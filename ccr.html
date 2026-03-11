@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compound Calculator · Kanba</title>
+  <meta name="description" content="Visualize compound interest growth with our fast, beautiful calculator. See your investment grow over time with charts and tables.">
+  <meta name="keywords" content="compound interest calculator, investment growth, crypto, kanba">
+  <meta name="theme-color" content="#0a0a12">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Compound Calculator · Kanba">
+  <meta property="og:description" content="Visualize compound interest with charts & tables.">
+  <meta property="og:url" content="https://kanba.pw/en/ccr.html">
+  <meta property="og:type" content="website">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/en/manifest.json" crossorigin="use-credentials">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/0x.png">
+  <link rel="icon" href="/images/0xbtc.png" type="image/png">
+
+  <!-- Fonts & CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/en/css/style.css">
+  <link rel="stylesheet" href="/en/css/calcr.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<!-- SEO only -->
+<h1 class="seo-only">Compound Interest Growth Calculator</h1>
+<p class="seo-only">Calculate how your investment grows over time with compound interest. Visualize with interactive charts and period-by-period tables.</p>
+
+<main class="ccr-main">
+  <div class="ccr-container">
+
+    <!-- Title -->
+    <div class="ccr-head">
+      <h1>Compound Growth Calculator</h1>
+      <p>See how your investment grows — period by period, visually.</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="ccr-card">
+      <form id="ccrForm" class="ccr-form-grid" novalidate>
+
+        <!-- Principal -->
+        <div class="ccr-group">
+          <label for="ccrPrincipal" class="ccr-label">
+            <span class="ccr-label-icon">💰</span>
+            <span>Initial Investment</span>
+          </label>
+          <div class="ccr-input-wrap">
+            <span class="ccr-prefix">$</span>
+            <input type="number" id="ccrPrincipal" class="ccr-input ccr-num"
+              placeholder="10000" min="0.01" step="0.01"
+              inputmode="decimal" required>
+          </div>
+          <span class="ccr-error" id="ccrPrincipalErr"></span>
+        </div>
+
+        <!-- Rate -->
+        <div class="ccr-group">
+          <label for="ccrRate" class="ccr-label">
+            <span class="ccr-label-icon">📈</span>
+            <span>Interest Rate</span>
+          </label>
+          <div class="ccr-input-wrap">
+            <input type="number" id="ccrRate" class="ccr-input ccr-num"
+              placeholder="7" min="0.001" max="1000" step="0.01"
+              inputmode="decimal" required>
+            <span class="ccr-suffix">%</span>
+          </div>
+          <span class="ccr-error" id="ccrRateErr"></span>
+        </div>
+
+        <!-- Periods -->
+        <div class="ccr-group">
+          <label for="ccrPeriods" class="ccr-label">
+            <span class="ccr-label-icon">⏱️</span>
+            <span>Number of Periods</span>
+          </label>
+          <div class="ccr-input-wrap">
+            <input type="number" id="ccrPeriods" class="ccr-input ccr-num"
+              placeholder="10" min="1" max="1000" step="1"
+              inputmode="numeric" required>
+            <span class="ccr-suffix">×</span>
+          </div>
+          <span class="ccr-error" id="ccrPeriodsErr"></span>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="ccr-submit">
+          <span>Calculate Growth</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path d="M5 12H19M19 12L12 5M19 12L12 19"/>
+          </svg>
+        </button>
+
+      </form>
+    </div><!-- /.ccr-card -->
+
+    <!-- Results -->
+    <div id="ccrResults" class="ccr-results hidden" aria-live="polite">
+
+      <!-- Summary Cards -->
+      <div class="ccr-cards">
+        <div class="ccr-card-item card-final">
+          <div class="card-ico">💎</div>
+          <div class="card-body">
+            <h3>Final Amount</h3>
+            <p class="card-value" id="ccrFinal">$0.00</p>
+            <span class="card-badge" id="ccrGainPct">+0%</span>
+          </div>
+        </div>
+
+        <div class="ccr-card-item card-interest">
+          <div class="card-ico">📊</div>
+          <div class="card-body">
+            <h3>Total Interest</h3>
+            <p class="card-value" id="ccrInterest">$0.00</p>
+          </div>
+        </div>
+
+        <div class="ccr-card-item card-avg">
+          <div class="card-ico">⚡</div>
+          <div class="card-body">
+            <h3>Avg Growth / Period</h3>
+            <p class="card-value" id="ccrAvg">$0.00</p>
+            <span class="card-sub">per period</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Section -->
+      <div class="ccr-chart-section">
+        <div class="ccr-chart-head">
+          <h3>Growth Visualization</h3>
+          <div class="ccr-toggle" role="group" aria-label="View toggle">
+            <button class="ccr-toggle-btn active" data-view="chart">Chart</button>
+            <button class="ccr-toggle-btn" data-view="table">Table</button>
+          </div>
+        </div>
+
+        <!-- Custom Tooltip -->
+        <div id="ccrTooltip" class="ccr-tooltip" role="tooltip" aria-live="polite">
+          <div class="tt-period" id="ttPeriod">Period</div>
+          <div class="tt-row">
+            <span class="tt-dot" style="background:#f7931a"></span>
+            <span>Balance</span>
+            <span class="tt-val" id="ttBalance">$0</span>
+          </div>
+          <div class="tt-row">
+            <span class="tt-dot" style="background:#00d4aa"></span>
+            <span>Interest</span>
+            <span class="tt-val" id="ttInterest">$0</span>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div id="ccrChartWrap" class="ccr-chart-wrap">
+          <canvas id="ccrChart" aria-label="Compound growth chart" role="img"></canvas>
+        </div>
+
+        <!-- Table -->
+        <div id="ccrTableWrap" class="ccr-table-wrap ccr-view-off">
+          <table class="ccr-table">
+            <thead>
+              <tr>
+                <th scope="col">Period</th>
+                <th scope="col">Starting Balance</th>
+                <th scope="col">Interest Earned</th>
+                <th scope="col">Ending Balance</th>
+              </tr>
+            </thead>
+            <tbody id="ccrTbody"></tbody>
+          </table>
+        </div>
+
+      </div><!-- /.ccr-chart-section -->
+
+    </div><!-- /#ccrResults -->
+
+  </div><!-- /.ccr-container -->
+</main>
+
+<div id="footer"></div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
+<script src="/en/common.js" defer></script>
+<script src="/en/js/calcr.js" defer></script>
+</body>
+</html>

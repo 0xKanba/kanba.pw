@@ -1,0 +1,272 @@
+/* ============================================================
+   calcr.css — Compound Calculator Styles (kanba.pw)
+   ============================================================ */
+
+.ccr-main {
+  min-height: calc(100dvh - var(--nav-h));
+  padding: 2.5rem 1.25rem;
+}
+.ccr-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.ccr-head {
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: ccr-up .6s ease both;
+}
+.ccr-head h1 {
+  font-family: var(--font-d);
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: .5rem;
+}
+.ccr-head p { font-size: .95rem; color: var(--text-muted); }
+
+/* ── Form Card ─────────────────────────────────────────────── */
+.ccr-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  animation: ccr-up .6s .1s ease both;
+}
+
+.ccr-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+/* ── Input Groups ──────────────────────────────────────────── */
+.ccr-group { display: flex; flex-direction: column; gap: .45rem; }
+
+.ccr-label {
+  display: flex; align-items: center; gap: .45rem;
+  font-size: .875rem; font-weight: 600;
+  color: var(--text);
+}
+.ccr-label-icon { font-size: 1.1rem; line-height: 1; }
+
+.ccr-input-wrap {
+  position: relative; display: flex; align-items: center;
+}
+.ccr-prefix, .ccr-suffix {
+  position: absolute;
+  font-size: .9rem; font-weight: 600;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.ccr-prefix { left: 1rem; }
+.ccr-suffix { right: 1rem; }
+
+.ccr-input {
+  width: 100%;
+  padding: .85rem 1rem;
+  font-size: 1rem; font-weight: 500;
+  background: var(--bg);
+  border: 1.5px solid var(--border2);
+  border-radius: 12px;
+  color: var(--text);
+  transition: border-color .2s, box-shadow .2s;
+  -moz-appearance: textfield;
+  font-family: var(--font-b);
+}
+.ccr-input::-webkit-inner-spin-button,
+.ccr-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.ccr-input:hover  { border-color: color-mix(in srgb, var(--accent) 40%, var(--border2)); }
+.ccr-input:focus  {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.ccr-input-wrap:has(.ccr-prefix) .ccr-input { padding-left: 2.25rem; }
+.ccr-input-wrap:has(.ccr-suffix) .ccr-input { padding-right: 3.5rem; }
+
+.ccr-error {
+  font-size: .8rem; color: #f87171;
+  display: none;
+}
+.ccr-error.show { display: block; }
+
+/* ── Submit Button ─────────────────────────────────────────── */
+.ccr-submit {
+  grid-column: 1 / -1;
+  padding: .95rem 2rem;
+  background: linear-gradient(135deg, var(--accent), #e8841a);
+  color: #0a0a12;
+  border-radius: 12px;
+  font-size: 1rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  gap: .6rem;
+  transition: transform .2s, box-shadow .2s;
+  font-family: var(--font-d);
+}
+.ccr-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.ccr-submit:active { transform: translateY(0); }
+.ccr-submit svg { transition: transform .2s; }
+.ccr-submit:hover svg { transform: translateX(4px); }
+
+/* ── Results ───────────────────────────────────────────────── */
+.ccr-results { animation: ccr-up .5s ease both; }
+.ccr-results.hidden { display: none; }
+
+/* Summary cards */
+.ccr-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.ccr-card-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.4rem;
+  display: flex; gap: .9rem; align-items: center;
+  position: relative; overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.ccr-card-item::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.ccr-card-item.card-final::before  { background: linear-gradient(90deg, var(--accent), #e8841a); }
+.ccr-card-item.card-interest::before { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+.ccr-card-item.card-avg::before    { background: linear-gradient(90deg, var(--accent2), #00a8a8); }
+.ccr-card-item:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+.card-ico {
+  font-size: 1.7rem;
+  width: 52px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface2));
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.card-body h3 {
+  font-size: .8rem; color: var(--text-muted);
+  margin-bottom: .2rem; font-weight: 500;
+}
+.card-value {
+  font-size: 1.4rem; font-weight: 800;
+  color: var(--text);
+  font-family: var(--font-d);
+}
+.card-badge {
+  display: inline-block; margin-top: .25rem;
+  padding: .2rem .5rem;
+  background: color-mix(in srgb, var(--accent2) 20%, var(--surface2));
+  color: var(--accent2);
+  border-radius: 6px;
+  font-size: .72rem; font-weight: 700;
+}
+.card-sub { font-size: .72rem; color: var(--text-muted); margin-top: .2rem; }
+
+/* ── Chart Section ─────────────────────────────────────────── */
+.ccr-chart-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.75rem;
+  position: relative;
+}
+.ccr-chart-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.25rem; flex-wrap: wrap; gap: .75rem;
+}
+.ccr-chart-head h3 {
+  font-family: var(--font-d);
+  font-size: 1.1rem; color: var(--text);
+}
+
+/* Toggle */
+.ccr-toggle {
+  display: flex; gap: .2rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: .2rem; border-radius: 10px;
+}
+.ccr-toggle-btn {
+  padding: .4rem .9rem;
+  border-radius: 8px;
+  font-size: .85rem; font-weight: 600;
+  color: var(--text-muted);
+  transition: all .2s;
+  font-family: var(--font-b);
+}
+.ccr-toggle-btn.active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+
+/* Tooltip */
+.ccr-tooltip {
+  position: absolute; top: 70px; left: 50%;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--surface2) 95%, transparent);
+  border: 1px solid var(--border2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text);
+  padding: .85rem 1.1rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+  z-index: 100; min-width: 190px;
+}
+.ccr-tooltip.show { opacity: 1; }
+.tt-period { font-weight: 700; font-size: .85rem; margin-bottom: .6rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+.tt-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; margin-top: .35rem; }
+.tt-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.tt-val { margin-left: auto; font-weight: 700; }
+
+/* Chart & Table containers */
+.ccr-chart-wrap { position: relative; height: 360px; }
+.ccr-table-wrap  { overflow-x: auto; }
+.ccr-view-off    { display: none !important; }
+
+.ccr-table {
+  width: 100%;
+  border-collapse: separate; border-spacing: 0;
+  font-size: .875rem;
+}
+.ccr-table th {
+  background: var(--bg);
+  padding: .7rem .9rem;
+  text-align: left;
+  font-weight: 600; color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  font-family: var(--font-d);
+}
+.ccr-table td {
+  padding: .7rem .9rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.ccr-table tbody tr:hover { background: var(--surface2); }
+.ccr-table tbody tr:last-child td { border-bottom: none; }
+.ccr-table td:last-child { font-weight: 700; color: var(--accent); }
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes ccr-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mobile ────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .ccr-card { padding: 1.25rem; }
+  .ccr-chart-section { padding: 1.25rem; }
+  .ccr-chart-wrap { height: 280px; }
+  .ccr-cards { grid-template-columns: 1fr; }
+}

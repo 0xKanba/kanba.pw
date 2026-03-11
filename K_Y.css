@@ -1,0 +1,257 @@
+/* ============================================================
+   K_Y.css — Profile Page Styles (kanba.pw)
+   ============================================================ */
+
+/* ── Page Layout ──────────────────────────────────────────── */
+.ky-page {
+  min-height: calc(100dvh - var(--nav-h));
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem 1.25rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Background Mesh ──────────────────────────────────────── */
+.bg-mesh {
+  position: fixed; inset: -40px; z-index: -1;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 80%, color-mix(in srgb, var(--accent2) 10%, transparent), transparent 70%),
+    var(--bg);
+  pointer-events: none;
+  transition: transform .6s ease;
+}
+
+/* ── Main Container ───────────────────────────────────────── */
+.ky-container {
+  width: 100%; max-width: 460px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2rem;
+}
+
+/* ── Profile Header ───────────────────────────────────────── */
+.profile-center {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1rem;
+  animation: ky-slide-down .7s cubic-bezier(.34,1.36,.64,1) both;
+}
+
+/* Profile Image */
+.profile-img-wrap {
+  position: relative;
+}
+.profile-img-clean {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 20%, transparent);
+  transition: transform .4s cubic-bezier(.34,1.36,.64,1), box-shadow .4s ease;
+  will-change: transform;
+}
+.profile-img-clean:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 50px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.profile-img-ring {
+  position: absolute; inset: -6px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(135deg, var(--accent), var(--accent2)) border-box;
+  animation: ky-spin 8s linear infinite;
+  pointer-events: none;
+}
+
+.profile-name {
+  font-family: var(--font-d);
+  font-size: 1.55rem; font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--text);
+}
+.profile-tagline {
+  font-size: .9rem; color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── Social Grid ──────────────────────────────────────────── */
+.social-section {
+  width: 100%;
+  animation: ky-fade-up .6s .15s ease both;
+}
+.social-grid-clean {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .6rem;
+}
+
+.social-link {
+  display: flex; flex-direction: column; align-items: center;
+  gap: .4rem;
+  padding: .8rem .5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: .78rem; font-weight: 600;
+  color: var(--text-muted);
+  transition: all .25s cubic-bezier(.34,1.36,.64,1);
+  position: relative; overflow: hidden;
+  will-change: transform;
+}
+.social-link::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.social-link:hover {
+  transform: translateY(-4px) scale(1.04);
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.social-link:hover::before { opacity: .08; }
+.social-link:active { transform: scale(.96); }
+
+.social-link img {
+  width: 22px; height: 22px;
+  position: relative; z-index: 1;
+  filter: var(--icon-filter, none);
+  transition: filter .25s ease;
+}
+.social-link span {
+  position: relative; z-index: 1;
+  letter-spacing: .03em;
+}
+
+/* Invert icons in dark mode */
+[data-theme="dark"] .social-link img { filter: brightness(0) invert(1); }
+[data-theme="light"] .social-link img { filter: brightness(0); }
+
+/* ── Referral / Company Section ───────────────────────────── */
+.referral-section {
+  width: 100%;
+  animation: ky-fade-up .6s .25s ease both;
+}
+.referral-title {
+  font-size: .78rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--text-muted);
+  margin-bottom: .75rem;
+  text-align: center;
+}
+.referral-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .6rem;
+}
+.ref-btn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: .5rem;
+  padding: 1rem .5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: all .25s cubic-bezier(.34,1.36,.64,1);
+  position: relative; overflow: hidden;
+}
+.ref-btn::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ref-color, var(--accent)), transparent);
+  transform: scaleX(0);
+  transition: transform .25s ease;
+  transform-origin: left;
+}
+.ref-btn:hover { transform: translateY(-4px); border-color: var(--ref-color, var(--accent)); }
+.ref-btn:hover::after { transform: scaleX(1); }
+.ref-btn:active { transform: scale(.97); }
+
+.ref-btn img {
+  width: 32px; height: 32px;
+  object-fit: contain;
+  filter: var(--icon-filter, none);
+}
+[data-theme="dark"] .ref-btn img { filter: brightness(0) invert(1); }
+[data-theme="light"] .ref-btn img { filter: brightness(0); }
+
+.ref-btn-name {
+  font-size: .8rem; font-weight: 700;
+  color: var(--text);
+  font-family: var(--font-d);
+}
+.ref-btn-tag {
+  font-size: .7rem; color: var(--text-muted);
+}
+
+/* Binance orange */
+.ref-btn.binance { --ref-color: #f3ba2f; }
+/* Bybit orange */
+.ref-btn.bybit   { --ref-color: #f7a600; }
+/* OKX white/blue */
+.ref-btn.okx     { --ref-color: #00ccff; }
+
+/* ── Donation / Payment ───────────────────────────────────── */
+.payment-section {
+  width: 100%;
+  animation: ky-fade-up .6s .35s ease both;
+}
+.payment-frame {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.payment-frame iframe {
+  width: 100%; height: 280px;
+  border: none; display: block;
+}
+
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes ky-slide-down {
+  from { opacity: 0; transform: translateY(-30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ky-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ky-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Entrance per data-entrance ───────────────────────────── */
+[data-entrance] {
+  animation: ky-fade-up .5s ease both;
+}
+[data-entrance="top"]         { animation-name: ky-slide-down; animation-delay: .1s; }
+[data-entrance="top-left"]    { animation-delay: .12s; }
+[data-entrance="top-right"]   { animation-delay: .14s; }
+[data-entrance="left"]        { animation-delay: .16s; }
+[data-entrance="center"]      { animation-delay: .18s; }
+[data-entrance="right"]       { animation-delay: .20s; }
+[data-entrance="bottom-left"] { animation-delay: .22s; }
+[data-entrance="bottom"]      { animation-delay: .24s; }
+[data-entrance="bottom-right"]{ animation-delay: .26s; }
+
+/* ── Reduced Motion ───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  [data-entrance], .profile-center, .social-section,
+  .referral-section, .payment-section {
+    animation: none; opacity: 1; transform: none;
+  }
+  .profile-img-ring { animation: none; }
+}
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .ky-page { padding: 2rem 1rem 1.5rem; }
+  .social-grid-clean { grid-template-columns: repeat(3, 1fr); }
+  .referral-grid { gap: .5rem; }
+  .profile-img-clean { width: 90px; height: 90px; }
+  .profile-name { font-size: 1.3rem; }
+}
