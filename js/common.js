@@ -43,14 +43,12 @@ document.addEventListener('DOMContentLoaded', function () {
   if (headerElement) headerElement.innerHTML = headerHTML;
   if (footerElement) footerElement.innerHTML = footerHTML;
 
-  // ✅ lowercase للمقارنة — يحل مشكلة HLsee و أي اسم بـ uppercase
   const path = window.location.pathname.toLowerCase().trim();
   let pageKey = path.split('/').pop().replace(/\.html$/, '').trim();
 
   if (!pageKey) pageKey = 'index';
 
   document.querySelectorAll('.footer-tab').forEach(tab => {
-    // ✅ كلاهما lowercase عند المقارنة
     if (tab.getAttribute('data-page').toLowerCase() === pageKey) {
       tab.classList.add('active');
     }
