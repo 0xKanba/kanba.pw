@@ -1,4 +1,11 @@
-document.addEventListener('DOMContentLoaded',function(){const link=document.createElement('link');link.rel='stylesheet';link.href='/en/css/style.css';document.head.appendChild(link);const headerHTML=`
+document.addEventListener('DOMContentLoaded', function () {
+
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/css/style.css';
+  document.head.appendChild(link);
+
+  const headerHTML = `
     <div class="market-traders-header">
       <div class="market-traders-container">
         <div class="market-traders-rectangle">
@@ -11,7 +18,9 @@ document.addEventListener('DOMContentLoaded',function(){const link=document.crea
         </div>
       </div>
     </div>
-  `;const footerHTML=`
+  `;
+
+  const footerHTML = `
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-tabs">
@@ -24,5 +33,23 @@ document.addEventListener('DOMContentLoaded',function(){const link=document.crea
         </div>
       </div>
     </footer>
-  `;const headerElement=document.getElementById('header');const footerElement=document.getElementById('footer');if(headerElement)headerElement.innerHTML=headerHTML;if(footerElement)footerElement.innerHTML=footerHTML;setTimeout(()=>{const path=window.location.pathname.toLowerCase().trim();let pageKey=path.split('/').pop().replace(/\.html$/,'').replace(/\/$/,'').trim();if(!pageKey||pageKey==='en'){pageKey='index'}
-document.querySelectorAll('.footer-tab').forEach(tab=>{const tabPage=tab.getAttribute('data-page');if(tabPage===pageKey){tab.classList.add('active')}})},150)})
+  `;
+
+  const headerElement = document.getElementById('header');
+  const footerElement = document.getElementById('footer');
+
+  if (headerElement) headerElement.innerHTML = headerHTML;
+  if (footerElement) footerElement.innerHTML = footerHTML;
+
+  const path = window.location.pathname.toLowerCase().trim();
+  let pageKey = path.split('/').pop().replace(/\.html$/, '').trim();
+
+  if (!pageKey) pageKey = 'index';
+
+  document.querySelectorAll('.footer-tab').forEach(tab => {
+    if (tab.getAttribute('data-page') === pageKey) {
+      tab.classList.add('active');
+    }
+  });
+
+});
