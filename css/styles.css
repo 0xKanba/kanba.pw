@@ -1,63 +1,50 @@
 /* =============================================
    styles.css — Header & Footer ONLY
-   لا تؤثر على أي عنصر خارج الرأس 
-/* المتغيرات فقط — لا تسبب أي تنسيق بحد ذاتها */
-/* في أعلى ccr.css */
-*, body, html {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+   ديناميكي — يتكيف تلقائياً مع أي عدد تبويبات
+   لا يؤثر على أي عنصر خارج الرأس والتذييل
+   ============================================= */
+
 :root {
-  --text-primary: #000000;
+  --text-primary:   #000000;
   --text-secondary: #333333;
-  --accent-color: #2563eb;
-  --accent-light: #3b82f6;
-  --border-color: rgba(0, 0, 0, 0.1);
-  --shadow-light: rgba(0, 0, 0, 0.05);
-  --shadow-heavy: rgba(0, 0, 0, 0.15);
-  --glow-color: rgba(37, 99, 235, 0.3);
-  --footer-bg: #f8f9fa;
-  --footer-text: #000000;
-  --footer-border: #2563eb;
-  --footer-active: #2563eb;
-  --header-bg: #ffffff;
-  --header-shadow: rgba(0, 0, 0, 0.1);
+  --border-color:   rgba(0, 0, 0, 0.1);
+  --glow-color:     rgba(37, 99, 235, 0.3);
+  --footer-bg:      #f8f9fa;
+  --footer-text:    #000000;
+  --footer-border:  #2563eb;
+  --footer-active:  #2563eb;
+  --header-bg:      #ffffff;
+  --header-shadow:  rgba(0, 0, 0, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text-primary: #e2e8f0;
+    --text-primary:   #e2e8f0;
     --text-secondary: #a0aec0;
-    --accent-color: #00BFFF;
-    --accent-light: #00BFFF;
-    --border-color: rgba(160, 174, 192, 0.2);
-    --shadow-light: rgba(0, 0, 0, 0.2);
-    --shadow-heavy: rgba(0, 0, 0, 0.4);
-    --glow-color: rgba(0, 191, 255, 0.3);
-    --footer-bg: #3b4044;
-    --footer-text: #e2e8f0;
-    --footer-border: #00BFFF;
-    --footer-active: #00BFFF;
-    --header-bg: #4c5257;
-    --header-shadow: rgba(0, 0, 0, 0.4);
+    --border-color:   rgba(160, 174, 192, 0.2);
+    --glow-color:     rgba(0, 191, 255, 0.3);
+    --footer-bg:      #3b4044;
+    --footer-text:    #e2e8f0;
+    --footer-border:  #00BFFF;
+    --footer-active:  #00BFFF;
+    --header-bg:      #4c5257;
+    --header-shadow:  rgba(0, 0, 0, 0.4);
   }
 }
-
 
 /* ============ HEADER ============ */
 
 .market-traders-header {
   width: 100%;
   padding: 0;
-  margin-bottom: 0;
+  margin: 0;
   position: relative;
   z-index: 1000;
   box-sizing: border-box;
 }
 
 .market-traders-container {
-  max-width: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -67,7 +54,7 @@
   background: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 2px 8px var(--header-shadow);
-  width: 100vw;
+  width: 100%;
   margin: 0;
   display: flex;
   justify-content: center;
@@ -76,7 +63,7 @@
   gap: 12px;
   direction: ltr;
   position: relative;
-  transition: .3s;
+  transition: background .3s, box-shadow .3s;
   box-sizing: border-box;
 }
 
@@ -115,8 +102,9 @@
 
 .site-logo {
   height: 36px;
-  transition: .3s;
+  transition: transform .3s;
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .header-content {
@@ -129,8 +117,7 @@
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: .8px;
-  margin-bottom: 2px;
-  word-wrap: break-word;
+  margin: 0;
 }
 
 .market-traders-subtitle {
@@ -138,7 +125,7 @@
   color: var(--text-secondary);
   font-weight: 500;
   letter-spacing: .5px;
-  word-wrap: break-word;
+  margin: 0;
 }
 
 /* ============ FOOTER ============ */
@@ -146,40 +133,45 @@
 .footer {
   background: var(--footer-bg);
   border-top: 2px solid var(--footer-border);
-  padding: 18px 0;
-  margin-top: auto;
-  direction: ltr;
+  padding: 16px 0;
   width: 100%;
   color: var(--footer-text);
-  transition: .3s;
+  transition: background .3s;
   position: relative;
   box-sizing: border-box;
+  direction: ltr;
 }
 
 .footer-content {
-  max-width: 800px;
+  width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px;
   box-sizing: border-box;
 }
 
 .footer-tabs {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  gap: 4px 8px;
+  margin-bottom: 12px;
+  width: 100%;
 }
 
 .footer-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 500;
-  font-size: .95rem;
-  padding: 8px 12px;
+  font-size: clamp(.7rem, 1.5vw, .95rem);
+  padding: 7px 10px;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
   color: var(--footer-text);
-  transition: .3s;
+  transition: color .3s;
   position: relative;
   box-sizing: border-box;
 }
@@ -188,8 +180,8 @@
   content: '';
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
   bottom: 0;
+  transform: translateX(-50%);
   width: 0;
   height: 2px;
   background-color: var(--footer-active);
@@ -204,7 +196,6 @@
   color: var(--footer-active);
   font-weight: 600;
   text-shadow: 0 0 8px var(--glow-color);
-  position: relative;
 }
 
 .footer-tab.active::after {
@@ -215,26 +206,26 @@
   content: '';
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
   top: -2px;
+  transform: translateX(-50%);
   width: 6px;
   height: 6px;
   background: var(--footer-active);
   border-radius: 50%;
   box-shadow: 0 0 10px var(--glow-color);
-  animation: 1.5s infinite pulse;
+  animation: pulse 1.5s infinite;
 }
 
 .copyright {
   text-align: center;
-  font-size: .85rem;
-  opacity: .8;
-  margin-top: 8px;
+  font-size: .8rem;
+  opacity: .75;
+  margin-top: 6px;
   color: var(--footer-text);
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  0%, 100% { opacity: 1;  transform: translateX(-50%) scale(1);   }
   50%       { opacity: .6; transform: translateX(-50%) scale(1.2); }
 }
 
@@ -242,24 +233,34 @@
 
 @media (max-width: 768px) {
   .market-traders-rectangle { padding: 8px 12px; }
-  .site-logo                 { height: 32px; }
+  .site-logo                 { height: 30px; }
   .market-traders-title      { font-size: 1rem; }
-  .market-traders-subtitle   { font-size: .75rem; }
-  .footer                    { padding: 15px 0; }
-  .footer-tabs               { gap: 14px; margin-bottom: 12px; }
-  .footer-tab                { font-size: .85rem; padding: 6px 10px; }
-  .copyright                 { font-size: .8rem; }
+  .footer                    { padding: 13px 0; }
+  .footer-tabs               { gap: 2px 6px; }
 }
 
 @media (max-width: 480px) {
   .market-traders-rectangle  { padding: 7px 10px; gap: 8px; }
   .header-unified-link       { gap: 8px; padding: 4px 8px; }
-  .site-logo                 { height: 28px; }
-  .market-traders-title      { font-size: .95rem; margin-bottom: 1px; }
-  .market-traders-subtitle   { font-size: .7rem; }
-  .footer                    { padding: 12px 0; }
-  .footer-content            { padding: 0 15px; }
-  .footer-tabs               { gap: 10px; }
-  .footer-tab                { font-size: .75rem; padding: 5px 8px; }
-  .copyright                 { font-size: .7rem; margin-top: 6px; }
+  .site-logo                 { height: 26px; }
+  .market-traders-title      { font-size: .9rem; }
+  .footer                    { padding: 10px 0; }
+  .footer-content            { padding: 0 10px; }
+  .footer-tabs               { gap: 2px 4px; }
+  .footer-tab                { padding: 5px 7px; }
+  .copyright                 { font-size: .7rem; }
+}
+
+@media (max-width: 360px) {
+  .footer-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    text-align: center;
+  }
+  .footer-tab {
+    justify-content: center;
+    font-size: .72rem;
+    padding: 6px 4px;
+  }
 }
