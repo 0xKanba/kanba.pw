@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded',function(){const link=document.crea
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-tabs">
-          <a href="/index.html" class="footer-tab" data-page="kanba">Kanba</a>
+          <a href="/index.html" class="footer-tab" data-page="index">Kanba</a>
           <a href="/younis.html" class="footer-tab" data-page="younis">Younis</a>
           <a href="/ccr.html" class="footer-tab" data-page="ccr">Compounding Calc.</a>
         </div>
