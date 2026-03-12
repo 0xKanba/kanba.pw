@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="market-traders-header">
       <div class="market-traders-container">
         <div class="market-traders-rectangle">
-          <a href="/" class="header-unified-link">
+          <a href="/index.html" class="header-unified-link">
             <img src="/images/btc21.png" alt="Market Traders" class="site-logo">
             <div class="header-content">
               <div class="market-traders-title">Kanba_trader x younis_y24</div>
