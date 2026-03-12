@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function () {
           <a href="/index.html"        class="footer-tab" data-page="index">Kanba</a>
           <a href="/younis.html"       class="footer-tab" data-page="younis">Younis</a>
           <a href="/ccr.html"          class="footer-tab" data-page="ccr">Compounding Calc.</a>
-          <a href="/HLsee.html"        class="footer-tab" data-page="hlsee">see analysis</a>
-          <a href="/video2026mar.html" class="footer-tab" data-page="video2026mar">videosNEWS</a>
+<a href="/HLsee.html"        class="footer-tab" data-page="hlsee"        target="_blank" rel="noopener noreferrer">see analysis</a>
+<a href="/video2026mar.html" class="footer-tab" data-page="video2026mar" target="_blank" rel="noopener noreferrer">videosNEWS</a>
         </div>
         <div class="copyright">
           © 2025-2026 Kanba_trader | All Rights Reserved
