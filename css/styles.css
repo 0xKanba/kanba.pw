@@ -2,6 +2,12 @@
    styles.css — Header & Footer ONLY
    لا تؤثر على أي عنصر خارج الرأس 
 /* المتغيرات فقط — لا تسبب أي تنسيق بحد ذاتها */
+/* في أعلى ccr.css */
+*, body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 :root {
   --text-primary: #000000;
   --text-secondary: #333333;
@@ -37,12 +43,7 @@
     --header-shadow: rgba(0, 0, 0, 0.4);
   }
 }
-/* في أعلى ccr.css */
-*, body, html {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+
 
 /* ============ HEADER ============ */
 
