@@ -1,10 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = '/css/styles.css';
-  document.head.appendChild(link);
-
   const headerHTML = `
     <div class="market-traders-header">
       <div class="market-traders-container">
@@ -27,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
           <a href="/index.html"        class="footer-tab" data-page="index">Kanba</a>
           <a href="/younis.html"       class="footer-tab" data-page="younis">Younis</a>
           <a href="/ccr.html"          class="footer-tab" data-page="ccr">Compounding Calc.</a>
-<a href="/HLsee.html"        class="footer-tab" data-page="hlsee"        target="_blank" rel="noopener noreferrer">see analysis</a>
-<a href="/video2026mar.html" class="footer-tab" data-page="video2026mar" target="_blank" rel="noopener noreferrer">videosNEWS</a>
+          <a href="/HLsee.html"        class="footer-tab" data-page="hlsee"        target="_blank" rel="noopener noreferrer">see analysis</a>
+          <a href="/video2026mar.html" class="footer-tab" data-page="video2026mar" target="_blank" rel="noopener noreferrer">videosNEWS</a>
         </div>
         <div class="copyright">
           © 2025-2026 Kanba_trader | All Rights Reserved
