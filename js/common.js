@@ -24,12 +24,11 @@ document.addEventListener('DOMContentLoaded', function () {
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-tabs">
-          <a href="/index.html" class="footer-tab" data-page="index">Kanba</a>
-          <a href="/younis.html" class="footer-tab" data-page="younis">Younis</a>
-          <a href="/ccr.html" class="footer-tab" data-page="ccr">Compounding Calc.</a>
-          <a href="/HLsee.html" class="footer-tab" data-page="HLsee">see analysis</a>
+          <a href="/index.html"        class="footer-tab" data-page="index">Kanba</a>
+          <a href="/younis.html"       class="footer-tab" data-page="younis">Younis</a>
+          <a href="/ccr.html"          class="footer-tab" data-page="ccr">Compounding Calc.</a>
+          <a href="/HLsee.html"        class="footer-tab" data-page="hlsee">see analysis</a>
           <a href="/video2026mar.html" class="footer-tab" data-page="video2026mar">videosNEWS</a>
-          
         </div>
         <div class="copyright">
           © 2025-2026 Kanba_trader | All Rights Reserved
@@ -44,12 +43,15 @@ document.addEventListener('DOMContentLoaded', function () {
   if (headerElement) headerElement.innerHTML = headerHTML;
   if (footerElement) footerElement.innerHTML = footerHTML;
 
+  // ✅ lowercase للمقارنة — يحل مشكلة HLsee و أي اسم بـ uppercase
   const path = window.location.pathname.toLowerCase().trim();
   let pageKey = path.split('/').pop().replace(/\.html$/, '').trim();
 
-if (!pageKey || pageKey === 'en') pageKey = 'index';
+  if (!pageKey) pageKey = 'index';
+
   document.querySelectorAll('.footer-tab').forEach(tab => {
-    if (tab.getAttribute('data-page') === pageKey) {
+    // ✅ كلاهما lowercase عند المقارنة
+    if (tab.getAttribute('data-page').toLowerCase() === pageKey) {
       tab.classList.add('active');
     }
   });
