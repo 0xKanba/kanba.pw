@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = '/css/style.css';
+  link.href = '/css/styles.css';
   document.head.appendChild(link);
 
   const headerHTML = `
