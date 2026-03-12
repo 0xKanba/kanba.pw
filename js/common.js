@@ -44,8 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const path = window.location.pathname.toLowerCase().trim();
   let pageKey = path.split('/').pop().replace(/\.html$/, '').trim();
 
-  if (!pageKey) pageKey = 'index';
-
+if (!pageKey || pageKey === 'en') pageKey = 'index';
   document.querySelectorAll('.footer-tab').forEach(tab => {
     if (tab.getAttribute('data-page') === pageKey) {
       tab.classList.add('active');
