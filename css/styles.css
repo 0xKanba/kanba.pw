@@ -1,7 +1,6 @@
 /* =============================================
    styles.css — Header & Footer ONLY
-   ديناميكي — يتكيف تلقائياً مع أي عدد تبويبات
-   لا يؤثر على أي عنصر خارج الرأس والتذييل
+   لا يؤثر على أي شيء خارج الرأس والتذييل
    ============================================= */
 
 :root {
@@ -35,12 +34,15 @@
 /* ============ HEADER ============ */
 
 .market-traders-header {
+  /* ✅ width:100% فقط — لا 100vw لتجنب الإطار الأبيض */
   width: 100%;
   padding: 0;
   margin: 0;
   position: relative;
   z-index: 1000;
   box-sizing: border-box;
+  /* ✅ يمنع أي overflow يسبب scrollbar أفقي */
+  overflow: hidden;
 }
 
 .market-traders-container {
@@ -54,6 +56,7 @@
   background: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 2px 8px var(--header-shadow);
+  /* ✅ 100% بدل 100vw — هذا كان سبب الإطار الأبيض */
   width: 100%;
   margin: 0;
   display: flex;
@@ -62,9 +65,8 @@
   padding: 10px 15px;
   gap: 12px;
   direction: ltr;
-  position: relative;
-  transition: background .3s, box-shadow .3s;
   box-sizing: border-box;
+  transition: background .3s, box-shadow .3s;
 }
 
 .header-unified-link {
@@ -74,7 +76,6 @@
   color: inherit;
   padding: 6px 12px;
   border-radius: 10px;
-  overflow: hidden;
   text-decoration: none;
   cursor: pointer;
   position: relative;
@@ -140,6 +141,7 @@
   position: relative;
   box-sizing: border-box;
   direction: ltr;
+  /* ✅ حُذف margin-top:auto — كان يقذف الصفحة للزاوية */
 }
 
 .footer-content {
