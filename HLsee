@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⬡ Hyperliquid Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Kufi+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+:root {
+  --bg:       #060a0f;
+  --bg2:      #0a1018;
+  --bg3:      #0e1520;
+  --surface:  #111926;
+  --surface2: #162032;
+  --border:   #1c2d42;
+  --border2:  #243650;
+  --green:    #00e5a0;
+  --green2:   #00b87a;
+  --red:      #ff3d6e;
+  --red2:     #cc2050;
+  --blue:     #38bdf8;
+  --yellow:   #fbbf24;
+  --purple:   #a78bfa;
+  --orange:   #fb923c;
+  --cyan:     #22d3ee;
+  --dim:      #3a5570;
+  --muted:    #536d85;
+  --text:     #cce0f0;
+  --text2:    #8aa8c0;
+  --mono:     'JetBrains Mono', monospace;
+  --ar:       'Noto Kufi Arabic', sans-serif;
+  --sans:     'Space Grotesk', sans-serif;
+  --r:        12px;
+  --r2:       16px;
+  --r3:       20px;
+  --glow-g:   0 0 20px rgba(0,229,160,0.15);
+  --glow-b:   0 0 20px rgba(56,189,248,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--ar);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+/* Grid BG texture */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(56,189,248,0.025) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;z-index:0;
+}
+body > *{position:relative;z-index:1}
+
+/* ══════════════════════════════════════════
+   LIVE PRICES TICKER
+══════════════════════════════════════════ */
+.ticker-wrap{
+  background:rgba(6,10,15,0.95);
+  border-bottom:1px solid var(--border);
+  overflow:hidden;height:38px;
+  backdrop-filter:blur(8px);
+  position:sticky;top:0;z-index:100;
+}
+.ticker-inner{
+  display:flex;align-items:center;
+  height:100%;gap:0;
+  animation:tickerScroll 40s linear infinite;
+  width:max-content;
+}
+@keyframes tickerScroll{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+.ticker-item{
+  display:flex;align-items:center;gap:8px;
+  padding:0 24px;
+  border-right:1px solid var(--border);
+  height:100%;white-space:nowrap;
+}
+.ticker-name{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1.5px}
+.ticker-price{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text)}
+.ticker-chg{font-family:var(--mono);font-size:9px}
+.up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--muted)}
+
+/* ══════════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════════ */
+.wrap{max-width:900px;margin:0 auto;padding:28px 16px 60px}
+
+/* ══════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════ */
+.hdr{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:32px;gap:16px;flex-wrap:wrap;
+}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-hex{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,var(--green2),var(--cyan));
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;font-weight:700;color:#000;
+  flex-shrink:0;
+}
+.hdr-text h1{
+  font-family:var(--mono);font-size:16px;font-weight:600;
+  color:var(--green);letter-spacing:3px;text-transform:uppercase;
+}
+.hdr-text p{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+
+/* Clock */
+.clock-box{
+  display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+}
+.clock-date{
+  font-family:var(--mono);font-size:11px;color:var(--muted);
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:4px 10px;letter-spacing:.5px;
+}
+.clock-time{
+  font-family:var(--mono);font-size:18px;font-weight:600;color:var(--cyan);
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:6px;padding:4px 12px;letter-spacing:3px;
+  text-shadow:0 0 12px rgba(34,211,238,0.4);
+}
+
+/* ══════════════════════════════════════════
+   MARKET PRICES GRID
+══════════════════════════════════════════ */
+.mkt-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;margin-bottom:24px;
+}
+.mkt-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r2);
+  padding:16px 14px;
+  transition:border-color .3s,transform .2s,box-shadow .3s;
+  position:relative;overflow:hidden;cursor:default;
+}
+.mkt-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,229,160,0.04),transparent 60%);
+  opacity:0;transition:opacity .3s;
+}
+.mkt-card:hover{transform:translateY(-2px);border-color:var(--border2);box-shadow:var(--glow-g)}
+.mkt-card:hover::before{opacity:1}
+.mkt-icon{font-size:18px;margin-bottom:8px;display:block}
+.mkt-sym{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;margin-bottom:4px;text-transform:uppercase}
+.mkt-name{font-size:10px;color:var(--text2);margin-bottom:8px}
+.mkt-price{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;transition:color .3s}
+.mkt-chg{font-family:var(--mono);font-size:10px;font-weight:600}
+.mkt-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  position:absolute;top:12px;left:12px;
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+/* ══════════════════════════════════════════
+   SEARCH
+══════════════════════════════════════════ */
+.srch-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);padding:20px;
+  margin-bottom:20px;
+}
+.srch-label{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);margin-bottom:10px;display:block}
+.srch{display:flex;gap:8px}
+.srch input{
+  flex:1;background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px 16px;color:var(--text);
+  font-family:var(--mono);font-size:12px;outline:none;
+  transition:border-color .2s,box-shadow .2s;text-align:right;
+  direction:ltr;
+}
+.srch input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,229,160,0.08)}
+.srch input::placeholder{color:var(--dim);direction:rtl}
+.srch-btn{
+  background:linear-gradient(135deg,var(--green2),var(--green));
+  color:#000;border:none;border-radius:var(--r);
+  padding:12px 24px;font-family:var(--ar);font-weight:700;
+  font-size:13px;cursor:pointer;white-space:nowrap;
+  transition:opacity .2s,transform .15s,box-shadow .2s;
+  box-shadow:0 4px 12px rgba(0,229,160,0.25);
+}
+.srch-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,229,160,0.35)}
+.srch-btn:active{transform:translateY(0)}
+
+.alias-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.alias-chip{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:20px;padding:5px 14px;font-size:11px;
+  color:var(--muted);cursor:pointer;font-family:var(--ar);
+  transition:all .2s;
+}
+.alias-chip:hover{border-color:var(--green);color:var(--green);background:rgba(0,229,160,0.06)}
+
+/* ══════════════════════════════════════════
+   STATUS BAR
+══════════════════════════════════════════ */
+.status-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;min-height:28px;
+}
+.wlt-tag{
+  display:none;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;
+}
+.wlt-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.wlt-addr{color:var(--blue)}
+.timer-txt{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.timer-txt .cd{color:var(--yellow);font-weight:600}
+
+#loading{
+  display:none;align-items:center;justify-content:center;gap:10px;
+  padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;
+}
+.spin{
+  width:16px;height:16px;border:2px solid var(--border2);
+  border-top-color:var(--green);border-radius:50%;
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{
+  background:rgba(255,61,110,0.08);border:1px solid rgba(255,61,110,0.2);
+  border-radius:var(--r);padding:12px 16px;color:var(--red);
+  font-size:12px;display:none;margin-bottom:16px;font-family:var(--mono);
+}
+
+/* ══════════════════════════════════════════
+   BALANCE HERO CARD
+══════════════════════════════════════════ */
+.bal-card{
+  background:linear-gradient(135deg,#0c1c2e,#091520);
+  border:1px solid var(--border2);border-radius:var(--r3);
+  padding:28px;margin-bottom:18px;display:none;
+  position:relative;overflow:hidden;
+}
+.bal-card::after{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:240px;height:240px;
+  background:radial-gradient(circle,rgba(0,229,160,0.08),transparent 70%);
+  pointer-events:none;
+}
+.bal-card::before{
+  content:'';position:absolute;bottom:-40px;left:-40px;
+  width:180px;height:180px;
+  background:radial-gradient(circle,rgba(56,189,248,0.06),transparent 70%);
+  pointer-events:none;
+}
+.bal-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.bal-main{}
+.bal-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-family:var(--mono);margin-bottom:8px}
+.bal-total{font-family:var(--mono);font-size:38px;font-weight:600;color:var(--green);line-height:1;transition:color .3s}
+.bal-total.flash{color:#fff}
+.bal-currency{font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
+.bal-sides{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.bal-sub{font-family:var(--mono);font-size:12px}
+.bal-sub .lbl2{color:var(--muted);font-size:10px;letter-spacing:1px}
+hr.hdiv{border:none;border-top:1px solid var(--border);margin:16px 0}
+.bal-row{display:flex;gap:20px;flex-wrap:wrap}
+.bi{flex:1;min-width:100px}
+.bi-lbl{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono)}
+.bi-val{font-family:var(--mono);font-size:14px;font-weight:600}
+.g{color:var(--green)}.r{color:var(--red)}.b{color:var(--blue)}.y{color:var(--yellow)}.p{color:var(--purple)}.o{color:var(--orange)}.c{color:var(--cyan)}
+
+/* ══════════════════════════════════════════
+   KPI
+══════════════════════════════════════════ */
+.kpi-row{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:10px;margin-bottom:18px;
+}
+.kpi{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);padding:16px;text-align:center;
+  transition:border-color .2s,transform .2s;
+}
+.kpi:hover{transform:translateY(-2px);border-color:var(--border2)}
+.kpi-lbl{font-size:9px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1.2px;font-family:var(--mono)}
+.kpi-val{font-family:var(--mono);font-size:18px;font-weight:600}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.bar-w{height:3px;background:var(--border);border-radius:2px;margin-top:7px}
+.bar-f{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width 1s ease}
+
+/* ══════════════════════════════════════════
+   PNL CALENDAR
+══════════════════════════════════════════ */
+.cal-sec{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);margin-bottom:18px;overflow:hidden;
+  display:none;
+}
+.cal-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.cal-hd-left{display:flex;align-items:center;gap:10px}
+.cal-title{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text)}
+.cal-month-nav{display:flex;align-items:center;gap:8px}
+.cal-nav-btn{
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--muted);font-size:12px;transition:all .15s;
+}
+.cal-nav-btn:hover{border-color:var(--green);color:var(--green)}
+.cal-month-lbl{font-family:var(--mono);font-size:12px;color:var(--text);min-width:90px;text-align:center}
+.cal-summary{font-family:var(--mono);font-size:11px}
+
+.cal-grid{padding:14px 12px}
+.cal-dow{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:4px;margin-bottom:6px;
+}
+.cal-dow span{
+  text-align:center;font-family:var(--mono);font-size:9px;
+  color:var(--dim);letter-spacing:1px;padding:4px 0;
+}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{
+  aspect-ratio:1;border-radius:8px;padding:4px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:default;transition:transform .15s,box-shadow .15s;
+  border:1px solid transparent;position:relative;overflow:hidden;
+  min-height:48px;
+}
+.cal-day:hover{transform:scale(1.04);z-index:2}
+.cal-day.empty{background:transparent;border:none;cursor:default}
+.cal-day.no-data{background:var(--bg3);border-color:var(--border)}
+.cal-day.pnl-pos{
+  background:rgba(0,229,160,0.10);
+  border-color:rgba(0,229,160,0.25);
+}
+.cal-day.pnl-pos:hover{box-shadow:0 0 12px rgba(0,229,160,0.2)}
+.cal-day.pnl-neg{
+  background:rgba(255,61,110,0.10);
+  border-color:rgba(255,61,110,0.25);
+}
+.cal-day.pnl-neg:hover{box-shadow:0 0 12px rgba(255,61,110,0.2)}
+.cal-day.today{box-shadow:0 0 0 1.5px var(--cyan) inset}
+.cal-dn{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:2px;font-weight:500}
+.cal-pnl{font-family:var(--mono);font-size:9px;font-weight:700;line-height:1.2;text-align:center}
+.cal-day.pnl-pos .cal-pnl{color:var(--green)}
+.cal-day.pnl-neg .cal-pnl{color:var(--red)}
+.cal-day.no-data .cal-pnl{color:var(--dim)}
+
+/* ══════════════════════════════════════════
+   SECTION CARD
+══════════════════════════════════════════ */
+.sec{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);margin-bottom:18px;overflow:hidden;
+}
+.sec-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.01);
+}
+.sec-title{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
+.badge{
+  font-family:var(--mono);font-size:10px;padding:3px 9px;
+  border-radius:12px;border:1px solid var(--border2);color:var(--muted);
+}
+.tbl-w{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{
+  font-family:var(--mono);font-size:9px;color:var(--dim);
+  padding:9px 14px;text-align:right;font-weight:500;
+  border-bottom:1px solid var(--border);letter-spacing:1.2px;
+  text-transform:uppercase;white-space:nowrap;
+}
+td{
+  padding:10px 14px;font-family:var(--mono);font-size:11px;
+  border-bottom:1px solid rgba(28,45,66,0.5);white-space:nowrap;
+  color:var(--text);
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(56,189,248,0.03)}
+.tag{
+  display:inline-block;font-size:9px;padding:3px 8px;
+  border-radius:4px;font-family:var(--mono);font-weight:700;
+  letter-spacing:.5px;
+}
+.tag-buy{background:rgba(0,229,160,0.12);color:var(--green)}
+.tag-sell{background:rgba(255,61,110,0.12);color:var(--red)}
+.tag-maker{background:rgba(167,139,250,0.12);color:var(--purple)}
+.tag-taker{background:rgba(56,189,248,0.12);color:var(--blue)}
+.empty{text-align:center;padding:32px;color:var(--dim);font-size:12px;font-family:var(--ar)}
+
+/* ══════════════════════════════════════════
+   FEE NOTE
+══════════════════════════════════════════ */
+.fee-note{
+  background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.15);
+  border-radius:var(--r);padding:10px 14px;font-size:11px;
+  color:var(--muted);display:none;font-family:var(--mono);line-height:1.8;
+  margin-bottom:18px;
+}
+.fee-note span{color:var(--purple)}
+
+/* ══════════════════════════════════════════
+   TX SECTION
+══════════════════════════════════════════ */
+.tx-sec{display:none;margin-bottom:18px}
+.tx-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.tx-stat{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px;
+}
+.ts-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;font-family:var(--mono)}
+.ts-val{font-family:var(--mono);font-size:14px;font-weight:600}
+.ts-sub{font-size:10px;color:var(--muted);margin-top:1px;font-family:var(--mono)}
+.ts-in{color:var(--green)}.ts-out{color:var(--red)}.ts-net{color:var(--blue)}.ts-cnt{color:var(--yellow)}
+
+.tx-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);overflow:hidden;
+}
+.tx-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.01);flex-wrap:wrap;gap:8px;
+}
+.tx-tabs{display:flex;gap:0;flex-wrap:wrap}
+.tx-tab{
+  padding:7px 12px;font-size:11px;font-weight:600;cursor:pointer;
+  border:none;background:transparent;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .15s,border-color .15s;
+  display:flex;align-items:center;gap:5px;font-family:var(--ar);
+}
+.tx-tab:hover{color:var(--text)}
+.tx-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tx-tab.active.t-in{color:var(--green);border-bottom-color:var(--green)}
+.tx-tab.active.t-out{color:var(--red);border-bottom-color:var(--red)}
+.tx-cnt{
+  font-size:9px;font-family:var(--mono);background:var(--bg3);
+  color:var(--muted);padding:2px 6px;border-radius:8px;
+}
+.tx-tab.active .tx-cnt{background:rgba(56,189,248,0.1);color:var(--blue)}
+.tx-tab.active.t-in .tx-cnt{background:rgba(0,229,160,0.1);color:var(--green)}
+.tx-tab.active.t-out .tx-cnt{background:rgba(255,61,110,0.1);color:var(--red)}
+.tx-info{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.tx-tbl-w{overflow-x:auto}
+.tx-tbl{width:100%;border-collapse:collapse;min-width:560px}
+.tx-tbl th{
+  font-size:9px;color:var(--dim);padding:9px 12px;text-align:right;
+  font-weight:500;border-bottom:1px solid var(--border);
+  letter-spacing:1px;text-transform:uppercase;white-space:nowrap;
+  font-family:var(--mono);
+}
+.tx-tbl td{
+  padding:9px 12px;font-family:var(--mono);font-size:11px;
+  border-bottom:1px solid rgba(28,45,66,0.4);white-space:nowrap;
+  vertical-align:middle;color:var(--text);
+}
+.tx-tbl tr:last-child td{border-bottom:none}
+.tx-tbl tr:hover td{background:rgba(56,189,248,0.03)}
+.tx-chip{
+  display:inline-flex;align-items:center;gap:3px;padding:3px 8px;
+  border-radius:5px;font-size:9px;font-weight:700;font-family:var(--mono);
+}
+.tc-in{background:rgba(0,229,160,0.1);color:var(--green)}
+.tc-out{background:rgba(255,61,110,0.1);color:var(--red)}
+.tc-int{background:rgba(56,189,248,0.1);color:var(--blue)}
+.tx-amt-in{color:var(--green);font-weight:600}
+.tx-amt-out{color:var(--red);font-weight:600}
+.tx-amt-int{color:var(--blue);font-weight:600}
+.tx-addr{color:var(--blue);cursor:pointer;font-size:10px;direction:ltr;display:inline-block}
+.tx-addr:hover{text-decoration:underline}
+.tx-time{color:var(--muted);font-size:10px}
+.tx-you{color:var(--muted);font-size:10px;font-family:var(--ar)}
+.tx-type-lbl{font-size:10px;color:var(--muted);font-family:var(--ar)}
+.tx-empty{text-align:center;padding:32px;color:var(--muted);font-size:12px;font-family:var(--ar)}
+.tx-loading{
+  display:none;align-items:center;justify-content:center;
+  gap:8px;padding:28px;color:var(--muted);font-size:12px;font-family:var(--ar);
+}
+.spin-b{
+  width:14px;height:14px;border:2px solid var(--border);
+  border-top-color:var(--blue);border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+.tx-pager{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--muted);font-family:var(--ar);
+}
+.tx-pg-btns{display:flex;gap:6px}
+.tx-pg-btn{
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:4px 12px;font-size:11px;cursor:pointer;color:var(--text);
+  font-family:var(--ar);transition:background .15s;
+}
+.tx-pg-btn:hover:not(:disabled){background:var(--border)}
+.tx-pg-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer{
+  text-align:center;font-size:10px;color:var(--dim);
+  margin-top:32px;font-family:var(--mono);display:none;
+  letter-spacing:1px;
+}
+footer span{color:var(--green)}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media(max-width:640px){
+  .mkt-grid{grid-template-columns:repeat(2,1fr)}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .tx-stats{grid-template-columns:repeat(2,1fr)}
+  .bal-total{font-size:28px}
+  td,th{font-size:10px;padding:8px 9px}
+  .tx-tbl th,.tx-tbl td{font-size:10px;padding:8px 9px}
+  .hdr{flex-direction:column}
+  .clock-box{align-items:flex-start}
+  .cal-day{min-height:40px}
+  .cal-pnl{font-size:8px}
+  .cal-dn{font-size:10px}
+  .wrap{padding:16px 12px 50px}
+}
+@media(max-width:400px){
+  .mkt-grid{grid-template-columns:repeat(2,1fr)}
+  .bal-total{font-size:24px}
+  .cal-day{min-height:36px;padding:3px}
+  .cal-dn{font-size:9px}
+  .cal-pnl{font-size:7px}
+}
+
+/* ── Entrance animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes txFade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.anim-in{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<!-- ════ LIVE TICKER ════ -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="tickerInner">
+    <!-- JS fills this -->
+    <div class="ticker-item"><span class="ticker-name">GOLD</span><span class="ticker-price" id="tk-gold">---</span><span class="ticker-chg neu" id="tkc-gold">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">SILVER</span><span class="ticker-price" id="tk-silver">---</span><span class="ticker-chg neu" id="tkc-silver">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">OIL</span><span class="ticker-price" id="tk-oil">---</span><span class="ticker-chg neu" id="tkc-oil">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">XYZ100</span><span class="ticker-price" id="tk-xyz">---</span><span class="ticker-chg neu" id="tkc-xyz">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">BTC</span><span class="ticker-price" id="tk-btc">---</span><span class="ticker-chg neu" id="tkc-btc">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">ETH</span><span class="ticker-price" id="tk-eth">---</span><span class="ticker-chg neu" id="tkc-eth">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">SOL</span><span class="ticker-price" id="tk-sol">---</span><span class="ticker-chg neu" id="tkc-sol">...</span></div>
+    <!-- duplicate for seamless scroll -->
+    <div class="ticker-item"><span class="ticker-name">GOLD</span><span class="ticker-price" id="tk-gold2">---</span><span class="ticker-chg neu" id="tkc-gold2">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">SILVER</span><span class="ticker-price" id="tk-silver2">---</span><span class="ticker-chg neu" id="tkc-silver2">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">OIL</span><span class="ticker-price" id="tk-oil2">---</span><span class="ticker-chg neu" id="tkc-oil2">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">XYZ100</span><span class="ticker-price" id="tk-xyz2">---</span><span class="ticker-chg neu" id="tkc-xyz2">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">BTC</span><span class="ticker-price" id="tk-btc2">---</span><span class="ticker-chg neu" id="tkc-btc2">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">ETH</span><span class="ticker-price" id="tk-eth2">---</span><span class="ticker-chg neu" id="tkc-eth2">...</span></div>
+    <div class="ticker-item"><span class="ticker-name">SOL</span><span class="ticker-price" id="tk-sol2">---</span><span class="ticker-chg neu" id="tkc-sol2">...</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ════ HEADER ════ -->
+<div class="hdr anim-in">
+  <div class="hdr-brand">
+    <div class="hdr-hex">⬡</div>
+    <div class="hdr-text">
+      <h1>HYPERLIQUID ANALYZER</h1>
+      <p>Real-time on-chain portfolio intelligence</p>
+    </div>
+  </div>
+  <div class="clock-box">
+    <div class="clock-date" id="clockDate">— — —</div>
+    <div class="clock-time" id="clockTime">--:--:--</div>
+  </div>
+</div>
+
+<!-- ════ MARKET PRICES ════ -->
+<div class="mkt-grid anim-in" style="animation-delay:.05s">
+  <div class="mkt-card">
+    <div class="mkt-dot"></div>
+    <span class="mkt-icon">🟡</span>
+    <div class="mkt-sym">xyz:GOLD</div>
+    <div class="mkt-name">الذهب</div>
+    <div class="mkt-price" id="p-gold">—</div>
+    <div class="mkt-chg neu" id="c-gold">---</div>
+  </div>
+  <div class="mkt-card">
+    <div class="mkt-dot"></div>
+    <span class="mkt-icon">⚪</span>
+    <div class="mkt-sym">xyz:SILVER</div>
+    <div class="mkt-name">الفضة</div>
+    <div class="mkt-price" id="p-silver">—</div>
+    <div class="mkt-chg neu" id="c-silver">---</div>
+  </div>
+  <div class="mkt-card">
+    <div class="mkt-dot"></div>
+    <span class="mkt-icon">🛢️</span>
+    <div class="mkt-sym">xyz:OIL</div>
+    <div class="mkt-name">النفط</div>
+    <div class="mkt-price" id="p-oil">—</div>
+    <div class="mkt-chg neu" id="c-oil">---</div>
+  </div>
+  <div class="mkt-card">
+    <div class="mkt-dot"></div>
+    <span class="mkt-icon">📈</span>
+    <div class="mkt-sym">xyz:XYZ100</div>
+    <div class="mkt-name">ناسداك</div>
+    <div class="mkt-price" id="p-xyz">—</div>
+    <div class="mkt-chg neu" id="c-xyz">---</div>
+  </div>
+</div>
+
+<!-- ════ SEARCH ════ -->
+<div class="srch-wrap anim-in" style="animation-delay:.1s">
+  <span class="srch-label">تحليل محفظة</span>
+  <div class="srch">
+    <input id="addrInput" type="text" placeholder="0x... أدخل عنوان المحفظة العامة" autocomplete="off" spellcheck="false" />
+    <button class="srch-btn" onclick="analyze()">تحليل</button>
+  </div>
+  <div class="alias-row">
+    <span class="alias-chip" onclick="quickLoad('ياسر')">ياسر</span>
+    <span class="alias-chip" onclick="quickLoad('يونس')">يونس</span>
+    <span class="alias-chip" onclick="quickLoad('علاوي')">علاوي</span>
+    <span class="alias-chip" onclick="quickLoad('كانبا')">كانبا</span>
+  </div>
+</div>
+
+<!-- ════ STATUS ════ -->
+<div class="status-row">
+  <div class="wlt-tag" id="wltTag">
+    <div class="wlt-dot"></div>
+    <span>محفظة:</span>
+    <span class="wlt-addr" id="wltSpan"></span>
+  </div>
+  <div class="timer-txt" id="timerDiv" style="display:none">التالي: <span class="cd" id="countdown">30</span>ث</div>
+</div>
+
+<div id="loading"><div class="spin"></div> جاري جلب البيانات...</div>
+<div class="err" id="errBox"></div>
+
+<!-- ════ BALANCE ════ -->
+<div class="bal-card anim-in" id="balCard">
+  <div class="bal-head">
+    <div class="bal-main">
+      <div class="bal-lbl">الرصيد الإجمالي الموحد</div>
+      <div class="bal-total" id="totalBal">0.000</div>
+      <div class="bal-currency">USDC</div>
+    </div>
+    <div class="bal-sides">
+      <div class="bal-sub"><span class="lbl2">PERP </span><span id="perpBal" class="b">0.000</span></div>
+      <div class="bal-sub"><span class="lbl2">SPOT </span><span id="spotBal" class="y">0.000</span></div>
+    </div>
+  </div>
+  <hr class="hdiv">
+  <div class="bal-row">
+    <div class="bi"><div class="bi-lbl">هامش مستخدم</div><div class="bi-val r" id="marginUsed">0.000</div></div>
+    <div class="bi"><div class="bi-lbl">هامش حر</div><div class="bi-val g" id="marginFree">0.000</div></div>
+    <div class="bi"><div class="bi-lbl">إجمالي رسوم</div><div class="bi-val o" id="totalFees">—</div></div>
+    <div class="bi"><div class="bi-lbl">مراكز مفتوحة</div><div class="bi-val c" id="openCount">0</div></div>
+  </div>
+</div>
+
+<div class="fee-note" id="feeNote">
+  <span>رسوم Hyperliquid (Tier 0):</span>
+  آخذ سوق <span>0.045%</span> — طلب حد <span>0.015%</span> — سبوت آخذ <span>0.070%</span> / حد <span>0.040%</span> |
+  الرسوم تنخفض مع زيادة الحجم 14 يوم
+</div>
+
+<!-- ════ KPI ════ -->
+<div class="kpi-row" id="kpiRow" style="display:none"></div>
+
+<!-- ════ PNL CALENDAR ════ -->
+<div class="cal-sec" id="calSec">
+  <div class="cal-hd">
+    <div class="cal-hd-left">
+      <div class="cal-title">📅 PnL Calendar</div>
+      <div class="cal-month-nav">
+        <div class="cal-nav-btn" onclick="calNav(-1)">‹</div>
+        <div class="cal-month-lbl" id="calMonthLbl"></div>
+        <div class="cal-nav-btn" onclick="calNav(1)">›</div>
+      </div>
+    </div>
+    <div class="cal-summary" id="calSummary"></div>
+  </div>
+  <div class="cal-grid">
+    <div class="cal-dow">
+      <span>أحد</span><span>اثن</span><span>ثلا</span><span>أرب</span><span>خمي</span><span>جمع</span><span>سبت</span>
+    </div>
+    <div class="cal-days" id="calDays"></div>
+  </div>
+</div>
+
+<!-- ════ POSITIONS ════ -->
+<div class="sec" id="posSec" style="display:none">
+  <div class="sec-hd">
+    <span class="sec-title">المراكز المفتوحة</span>
+    <span class="badge" id="posBadge">0</span>
+  </div>
+  <div class="tbl-w">
+    <table>
+      <thead><tr><th>العملة</th><th>اتجاه</th><th>الحجم</th><th>دخول</th><th>الآن</th><th>PnL $</th><th>PnL %</th><th>رافعة</th></tr></thead>
+      <tbody id="posTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════ FILLS ════ -->
+<div class="sec" id="histSec" style="display:none">
+  <div class="sec-hd">
+    <span class="sec-title">تاريخ الصفقات</span>
+    <span class="badge" id="histBadge">0</span>
+  </div>
+  <div class="tbl-w">
+    <table>
+      <thead><tr><th>الوقت</th><th>العملة</th><th>اتجاه</th><th>نوع</th><th>السعر</th><th>الحجم</th><th>PnL محقق</th><th>رسوم</th><th>رسوم%</th></tr></thead>
+      <tbody id="histTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════ TRANSACTIONS ════ -->
+<div class="tx-sec" id="txSec">
+  <div class="tx-stats">
+    <div class="tx-stat"><div class="ts-lbl">مُستلم</div><div class="ts-val ts-in" id="txStatIn">—</div><div class="ts-sub">USDC</div></div>
+    <div class="tx-stat"><div class="ts-lbl">مُرسل</div><div class="ts-val ts-out" id="txStatOut">—</div><div class="ts-sub">USDC</div></div>
+    <div class="tx-stat"><div class="ts-lbl">صافي التدفق</div><div class="ts-val ts-net" id="txStatNet">—</div><div class="ts-sub">USDC</div></div>
+    <div class="tx-stat"><div class="ts-lbl">المعاملات</div><div class="ts-val ts-cnt" id="txStatCnt">—</div><div class="ts-sub">معاملة</div></div>
+  </div>
+  <div class="tx-card">
+    <div class="tx-hd">
+      <div class="tx-tabs">
+        <button class="tx-tab active"  onclick="txSwitch('all')" id="txtab-all">الكل <span class="tx-cnt" id="txcnt-all">0</span></button>
+        <button class="tx-tab t-in"    onclick="txSwitch('in')"  id="txtab-in">وارد <span class="tx-cnt" id="txcnt-in">0</span></button>
+        <button class="tx-tab t-out"   onclick="txSwitch('out')" id="txtab-out">صادر <span class="tx-cnt" id="txcnt-out">0</span></button>
+        <button class="tx-tab"         onclick="txSwitch('int')" id="txtab-int">داخلي <span class="tx-cnt" id="txcnt-int">0</span></button>
+      </div>
+      <div class="tx-info" id="txInfo"></div>
+    </div>
+    <div class="tx-loading" id="txLoading"><div class="spin-b"></div> جاري الجلب...</div>
+    <div class="tx-tbl-w">
+      <table class="tx-tbl">
+        <thead><tr><th>النوع</th><th>المبلغ</th><th>عملة</th><th>من</th><th>إلى</th><th>وقت</th><th>تفاصيل</th></tr></thead>
+        <tbody id="txTbody"></tbody>
+      </table>
+      <div class="tx-empty" id="txEmpty" style="display:none">لا توجد معاملات في هذه الفئة</div>
+    </div>
+    <div class="tx-pager" id="txPager" style="display:none">
+      <span id="txPagerInfo"></span>
+      <div class="tx-pg-btns">
+        <button class="tx-pg-btn" id="txBtnPrev" onclick="txPrev()">‹ السابق</button>
+        <button class="tx-pg-btn" id="txBtnNext" onclick="txNext()">التالي ›</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer id="foot" style="display:none">آخر تحديث: <span id="updTime"></span> — <span>Hyperliquid</span> Public API</footer>
+
+</div><!-- /wrap -->
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════════════════ */
+const API = "https://api.hyperliquid.xyz/info";
+const ALIASES = {
+  "ياسر":  "0x6cc7ea5913c3002d53938b8e93da8425ab0bbafa",
+  "يونس":  "0x751d8d19760907d5d68c5ea758d1984282a0b39d",
+  "علاوي": "0x8fb06d076cb42b3480a19bab8f1d7d4170839e0f",
+  "كانبا": "0x0640F5Bfc50AC53eC68C435a60cB0ffF5C555FAD"
+};
+
+const XYZ_ASSETS = [
+  { id:'gold',   coin:'xyz:GOLD',   sym:'GOLD'   },
+  { id:'silver', coin:'xyz:SILVER', sym:'SILVER' },
+  { id:'oil',    coin:'xyz:CL',    sym:'oil'    },
+  { id:'xyz',    coin:'xyz:XYZ100', sym:'XYZ100' },
+];
+
+const HL_ASSETS = ['BTC','ETH','SOL'];
+
+let cdTimer = null, currentAddress = '';
+const TX_PER = 25;
+let txAll = [], txFiltered = [], txTab = 'all', txPage = 0;
+
+// Calendar state
+let calYear, calMonth, calPnlData = {};
+
+/* ════════════════════════════════════════════════════════════════
+   CLOCK
+════════════════════════════════════════════════════════════════ */
+function startClock() {
+  const updateClock = () => {
+    const now = new Date();
+    // Date: "3 مارس 2025"
+    const dateStr = now.toLocaleDateString('en-uk', { day:'numeric', month:'long', year:'numeric' });
+    // Time: "22:11:33"
+    const timeStr = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    document.getElementById('clockDate').textContent = dateStr;
+    document.getElementById('clockTime').textContent = timeStr;
+  };
+  updateClock();
+  setInterval(updateClock, 1000);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LIVE MARKET PRICES
+════════════════════════════════════════════════════════════════ */
+async function fetchMarketPrices() {
+  try {
+    // XYZ assets via l2Book
+    const xyzRes = await Promise.all(XYZ_ASSETS.map(a =>
+      fetch(API, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ type:'l2Book', coin: a.coin })
+      }).then(r => r.json())
+    ));
+
+    // HL perps mids + meta for 24h change
+    const [midsR, metaR] = await Promise.all([
+      fetch(API, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'allMids'})}),
+      fetch(API, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'metaAndAssetCtxs'})})
+    ]);
+    const mids = await midsR.json();
+    const meta = await metaR.json();
+
+    const prevMap = {};
+    meta[0].universe.forEach((u,i) => { prevMap[u.name] = parseFloat(meta[1][i]?.prevDayPx || 0); });
+
+    // Update XYZ price cards
+    XYZ_ASSETS.forEach((a, i) => {
+      const lb = xyzRes[i];
+      if (lb.levels?.[0]?.[0] && lb.levels?.[1]?.[0]) {
+        const bid   = parseFloat(lb.levels[0][0].px);
+        const ask   = parseFloat(lb.levels[1][0].px);
+        const price = (bid + ask) / 2;
+        setMktCard(a.id, price, null);
+      }
+    });
+
+    // Update HL ticker prices
+    HL_ASSETS.forEach(sym => {
+      const price = parseFloat(mids[sym]);
+      const prev  = prevMap[sym] || 0;
+      const chg   = prev > 0 ? (price - prev) / prev * 100 : null;
+      const key   = sym.toLowerCase();
+      setTickerItem(key, price, chg);
+      setTickerItem(key+'2', price, chg);
+    });
+
+    // XYZ ticker (we need candleSnapshot for 24h chg)
+    // Use l2Book price and last candle for change
+    for (const [i, a] of XYZ_ASSETS.entries()) {
+      try {
+        const now = Date.now();
+        const cr = await fetch(API, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ type:'candleSnapshot', req:{ coin:a.coin, interval:'1h', startTime: now - 86400000, endTime: now }})
+        });
+        const candles = await cr.json();
+        if (Array.isArray(candles) && candles.length >= 2) {
+          const firstOpen = parseFloat(candles[0].o);
+          const lastClose = parseFloat(candles[candles.length-1].c);
+          const chg = firstOpen > 0 ? (lastClose - firstOpen) / firstOpen * 100 : null;
+          // Re-read price from card
+          const priceEl = document.getElementById('p-' + a.id);
+          const priceVal = priceEl ? parseFloat(priceEl.dataset.raw || 0) : 0;
+          setChgDisplay(a.id, chg);
+          setTickerItem(a.id, priceVal, chg);
+          setTickerItem(a.id+'2', priceVal, chg);
+        }
+      } catch(e) {}
+    }
+
+  } catch(e) { console.error('market:', e.message); }
+}
+
+function setMktCard(id, price, chg) {
+  const el = document.getElementById('p-' + id);
+  if (!el) return;
+  el.dataset.raw = price;
+  el.textContent = '$' + fmtP(price);
+  setChgDisplay(id, chg);
+  setTickerItem(id, price, chg);
+  setTickerItem(id+'2', price, chg);
+}
+
+function setChgDisplay(id, chg) {
+  const el = document.getElementById('c-' + id);
+  if (!el || chg === null || chg === undefined) return;
+  const sign = chg >= 0 ? '+' : '';
+  el.textContent = sign + chg.toFixed(2) + '%';
+  el.className = 'mkt-chg ' + (chg >= 0 ? 'up' : 'dn');
+  // Update card price color
+  const pe = document.getElementById('p-' + id);
+  if (pe) pe.style.color = chg >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+function setTickerItem(id, price, chg) {
+  const pe = document.getElementById('tk-' + id);
+  const ce = document.getElementById('tkc-' + id);
+  if (pe && price > 0) pe.textContent = '$' + fmtP(price);
+  if (ce && chg !== null && chg !== undefined) {
+    const sign = chg >= 0 ? '+' : '';
+    ce.textContent = sign + chg.toFixed(2) + '%';
+    ce.className = 'ticker-chg ' + (chg >= 0 ? 'up' : 'dn');
+  }
+}
+
+function fmtP(v) {
+  if (!v || isNaN(v)) return '—';
+  if (v >= 1000) return v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if (v >= 100)  return v.toFixed(2);
+  if (v >= 1)    return v.toFixed(3);
+  return v.toFixed(5);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PNL CALENDAR
+════════════════════════════════════════════════════════════════ */
+function buildCalendar(fills) {
+  // Build daily PnL map from fills
+  calPnlData = {};
+  fills.forEach(f => {
+    const pnl = parseFloat(f.closedPnl || 0);
+    if (!pnl) return;
+    const d = new Date(f.time);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    calPnlData[key] = (calPnlData[key] || 0) + pnl;
+  });
+
+  const now = new Date();
+  calYear  = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
+}
+
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  document.getElementById('calMonthLbl').textContent = `${monthNames[calMonth]} ${calYear}`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date();
+
+  // Monthly summary
+  let monthTotal = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if (calPnlData[key]) monthTotal += calPnlData[key];
+  }
+  const sumEl = document.getElementById('calSummary');
+  if (monthTotal !== 0) {
+    sumEl.innerHTML = `<span style="color:${monthTotal>=0?'var(--green)':'var(--red)'}">${monthTotal>=0?'+':''}${fmt(monthTotal,2)} $</span>`;
+  } else {
+    sumEl.textContent = '';
+  }
+
+  // Build grid
+  let html = '';
+  // empty cells before first day
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const pnl = calPnlData[key];
+    const isToday = (d===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear());
+    let cls = 'cal-day ';
+    let pnlHtml = '';
+
+    if (pnl !== undefined && pnl !== 0) {
+      cls += pnl >= 0 ? 'pnl-pos' : 'pnl-neg';
+      const sign = pnl >= 0 ? '+' : '';
+      // Shorten large numbers
+      let pnlStr;
+      const abs = Math.abs(pnl);
+      if (abs >= 10000) pnlStr = sign + (pnl/1000).toFixed(1) + 'k';
+      else if (abs >= 1000) pnlStr = sign + pnl.toFixed(0);
+      else pnlStr = sign + pnl.toFixed(1);
+      pnlHtml = `<div class="cal-pnl">${pnlStr}</div>`;
+    } else {
+      cls += 'no-data';
+      pnlHtml = '';
+    }
+    if (isToday) cls += ' today';
+
+    const title = pnl !== undefined ? `${key}: ${pnl>=0?'+':''}${fmt(pnl,2)} $` : key;
+    html += `<div class="${cls}" title="${title}" style="animation:fadeUp .2s ${((firstDay+d-1)%7)*.03}s both">
+      <div class="cal-dn">${d}</div>${pnlHtml}
+    </div>`;
+  }
+  document.getElementById('calDays').innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAIN ANALYZE
+════════════════════════════════════════════════════════════════ */
+async function post(b) {
+  const r = await fetch(API, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+function quickLoad(name) {
+  document.getElementById('addrInput').value = name;
+  analyze();
+}
+
+async function analyze(isRef=false) {
+  const raw  = isRef ? currentAddress : document.getElementById('addrInput').value.trim();
+  const addr = ALIASES[raw] || raw;
+  if (!addr || addr.length < 10) { showErr('أدخل عنوان صحيح'); return; }
+  currentAddress = addr;
+
+  if (!isRef) {
+    ['posSec','histSec','foot','kpiRow','calSec'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById('balCard').style.display = 'none';
+    document.getElementById('feeNote').style.display = 'none';
+    document.getElementById('txSec').style.display   = 'none';
+    showErr('');
+  }
+
+  document.getElementById('loading').style.display = 'flex';
+
+  try {
+    const [perp, spot, fills, mids, txData] = await Promise.all([
+      post({ type:'clearinghouseState',           user:addr }),
+      post({ type:'spotClearinghouseState',        user:addr }),
+      post({ type:'userFills',                     user:addr }),
+      post({ type:'allMids' }),
+      post({ type:'userNonFundingLedgerUpdates',   user:addr, startTime:0 })
+    ]);
+
+    const wltTag = document.getElementById('wltTag');
+    wltTag.style.display = 'flex';
+    document.getElementById('wltSpan').textContent = addr.slice(0,6) + '...' + addr.slice(-4);
+
+    renderBal(perp, spot, fills);
+    renderKPI(fills);
+    renderPos(perp, mids);
+    renderHist(fills);
+    renderTx(txData, addr);
+    buildCalendar(fills);
+
+    ['posSec','histSec','foot','feeNote'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    });
+    document.getElementById('kpiRow').style.display = 'grid';
+    document.getElementById('txSec').style.display  = 'block';
+    document.getElementById('calSec').style.display = 'block';
+    document.getElementById('updTime').textContent  = new Date().toLocaleTimeString('ar-EG');
+    showErr('');
+
+    if (!isRef) startCD();
+    else {
+      const tb = document.getElementById('totalBal');
+      tb.classList.add('flash');
+      setTimeout(() => tb.classList.remove('flash'), 350);
+    }
+  } catch(e) {
+    showErr('خطأ: ' + e.message);
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function startCD() {
+  clearInterval(cdTimer);
+  let cd = 30;
+  const div = document.getElementById('timerDiv');
+  div.style.display = 'block';
+  document.getElementById('countdown').textContent = cd;
+  cdTimer = setInterval(() => {
+    cd--;
+    document.getElementById('countdown').textContent = cd;
+    if (cd <= 0) { cd = 30; analyze(true); }
+  }, 1000);
+}
+
+/* ── BALANCE ── */
+function renderBal(perp, spot, fills) {
+  const s     = perp.marginSummary;
+  const perpV = parseFloat(s.accountValue);
+  const mU    = parseFloat(s.totalMarginUsed);
+  const mF    = parseFloat(s.totalRawUsd);
+  let spotV   = 0;
+  (spot.balances||[]).forEach(b => spotV += parseFloat(b.total||0));
+  const total    = perpV + spotV;
+  const feeTotal = fills.reduce((a,f) => a + parseFloat(f.fee||0), 0);
+  const active   = (perp.assetPositions||[]).filter(p => parseFloat(p.position.szi) !== 0).length;
+
+  document.getElementById('balCard').style.display = 'block';
+  animNum('totalBal', total, 3);
+  animNum('perpBal', perpV, 3);
+  animNum('spotBal', spotV, 3);
+  animNum('marginUsed', mU, 3);
+  animNum('marginFree', mF, 3);
+  document.getElementById('totalFees').textContent = fmt(feeTotal) + ' $';
+  document.getElementById('openCount').textContent = active;
+}
+
+/* ── KPI ── */
+function renderKPI(fills) {
+  if (!fills.length) {
+    document.getElementById('kpiRow').innerHTML = '<div class="kpi"><div class="kpi-lbl">صفقات</div><div class="kpi-val y">0</div></div>';
+    return;
+  }
+  const total  = fills.length;
+  const pnlAll = fills.reduce((a,f) => a + parseFloat(f.closedPnl||0), 0);
+  const feeAll = fills.reduce((a,f) => a + parseFloat(f.fee||0), 0);
+  const net    = pnlAll - feeAll;
+  const wins   = fills.filter(f => parseFloat(f.closedPnl||0) > 0).length;
+  const wr     = (wins/total*100).toFixed(1);
+  const makers = fills.filter(f => f.crossed===false||(f.crossed===undefined&&parseFloat(f.fee||0)<=0)).length;
+  const mkPct  = Math.round(makers/total*100);
+
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi"><div class="kpi-lbl">صافي الربح</div><div class="kpi-val ${pc(net)}">${net>=0?'+':''}${fmt(net)}</div><div class="kpi-sub">USDC</div></div>
+    <div class="kpi"><div class="kpi-lbl">نسبة الربح</div><div class="kpi-val ${parseFloat(wr)>=50?'g':'r'}">${wr}%</div><div class="bar-w"><div class="bar-f" style="width:${wr}%"></div></div></div>
+    <div class="kpi"><div class="kpi-lbl">صفقات كلي</div><div class="kpi-val y">${total}</div><div class="kpi-sub">${wins} ربح / ${total-wins} خسارة</div></div>
+    <div class="kpi"><div class="kpi-lbl">صانع سوق</div><div class="kpi-val p">${mkPct}%</div><div class="kpi-sub">${makers} صفقة</div></div>
+    <div class="kpi"><div class="kpi-lbl">آخذ سوق</div><div class="kpi-val b">${100-mkPct}%</div><div class="kpi-sub">${total-makers} صفقة</div></div>
+    <div class="kpi"><div class="kpi-lbl">إجمالي رسوم</div><div class="kpi-val r">${fmt(feeAll)}</div><div class="kpi-sub">USDC</div></div>`;
+}
+
+/* ── POSITIONS ── */
+function renderPos(perp, mids) {
+  const active = (perp.assetPositions||[]).filter(p => parseFloat(p.position.szi) !== 0);
+  document.getElementById('posBadge').textContent = active.length + ' مركز';
+  if (!active.length) {
+    document.getElementById('posTbody').innerHTML = '<tr><td colspan="8"><div class="empty">لا توجد مراكز مفتوحة</div></td></tr>';
+    return;
+  }
+  document.getElementById('posTbody').innerHTML = active.map(p => {
+    const pos  = p.position;
+    const size = parseFloat(pos.szi);
+    const entry= parseFloat(pos.entryPx);
+    const pnl  = parseFloat(pos.unrealizedPnl);
+    const now  = parseFloat(mids[pos.coin]||0);
+    const pnlPct = entry && now ? ((now-entry)/entry*100*(size>0?1:-1)).toFixed(2) : '—';
+    const cl   = pc(pnl);
+    return `<tr style="animation:fadeUp .25s both">
+      <td style="font-weight:600">${pos.coin}</td>
+      <td><span class="tag ${size>0?'tag-buy':'tag-sell'}">${size>0?'شراء':'بيع'}</span></td>
+      <td>${fmt(Math.abs(size),4)}</td>
+      <td>${fmt(entry)}</td>
+      <td class="b">${now?fmt(now):'—'}</td>
+      <td class="${cl}">${pnl>=0?'+':''}${fmt(pnl)} $</td>
+      <td class="${cl}">${pnlPct!=='—'?(parseFloat(pnlPct)>=0?'+':'')+pnlPct+'%':'—'}</td>
+      <td class="y">${pos.leverage.value}x</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── FILLS ── */
+function renderHist(fills) {
+  document.getElementById('histBadge').textContent = fills.length + ' صفقة';
+  if (!fills.length) {
+    document.getElementById('histTbody').innerHTML = '<tr><td colspan="9"><div class="empty">لا توجد صفقات</div></td></tr>';
+    return;
+  }
+  const sorted = [...fills].sort((a,b) => b.time - a.time);
+  document.getElementById('histTbody').innerHTML = sorted.map(f => {
+    const pnl      = parseFloat(f.closedPnl||0);
+    const fee      = parseFloat(f.fee||0);
+    const notional = parseFloat(f.sz||0) * parseFloat(f.px||0);
+    const feePct   = notional > 0 ? (Math.abs(fee)/notional*100).toFixed(4) : '—';
+    const ot  = orderType(f);
+    const cl  = pc(pnl);
+    const fc  = fee < 0 ? 'g' : '';
+    return `<tr style="animation:fadeUp .2s both">
+      <td style="color:var(--muted)">${fmtT(f.time)}</td>
+      <td style="font-weight:600">${f.coin}</td>
+      <td><span class="tag ${f.side==='B'?'tag-buy':'tag-sell'}">${f.side==='B'?'شراء':'بيع'}</span></td>
+      <td><span class="tag ${ot.cls}">${ot.label}</span></td>
+      <td>${fmt(parseFloat(f.px))}</td>
+      <td>${fmt(parseFloat(f.sz),4)}</td>
+      <td class="${cl}">${pnl!==0?(pnl>0?'+':'')+fmt(pnl)+' $':'—'}</td>
+      <td class="${fc}">${fee<0?'↩ '+fmt(Math.abs(fee),4):fmt(fee,4)}</td>
+      <td style="color:var(--muted)">${feePct!=='—'?feePct+'%':'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TRANSACTIONS
+════════════════════════════════════════════════════════════════ */
+const TX_TYPE_MAP = {
+  deposit:'إيداع', withdraw:'سحب', spotTransfer:'تحويل سبوت',
+  internalTransfer:'داخلي', subAccountTransfer:'حساب فرعي',
+  accountClassTransfer:'تصنيف', vaultDeposit:'إيداع خزينة',
+  vaultWithdraw:'سحب خزينة', funding:'تمويل', liquidation:'تصفية'
+};
+
+function txClassify(tx, addr) {
+  const t  = tx.delta.type;
+  if (t==='deposit')     return 'in';
+  if (t==='withdraw')    return 'out';
+  if (t==='vaultWithdraw') return 'in';
+  if (t==='vaultDeposit')  return 'out';
+  if (t==='spotTransfer') {
+    const usdc = parseFloat(tx.delta.usdc||0);
+    return usdc > 0 ? 'in' : 'out';
+  }
+  return 'int';
+}
+function txAmt(tx) {
+  const d = tx.delta;
+  return Math.abs(parseFloat(d.usdc||d.amount||d.nUsdc||0));
+}
+function txFrom(tx, addr) {
+  const d = tx.delta;
+  if (d.type==='deposit')      return d.user || addr;
+  if (d.type==='spotTransfer' && d.user) return d.user;
+  return addr;
+}
+function txTo(tx, addr) {
+  const d = tx.delta;
+  if (d.type==='withdraw')     return d.destination || '—';
+  if (d.type==='spotTransfer' && d.destination) return d.destination;
+  return addr;
+}
+
+function renderTx(raw, addr) {
+  txAll = (Array.isArray(raw)?raw:[])
+    .map(tx => ({...tx, _dir:txClassify(tx,addr), _amt:txAmt(tx)}))
+    .sort((a,b) => b.time - a.time);
+
+  const totIn  = txAll.filter(t=>t._dir==='in').reduce((s,t)=>s+t._amt,0);
+  const totOut = txAll.filter(t=>t._dir==='out').reduce((s,t)=>s+t._amt,0);
+  const net    = totIn - totOut;
+  document.getElementById('txStatIn').textContent  = '+' + fmt(totIn,2);
+  document.getElementById('txStatOut').textContent = '-' + fmt(totOut,2);
+  const netEl = document.getElementById('txStatNet');
+  netEl.textContent = (net>=0?'+':'')+fmt(net,2);
+  netEl.style.color = net>=0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('txStatCnt').textContent = txAll.length;
+
+  ['all','in','out','int'].forEach(t => {
+    document.getElementById('txcnt-'+t).textContent =
+      t==='all' ? txAll.length :
+      txAll.filter(tx=>tx._dir===t).length;
+  });
+  document.getElementById('txInfo').textContent = txAll.length + ' معاملة';
+
+  txTab = 'all'; txPage = 0;
+  ['all','in','out','int'].forEach(t => document.getElementById('txtab-'+t).classList.remove('active'));
+  document.getElementById('txtab-all').classList.add('active');
+  txApply();
+}
+
+function txSwitch(tab) {
+  txTab = tab; txPage = 0;
+  ['all','in','out','int'].forEach(t => document.getElementById('txtab-'+t).classList.remove('active'));
+  document.getElementById('txtab-'+tab).classList.add('active');
+  txApply();
+}
+function txApply() {
+  txFiltered = txTab==='all' ? txAll : txAll.filter(t=>t._dir===txTab);
+  txRenderPage();
+}
+function txRenderPage() {
+  const start = txPage * TX_PER;
+  const slice = txFiltered.slice(start, start+TX_PER);
+  const tbody = document.getElementById('txTbody');
+  const empty = document.getElementById('txEmpty');
+  const addr  = currentAddress;
+
+  if (!slice.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    document.getElementById('txPager').style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = slice.map((tx,i) => {
+    const dir     = tx._dir;
+    const amt     = tx._amt;
+    const from    = txFrom(tx, addr);
+    const to      = txTo(tx, addr);
+    const isMe    = a => a && a.toLowerCase()===addr.toLowerCase();
+    const typeLbl = TX_TYPE_MAP[tx.delta.type] || tx.delta.type;
+    const token   = tx.delta.token || 'USDC';
+    const chipCls = dir==='in'?'tc-in':dir==='out'?'tc-out':'tc-int';
+    const dirLbl  = dir==='in'?'↓ وارد':dir==='out'?'↑ صادر':'⇄ داخلي';
+    const amtCls  = dir==='in'?'tx-amt-in':dir==='out'?'tx-amt-out':'tx-amt-int';
+    const sign    = dir==='in'?'+':dir==='out'?'-':'';
+    return `<tr style="animation:txFade .2s ${i*.025}s both">
+      <td><span class="tx-chip ${chipCls}">${dirLbl}</span></td>
+      <td class="${amtCls}">${sign}${fmt(amt,amt<1?4:2)}</td>
+      <td style="color:var(--muted);font-size:10px">${token}</td>
+      <td>${isMe(from)?'<span class="tx-you">أنت</span>':`<span class="tx-addr" onclick="navigator.clipboard?.writeText('${from}')" title="${from}">${short(from)}</span>`}</td>
+      <td>${isMe(to)?'<span class="tx-you">أنت</span>':`<span class="tx-addr" onclick="navigator.clipboard?.writeText('${to}')" title="${to}">${short(to)}</span>`}</td>
+      <td class="tx-time" title="${new Date(tx.time).toLocaleString('ar-EG')}">${fmtAge(tx.time)}</td>
+      <td class="tx-type-lbl">${typeLbl}</td>
+    </tr>`;
+  }).join('');
+
+  const total = txFiltered.length;
+  const pages = Math.ceil(total/TX_PER);
+  const pager = document.getElementById('txPager');
+  if (pages > 1) {
+    document.getElementById('txPagerInfo').textContent = `${start+1}–${Math.min(start+TX_PER,total)} من ${total}`;
+    document.getElementById('txBtnPrev').disabled = txPage===0;
+    document.getElementById('txBtnNext').disabled = txPage>=pages-1;
+    pager.style.display = 'flex';
+  } else {
+    pager.style.display = 'none';
+  }
+}
+function txPrev() { if (txPage>0){txPage--;txRenderPage();} }
+function txNext() { if (txPage<Math.ceil(txFiltered.length/TX_PER)-1){txPage++;txRenderPage();} }
+
+/* ════════════════════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════════════════════ */
+function fmt(n, d=3) {
+  const v = parseFloat(n);
+  if (isNaN(v)) return '—';
+  return v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+function fmtT(ts) {
+  return new Date(ts).toLocaleString('en-UK',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function fmtAge(ts) {
+  const d = Date.now() - ts;
+  if (d < 60000)    return 'الآن';
+  if (d < 3600000)  return Math.floor(d/60000) + ' د';
+  if (d < 86400000) return Math.floor(d/3600000) + ' س';
+  return fmtT(ts);
+}
+function pc(v) { return v>0?'g':v<0?'r':''; }
+function short(a) { return a&&a.length>10?a.slice(0,6)+'…'+a.slice(-4):(a||'—'); }
+function orderType(f) {
+  if (f.crossed===true)  return {label:'سوق',cls:'tag-taker'};
+  if (f.crossed===false) return {label:'طلب حد',cls:'tag-maker'};
+  return parseFloat(f.fee||0)<=0
+    ? {label:'طلب حد',cls:'tag-maker'}
+    : {label:'سوق',cls:'tag-taker'};
+}
+function animNum(id, val, d=3) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const from = parseFloat(el.dataset.v || 0);
+  const to   = parseFloat(val);
+  if (isNaN(to)) { el.textContent = '—'; return; }
+  el.dataset.v = to;
+  if (Math.abs(from-to) < 0.0001) { el.textContent = fmt(to,d); return; }
+  const t0 = Date.now(), dur = 700;
+  const tick = () => {
+    const p = Math.min((Date.now()-t0)/dur,1);
+    const e = p<.5?2*p*p:-1+(4-2*p)*p;
+    el.textContent = fmt(from+(to-from)*e, d);
+    if (p<1) requestAnimationFrame(tick);
+    else el.textContent = fmt(to,d);
+  };
+  requestAnimationFrame(tick);
+}
+function showErr(msg) {
+  const el = document.getElementById('errBox');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════════ */
+document.getElementById('addrInput').addEventListener('keydown', e => {
+  if (e.key==='Enter') analyze();
+});
+
+// Start clock
+startClock();
+
+// Initial market prices + refresh every 6s
+fetchMarketPrices();
+setInterval(fetchMarketPrices, 6000);
+
+const st = document.createElement('style');
+st.textContent = `@keyframes txFade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}`;
+document.head.appendChild(st);
+</script>
+</body>
+</html>
