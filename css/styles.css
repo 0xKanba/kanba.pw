@@ -1,12 +1,8 @@
 /* ================================
    styles.css — Header & Footer only
+   لا يؤثر على أي شيء خارج mt-header و mt-footer
    ================================ */
 
-/* Reset عام — لمنع الإطار الأبيض في كل الصفحات */
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-
-/* ── CSS Variables ── */
 :root {
   --mt-header-bg:     #ffffff;
   --mt-header-shadow: rgba(0,0,0,.10);
@@ -46,6 +42,7 @@ html, body { margin: 0; padding: 0; }
   position: relative;
   z-index: 100;
   transition: background .3s;
+  margin: 0;
 }
 
 .mt-header-link {
@@ -58,6 +55,7 @@ html, body { margin: 0; padding: 0; }
   border-radius: 10px;
   position: relative;
   transition: box-shadow .3s;
+  box-sizing: border-box;
 }
 
 .mt-header-link:hover {
@@ -73,6 +71,7 @@ html, body { margin: 0; padding: 0; }
   border-radius: 8px;
   flex-shrink: 0;
   transition: transform .3s;
+  display: block;
 }
 
 .mt-title {
@@ -81,6 +80,8 @@ html, body { margin: 0; padding: 0; }
   color: var(--mt-title-color);
   letter-spacing: .7px;
   white-space: nowrap;
+  margin: 0;
+  padding: 0;
 }
 
 /* ══════════ FOOTER ══════════ */
@@ -92,6 +93,7 @@ html, body { margin: 0; padding: 0; }
   padding: 14px 16px;
   box-sizing: border-box;
   transition: background .3s;
+  margin: 0;
 }
 
 .mt-nav {
@@ -100,7 +102,9 @@ html, body { margin: 0; padding: 0; }
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 6px;
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
+  padding: 0;
+  list-style: none;
 }
 
 .mt-nav-link {
@@ -115,9 +119,10 @@ html, body { margin: 0; padding: 0; }
   white-space: nowrap;
   position: relative;
   transition: color .25s;
+  box-sizing: border-box;
+  margin: 0;
 }
 
-/* خط سفلي متحرك عند hover */
 .mt-nav-link::after {
   content: '';
   position: absolute;
@@ -133,7 +138,6 @@ html, body { margin: 0; padding: 0; }
 
 .mt-nav-link:hover::after { width: 70%; }
 
-/* التبويب النشط */
 .mt-nav-link.mt-active {
   color: var(--mt-accent);
   font-weight: 700;
@@ -142,12 +146,11 @@ html, body { margin: 0; padding: 0; }
 
 .mt-nav-link.mt-active::after { width: 70%; }
 
-/* نقطة توهج فوق التبويب النشط */
 .mt-nav-link.mt-active::before {
   content: '';
   position: absolute;
   left: 50%;
-  top: 0px;
+  top: 0;
   transform: translateX(-50%);
   width: 5px;
   height: 5px;
@@ -163,6 +166,7 @@ html, body { margin: 0; padding: 0; }
   color: var(--mt-footer-color);
   opacity: .7;
   margin: 0;
+  padding: 0;
 }
 
 @keyframes mt-pulse {
@@ -173,20 +177,19 @@ html, body { margin: 0; padding: 0; }
 /* ══════════ RESPONSIVE ══════════ */
 
 @media (max-width: 768px) {
-  .mt-header  { padding: 8px 12px; }
-  .mt-logo    { height: 28px; }
-  .mt-title   { font-size: .95rem; }
-  .mt-footer  { padding: 12px 12px; }
-  .mt-nav     { gap: 2px 4px; }
+  .mt-header   { padding: 8px 12px; }
+  .mt-logo     { height: 28px; }
+  .mt-title    { font-size: .95rem; }
+  .mt-footer   { padding: 12px; }
 }
 
 @media (max-width: 480px) {
-  .mt-header     { padding: 7px 10px; }
-  .mt-logo       { height: 24px; }
-  .mt-title      { font-size: .85rem; }
-  .mt-footer     { padding: 10px 10px; }
-  .mt-nav-link   { padding: 5px 7px; }
-  .mt-copy       { font-size: .7rem; }
+  .mt-header   { padding: 7px 10px; }
+  .mt-logo     { height: 24px; }
+  .mt-title    { font-size: .85rem; }
+  .mt-footer   { padding: 10px; }
+  .mt-nav-link { padding: 5px 7px; }
+  .mt-copy     { font-size: .7rem; }
 }
 
 @media (max-width: 360px) {
