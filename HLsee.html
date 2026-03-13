@@ -11,14 +11,10 @@
 </head>
 <body>
 
-<!-- ═══ TICKER ═══ -->
 <div class="ticker-wrap">
-  <div class="ticker-track" id="tickerTrack">
-    <!-- JS inserts items (×2 for seamless loop) -->
-  </div>
+  <div class="ticker-track" id="tickerTrack"></div>
 </div>
 
-<!-- ═══ FLOATING BADGE (fixed corner) ═══ -->
 <div class="float-badge" id="floatBadge">
   <div class="fb-hex">⬡</div>
   <div class="fb-info">
@@ -28,7 +24,6 @@
   <div class="fb-dot"></div>
 </div>
 
-<!-- ═══ HEADER ═══ -->
 <header class="site-header" id="siteHeader">
   <div class="wrap hdr-inner">
     <div class="brand">
@@ -47,12 +42,8 @@
 
 <main class="wrap">
 
-  <!-- ═══ MARKET GRID ═══ -->
-  <section class="mkt-grid" id="mktGrid">
-    <!-- JS renders cards -->
-  </section>
+  <section class="mkt-grid" id="mktGrid"></section>
 
-  <!-- ═══ SEARCH ═══ -->
   <section class="search-card">
     <div class="search-label">Analyze Wallet</div>
     <div class="search-row">
@@ -64,12 +55,9 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
     </div>
-    <div class="alias-row" id="aliasRow">
-      <!-- JS renders alias chips -->
-    </div>
+    <div class="alias-row" id="aliasRow"></div>
   </section>
 
-  <!-- ═══ STATUS BAR ═══ -->
   <div class="status-bar">
     <div class="wallet-tag" id="walletTag" style="display:none">
       <span class="wt-dot"></span>
@@ -81,14 +69,12 @@
     </div>
   </div>
 
-  <!-- ═══ LOADING / ERROR ═══ -->
   <div class="loading-bar" id="loadingBar" style="display:none">
     <div class="lb-spin"></div>
     <span id="loadingText">Fetching data...</span>
   </div>
   <div class="err-box" id="errBox" style="display:none"></div>
 
-  <!-- ═══ BALANCE HERO ═══ -->
   <div class="bal-hero" id="balHero" style="display:none">
     <div class="bal-glow"></div>
     <div class="bal-head">
@@ -114,29 +100,15 @@
     </div>
     <div class="bal-divider"></div>
     <div class="bal-row">
-      <div class="bi">
-        <div class="bi-lbl">Margin Used</div>
-        <div class="bi-val red" id="marginUsed">0.000</div>
-      </div>
-      <div class="bi">
-        <div class="bi-lbl">Free Margin</div>
-        <div class="bi-val green" id="marginFree">0.000</div>
-      </div>
-      <div class="bi">
-        <div class="bi-lbl">Total Fees Paid</div>
-        <div class="bi-val orange" id="totalFees">—</div>
-      </div>
-      <div class="bi">
-        <div class="bi-lbl">Open Positions</div>
-        <div class="bi-val cyan" id="openCount">0</div>
-      </div>
+      <div class="bi"><div class="bi-lbl">Margin Used</div><div class="bi-val red" id="marginUsed">0.000</div></div>
+      <div class="bi"><div class="bi-lbl">Free Margin</div><div class="bi-val green" id="marginFree">0.000</div></div>
+      <div class="bi"><div class="bi-lbl">Total Fees Paid</div><div class="bi-val orange" id="totalFees">—</div></div>
+      <div class="bi"><div class="bi-lbl">Open Positions</div><div class="bi-val cyan" id="openCount">0</div></div>
     </div>
   </div>
 
-  <!-- ═══ KPI ROW ═══ -->
   <div class="kpi-grid" id="kpiGrid" style="display:none"></div>
 
-  <!-- ═══ PnL CALENDAR ═══ -->
   <div class="cal-card" id="calCard" style="display:none">
     <div class="card-head">
       <div class="ch-left">
@@ -158,7 +130,6 @@
     </div>
   </div>
 
-  <!-- ═══ POSITIONS ═══ -->
   <div class="data-card" id="posCard" style="display:none">
     <div class="card-head">
       <span class="card-title">Open Positions</span>
@@ -176,7 +147,6 @@
     </div>
   </div>
 
-  <!-- ═══ FILLS HISTORY ═══ -->
   <div class="data-card" id="fillsCard" style="display:none">
     <div class="card-head">
       <span class="card-title">Trade History</span>
@@ -198,7 +168,6 @@
     </div>
   </div>
 
-  <!-- ═══ TRANSACTIONS ═══ -->
   <div class="tx-wrapper" id="txWrapper" style="display:none">
     <div class="tx-stats-row">
       <div class="tx-stat">
@@ -226,10 +195,10 @@
     <div class="data-card">
       <div class="card-head tx-head">
         <div class="tx-tabs">
-          <button class="tx-tab active" data-tab="all"  onclick="txSwitch('all')">All <span class="tc" id="txcnt-all">0</span></button>
-          <button class="tx-tab t-in"   data-tab="in"   onclick="txSwitch('in')">In <span class="tc" id="txcnt-in">0</span></button>
-          <button class="tx-tab t-out"  data-tab="out"  onclick="txSwitch('out')">Out <span class="tc" id="txcnt-out">0</span></button>
-          <button class="tx-tab"        data-tab="int"  onclick="txSwitch('int')">Internal <span class="tc" id="txcnt-int">0</span></button>
+          <button class="tx-tab active" id="txtab-all" data-tab="all"  onclick="txSwitch('all')">All <span class="tc" id="txcnt-all">0</span></button>
+          <button class="tx-tab t-in"   id="txtab-in"  data-tab="in"   onclick="txSwitch('in')">In <span class="tc" id="txcnt-in">0</span></button>
+          <button class="tx-tab t-out"  id="txtab-out" data-tab="out"  onclick="txSwitch('out')">Out <span class="tc" id="txcnt-out">0</span></button>
+          <button class="tx-tab"        id="txtab-int" data-tab="int"  onclick="txSwitch('int')">Internal <span class="tc" id="txcnt-int">0</span></button>
         </div>
         <div class="tx-info-lbl" id="txInfoLbl"></div>
       </div>
@@ -256,7 +225,6 @@
     </div>
   </div>
 
-  <!-- ═══ FEE NOTE ═══ -->
   <div class="fee-note" id="feeNote" style="display:none">
     <strong>Hyperliquid Fee Tiers (Tier 0):</strong>
     Taker <span class="fn-hl">0.045%</span> · Limit <span class="fn-hl">0.015%</span> ·
