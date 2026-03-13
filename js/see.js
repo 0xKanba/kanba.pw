@@ -693,14 +693,16 @@ function renderTx(raw, addr) {
 
   txTab = 'all'; txPage = 0;
   document.querySelectorAll('.tx-tab').forEach(b => b.classList.remove('active'));
-  ge('txtab-all').classList.add('active');
+  const allTab = ge('txtab-all');
+  if (allTab) allTab.classList.add('active');
   txApply();
 }
 
 function txSwitch(tab) {
   txTab = tab; txPage = 0;
   document.querySelectorAll('.tx-tab').forEach(b => b.classList.remove('active'));
-  ge(`txtab-${tab}`).classList.add('active');
+  const activeBtn = ge(`txtab-${tab}`);
+  if (activeBtn) activeBtn.classList.add('active');
   txApply();
 }
 function txApply() {
