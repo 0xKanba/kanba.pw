@@ -1,51 +1,42 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+  /* ── Header ── */
   const headerHTML = `
-    <div class="market-traders-header">
-      <div class="market-traders-container">
-        <div class="market-traders-rectangle">
-          <a href="/index.html" class="header-unified-link">
-            <img src="/images/btc21.png" alt="Market Traders" class="site-logo">
-            <div class="header-content">
-              <div class="market-traders-title">Kanba_trader x younis_y24</div>
-            </div>
-          </a>
-        </div>
-      </div>
+    <div class="mt-header">
+      <a href="/index.html" class="mt-header-link">
+        <img src="/images/btc21.png" alt="logo" class="mt-logo">
+        <span class="mt-title">Kanba_trader x younis_y24</span>
+      </a>
     </div>
   `;
 
+  /* ── Footer ── */
   const footerHTML = `
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-tabs">
-          <a href="/index.html"        class="footer-tab" data-page="index">Kanba</a>
-          <a href="/younis.html"       class="footer-tab" data-page="younis">Younis</a>
-          <a href="/ccr.html"          class="footer-tab" data-page="ccr">Compounding Calc.</a>
-          <a href="/HLsee.html"        class="footer-tab" data-page="hlsee"        target="_blank" rel="noopener noreferrer">see analysis</a>
-          <a href="/video2026mar.html" class="footer-tab" data-page="video2026mar" target="_blank" rel="noopener noreferrer">videosNEWS</a>
-        </div>
-        <div class="copyright">
-          © 2025-2026 Kanba_trader | All Rights Reserved
-        </div>
-      </div>
-    </footer>
+    <div class="mt-footer">
+      <nav class="mt-nav">
+        <a href="/index.html"        class="mt-nav-link" data-p="index">Kanba</a>
+        <a href="/younis.html"       class="mt-nav-link" data-p="younis">Younis</a>
+        <a href="/ccr.html"          class="mt-nav-link" data-p="ccr">Compounding Calc.</a>
+        <a href="/HLsee.html"        class="mt-nav-link" data-p="hlsee"        target="_blank" rel="noopener noreferrer">see analysis</a>
+        <a href="/video2026mar.html" class="mt-nav-link" data-p="video2026mar" target="_blank" rel="noopener noreferrer">videosNEWS</a>
+      </nav>
+      <p class="mt-copy">© 2025-2026 Kanba_trader | All Rights Reserved</p>
+    </div>
   `;
 
-  const headerElement = document.getElementById('header');
-  const footerElement = document.getElementById('footer');
+  const h = document.getElementById('header');
+  const f = document.getElementById('footer');
 
-  if (headerElement) headerElement.innerHTML = headerHTML;
-  if (footerElement) footerElement.innerHTML = footerHTML;
+  if (h) h.innerHTML = headerHTML;
+  if (f) f.innerHTML = footerHTML;
 
-  const path = window.location.pathname.toLowerCase().trim();
-  let pageKey = path.split('/').pop().replace(/\.html$/, '').trim();
+  /* ── Active tab ── */
+  const pop = window.location.pathname.toLowerCase().split('/').pop();
+  const key = pop.replace(/\.html$/, '') || 'index';
 
-  if (!pageKey) pageKey = 'index';
-
-  document.querySelectorAll('.footer-tab').forEach(tab => {
-    if (tab.getAttribute('data-page').toLowerCase() === pageKey) {
-      tab.classList.add('active');
+  document.querySelectorAll('.mt-nav-link').forEach(function (a) {
+    if (a.getAttribute('data-p').toLowerCase() === key) {
+      a.classList.add('mt-active');
     }
   });
 
