@@ -1,273 +1,199 @@
-/* =============================================
-   styles.css — Header & Footer ONLY
-   لا يؤثر على أي شيء خارج الرأس والتذييل
-   ============================================= */
-/* في أعلى ccr.css */
-*, body, html {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ================================
+   styles.css — Header & Footer only
+   ================================ */
+
+/* Reset عام — لمنع الإطار الأبيض في كل الصفحات */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+/* ── CSS Variables ── */
 :root {
-  --text-primary:   #000000;
-  --text-secondary: #333333;
-  --border-color:   rgba(0, 0, 0, 0.1);
-  --glow-color:     rgba(37, 99, 235, 0.3);
-  --footer-bg:      #f8f9fa;
-  --footer-text:    #000000;
-  --footer-border:  #2563eb;
-  --footer-active:  #2563eb;
-  --header-bg:      #ffffff;
-  --header-shadow:  rgba(0, 0, 0, 0.1);
+  --mt-header-bg:     #ffffff;
+  --mt-header-shadow: rgba(0,0,0,.10);
+  --mt-border:        rgba(0,0,0,.10);
+  --mt-title-color:   #000000;
+  --mt-footer-bg:     #f8f9fa;
+  --mt-footer-color:  #000000;
+  --mt-accent:        #2563eb;
+  --mt-glow:          rgba(37,99,235,.30);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text-primary:   #e2e8f0;
-    --text-secondary: #a0aec0;
-    --border-color:   rgba(160, 174, 192, 0.2);
-    --glow-color:     rgba(0, 191, 255, 0.3);
-    --footer-bg:      #3b4044;
-    --footer-text:    #e2e8f0;
-    --footer-border:  #00BFFF;
-    --footer-active:  #00BFFF;
-    --header-bg:      #4c5257;
-    --header-shadow:  rgba(0, 0, 0, 0.4);
+    --mt-header-bg:     #4c5257;
+    --mt-header-shadow: rgba(0,0,0,.40);
+    --mt-border:        rgba(160,174,192,.20);
+    --mt-title-color:   #e2e8f0;
+    --mt-footer-bg:     #3b4044;
+    --mt-footer-color:  #e2e8f0;
+    --mt-accent:        #00BFFF;
+    --mt-glow:          rgba(0,191,255,.30);
   }
 }
 
-/* ============ HEADER ============ */
+/* ══════════ HEADER ══════════ */
 
-.market-traders-header {
-  /* ✅ width:100% فقط — لا 100vw لتجنب الإطار الأبيض */
+.mt-header {
   width: 100%;
-  padding: 0;
-  margin: 0;
-  position: relative;
-  z-index: 1000;
-  box-sizing: border-box;
-  /* ✅ يمنع أي overflow يسبب scrollbar أفقي */
-  overflow: hidden;
-}
-
-.market-traders-container {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.market-traders-rectangle {
-  background: var(--header-bg);
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px var(--header-shadow);
-  /* ✅ 100% بدل 100vw — هذا كان سبب الإطار الأبيض */
-  width: 100%;
-  margin: 0;
+  background: var(--mt-header-bg);
+  border-bottom: 1px solid var(--mt-border);
+  box-shadow: 0 2px 8px var(--mt-header-shadow);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px 15px;
-  gap: 12px;
-  direction: ltr;
+  padding: 10px 16px;
   box-sizing: border-box;
-  transition: background .3s, box-shadow .3s;
+  position: relative;
+  z-index: 100;
+  transition: background .3s;
 }
 
-.header-unified-link {
+.mt-header-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: inherit;
-  padding: 6px 12px;
-  border-radius: 10px;
+  gap: 10px;
   text-decoration: none;
-  cursor: pointer;
-  position: relative;
-  transition: .3s;
-  box-sizing: border-box;
-}
-
-.header-unified-link::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: transparent;
+  color: inherit;
+  padding: 6px 10px;
   border-radius: 10px;
+  position: relative;
   transition: box-shadow .3s;
-  z-index: -1;
 }
 
-.header-unified-link:hover::before {
-  box-shadow: 0 0 20px var(--glow-color);
+.mt-header-link:hover {
+  box-shadow: 0 0 18px var(--mt-glow);
 }
 
-.header-unified-link:hover .site-logo {
-  transform: scale(1.1);
+.mt-header-link:hover .mt-logo {
+  transform: scale(1.08);
 }
 
-.site-logo {
-  height: 36px;
-  transition: transform .3s;
+.mt-logo {
+  height: 34px;
   border-radius: 8px;
   flex-shrink: 0;
+  transition: transform .3s;
 }
 
-.header-content {
-  text-align: left;
+.mt-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--mt-title-color);
+  letter-spacing: .7px;
   white-space: nowrap;
 }
 
-.market-traders-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: .8px;
-  margin: 0;
-}
+/* ══════════ FOOTER ══════════ */
 
-.market-traders-subtitle {
-  font-size: .85rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  letter-spacing: .5px;
-  margin: 0;
-}
-
-/* ============ FOOTER ============ */
-
-.footer {
-  background: var(--footer-bg);
-  border-top: 2px solid var(--footer-border);
-  padding: 16px 0;
+.mt-footer {
   width: 100%;
-  color: var(--footer-text);
+  background: var(--mt-footer-bg);
+  border-top: 2px solid var(--mt-accent);
+  padding: 14px 16px;
+  box-sizing: border-box;
   transition: background .3s;
-  position: relative;
-  box-sizing: border-box;
-  direction: ltr;
-  /* ✅ حُذف margin-top:auto — كان يقذف الصفحة للزاوية */
 }
 
-.footer-content {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
-
-.footer-tabs {
+.mt-nav {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 8px;
-  margin-bottom: 12px;
-  width: 100%;
+  gap: 4px 6px;
+  margin-bottom: 10px;
 }
 
-.footer-tab {
+.mt-nav-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  font-size: clamp(.68rem, 1.4vw, .92rem);
   font-weight: 500;
-  font-size: clamp(.7rem, 1.5vw, .95rem);
-  padding: 7px 10px;
-  white-space: nowrap;
+  color: var(--mt-footer-color);
   text-decoration: none;
-  cursor: pointer;
-  color: var(--footer-text);
-  transition: color .3s;
+  padding: 6px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
   position: relative;
-  box-sizing: border-box;
+  transition: color .25s;
 }
 
-.footer-tab::after {
+/* خط سفلي متحرك عند hover */
+.mt-nav-link::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: 0;
+  bottom: 2px;
   transform: translateX(-50%);
   width: 0;
   height: 2px;
-  background-color: var(--footer-active);
-  transition: width .3s;
+  background: var(--mt-accent);
+  transition: width .25s;
+  border-radius: 2px;
 }
 
-.footer-tab:hover::after {
-  width: 100%;
+.mt-nav-link:hover::after { width: 70%; }
+
+/* التبويب النشط */
+.mt-nav-link.mt-active {
+  color: var(--mt-accent);
+  font-weight: 700;
+  text-shadow: 0 0 8px var(--mt-glow);
 }
 
-.footer-tab.active {
-  color: var(--footer-active);
-  font-weight: 600;
-  text-shadow: 0 0 8px var(--glow-color);
-}
+.mt-nav-link.mt-active::after { width: 70%; }
 
-.footer-tab.active::after {
-  width: 100%;
-}
-
-.footer-tab.active::before {
+/* نقطة توهج فوق التبويب النشط */
+.mt-nav-link.mt-active::before {
   content: '';
   position: absolute;
   left: 50%;
-  top: -2px;
+  top: 0px;
   transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
-  background: var(--footer-active);
+  width: 5px;
+  height: 5px;
+  background: var(--mt-accent);
   border-radius: 50%;
-  box-shadow: 0 0 10px var(--glow-color);
-  animation: pulse 1.5s infinite;
+  box-shadow: 0 0 8px var(--mt-glow);
+  animation: mt-pulse 1.5s infinite;
 }
 
-.copyright {
+.mt-copy {
   text-align: center;
-  font-size: .8rem;
-  opacity: .75;
-  margin-top: 6px;
-  color: var(--footer-text);
+  font-size: .78rem;
+  color: var(--mt-footer-color);
+  opacity: .7;
+  margin: 0;
 }
 
-@keyframes pulse {
+@keyframes mt-pulse {
   0%, 100% { opacity: 1;  transform: translateX(-50%) scale(1);   }
-  50%       { opacity: .6; transform: translateX(-50%) scale(1.2); }
+  50%       { opacity: .5; transform: translateX(-50%) scale(1.3); }
 }
 
-/* ============ RESPONSIVE ============ */
+/* ══════════ RESPONSIVE ══════════ */
 
 @media (max-width: 768px) {
-  .market-traders-rectangle { padding: 8px 12px; }
-  .site-logo                 { height: 30px; }
-  .market-traders-title      { font-size: 1rem; }
-  .footer                    { padding: 13px 0; }
-  .footer-tabs               { gap: 2px 6px; }
+  .mt-header  { padding: 8px 12px; }
+  .mt-logo    { height: 28px; }
+  .mt-title   { font-size: .95rem; }
+  .mt-footer  { padding: 12px 12px; }
+  .mt-nav     { gap: 2px 4px; }
 }
 
 @media (max-width: 480px) {
-  .market-traders-rectangle  { padding: 7px 10px; gap: 8px; }
-  .header-unified-link       { gap: 8px; padding: 4px 8px; }
-  .site-logo                 { height: 26px; }
-  .market-traders-title      { font-size: .9rem; }
-  .footer                    { padding: 10px 0; }
-  .footer-content            { padding: 0 10px; }
-  .footer-tabs               { gap: 2px 4px; }
-  .footer-tab                { padding: 5px 7px; }
-  .copyright                 { font-size: .7rem; }
+  .mt-header     { padding: 7px 10px; }
+  .mt-logo       { height: 24px; }
+  .mt-title      { font-size: .85rem; }
+  .mt-footer     { padding: 10px 10px; }
+  .mt-nav-link   { padding: 5px 7px; }
+  .mt-copy       { font-size: .7rem; }
 }
 
 @media (max-width: 360px) {
-  .footer-tabs {
+  .mt-nav {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 4px;
-    text-align: center;
   }
-  .footer-tab {
-    justify-content: center;
-    font-size: .72rem;
-    padding: 6px 4px;
-  }
+  .mt-nav-link { justify-content: center; font-size: .7rem; }
 }
