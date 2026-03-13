@@ -1,4 +1,9 @@
 /* SEO Only Content */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 .seo-only {
     position: absolute;
     width: 1px;
