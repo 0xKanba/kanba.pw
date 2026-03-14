@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded',function(){const link=document.createElement('link');link.rel='stylesheet';link.href='/css/style.css';document.head.appendChild(link);const headerHTML=`
+document.addEventListener('DOMContentLoaded',function(){const link=document.createElement('link');link.rel='stylesheet';link.href='/css/styles.css';document.head.appendChild(link);const headerHTML=`
     
   `;const footerHTML=`
     <footer class="footer">
