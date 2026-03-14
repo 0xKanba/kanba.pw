@@ -1,30 +1,17 @@
-/* common.js — footer injector only */
+document.addEventListener('DOMContentLoaded',function(){const link=document.createElement('link');link.rel='stylesheet';link.href='/css/style.css';document.head.appendChild(link);const headerHTML=`
+    
+  `;const footerHTML=`
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-tabs">
+          <a href="/index.html" class="footer-tab" data-page="index">Kanba</a>
+          <a href="/younis.html" class="footer-tab" data-page="younis">Younis</a>
 
-document.addEventListener('DOMContentLoaded', function () {
-
-  var f = document.getElementById('footer');
-  if (!f) return;
-
-  /* ── links ── */
-  var links = [
-    { href: '/index.html',        key: 'index',       label: 'Kanba'             },
-    { href: '/younis.html',       key: 'younis',      label: 'Younis'            },
-    { href: '/ccr.html',          key: 'ccr',         label: 'Compounding Calc.' },
-    { href: '/HLsee.html',        key: 'hlsee',       label: 'see analysis',  blank: true },
-    { href: '/video2026mar.html', key: 'video2026mar',label: 'videosNEWS',    blank: true },
-  ];
-
-  /* ── active key ── */
-  var page = window.location.pathname.toLowerCase().split('/').pop().replace('.html', '') || 'index';
-
-  /* ── build nav ── */
-  var nav = '<div class="sitenav">';
-  links.forEach(function (l) {
-    var on  = page === l.key ? ' sitenav-on' : '';
-    var ext = l.blank ? ' target="_blank" rel="noopener noreferrer"' : '';
-    nav += '<a href="' + l.href + '" class="sitenav-a' + on + '" data-p="' + l.key + '"' + ext + '>' + l.label + '</a>';
-  });
-  nav += '</div>';
-
-  f.innerHTML = nav + '<p class="sitenav-copy">© 2025-2026 Kanba_trader | All Rights Reserved</p>';
-});
+        </div>
+        <div class="copyright">
+          © 2025-2026 Kanba_trader | All Rights Reserved
+        </div>
+      </div>
+    </footer>
+  `;const headerElement=document.getElementById('header');const footerElement=document.getElementById('footer');if(headerElement)headerElement.innerHTML=headerHTML;if(footerElement)footerElement.innerHTML=footerHTML;setTimeout(()=>{const path=window.location.pathname.toLowerCase().trim();let pageKey=path.split('/').pop().replace(/\.html$/,'').replace(/\/$/,'').trim();if(!pageKey||pageKey==='en'){pageKey='index'}
+document.querySelectorAll('.footer-tab').forEach(tab=>{const tabPage=tab.getAttribute('data-page');if(tabPage===pageKey){tab.classList.add('active')}})},150)})
