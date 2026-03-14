@@ -1,55 +1,27 @@
-// ===== Universal Footer Injector =====
-(function() {
-    'use strict';
-    
-    // منع التكرار: إذا وجدنا التذييل بالفعل نتوقف
-    if (document.getElementById('universal-footer')) return;
+document.addEventListener('DOMContentLoaded', function () {
+  var f = document.getElementById('footer');
+  if (!f) return;
 
-    const siteLinks = [
-        { name: 'Kanba', href: '/index.html' },
-        { name: 'Younis', href: '/younis.html' },
-        { name: 'Compounding Calc.', href: '/ccr.html' },
-        { name: 'Analysis', href: '/HLsee.html' },
-        { name: 'Videos', href: '/video2026mar.html' }
-    ];
+  // حقن التذييل داخل حاوية عزل فريدة
+  f.innerHTML =
+    '<div id="k-unified-footer">' +
+      '<div class="k-nav">' +
+        '<a href="/index.html" class="k-nav-a" data-p="index">Kanba</a>' +
+        '<a href="/younis.html" class="k-nav-a" data-p="younis">Younis</a>' +
+        '<a href="/ccr.html" class="k-nav-a" data-p="ccr">Compounding Calc.</a>' +
+        '<a href="/HLsee.html" class="k-nav-a" data-p="hlsee" target="_blank" rel="noopener noreferrer">see analysis</a>' +
+        '<a href="/video2026mar.html" class="k-nav-a" data-p="video2026mar" target="_blank" rel="noopener noreferrer">videosNEWS</a>' +
+      '</div>' +
+      '<p class="k-copy">© 2025-2026 Kanba_trader | All Rights Reserved</p>' +
+    '</div>';
 
-    // تحديد الصفحة الحالية
-    const currentPath = window.location.pathname.toLowerCase().split('/').pop() || 'index.html';
-    const currentPageName = currentPath.replace('.html', '') || 'index';
+  var pop = window.location.pathname.toLowerCase().split('/').pop();
+  var key = pop.replace('.html', '') || 'index';
 
-    // بناء عناصر التذييل برمجياً (أنظف وأسرع)
-    const footer = document.createElement('footer');
-    footer.id = 'universal-footer';
-
-    const navList = document.createElement('ul');
-    navList.className = 'footer-nav-list';
-
-    siteLinks.forEach(link => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        
-        a.href = link.href;
-        a.textContent = link.name;
-        a.className = 'footer-link';
-        
-        // تفعيل الرابط الحالي تلقائياً
-        if (link.href.includes(currentPageName) || 
-            (currentPageName === '' && link.href === '/index.html')) {
-            a.classList.add('active');
-        }
-
-        li.appendChild(a);
-        navList.appendChild(li);
-    });
-
-    const copyP = document.createElement('p');
-    copyP.className = 'footer-copy';
-    copyP.textContent = '© 2025 Kanba Trader | All Rights Reserved';
-
-    footer.appendChild(navList);
-    footer.appendChild(copyP);
-
-    // إضافة التذييل في نهاية الصفحة مباشرة
-    document.body.appendChild(footer);
-
-})();
+  var links = f.querySelectorAll('.k-nav-a');
+  for (var i = 0; i < links.length; i++) {
+    if (links[i].getAttribute('data-p') === key) {
+      links[i].classList.add('k-nav-on');
+    }
+  }
+});
