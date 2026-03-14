@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded',function(){const link=document.crea
         <div class="footer-tabs">
           <a href="/index.html" class="footer-tab" data-page="index">Kanba</a>
           <a href="/younis.html" class="footer-tab" data-page="younis">Younis</a>
+          <a href="/ccr.html" class="footer-tab" target="_blank" data-page="ccr">Compounding Calc.</a>
+          <a href="/HLsee.html" class="footer-tab" data-page="HLsee">see analysis</a>
+          <a href="/video2026mar.html" class="footer-tab" data-page="video2026mar">video2026mar</a>
 
         </div>
         <div class="copyright">
