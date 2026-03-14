@@ -1,56 +1,59 @@
-/* =========================================
-   عزل تام للتذييل الموحد - Zero Page Interference
-========================================= */
+/* styles.css — footer only, fully isolated */
 
-#k-unified-footer {
-  all: revert; /* إعادة ضبط أي تنسيقات متسربة من الصفحة الأساسية */
+#footer {
+  all: revert;
+  box-sizing: border-box;
   display: block;
+  width: 100%;
   background: #f8f9fa;
   border-top: 2px solid #2563eb;
   padding: 14px 16px;
   text-align: center;
-  font-family: system-ui, -apple-system, sans-serif;
-  box-sizing: border-box;
-  width: 100%;
-}
-
-#k-unified-footer * {
-  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  position: relative;
+  z-index: 10;
+  clear: both;
 }
 
 @media (prefers-color-scheme: dark) {
-  #k-unified-footer {
-    background: #3b4044;
-    border-top-color: #00BFFF;
+  #footer {
+    background: #1e2124;
+    border-top-color: #00bfff;
   }
 }
 
-#k-unified-footer .k-nav {
+#footer * {
+  box-sizing: border-box;
+}
+
+#footer .sitenav {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 4px 6px;
-  margin: 0 0 10px 0;
+  margin: 0 0 10px;
   padding: 0;
+  list-style: none;
 }
 
-#k-unified-footer .k-nav-a {
+#footer .sitenav-a {
+  display: inline-block;
   font-size: clamp(.68rem, 1.4vw, .9rem);
   font-weight: 500;
-  color: #000;
+  color: #1a1a1a;
   text-decoration: none;
   padding: 5px 9px;
   border-radius: 5px;
   white-space: nowrap;
   position: relative;
-  transition: color 0.25s;
+  transition: color .2s;
 }
 
 @media (prefers-color-scheme: dark) {
-  #k-unified-footer .k-nav-a { color: #e2e8f0; }
+  #footer .sitenav-a { color: #e2e8f0; }
 }
 
-#k-unified-footer .k-nav-a::after {
+#footer .sitenav-a::after {
   content: '';
   position: absolute;
   left: 50%;
@@ -64,24 +67,22 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  #k-unified-footer .k-nav-a::after { background: #00BFFF; }
+  #footer .sitenav-a::after { background: #00bfff; }
 }
 
-#k-unified-footer .k-nav-a:hover::after,
-#k-unified-footer .k-nav-a.k-nav-on::after {
-  width: 70%;
-}
+#footer .sitenav-a:hover::after,
+#footer .sitenav-a.sitenav-on::after { width: 70%; }
 
-#k-unified-footer .k-nav-a.k-nav-on {
+#footer .sitenav-a.sitenav-on {
   color: #2563eb;
   font-weight: 700;
 }
 
 @media (prefers-color-scheme: dark) {
-  #k-unified-footer .k-nav-a.k-nav-on { color: #00BFFF; }
+  #footer .sitenav-a.sitenav-on { color: #00bfff; }
 }
 
-#k-unified-footer .k-copy {
+#footer .sitenav-copy {
   font-size: .75rem;
   color: #555;
   margin: 0;
@@ -90,17 +91,14 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  #k-unified-footer .k-copy { color: #a0aec0; }
+  #footer .sitenav-copy { color: #a0aec0; }
 }
 
 @media (max-width: 360px) {
-  #k-unified-footer .k-nav {
+  #footer .sitenav {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 4px;
   }
-  #k-unified-footer .k-nav-a {
-    text-align: center;
-    font-size: .7rem;
-  }
+  #footer .sitenav-a { text-align: center; font-size: .7rem; }
 }
