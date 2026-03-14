@@ -1,26 +1,43 @@
-document.addEventListener('DOMContentLoaded', function () {
-
-  var f = document.getElementById('footer');
-  if (!f) return;
-
-  f.innerHTML =
-    '<div class="sitenav">' +
-      '<a href="/index.html"        class="sitenav-a" data-p="index">Kanba</a>' +
-      '<a href="/younis.html"       class="sitenav-a" data-p="younis">Younis</a>' +
-      '<a href="/ccr.html"          class="sitenav-a" data-p="ccr">Compounding Calc.</a>' +
-      '<a href="/HLsee.html"        class="sitenav-a" data-p="hlsee"        target="_blank" rel="noopener noreferrer">see analysis</a>' +
-      '<a href="/video2026mar.html" class="sitenav-a" data-p="video2026mar" target="_blank" rel="noopener noreferrer">videosNEWS</a>' +
-    '</div>' +
-    '<p class="sitenav-copy">© 2025-2026 Kanba_trader | All Rights Reserved</p>';
-
-  var pop = window.location.pathname.toLowerCase().split('/').pop();
-  var key = pop.replace('.html', '') || 'index';
-
-  var links = f.querySelectorAll('.sitenav-a');
-  for (var i = 0; i < links.length; i++) {
-    if (links[i].getAttribute('data-p') === key) {
-      links[i].className += ' sitenav-on';
+(function() {
+    'use strict';
+    
+    // Create footer element once
+    if (!document.getElementById('global-footer')) {
+        const nav = ['Kanba', 'Younis', 'Compounding Calc.', 'Analysis', 'Videos'];
+        const links = ['/index.html', '/younis.html', '/ccr.html', '/HLsee.html', '/video2026mar.html'];
+        
+        const footerHTML = `
+            <div id="global-footer" class="footer-ready">
+                <nav aria-label="Footer Navigation">
+                    <ul class="footer-nav">
+                        ${nav.map((name, i) => 
+                            `<li><a href="${links[i]}" class="footer-nav-link">${name}</a></li>`
+                        ).join('')}
+                    </ul>
+                </nav>
+                <p class="footer-copyright">© 2025 Kanba Trader | All Rights Reserved</p>
+            </div>
+        `;
+        
+        const container = document.body.lastElementChild;
+        if (container && container.tagName !== 'FOOTER') {
+            const footerEl = document.createElement('div');
+            footerEl.innerHTML = footerHTML.trim();
+            document.body.appendChild(footerEl);
+        }
+        
+        // Mark footer as loaded
+        document.body.classList.add('footer-ready');
+        
+        // Highlight current page link
+        const currentPage = window.location.pathname.toLowerCase().split('/').pop().replace('.html', '');
+        const activeLinks = document.querySelectorAll('.footer-nav-link');
+        
+        activeLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && href.includes(currentPage)) {
+                link.classList.add('active');
+            }
+        });
     }
-  }
-
-});
+})();
