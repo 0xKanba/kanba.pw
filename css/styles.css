@@ -1,89 +1,86 @@
-/* ===== Universal Footer Reset & Styling ===== */
+/* ===== Fixed Footer - Adaptive to Mesh Background ===== */
 
-/* اجعل جسم الصفحة مرناً ليدفع التذييل للأسفل تلقائياً بدون فراغات */
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box;
-}
-
-body {
+/* إصلاح ارتفاع الصفحة لتكون مرنة */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* ملء الشاشة دائماً */
-    position: relative;
 }
 
-/* جعل المحتوى يأخذ المساحة المتاحة ويضغط التذييل للأسفل */
-.container, .calc-main {
+/* جعل المحتوى يمتلئ المساحة المتاحة */
+.calc-main, .container {
     flex: 1;
     width: 100%;
-    min-height: auto !important; /* إلغاء أي حسابات قديمة للتوتر */
-    padding-bottom: 2rem; /* مسافة بسيطة قبل التذييل */
+    min-height: auto !important; /* إلغاء الحساب القاسي سابقاً */
+    position: relative;
+    z-index: 1;
 }
 
-/* تنسيق التذييل الموحد */
-#universal-footer {
-    width: 100%;
-    background-color: transparent; /* شفافية لندمج مع Mesh */
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+/* التذييل الشفاف */
+#footer {
+    background: transparent !important; /* يلغي اللون الأبيض نهائياً */
+    backdrop-filter: blur(15px); /* تأثير الزجاج ليندمج */
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1); /* حدود خفيفة بدلاً من الصلبة */
     padding: 1.5rem 1rem;
     text-align: center;
+    z-index: 100;
+    flex-shrink: 0; /* منع تصغير التذييل */
     margin-top: 2rem;
-    backdrop-filter: blur(5px);
-    z-index: 999;
 }
 
-/* روابط التذييل */
-.footer-nav-list {
-    display: flex;
-    justify-content: center;
-    gap: 0.75rem;
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1rem 0;
-    flex-wrap: wrap;
-}
-
-.footer-link {
-    font-size: 0.85rem;
+/* ألوان النصوص تتكيف تلقائياً */
+.sitenav-a {
     color: var(--text-dim, #94a3b8);
-    text-decoration: none;
-    padding: 0.4rem 1rem;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+    #footer {
+        border-top-color: rgba(255, 255, 255, 0.05);
+    }
 }
 
 @media (prefers-color-scheme: light) {
-    .footer-link { color: #64748b; }
-    #universal-footer { border-top-color: rgba(0,0,0,0.05); }
+    #footer {
+        border-top-color: rgba(0, 0, 0, 0.05);
+    }
+    .sitenav-a {
+        color: #475569 !important;
+    }
 }
 
-.footer-link:hover, .footer-link.active {
-    color: var(--primary, #0ea5e9);
-    background: rgba(14, 165, 233, 0.08);
-    transform: translateY(-1px);
+/* باقي التنسيقات كما هي */
+.sitenav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 0 0 0.75rem 0;
+    padding: 0;
+    list-style: none;
 }
 
-@media (prefers-color-scheme: dark) {
-    .footer-link.active { color: #38bdf8; }
-    .footer-link:hover { color: #38bdf8; }
+.sitenav-a {
+    font-size: clamp(.8rem, 2vw, 0.95rem);
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    display: inline-block;
 }
 
-/* حقوق النشر */
-.footer-copy {
+.sitenav-on {
+    color: var(--primary, #0ea5e9) !important;
+    background: rgba(14, 165, 233, 0.1);
+}
+
+.sitenav-copy {
     font-size: 0.75rem;
-    color: var(--text-dim, #64748b);
-    opacity: 0.6;
+    color: var(--text-dim, #94a3b8);
     margin: 0;
-}
-
-@media (prefers-color-scheme: dark) {
-    .footer-copy { color: #64748b; }
-}
-
-/* للموبايل الصغير جداً */
-@media (max-width: 400px) {
-    .footer-nav-list { gap: 0.5rem; flex-direction: column; align-items: center; }
+    opacity: 0.7;
 }
