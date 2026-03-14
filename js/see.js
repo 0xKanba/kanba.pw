@@ -1,11 +1,16 @@
 /* ═══════════════════════════════════════════════════════
-   HYPERLIQUID ANALYZER — script.js
-   - Full PnL from ALL historical fills (time-chunked fetch)
-   - Realized + Unrealized + Funding breakdown
-   - Smooth animations, fixed floating badge, English UI
+   HYPERLIQUID ANALYZER — see.js  (corrected data model)
+
+   PnL truth:  Total PnL = accountValue + allWithdrawals − allDeposits
+               (per official HL docs: portfolio endpoint pnlHistory)
+
+   Realized PnL = Σ fill.closedPnl  +  Σ funding.delta.usdc
+   Unrealized PnL = from open assetPositions
+
+   Deposits / Withdrawals = only bridge-level ops (type=deposit / type=withdraw)
+   Vault ops shown separately so stats are never inflated.
 ═══════════════════════════════════════════════════════ */
 
-/* ──────────────── CONFIG ──────────────── */
 const API = 'https://api.hyperliquid.xyz/info';
 
 const ALIASES = {
@@ -16,27 +21,26 @@ const ALIASES = {
 };
 
 const XYZ_ASSETS = [
-  { id: 'gold',   coin: 'xyz:GOLD',   name: 'Gold',     icon: '🟡' },
-  { id: 'silver', coin: 'xyz:SILVER', name: 'Silver',   icon: '⚪' },
+  { id: 'gold',   coin: 'xyz:GOLD',   name: 'Gold',      icon: '🟡' },
+  { id: 'silver', coin: 'xyz:SILVER', name: 'Silver',    icon: '⚪' },
   { id: 'oil',    coin: 'xyz:CL',     name: 'Crude Oil', icon: '🛢️' },
-  { id: 'xyz',    coin: 'xyz:XYZ100', name: 'NASDAQ',   icon: '📈' },
+  { id: 'xyz',    coin: 'xyz:XYZ100', name: 'NASDAQ',    icon: '📈' },
 ];
-const HL_ASSETS = ['BTC','ETH','SOL'];
-const ALL_TICKERS = [...XYZ_ASSETS.map(a => a.id), ...HL_ASSETS.map(s => s.toLowerCase())];
-const MONTHS = ['January','February','March','April','May','June',
-                'July','August','September','October','November','December'];
+const HL_ASSETS = ['BTC', 'ETH', 'SOL'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-/* ──────────────── STATE ──────────────── */
+/* ── state ── */
 let currentAddr = '';
-let cdTimer = null;
+let cdTimer      = null;
 let calYear, calMonth, calPnlData = {};
-let allFills = [];
+let allFills  = [];
+let allFunding = [];
 let txAll = [], txFiltered = [], txTab = 'all', txPage = 0;
-const TX_PER = 25;
-const mktPrices = {};     // { id: { price, chg } }
+const TX_PER    = 25;
+const mktPrices = {};
 
 /* ══════════════════════════════════════════════
-   POST HELPER
+   API helper
 ══════════════════════════════════════════════ */
 async function post(body) {
   const r = await fetch(API, {
@@ -64,31 +68,23 @@ function startClock() {
 }
 
 /* ══════════════════════════════════════════════
-   FLOATING BADGE + SCROLL HEADER
+   SCROLL / BADGE
 ══════════════════════════════════════════════ */
 function initScrollBehaviors() {
   const badge  = ge('floatBadge');
   const header = ge('siteHeader');
-  let lastY = 0;
-
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
-    // Show badge after 200px
-    if (y > 200) badge.classList.add('visible');
-    else         badge.classList.remove('visible');
-    // Header shadow
-    if (y > 10) header.classList.add('scrolled');
-    else        header.classList.remove('scrolled');
-    lastY = y;
+    badge.classList.toggle('visible', y > 200);
+    header.classList.toggle('scrolled', y > 10);
   }, { passive: true });
 }
-
 function updateBadge(addr) {
   ge('fbAddr').textContent = addr ? addr.slice(0,6) + '…' + addr.slice(-4) : '—';
 }
 
 /* ══════════════════════════════════════════════
-   MARKET TICKER
+   TICKER
 ══════════════════════════════════════════════ */
 function buildTicker() {
   const track = ge('tickerTrack');
@@ -96,53 +92,49 @@ function buildTicker() {
     ...XYZ_ASSETS.map(a => ({ id: a.id, sym: a.coin })),
     ...HL_ASSETS.map(s  => ({ id: s.toLowerCase(), sym: s })),
   ];
-  const makeItem = (item, suffix = '') =>
-    `<div class="tick-item" id="ti-${item.id}${suffix}">
+  const makeItem = (item, sfx = '') =>
+    `<div class="tick-item" id="ti-${item.id}${sfx}">
        <span class="tick-sym">${item.sym}</span>
-       <span class="tick-px"  id="tp-${item.id}${suffix}">—</span>
-       <span class="tick-chg neu" id="tc-${item.id}${suffix}">...</span>
+       <span class="tick-px"  id="tp-${item.id}${sfx}">—</span>
+       <span class="tick-chg neu" id="tc-${item.id}${sfx}">…</span>
      </div>`;
-  // Double for seamless scroll
   track.innerHTML = items.map(i => makeItem(i) + makeItem(i, '2')).join('');
 }
-
 function setTickerPair(id, px, chg) {
   ['', '2'].forEach(sfx => {
     const pe = ge(`tp-${id}${sfx}`);
     const ce = ge(`tc-${id}${sfx}`);
     if (pe && px) pe.textContent = '$' + fmtPrice(px);
     if (ce && chg != null) {
-      const sign = chg >= 0 ? '+' : '';
-      ce.textContent  = sign + chg.toFixed(2) + '%';
-      ce.className    = 'tick-chg ' + (chg >= 0 ? 'up' : 'dn');
+      ce.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+      ce.className   = 'tick-chg ' + (chg >= 0 ? 'up' : 'dn');
     }
   });
 }
 
 /* ══════════════════════════════════════════════
-   MARKET CARDS — build DOM
+   MARKET CARDS
 ══════════════════════════════════════════════ */
 function buildMarketGrid() {
-  const grid = ge('mktGrid');
+  const grid  = ge('mktGrid');
   const cards = [
     ...XYZ_ASSETS.map(a => ({ id: a.id, sym: a.coin, name: a.name, icon: a.icon })),
     ...HL_ASSETS.map(s  => ({ id: s.toLowerCase(), sym: s, name: s, icon: cryptoIcon(s) })),
   ];
-  grid.innerHTML = cards.map((c, i) => `
-    <div class="mkt-card" style="animation-delay:${i * 0.04}s">
-      <div class="mkt-dot"></div>
-      <span class="mkt-icon">${c.icon}</span>
-      <div class="mkt-sym">${c.sym}</div>
-      <div class="mkt-name">${c.name}</div>
-      <div class="mkt-price" id="mp-${c.id}">—</div>
-      <div class="mkt-chg neu" id="mc-${c.id}">—</div>
-    </div>`).join('');
+  grid.innerHTML = cards.map((c, i) =>
+    `<div class="mkt-card" style="animation-delay:${i * 0.04}s">
+       <div class="mkt-dot"></div>
+       <span class="mkt-icon">${c.icon}</span>
+       <div class="mkt-sym">${c.sym}</div>
+       <div class="mkt-name">${c.name}</div>
+       <div class="mkt-price" id="mp-${c.id}">—</div>
+       <div class="mkt-chg neu" id="mc-${c.id}">—</div>
+     </div>`
+  ).join('');
 }
-
 function cryptoIcon(s) {
   return s === 'BTC' ? '₿' : s === 'ETH' ? 'Ξ' : s === 'SOL' ? '◎' : '●';
 }
-
 function setMktCard(id, px, chg) {
   const pe = ge(`mp-${id}`);
   const ce = ge(`mc-${id}`);
@@ -150,8 +142,7 @@ function setMktCard(id, px, chg) {
   pe.textContent = '$' + fmtPrice(px);
   pe.dataset.raw = px;
   if (ce && chg != null) {
-    const sign = chg >= 0 ? '+' : '';
-    ce.textContent = sign + chg.toFixed(2) + '%';
+    ce.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
     ce.className   = 'mkt-chg ' + (chg >= 0 ? 'up' : 'dn');
     pe.style.color = chg >= 0 ? 'var(--green)' : 'var(--red)';
   }
@@ -159,24 +150,22 @@ function setMktCard(id, px, chg) {
 }
 
 /* ══════════════════════════════════════════════
-   FETCH LIVE MARKET PRICES
+   MARKET PRICE FETCH
 ══════════════════════════════════════════════ */
 async function fetchMarket() {
   try {
-    // XYZ prices via l2Book
-    const xyzResults = await Promise.allSettled(
+    const xyzRes = await Promise.allSettled(
       XYZ_ASSETS.map(a => post({ type: 'l2Book', coin: a.coin }))
     );
-    xyzResults.forEach((r, i) => {
+    xyzRes.forEach((r, i) => {
       if (r.status !== 'fulfilled') return;
-      const lb  = r.value;
+      const lb = r.value;
       if (!lb.levels?.[0]?.[0] || !lb.levels?.[1]?.[0]) return;
       const bid = parseFloat(lb.levels[0][0].px);
       const ask = parseFloat(lb.levels[1][0].px);
       setMktCard(XYZ_ASSETS[i].id, (bid + ask) / 2, null);
     });
 
-    // HL perp mids + prev-day for change %
     const [midsR, metaR] = await Promise.all([
       post({ type: 'allMids' }),
       post({ type: 'metaAndAssetCtxs' }),
@@ -192,7 +181,6 @@ async function fetchMarket() {
       setMktCard(sym.toLowerCase(), px, chg);
     });
 
-    // 24h change for XYZ via hourly candles
     await Promise.allSettled(XYZ_ASSETS.map(async a => {
       const now = Date.now();
       const cr  = await post({
@@ -200,13 +188,12 @@ async function fetchMarket() {
         req:  { coin: a.coin, interval: '1h', startTime: now - 86400000, endTime: now },
       });
       if (!Array.isArray(cr) || cr.length < 2) return;
-      const firstOpen  = parseFloat(cr[0].o);
-      const lastClose  = parseFloat(cr[cr.length - 1].c);
+      const firstOpen = parseFloat(cr[0].o);
+      const lastClose = parseFloat(cr[cr.length - 1].c);
       const chg = firstOpen > 0 ? (lastClose - firstOpen) / firstOpen * 100 : null;
       const px  = parseFloat(ge(`mp-${a.id}`)?.dataset?.raw || 0);
       setMktCard(a.id, px, chg);
     }));
-
   } catch (e) { console.warn('Market fetch:', e.message); }
 }
 
@@ -214,69 +201,74 @@ async function fetchMarket() {
    ALIAS CHIPS
 ══════════════════════════════════════════════ */
 function buildAliasChips() {
-  const row = ge('aliasRow');
-  row.innerHTML = Object.keys(ALIASES).map(name =>
+  ge('aliasRow').innerHTML = Object.keys(ALIASES).map(name =>
     `<span class="alias-chip" onclick="quickLoad('${name}')">${name}</span>`
   ).join('');
 }
-
 function quickLoad(name) {
   ge('addrInput').value = name;
   analyze();
 }
 
 /* ══════════════════════════════════════════════
-   FETCH ALL FILLS (complete PnL history)
-   Strategy: userFills returns all fills for most accounts.
-   For very active traders (≥2000 fills), we do time-chunked
-   fetching going backwards to capture full history.
+   FETCH ALL FILLS  (complete history)
 ══════════════════════════════════════════════ */
 async function fetchAllFills(addr) {
-  setLoadText('Fetching trade history...');
-  showPnlNote(true, 'Loading complete PnL history...');
+  setLoadText('Loading trade history…');
+  showPnlNote(true, 'Fetching all fills…');
 
-  let fills = [];
   const seen = new Set();
+  let fills  = [];
 
-  const addFills = (batch) => {
+  const addFills = batch => {
     if (!Array.isArray(batch)) return;
     batch.forEach(f => {
-      const key = f.oid != null ? `${f.oid}-${f.coin}-${f.side}` : `${f.time}-${f.coin}-${f.px}-${f.sz}`;
+      const key = f.oid != null
+        ? `${f.oid}-${f.coin}-${f.side}`
+        : `${f.time}-${f.coin}-${f.px}-${f.sz}`;
       if (!seen.has(key)) { seen.add(key); fills.push(f); }
     });
   };
 
-  // Primary fetch — userFills with startTime 0 to get ALL
   try {
-    const primary = await post({ type: 'userFills', user: addr });
-    addFills(primary);
-  } catch(e) { console.warn('Primary fills fetch failed:', e.message); }
+    addFills(await post({ type: 'userFills', user: addr }));
+  } catch(e) { console.warn('Primary fills:', e.message); }
 
-  // If we got a suspiciously round number (possible truncation), try time-chunked
+  /* time-chunked fetch for very active wallets */
   if (fills.length > 0 && fills.length % 500 === 0) {
     const oldestTime = Math.min(...fills.map(f => f.time));
-    showPnlNote(true, `Fetching older history (before ${new Date(oldestTime).toLocaleDateString()})...`);
-    try {
-      // Go back 2 years in chunks if needed
-      const chunkMs = 90 * 24 * 60 * 60 * 1000; // 90-day chunks
-      let endTime = oldestTime - 1;
-      const hardStop = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
-      for (let i = 0; i < 10 && endTime > hardStop; i++) {
-        const startTime = Math.max(endTime - chunkMs, hardStop);
-        try {
-          const chunk = await post({ type: 'userFillsByTime', user: addr, startTime, endTime });
-          if (!Array.isArray(chunk) || chunk.length === 0) break;
-          addFills(chunk);
-          endTime = startTime - 1;
-          showPnlNote(true, `Fetched ${fills.length} trades so far...`);
-        } catch { break; }
-      }
-    } catch(e) { /* older-history fetch optional */ }
+    showPnlNote(true, `Fetching history before ${fmtDate(oldestTime)}…`);
+    const chunkMs  = 90 * 86400000;
+    let   endTime  = oldestTime - 1;
+    const hardStop = Date.now() - 3 * 365 * 86400000;
+    for (let i = 0; i < 12 && endTime > hardStop; i++) {
+      const startTime = Math.max(endTime - chunkMs, hardStop);
+      try {
+        const chunk = await post({ type: 'userFillsByTime', user: addr, startTime, endTime });
+        if (!Array.isArray(chunk) || chunk.length === 0) break;
+        addFills(chunk);
+        endTime = startTime - 1;
+        showPnlNote(true, `${fills.length} trades fetched…`);
+      } catch { break; }
+    }
   }
 
   fills.sort((a, b) => b.time - a.time);
   showPnlNote(false);
   return fills;
+}
+
+/* ══════════════════════════════════════════════
+   FETCH ALL FUNDING  (needed for true realized PnL)
+══════════════════════════════════════════════ */
+async function fetchAllFunding(addr) {
+  try {
+    const data = await post({ type: 'userFunding', user: addr, startTime: 0 });
+    return Array.isArray(data) ? data : [];
+  } catch(e) {
+    console.warn('Funding fetch:', e.message);
+    return [];
+  }
 }
 
 function showPnlNote(show, msg = '') {
@@ -305,41 +297,39 @@ async function analyze(isRefresh = false) {
   }
 
   show('loadingBar', 'flex');
-  setLoadText('Fetching portfolio data...');
+  setLoadText('Fetching portfolio data…');
 
   try {
-    // Fetch base data in parallel, fills separately for progress
-    const [perp, spot, mids, txData] = await Promise.all([
-      post({ type: 'clearinghouseState',         user: addr }),
-      post({ type: 'spotClearinghouseState',     user: addr }),
+    /* Parallel: all base data + fills + funding */
+    const [perp, spot, mids, txData, portfolioData] = await Promise.all([
+      post({ type: 'clearinghouseState',          user: addr }),
+      post({ type: 'spotClearinghouseState',      user: addr }),
       post({ type: 'allMids' }),
       post({ type: 'userNonFundingLedgerUpdates', user: addr, startTime: 0 }),
+      post({ type: 'portfolio',                   user: addr }),
     ]);
 
-    // Full fills fetch with progress
-    allFills = await fetchAllFills(addr);
+    allFills   = await fetchAllFills(addr);
+    allFunding = await fetchAllFunding(addr);
 
-    // Update badge + tag
     updateBadge(addr);
     const wt = ge('walletTag');
     wt.style.display = 'flex';
     ge('walletAddr').textContent = addr.slice(0,6) + '…' + addr.slice(-4);
 
-    // Render everything
-    renderBalance(perp, spot, allFills, mids);
-    renderKPI(allFills);
+    renderBalance(perp, spot, allFills, allFunding, portfolioData);
+    renderKPI(allFills, allFunding, portfolioData);
     renderPositions(perp, mids);
     renderFills(allFills);
-    buildCalendar(allFills);
+    buildCalendar(allFills, allFunding);
     renderTx(txData, addr);
 
-    // Show sections
     ['posCard','fillsCard','siteFooter','feeNote','txWrapper','calCard'].forEach(id => {
       const el = ge(id); if (el) el.style.display = '';
     });
-    ge('kpiGrid').style.display  = 'grid';
-    ge('balHero').style.display  = 'block';
-    ge('updTime').textContent    = new Date().toLocaleTimeString();
+    ge('kpiGrid').style.display = 'grid';
+    ge('balHero').style.display = 'block';
+    ge('updTime').textContent   = new Date().toLocaleTimeString();
     showErr('');
 
     if (!isRefresh) startCountdown();
@@ -370,130 +360,217 @@ function startCountdown() {
 }
 
 /* ══════════════════════════════════════════════
-   RENDER — BALANCE
+   PARSE PORTFOLIO ENDPOINT → true PnL
+   Formula (official docs):
+     PnL = accountValue + totalWithdrawals − totalDeposits
+   The pnlHistory array's LAST value is the current PnL.
 ══════════════════════════════════════════════ */
-function renderBalance(perp, spot, fills, mids) {
-  const s    = perp.marginSummary || perp.crossMarginSummary || {};
+function parsePortfolio(portfolioData) {
+  const result = { allTimePnl: null, monthPnl: null, weekPnl: null, dayPnl: null };
+  if (!Array.isArray(portfolioData)) return result;
+
+  portfolioData.forEach(([period, data]) => {
+    const history = data?.pnlHistory;
+    if (!Array.isArray(history) || history.length === 0) return;
+    const lastVal = parseFloat(history[history.length - 1][1]);
+    if (period === 'allTime')  result.allTimePnl = lastVal;
+    if (period === 'month')    result.monthPnl   = lastVal;
+    if (period === 'week')     result.weekPnl    = lastVal;
+    if (period === 'day')      result.dayPnl     = lastVal;
+  });
+  return result;
+}
+
+/* ══════════════════════════════════════════════
+   RENDER — BALANCE HERO
+══════════════════════════════════════════════ */
+function renderBalance(perp, spot, fills, funding, portfolioData) {
+  const s     = perp.marginSummary || perp.crossMarginSummary || {};
   const perpV = parseFloat(s.accountValue || 0);
   const mU    = parseFloat(s.totalMarginUsed || 0);
-  const mF    = parseFloat(s.totalRawUsd || perpV - mU);
+  // withdrawable is the correct "free margin" — not a manual calculation
+  const mF    = parseFloat(perp.withdrawable ?? (perpV - mU));
 
-  // Unrealized PnL from open positions
+  /* unrealized PnL from positions */
   let unrealPnl = 0;
   (perp.assetPositions || []).forEach(p => {
     unrealPnl += parseFloat(p.position.unrealizedPnl || 0);
   });
 
+  /* spot value (USDC only for simplicity) */
   let spotV = 0;
   (spot.balances || []).forEach(b => { spotV += parseFloat(b.total || 0); });
 
-  const total   = perpV + spotV;
-  const feeTot  = fills.reduce((a, f) => a + parseFloat(f.fee || 0), 0);
-  const active  = (perp.assetPositions || []).filter(p => parseFloat(p.position.szi) !== 0).length;
+  /* total fees from all fills */
+  const feeTot = fills.reduce((a, f) => a + parseFloat(f.fee || 0), 0);
+
+  /* open positions count */
+  const active = (perp.assetPositions || []).filter(
+    p => parseFloat(p.position.szi) !== 0
+  ).length;
+
+  const total = perpV + spotV;
 
   show('balHero');
-  animNum('totalBal', total, 3);
-  animNum('perpBal',  perpV, 3);
-  animNum('spotBal',  spotV, 3);
-  animNum('marginUsed', mU,  3);
-  animNum('marginFree', mF,  3);
+  animNum('totalBal',   total, 2);
+  animNum('perpBal',    perpV, 2);
+  animNum('spotBal',    spotV, 2);
+  animNum('marginUsed', mU,    2);
+  animNum('marginFree', mF,    2);
 
   const uEl = ge('unrealPnl');
   if (uEl) {
-    uEl.textContent = (unrealPnl >= 0 ? '+' : '') + fmt(unrealPnl, 3);
-    uEl.className = 'si-val ' + (unrealPnl >= 0 ? 'green' : 'red');
+    uEl.textContent = (unrealPnl >= 0 ? '+' : '') + fmt(unrealPnl, 2);
+    uEl.className   = 'si-val ' + (unrealPnl >= 0 ? 'green' : 'red');
   }
-  ge('totalFees').textContent = fmt(feeTot) + ' $';
-  ge('openCount').textContent = active;
+  ge('totalFees').textContent = fmt(feeTot, 2) + ' $';
+  ge('openCount').textContent  = active;
 }
 
 /* ══════════════════════════════════════════════
-   RENDER — KPI
-   Full realized PnL from ALL fills
-══════════════════════════════════════════════ */
-function renderKPI(fills) {
-  const grid = ge('kpiGrid');
-  if (!fills.length) {
-    grid.innerHTML = '<div class="kpi"><div class="kpi-lbl">Trades</div><div class="kpi-val yellow">0</div></div>';
-    return;
-  }
+   RENDER — KPI  (corrected PnL breakdown)
 
+   ┌─────────────────────────────────────────┐
+   │ TRUE PnL  = portfolio allTime last val  │
+   │   = accountValue + withdrawals − deposits│
+   │                                         │
+   │ Realized PnL (trades) = Σ closedPnl     │
+   │ Funding PnL           = Σ delta.usdc    │
+   │ Total Realized        = trades + fund.  │
+   │ Unrealized            = open positions  │
+   └─────────────────────────────────────────┘
+══════════════════════════════════════════════ */
+function renderKPI(fills, funding, portfolioData) {
+  const grid = ge('kpiGrid');
+
+  /* portfolio-based true PnL */
+  const port       = parsePortfolio(portfolioData);
+  const allTimePnl = port.allTimePnl;
+
+  /* trades realized PnL */
+  const tradesPnl = fills.reduce((a, f) => a + parseFloat(f.closedPnl || 0), 0);
+
+  /* funding realized PnL */
+  const fundingPnl = funding.reduce((a, f) => {
+    return a + parseFloat(f.delta?.usdc || 0);
+  }, 0);
+
+  /* total realized = trades + funding */
+  const totalRealized = tradesPnl + fundingPnl;
+
+  /* fees */
+  const feeAll = fills.reduce((a, f) => a + parseFloat(f.fee || 0), 0);
+
+  /* net realized after fees */
+  const netRealized = totalRealized - feeAll;
+
+  /* win / loss stats */
   const total   = fills.length;
-  const realPnl = fills.reduce((a, f) => a + parseFloat(f.closedPnl || 0), 0);
-  const feeAll  = fills.reduce((a, f) => a + parseFloat(f.fee || 0), 0);
-  const net     = realPnl - feeAll; // net PnL after fees
   const wins    = fills.filter(f => parseFloat(f.closedPnl || 0) > 0).length;
   const losses  = fills.filter(f => parseFloat(f.closedPnl || 0) < 0).length;
   const wr      = total > 0 ? (wins / total * 100).toFixed(1) : '0.0';
-  const makers  = fills.filter(f => f.crossed === false ||
-    (f.crossed == null && parseFloat(f.fee || 0) <= 0)).length;
-  const mkPct   = total > 0 ? Math.round(makers / total * 100) : 0;
 
-  // Best and worst single-day PnL
+  /* maker rate */
+  const makers = fills.filter(f =>
+    f.crossed === false || (f.crossed == null && parseFloat(f.fee || 0) <= 0)
+  ).length;
+  const mkPct  = total > 0 ? Math.round(makers / total * 100) : 0;
+
+  /* best / worst day */
   const dayPnl = {};
   fills.forEach(f => {
     const pnl = parseFloat(f.closedPnl || 0);
     if (!pnl) return;
-    const d = new Date(f.time);
+    const d   = new Date(f.time);
     const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     dayPnl[key] = (dayPnl[key] || 0) + pnl;
   });
-  const dayVals = Object.values(dayPnl);
-  const bestDay = dayVals.length ? Math.max(...dayVals) : 0;
+  const dayVals  = Object.values(dayPnl);
+  const bestDay  = dayVals.length ? Math.max(...dayVals) : 0;
   const worstDay = dayVals.length ? Math.min(...dayVals) : 0;
 
+  /* volume */
+  const totalVol = fills.reduce((a, f) => {
+    return a + parseFloat(f.sz || 0) * parseFloat(f.px || 0);
+  }, 0);
+
   grid.innerHTML = `
-    <div class="kpi" style="animation-delay:.05s">
-      <div class="kpi-lbl">Realized PnL</div>
-      <div class="kpi-val ${realPnl >= 0 ? 'green' : 'red'}">${realPnl >= 0 ? '+' : ''}${fmt(realPnl)}</div>
-      <div class="kpi-sub">USDC · all-time</div>
+    ${allTimePnl != null ? `
+    <div class="kpi" style="animation-delay:.03s">
+      <div class="kpi-lbl">True Total PnL ✦</div>
+      <div class="kpi-val ${allTimePnl >= 0 ? 'green' : 'red'}">${allTimePnl >= 0 ? '+' : ''}${fmt(allTimePnl)}</div>
+      <div class="kpi-sub">portfolio endpoint · most accurate</div>
+    </div>` : ''}
+    <div class="kpi" style="animation-delay:.06s">
+      <div class="kpi-lbl">Realized (Trades + Funding)</div>
+      <div class="kpi-val ${totalRealized >= 0 ? 'green' : 'red'}">${totalRealized >= 0 ? '+' : ''}${fmt(totalRealized)}</div>
+      <div class="kpi-sub">trades ${fmt(tradesPnl)} · funding ${fmt(fundingPnl)}</div>
     </div>
-    <div class="kpi" style="animation-delay:.08s">
-      <div class="kpi-lbl">Net PnL (after fees)</div>
-      <div class="kpi-val ${net >= 0 ? 'green' : 'red'}">${net >= 0 ? '+' : ''}${fmt(net)}</div>
+    <div class="kpi" style="animation-delay:.09s">
+      <div class="kpi-lbl">Net Realized (after fees)</div>
+      <div class="kpi-val ${netRealized >= 0 ? 'green' : 'red'}">${netRealized >= 0 ? '+' : ''}${fmt(netRealized)}</div>
       <div class="kpi-sub">USDC</div>
     </div>
-    <div class="kpi" style="animation-delay:.11s">
+    <div class="kpi" style="animation-delay:.12s">
       <div class="kpi-lbl">Win Rate</div>
       <div class="kpi-val ${parseFloat(wr) >= 50 ? 'green' : 'red'}">${wr}%</div>
       <div class="bar-w"><div class="bar-f" style="width:${wr}%"></div></div>
     </div>
-    <div class="kpi" style="animation-delay:.14s">
+    <div class="kpi" style="animation-delay:.15s">
       <div class="kpi-lbl">Total Trades</div>
       <div class="kpi-val yellow">${total.toLocaleString()}</div>
       <div class="kpi-sub">${wins}W / ${losses}L</div>
     </div>
-    <div class="kpi" style="animation-delay:.17s">
+    <div class="kpi" style="animation-delay:.18s">
       <div class="kpi-lbl">Maker Rate</div>
       <div class="kpi-val purple">${mkPct}%</div>
       <div class="kpi-sub">${makers.toLocaleString()} trades</div>
     </div>
-    <div class="kpi" style="animation-delay:.2s">
-      <div class="kpi-lbl">Total Fees</div>
+    <div class="kpi" style="animation-delay:.21s">
+      <div class="kpi-lbl">Total Fees Paid</div>
       <div class="kpi-val orange">${fmt(Math.abs(feeAll))}</div>
-      <div class="kpi-sub">${feeAll <= 0 ? '(net rebates)' : 'USDC paid'}</div>
+      <div class="kpi-sub">${feeAll < 0 ? 'net rebates' : 'USDC paid'}</div>
     </div>
-    <div class="kpi" style="animation-delay:.23s">
+    <div class="kpi" style="animation-delay:.24s">
+      <div class="kpi-lbl">Funding Payments</div>
+      <div class="kpi-val ${fundingPnl >= 0 ? 'cyan' : 'red'}">${fundingPnl >= 0 ? '+' : ''}${fmt(fundingPnl)}</div>
+      <div class="kpi-sub">${funding.length} events</div>
+    </div>
+    <div class="kpi" style="animation-delay:.27s">
       <div class="kpi-lbl">Best Day</div>
       <div class="kpi-val green">+${fmt(bestDay)}</div>
       <div class="kpi-sub">USDC</div>
     </div>
-    <div class="kpi" style="animation-delay:.26s">
+    <div class="kpi" style="animation-delay:.30s">
       <div class="kpi-lbl">Worst Day</div>
       <div class="kpi-val red">${fmt(worstDay)}</div>
       <div class="kpi-sub">USDC</div>
-    </div>`;
+    </div>
+    <div class="kpi" style="animation-delay:.33s">
+      <div class="kpi-lbl">Total Volume</div>
+      <div class="kpi-val blue">${fmtLarge(totalVol)}</div>
+      <div class="kpi-sub">USDC notional</div>
+    </div>
+    ${port.dayPnl != null ? `
+    <div class="kpi" style="animation-delay:.36s">
+      <div class="kpi-lbl">24h PnL</div>
+      <div class="kpi-val ${port.dayPnl >= 0 ? 'green' : 'red'}">${port.dayPnl >= 0 ? '+' : ''}${fmt(port.dayPnl)}</div>
+      <div class="kpi-sub">USDC</div>
+    </div>` : ''}`;
 }
 
 /* ══════════════════════════════════════════════
    RENDER — POSITIONS
 ══════════════════════════════════════════════ */
 function renderPositions(perp, mids) {
-  const active = (perp.assetPositions || []).filter(p => parseFloat(p.position.szi) !== 0);
+  const active = (perp.assetPositions || []).filter(
+    p => parseFloat(p.position.szi) !== 0
+  );
   ge('posBadge').textContent = `${active.length} position${active.length !== 1 ? 's' : ''}`;
 
   if (!active.length) {
-    ge('posTbody').innerHTML = '<tr class="no-data-row"><td colspan="8">No open positions</td></tr>';
+    ge('posTbody').innerHTML =
+      '<tr class="no-data-row"><td colspan="8">No open positions</td></tr>';
     return;
   }
 
@@ -506,15 +583,16 @@ function renderPositions(perp, mids) {
     const pnlPct = entry > 0 && mark > 0
       ? ((mark - entry) / entry * 100 * (size > 0 ? 1 : -1)).toFixed(2)
       : null;
-    const cl = colClass(unreal);
+    const liq    = pos.liquidationPx ? parseFloat(pos.liquidationPx) : null;
+    const notional = Math.abs(size) * mark;
     return `<tr class="row-anim" style="animation-delay:${i * 0.03}s">
       <td style="font-weight:700">${pos.coin}</td>
       <td><span class="tag ${size > 0 ? 'tag-buy' : 'tag-sell'}">${size > 0 ? '▲ LONG' : '▼ SHORT'}</span></td>
       <td>${fmt(Math.abs(size), 4)}</td>
-      <td>${fmt(entry)}</td>
-      <td class="blue">${mark ? fmt(mark) : '—'}</td>
-      <td class="${cl}">${unreal >= 0 ? '+' : ''}${fmt(unreal, 3)} $</td>
-      <td class="${cl}">${pnlPct != null ? (parseFloat(pnlPct) >= 0 ? '+' : '') + pnlPct + '%' : '—'}</td>
+      <td>${fmt(entry, 2)}</td>
+      <td class="blue">${mark ? fmt(mark, 2) : '—'}</td>
+      <td class="${colClass(unreal)}">${unreal >= 0 ? '+' : ''}${fmt(unreal, 2)} $</td>
+      <td class="${colClass(unreal)}">${pnlPct != null ? (parseFloat(pnlPct) >= 0 ? '+' : '') + pnlPct + '%' : '—'}</td>
       <td class="yellow">${pos.leverage?.value ?? '—'}x</td>
     </tr>`;
   }).join('');
@@ -522,56 +600,67 @@ function renderPositions(perp, mids) {
 
 /* ══════════════════════════════════════════════
    RENDER — FILLS HISTORY
-   Precise PnL from ALL historical fills
 ══════════════════════════════════════════════ */
 function renderFills(fills) {
-  ge('fillsBadge').textContent = `${fills.length.toLocaleString()} trade${fills.length !== 1 ? 's' : ''}`;
+  ge('fillsBadge').textContent =
+    `${fills.length.toLocaleString()} trade${fills.length !== 1 ? 's' : ''}`;
+
   if (!fills.length) {
-    ge('fillsTbody').innerHTML = '<tr class="no-data-row"><td colspan="9">No trade history</td></tr>';
+    ge('fillsTbody').innerHTML =
+      '<tr class="no-data-row"><td colspan="9">No trade history</td></tr>';
     return;
   }
 
-  // Show newest first (already sorted in fetchAllFills)
   ge('fillsTbody').innerHTML = fills.slice(0, 500).map((f, i) => {
     const pnl      = parseFloat(f.closedPnl || 0);
     const fee      = parseFloat(f.fee || 0);
     const sz       = parseFloat(f.sz || 0);
     const px       = parseFloat(f.px || 0);
     const notional = sz * px;
-    const feePct   = notional > 0 ? (Math.abs(fee) / notional * 100).toFixed(4) : '—';
-    const ot       = orderType(f);
-    const cl       = colClass(pnl);
-    const feeCol   = fee < 0 ? 'green' : '';
-    return `<tr class="row-anim" style="animation-delay:${Math.min(i,30) * 0.015}s">
+    const feePct   = notional > 0
+      ? (Math.abs(fee) / notional * 100).toFixed(4)
+      : '—';
+    const ot = orderType(f);
+    return `<tr class="row-anim" style="animation-delay:${Math.min(i, 30) * 0.015}s">
       <td class="muted-txt">${fmtTime(f.time)}</td>
       <td style="font-weight:700">${f.coin}</td>
       <td><span class="tag ${f.side === 'B' ? 'tag-buy' : 'tag-sell'}">${f.side === 'B' ? '▲ BUY' : '▼ SELL'}</span></td>
       <td><span class="tag ${ot.cls}">${ot.label}</span></td>
-      <td>${fmt(px)}</td>
+      <td>${fmt(px, 2)}</td>
       <td>${fmt(sz, 4)}</td>
-      <td class="${cl}">${pnl !== 0 ? (pnl > 0 ? '+' : '') + fmt(pnl, 4) + ' $' : '—'}</td>
-      <td class="${feeCol}">${fee < 0 ? '↩ ' + fmt(Math.abs(fee), 4) : fmt(fee, 4)}</td>
+      <td class="${colClass(pnl)}">${pnl !== 0 ? (pnl > 0 ? '+' : '') + fmt(pnl, 2) + ' $' : '—'}</td>
+      <td class="${fee < 0 ? 'green' : ''}">${fee < 0 ? '↩ ' + fmt(Math.abs(fee), 4) : fmt(fee, 4)}</td>
       <td class="muted-txt">${feePct !== '—' ? feePct + '%' : '—'}</td>
     </tr>`;
   }).join('');
 }
 
 /* ══════════════════════════════════════════════
-   PnL CALENDAR
+   PnL CALENDAR  (includes funding per day)
 ══════════════════════════════════════════════ */
-function buildCalendar(fills) {
+function buildCalendar(fills, funding) {
   calPnlData = {};
+
   fills.forEach(f => {
     const pnl = parseFloat(f.closedPnl || 0);
-    // Include ALL non-zero pnl (fees affect net, but closedPnl is raw realized)
-    if (pnl === 0) return;
+    if (!pnl) return;
     const d   = new Date(f.time);
     const key = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
     calPnlData[key] = (calPnlData[key] || 0) + pnl;
   });
+
+  /* add funding per day */
+  funding.forEach(f => {
+    const usdc = parseFloat(f.delta?.usdc || 0);
+    if (!usdc) return;
+    const d   = new Date(f.time);
+    const key = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    calPnlData[key] = (calPnlData[key] || 0) + usdc;
+  });
+
   const now = new Date();
-  calYear  = now.getFullYear();
-  calMonth = now.getMonth();
+  calYear   = now.getFullYear();
+  calMonth  = now.getMonth();
   renderCalendar();
   show('calCard');
 }
@@ -579,7 +668,7 @@ function buildCalendar(fills) {
 function calNav(dir) {
   calMonth += dir;
   if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth <  0) { calMonth = 11; calYear--; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
   renderCalendar();
 }
 
@@ -594,6 +683,7 @@ function renderCalendar() {
     const key = `${calYear}-${pad2(calMonth + 1)}-${pad2(d)}`;
     monthTotal += calPnlData[key] || 0;
   }
+
   const sumEl = ge('calSummary');
   sumEl.innerHTML = monthTotal !== 0
     ? `<span style="color:${monthTotal >= 0 ? 'var(--green)' : 'var(--red)'}">
@@ -607,8 +697,10 @@ function renderCalendar() {
   for (let d = 1; d <= daysInMonth; d++) {
     const key     = `${calYear}-${pad2(calMonth + 1)}-${pad2(d)}`;
     const pnl     = calPnlData[key];
-    const isToday = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
-    let cls = 'cal-day ';
+    const isToday = d === today.getDate() &&
+                    calMonth === today.getMonth() &&
+                    calYear  === today.getFullYear();
+    let cls     = 'cal-day ';
     let pnlHtml = '';
 
     if (pnl !== undefined && pnl !== 0) {
@@ -624,11 +716,8 @@ function renderCalendar() {
     }
     if (isToday) cls += ' today';
 
-    const title = pnl != null
-      ? `${key}: ${pnl >= 0 ? '+' : ''}${fmt(pnl, 2)} $`
-      : key;
-
-    html += `<div class="${cls}" title="${title}" style="animation:fade-up .22s ${((firstDay + d - 1) % 7) * 0.025}s both">
+    html += `<div class="${cls}" title="${key}: ${pnl != null ? (pnl >= 0 ? '+' : '') + fmt(pnl, 2) + ' $' : 'no data'}"
+      style="animation:fade-up .22s ${((firstDay + d - 1) % 7) * 0.025}s both">
       <div class="cal-dn">${d}</div>${pnlHtml}
     </div>`;
   }
@@ -637,21 +726,40 @@ function renderCalendar() {
 
 /* ══════════════════════════════════════════════
    RENDER — TRANSACTIONS
+   FIX: bridge ops (deposit/withdraw) are separated from
+        vault ops so stats are never inflated.
 ══════════════════════════════════════════════ */
 const TX_TYPE_LABELS = {
-  deposit: 'Deposit', withdraw: 'Withdraw', spotTransfer: 'Spot Transfer',
-  internalTransfer: 'Internal', subAccountTransfer: 'Sub-Account',
-  accountClassTransfer: 'Classification', vaultDeposit: 'Vault Deposit',
-  vaultWithdraw: 'Vault Withdraw', funding: 'Funding', liquidation: 'Liquidation',
+  deposit:              'Bridge Deposit',
+  withdraw:             'Bridge Withdraw',
+  spotTransfer:         'Spot Transfer',
+  internalTransfer:     'Internal',
+  subAccountTransfer:   'Sub-Account',
+  accountClassTransfer: 'Classification',
+  vaultDeposit:         'Vault Deposit',
+  vaultWithdraw:        'Vault Withdraw',
+  funding:              'Funding',
+  liquidation:          'Liquidation',
 };
 
-function txClassify(tx, addr) {
+/* 
+  'in'  = money flowing INTO the user's trading account
+  'out' = money flowing OUT OF the user's trading account
+  'int' = internal moves (no net change to user's total balance)
+
+  deposit   → external bridge → INTO account ✓ in
+  withdraw  → external bridge → OUT of account ✓ out
+  vaultDeposit  → user deposits from perp wallet INTO a vault → out
+  vaultWithdraw → user withdraws from vault INTO perp wallet → in
+  spotTransfer  → depends on sign of usdc
+*/
+function txClassify(tx) {
   const t = tx.delta.type;
-  if (t === 'deposit')      return 'in';
-  if (t === 'withdraw')     return 'out';
-  if (t === 'vaultWithdraw') return 'in';
+  if (t === 'deposit')       return 'in';
+  if (t === 'withdraw')      return 'out';
   if (t === 'vaultDeposit')  return 'out';
-  if (t === 'spotTransfer') return parseFloat(tx.delta.usdc || 0) > 0 ? 'in' : 'out';
+  if (t === 'vaultWithdraw') return 'in';
+  if (t === 'spotTransfer')  return parseFloat(tx.delta.usdc || 0) > 0 ? 'in' : 'out';
   return 'int';
 }
 function txAmt(tx) {
@@ -671,25 +779,40 @@ function txTo(tx, addr) {
 
 function renderTx(raw, addr) {
   txAll = (Array.isArray(raw) ? raw : [])
-    .map(tx => ({ ...tx, _dir: txClassify(tx, addr), _amt: txAmt(tx) }))
+    .map(tx => ({ ...tx, _dir: txClassify(tx), _amt: txAmt(tx) }))
     .sort((a, b) => b.time - a.time);
 
-  const inTotal  = txAll.filter(t => t._dir === 'in').reduce((s, t)  => s + t._amt, 0);
-  const outTotal = txAll.filter(t => t._dir === 'out').reduce((s, t) => s + t._amt, 0);
-  const net      = inTotal - outTotal;
+  /* FIX: separate bridge deposits/withdrawals from vault ops */
+  const bridgeIn  = txAll.filter(t => t.delta.type === 'deposit');
+  const bridgeOut = txAll.filter(t => t.delta.type === 'withdraw');
+  const vaultIn   = txAll.filter(t => t.delta.type === 'vaultWithdraw');
+  const vaultOut  = txAll.filter(t => t.delta.type === 'vaultDeposit');
 
-  ge('txStatIn').textContent  = '+' + fmt(inTotal, 2);
-  ge('txStatOut').textContent = '-' + fmt(outTotal, 2);
+  const bridgeInTotal  = bridgeIn.reduce((s, t)  => s + t._amt, 0);
+  const bridgeOutTotal = bridgeOut.reduce((s, t) => s + t._amt, 0);
+  const netBridge      = bridgeInTotal - bridgeOutTotal;
+
+  /* update stats display */
+  ge('txStatIn').textContent  = '+' + fmt(bridgeInTotal, 2);
+  ge('txStatOut').textContent = '-' + fmt(bridgeOutTotal, 2);
   const netEl = ge('txStatNet');
-  netEl.textContent = (net >= 0 ? '+' : '') + fmt(net, 2);
-  netEl.className = 'tsv ' + (net >= 0 ? 'green' : 'red');
+  netEl.textContent = (netBridge >= 0 ? '+' : '') + fmt(netBridge, 2);
+  netEl.className   = 'tsv ' + (netBridge >= 0 ? 'green' : 'red');
   ge('txStatCnt').textContent = txAll.length;
 
+  /* update stat labels to clarify bridge-only */
+  const inLbl = ge('txStatInLbl');
+  const outLbl = ge('txStatOutLbl');
+  if (inLbl)  inLbl.textContent  = 'Bridge Deposits';
+  if (outLbl) outLbl.textContent = 'Bridge Withdrawals';
+
   ['all', 'in', 'out', 'int'].forEach(t => {
-    ge(`txcnt-${t}`).textContent = t === 'all' ? txAll.length
+    const el = ge(`txcnt-${t}`);
+    if (!el) return;
+    el.textContent = t === 'all' ? txAll.length
       : txAll.filter(tx => tx._dir === t).length;
   });
-  ge('txInfoLbl').textContent = `${txAll.length} transactions`;
+  ge('txInfoLbl').textContent = `${txAll.length} transactions · ${bridgeIn.length} deposits · ${bridgeOut.length} withdrawals`;
 
   txTab = 'all'; txPage = 0;
   document.querySelectorAll('.tx-tab').forEach(b => b.classList.remove('active'));
@@ -715,7 +838,6 @@ function txRenderPage() {
   const tbody  = ge('txTbody');
   const empty  = ge('txEmpty');
   const pager  = ge('txPager');
-  const addr   = currentAddr;
 
   if (!slice.length) {
     tbody.innerHTML    = '';
@@ -728,9 +850,9 @@ function txRenderPage() {
   tbody.innerHTML = slice.map((tx, i) => {
     const dir     = tx._dir;
     const amt     = tx._amt;
-    const from    = txFrom(tx, addr);
-    const to      = txTo(tx, addr);
-    const isMe    = a => a && a.toLowerCase() === addr.toLowerCase();
+    const from    = txFrom(tx, currentAddr);
+    const to      = txTo(tx, currentAddr);
+    const isMe    = a => a && a.toLowerCase() === currentAddr.toLowerCase();
     const typeLbl = TX_TYPE_LABELS[tx.delta.type] || tx.delta.type;
     const token   = tx.delta.token || 'USDC';
     const chipCls = dir === 'in' ? 'tc-in' : dir === 'out' ? 'tc-out' : 'tc-int';
@@ -741,8 +863,10 @@ function txRenderPage() {
       <td><span class="tx-chip ${chipCls}">${dirLbl}</span></td>
       <td class="${amtCls}" style="font-weight:700">${sign}${fmt(amt, amt < 1 ? 4 : 2)}</td>
       <td class="muted-txt" style="font-size:10px">${token}</td>
-      <td>${isMe(from) ? '<span class="tx-you">You</span>' : `<span class="tx-addr" onclick="navigator.clipboard?.writeText('${from}')" title="${from}">${shortAddr(from)}</span>`}</td>
-      <td>${isMe(to) ? '<span class="tx-you">You</span>' : `<span class="tx-addr" onclick="navigator.clipboard?.writeText('${to}')" title="${to}">${shortAddr(to)}</span>`}</td>
+      <td>${isMe(from) ? '<span class="tx-you">You</span>' :
+        `<span class="tx-addr" onclick="navigator.clipboard?.writeText('${from}')" title="${from}">${shortAddr(from)}</span>`}</td>
+      <td>${isMe(to)   ? '<span class="tx-you">You</span>' :
+        `<span class="tx-addr" onclick="navigator.clipboard?.writeText('${to}')" title="${to}">${shortAddr(to)}</span>`}</td>
       <td class="tx-time" title="${new Date(tx.time).toLocaleString()}">${ageStr(tx.time)}</td>
       <td class="muted-txt" style="font-size:11px">${typeLbl}</td>
     </tr>`;
@@ -760,19 +884,23 @@ function txRenderPage() {
   }
 }
 function txPrev() { if (txPage > 0) { txPage--; txRenderPage(); } }
-function txNext() { if (txPage < Math.ceil(txFiltered.length / TX_PER) - 1) { txPage++; txRenderPage(); } }
+function txNext() {
+  if (txPage < Math.ceil(txFiltered.length / TX_PER) - 1) {
+    txPage++; txRenderPage();
+  }
+}
 
 /* ══════════════════════════════════════════════
    ANIMATED NUMBER
 ══════════════════════════════════════════════ */
-function animNum(id, val, decimals = 3) {
+function animNum(id, val, decimals = 2) {
   const el = ge(id);
   if (!el) return;
   const from = parseFloat(el.dataset.v || 0);
   const to   = parseFloat(val);
   if (isNaN(to)) { el.textContent = '—'; return; }
   el.dataset.v = to;
-  if (Math.abs(from - to) < 0.0001) { el.textContent = fmt(to, decimals); return; }
+  if (Math.abs(from - to) < 0.01) { el.textContent = fmt(to, decimals); return; }
   const t0 = Date.now(), dur = 750;
   const tick = () => {
     const p = Math.min((Date.now() - t0) / dur, 1);
@@ -785,39 +913,57 @@ function animNum(id, val, decimals = 3) {
 }
 
 /* ══════════════════════════════════════════════
-   UTILITIES
+   UTILS
 ══════════════════════════════════════════════ */
-const ge = id => document.getElementById(id);
+const ge   = id => document.getElementById(id);
 const show = (id, d = 'block') => { const e = ge(id); if (e) e.style.display = d; };
 const hide = id => { const e = ge(id); if (e) e.style.display = 'none'; };
 
-function fmt(n, d = 3) {
+function fmt(n, d = 2) {
   const v = parseFloat(n);
   if (isNaN(v)) return '—';
-  return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  return v.toLocaleString('en-US', {
+    minimumFractionDigits: d,
+    maximumFractionDigits: d,
+  });
+}
+function fmtLarge(v) {
+  if (!v || isNaN(v)) return '—';
+  if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
+  if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+  return fmt(v, 2);
 }
 function fmtPrice(v) {
   if (!v || isNaN(v)) return '—';
-  if (v >= 10000) return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (v >= 10000) return v.toLocaleString('en-US', { maximumFractionDigits: 2 });
   if (v >= 1000)  return v.toFixed(2);
   if (v >= 100)   return v.toFixed(3);
   if (v >= 1)     return v.toFixed(4);
   return v.toFixed(5);
 }
 function fmtTime(ts) {
-  return new Date(ts).toLocaleString('en-GB', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return new Date(ts).toLocaleString('en-GB', {
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+function fmtDate(ts) {
+  return new Date(ts).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  });
 }
 function ageStr(ts) {
   const d = Date.now() - ts;
-  if (d < 60000)     return 'just now';
-  if (d < 3600000)   return Math.floor(d / 60000) + 'm ago';
-  if (d < 86400000)  return Math.floor(d / 3600000) + 'h ago';
+  if (d < 60000)    return 'just now';
+  if (d < 3600000)  return Math.floor(d / 60000) + 'm ago';
+  if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
   return fmtTime(ts);
 }
 function shortAddr(a) {
   return a && a.length > 10 ? a.slice(0, 6) + '…' + a.slice(-4) : (a || '—');
 }
-function pad2(n) { return String(n).padStart(2, '0'); }
+function pad2(n)  { return String(n).padStart(2, '0'); }
 function colClass(v) { return v > 0 ? 'green' : v < 0 ? 'red' : ''; }
 function orderType(f) {
   if (f.crossed === true)  return { label: 'Market', cls: 'tag-taker' };
@@ -829,21 +975,16 @@ function orderType(f) {
 function showErr(msg) {
   const el = ge('errBox');
   if (!el) return;
-  el.textContent    = msg;
-  el.style.display  = msg ? 'block' : 'none';
+  el.textContent   = msg;
+  el.style.display = msg ? 'block' : 'none';
 }
 function setLoadText(txt) {
   const el = ge('loadingText');
   if (el) el.textContent = txt;
 }
 
-/* add helper class for muted text on <td> */
-const mStyle = document.createElement('style');
-mStyle.textContent = '.muted-txt { color: rgba(255,255,255,0.44) !important; }';
-document.head.appendChild(mStyle);
-
 /* ══════════════════════════════════════════════
-   KEYBOARD SHORTCUT
+   INIT
 ══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   ge('addrInput').addEventListener('keydown', e => {
