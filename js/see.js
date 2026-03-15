@@ -122,7 +122,7 @@ function buildMarketGrid() {
     ...HL_ASSETS.map(s  => ({ id: s.toLowerCase(), sym: s, name: s, icon: cryptoIcon(s) })),
   ];
   grid.innerHTML = cards.map((c, i) =>
-    `<div class="mkt-card" style="animation-delay:${i * 0.04}s">
+    `<div class="mkt-card" style="animation-delay:${i * 0.05}s">
        <div class="mkt-dot"></div>
        <span class="mkt-icon">${c.icon}</span>
        <div class="mkt-sym">${c.sym}</div>
