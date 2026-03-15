@@ -3,35 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⬡ Hyperliquid Analyzer</title>
+  <title>Hyperliquid Analyzer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/see.css" />
 </head>
 <body>
 
+<!-- ─── Ticker ─── -->
 <div class="ticker-wrap">
   <div class="ticker-track" id="tickerTrack"></div>
 </div>
 
+<!-- ─── Floating corner badge ─── -->
 <div class="float-badge" id="floatBadge">
-  <div class="fb-hex">⬡</div>
+  <div class="fb-hex">HL</div>
   <div class="fb-info">
-    <div class="fb-name">HL ANALYZER</div>
+    <div class="fb-name">ANALYZER</div>
     <div class="fb-addr" id="fbAddr">—</div>
   </div>
   <div class="fb-dot"></div>
 </div>
 
+<!-- ─── Header ─── -->
 <header class="site-header" id="siteHeader">
   <div class="wrap hdr-inner">
     <div class="brand">
-      <div class="brand-hex">⬡</div>
+      <div class="brand-hex">HL</div>
       <div class="brand-text">
-        <h1>HYPERLIQUID ANALYZER</h1>
-        <p>Real-time on-chain portfolio intelligence</p>
+        <h1>Hyperliquid Analyzer</h1>
+        <p>On-chain portfolio intelligence</p>
       </div>
     </div>
     <div class="clock-box">
@@ -41,24 +44,30 @@
   </div>
 </header>
 
+<!-- ─── Main ─── -->
 <main class="wrap">
 
+  <!-- Market price cards -->
   <section class="mkt-grid" id="mktGrid"></section>
 
+  <!-- Search -->
   <section class="search-card">
     <div class="search-label">Analyze Wallet</div>
     <div class="search-row">
       <input id="addrInput" type="text" class="search-input"
-             placeholder="Enter public wallet address  0x..."
+             placeholder="0x... wallet address or alias"
              autocomplete="off" spellcheck="false" />
       <button class="search-btn" onclick="analyze()">
         <span>Analyze</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
       </button>
     </div>
     <div class="alias-row" id="aliasRow"></div>
   </section>
 
+  <!-- Status bar -->
   <div class="status-bar">
     <div class="wallet-tag" id="walletTag" style="display:none">
       <span class="wt-dot"></span>
@@ -66,16 +75,18 @@
       <span class="wt-addr" id="walletAddr"></span>
     </div>
     <div class="refresh-timer" id="refreshTimer" style="display:none">
-      Auto-refresh in <span class="cd" id="countdown">30</span>s
+      Refresh in <span class="cd" id="countdown">30</span>s
     </div>
   </div>
 
+  <!-- Loading / Error -->
   <div class="loading-bar" id="loadingBar" style="display:none">
     <div class="lb-spin"></div>
-    <span id="loadingText">Fetching data...</span>
+    <span id="loadingText">Fetching data…</span>
   </div>
   <div class="err-box" id="errBox" style="display:none"></div>
 
+  <!-- ─── Portfolio Overview ─── -->
   <div class="bal-hero" id="balHero" style="display:none">
     <div class="bal-glow"></div>
     <div class="bal-head">
@@ -86,34 +97,48 @@
       </div>
       <div class="bal-sides">
         <div class="bal-side-item">
-          <span class="si-lbl">PERP</span>
-          <span class="si-val blue" id="perpBal">0.00</span>
+          <span class="si-lbl">Perp Account</span>
+          <span class="si-val" id="perpBal">0.00</span>
         </div>
         <div class="bal-side-item">
-          <span class="si-lbl">SPOT</span>
+          <span class="si-lbl">Spot Balance</span>
           <span class="si-val yellow" id="spotBal">0.00</span>
         </div>
         <div class="bal-side-item">
-          <span class="si-lbl">UNREAL PnL</span>
+          <span class="si-lbl">Unrealized PnL</span>
           <span class="si-val" id="unrealPnl">0.00</span>
         </div>
       </div>
     </div>
     <div class="bal-divider"></div>
     <div class="bal-row">
-      <div class="bi"><div class="bi-lbl">Margin Used</div><div class="bi-val red" id="marginUsed">0.00</div></div>
-      <div class="bi"><div class="bi-lbl">Free Margin</div><div class="bi-val green" id="marginFree">0.00</div></div>
-      <div class="bi"><div class="bi-lbl">Total Fees Paid</div><div class="bi-val orange" id="totalFees">—</div></div>
-      <div class="bi"><div class="bi-lbl">Open Positions</div><div class="bi-val cyan" id="openCount">0</div></div>
+      <div class="bi">
+        <div class="bi-lbl">Margin Used</div>
+        <div class="bi-val red" id="marginUsed">0.00</div>
+      </div>
+      <div class="bi">
+        <div class="bi-lbl">Free Margin</div>
+        <div class="bi-val green" id="marginFree">0.00</div>
+      </div>
+      <div class="bi">
+        <div class="bi-lbl">Total Fees</div>
+        <div class="bi-val orange" id="totalFees">—</div>
+      </div>
+      <div class="bi">
+        <div class="bi-lbl">Open Positions</div>
+        <div class="bi-val cyan" id="openCount">0</div>
+      </div>
     </div>
   </div>
 
+  <!-- ─── KPI Grid ─── -->
   <div class="kpi-grid" id="kpiGrid" style="display:none"></div>
 
+  <!-- ─── PnL Calendar ─── -->
   <div class="cal-card" id="calCard" style="display:none">
     <div class="card-head">
       <div class="ch-left">
-        <span class="card-title">📅 PnL Calendar</span>
+        <span class="card-title">PnL Calendar</span>
         <div class="cal-nav">
           <button class="cnav-btn" onclick="calNav(-1)">‹</button>
           <span class="cal-month-lbl" id="calMonthLbl">—</span>
@@ -131,6 +156,7 @@
     </div>
   </div>
 
+  <!-- ─── Open Positions ─── -->
   <div class="data-card" id="posCard" style="display:none">
     <div class="card-head">
       <span class="card-title">Open Positions</span>
@@ -148,6 +174,7 @@
     </div>
   </div>
 
+  <!-- ─── Trade History ─── -->
   <div class="data-card" id="fillsCard" style="display:none">
     <div class="card-head">
       <span class="card-title">Trade History</span>
@@ -155,7 +182,7 @@
     </div>
     <div class="pnl-fetch-note" id="pnlFetchNote" style="display:none">
       <span class="pfn-spin"></span>
-      <span id="pnlFetchText">Fetching complete PnL history...</span>
+      <span id="pnlFetchText">Fetching complete PnL history…</span>
     </div>
     <div class="tbl-wrap">
       <table>
@@ -169,10 +196,10 @@
     </div>
   </div>
 
+  <!-- ─── Transactions ─── -->
   <div class="tx-wrapper" id="txWrapper" style="display:none">
     <div class="tx-stats-row">
       <div class="tx-stat">
-        <!-- label updated by JS to "Bridge Deposits" -->
         <div class="tsl" id="txStatInLbl">Bridge Deposits</div>
         <div class="tsv green" id="txStatIn">—</div>
         <div class="tss">USDC</div>
@@ -197,15 +224,23 @@
     <div class="data-card">
       <div class="card-head tx-head">
         <div class="tx-tabs">
-          <button class="tx-tab active" id="txtab-all" data-tab="all"  onclick="txSwitch('all')">All <span class="tc" id="txcnt-all">0</span></button>
-          <button class="tx-tab t-in"   id="txtab-in"  data-tab="in"   onclick="txSwitch('in')">In <span class="tc" id="txcnt-in">0</span></button>
-          <button class="tx-tab t-out"  id="txtab-out" data-tab="out"  onclick="txSwitch('out')">Out <span class="tc" id="txcnt-out">0</span></button>
-          <button class="tx-tab"        id="txtab-int" data-tab="int"  onclick="txSwitch('int')">Internal <span class="tc" id="txcnt-int">0</span></button>
+          <button class="tx-tab active" id="txtab-all" onclick="txSwitch('all')">
+            All <span class="tc" id="txcnt-all">0</span>
+          </button>
+          <button class="tx-tab t-in" id="txtab-in" onclick="txSwitch('in')">
+            In <span class="tc" id="txcnt-in">0</span>
+          </button>
+          <button class="tx-tab t-out" id="txtab-out" onclick="txSwitch('out')">
+            Out <span class="tc" id="txcnt-out">0</span>
+          </button>
+          <button class="tx-tab" id="txtab-int" onclick="txSwitch('int')">
+            Internal <span class="tc" id="txcnt-int">0</span>
+          </button>
         </div>
         <div class="tx-info-lbl" id="txInfoLbl"></div>
       </div>
       <div class="tx-loading" id="txLoading" style="display:none">
-        <div class="lb-spin small"></div> Loading transactions...
+        <div class="lb-spin small"></div> Loading transactions…
       </div>
       <div class="tbl-wrap">
         <table class="tx-tbl">
@@ -227,6 +262,7 @@
     </div>
   </div>
 
+  <!-- ─── Fee note ─── -->
   <div class="fee-note" id="feeNote" style="display:none">
     <strong>Hyperliquid Fee Tiers (Tier 0):</strong>
     Taker <span class="fn-hl">0.045%</span> · Limit <span class="fn-hl">0.015%</span> ·
@@ -235,10 +271,11 @@
   </div>
 
   <footer class="site-footer" id="siteFooter" style="display:none">
-    Last updated: <span id="updTime">—</span> · Hyperliquid Public API
+    Last updated: <span id="updTime">—</span> · Hyperliquid Public API · Data updates every 30s
   </footer>
 
 </main>
+
 <div id="footer"></div>
 <script src="/js/common.js"></script>
 <script src="/js/see.js"></script>
