@@ -10,12 +10,12 @@
 <meta property="og:image" content="/images/0xbtc.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="/images/0xbtc.png">
+<link rel="icon" href="/images/0xbtc.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/styles.css">
 <link rel="stylesheet" href="/css/see.css">
-  <link rel="icon" href="/images/0xbtc.png" type="image/png">
 </head>
 <body>
 
@@ -62,7 +62,7 @@
     <div class="search-label">Analyze Wallet</div>
     <div class="search-row">
       <input id="addrInput" type="text" class="search-input"
-             placeholder="0x... wallet address or alias"
+             placeholder="0x… wallet address or alias"
              autocomplete="off" spellcheck="false" />
       <button class="search-btn" onclick="analyze()">
         <span>Analyze</span>
@@ -191,7 +191,7 @@
     </div>
     <div class="pnl-fetch-note" id="pnlFetchNote" style="display:none">
       <span class="pfn-spin"></span>
-      <span id="pnlFetchText">Fetching complete PnL history…</span>
+      <span id="pnlFetchText">Loading complete trade history…</span>
     </div>
     <div class="tbl-wrap">
       <table>
@@ -209,12 +209,12 @@
   <div class="tx-wrapper" id="txWrapper" style="display:none">
     <div class="tx-stats-row">
       <div class="tx-stat">
-        <div class="tsl" id="txStatInLbl">Bridge Deposits</div>
+        <div class="tsl">Bridge Deposits</div>
         <div class="tsv green" id="txStatIn">—</div>
         <div class="tss">USDC</div>
       </div>
       <div class="tx-stat">
-        <div class="tsl" id="txStatOutLbl">Bridge Withdrawals</div>
+        <div class="tsl">Bridge Withdrawals</div>
         <div class="tsv red" id="txStatOut">—</div>
         <div class="tss">USDC</div>
       </div>
