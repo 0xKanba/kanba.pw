@@ -1,17 +1,23 @@
 /* ══════════════════════════════════════════════════════════════
    HYPERLIQUID ANALYZER — see.js
 
-   PnL Formula (official HL docs):
-     True PnL = accountValue + totalWithdrawals − totalDeposits
-     (from portfolio endpoint pnlHistory last value)
+   PnL Calendar (accurate daily):
+     Source → portfolio endpoint allTime.pnlHistory
+     Each entry [ts_ms, cumulativePnl]. Daily PnL = diff per day.
+     Progressive: calendar renders instantly from portfolio call.
+     Trade counts (volume, # trades) fill in after fills load.
 
-   Fills fetch:  ALWAYS chunked by time — no fill count limit.
-     Strategy: go back from now in 30-day windows until 3 empty
-     consecutive chunks → stop. Covers wallets with 10,000+ fills.
+   KPI — True Total PnL only (no duplicate):
+     allTimePnl  = portfolio.allTime.pnlHistory last value
+     24h/7d/30d  = portfolio day/week/month last values
+     "Realized PnL" card removed — portfolio value IS more accurate.
+     Trading stats (win rate, R/R, fees…) added after fills load.
 
-   Realized PnL = Σ fill.closedPnl + Σ funding.delta.usdc
-   Unrealized PnL = from open assetPositions
-   Deposits/Withdrawals = bridge-level ops only
+   Analyze flow (two phases):
+     Phase 1 (fast): perp, spot, mids, txData, portfolio
+       → render balance, positions, calendar, tx, KPI stub
+     Phase 2 (bg): fetchAllFills + fetchAllFunding
+       → enrich calendar trade counts, full KPI, fills table
 ══════════════════════════════════════════════════════════════ */
 
 const API = 'https://api.hyperliquid.xyz/info';
@@ -33,15 +39,14 @@ const HL_ASSETS = ['BTC', 'ETH', 'SOL'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 /* ── state ── */
-let currentAddr  = '';
-let cdTimer      = null;
+let currentAddr = '';
+let cdTimer     = null;
 let calYear, calMonth;
-let calPnlData   = {};
-let allFills     = [];
-let allFunding   = [];
+let calPnlData  = {};
+let allFills    = [];
+let allFunding  = [];
 let txAll = [], txFiltered = [], txTab = 'all', txPage = 0;
 const TX_PER    = 25;
-const mktPrices = {};
 
 /* ══════════════════════════════════════════════
    API helper
@@ -112,8 +117,8 @@ function setTickerPair(id, px, chg) {
     const ce = ge('tc-' + id + sfx);
     if (pe && px) pe.textContent = '$' + fmtPrice(px);
     if (ce && chg != null) {
-      ce.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
-      ce.className   = 'tick-chg ' + (chg >= 0 ? 'up' : 'dn');
+      ce.textContent   = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+      ce.className     = 'tick-chg ' + (chg >= 0 ? 'up' : 'dn');
     }
   });
 }
@@ -200,7 +205,7 @@ async function fetchMarket() {
       const lastClose = parseFloat(cr[cr.length - 1].c);
       const chg = firstOpen > 0 ? (lastClose - firstOpen) / firstOpen * 100 : null;
       const pxEl = ge('mp-' + a.id);
-      const px  = pxEl ? parseFloat(pxEl.dataset.raw || 0) : 0;
+      const px   = pxEl ? parseFloat(pxEl.dataset.raw || 0) : 0;
       setMktCard(a.id, px, chg);
     }));
   } catch (e) { console.warn('Market fetch:', e.message); }
@@ -220,17 +225,14 @@ function quickLoad(name) {
 }
 
 /* ══════════════════════════════════════════════
-   FETCH ALL FILLS — COMPLETE HISTORY (no limit)
-   ────────────────────────────────────────────
+   FETCH ALL FILLS — complete history (chunked)
    Strategy:
-   1. userFills → latest batch (up to ~2000)
-   2. ALWAYS continue: chunk backward in 30-day windows
-      from oldest known fill timestamp.
-   3. Stop: 3 consecutive empty chunks OR 5 years back.
-   Handles wallets with 10,000+ fills correctly.
+   1. userFills → latest batch
+   2. Chunk backward 30-day windows from oldest fill
+   3. Stop after 3 consecutive empty chunks or 5yrs back
 ══════════════════════════════════════════════ */
 async function fetchAllFills(addr) {
-  setLoadText('Fetching all trade history...');
+  setLoadText('Loading trade history…');
 
   const seen  = new Set();
   const fills = [];
@@ -249,13 +251,11 @@ async function fetchAllFills(addr) {
     return added;
   }
 
-  /* Step 1: latest fills */
   try {
     const latest = await post({ type: 'userFills', user: addr });
     addBatch(latest);
   } catch(e) { console.warn('userFills:', e.message); }
 
-  /* Step 2: always chunk backward regardless of count */
   let endTime     = fills.length
     ? Math.min.apply(null, fills.map(function(f){ return f.time; })) - 1
     : Date.now();
@@ -264,7 +264,7 @@ async function fetchAllFills(addr) {
   while (endTime > LIMIT && emptyStreak < 3) {
     const startTime = Math.max(endTime - CHUNK, LIMIT);
     const dateLabel = new Date(startTime).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
-    setLoadText('Loading fills... ' + fills.length.toLocaleString() + ' found (' + dateLabel + ')');
+    setLoadText('Loading fills… ' + fills.length.toLocaleString() + ' found (' + dateLabel + ')');
     try {
       const chunk = await post({
         type: 'userFillsByTime',
@@ -276,7 +276,7 @@ async function fetchAllFills(addr) {
       const added = addBatch(chunk);
       emptyStreak = added === 0 ? emptyStreak + 1 : 0;
     } catch(e) {
-      console.warn('chunk fetch:', e.message);
+      console.warn('chunk:', e.message);
       emptyStreak++;
     }
     endTime = startTime - 1;
@@ -300,7 +300,7 @@ async function fetchAllFunding(addr) {
 }
 
 /* ══════════════════════════════════════════════
-   MAIN ANALYZE
+   MAIN ANALYZE — two-phase
 ══════════════════════════════════════════════ */
 async function analyze(isRefresh) {
   isRefresh = isRefresh || false;
@@ -310,52 +310,48 @@ async function analyze(isRefresh) {
   currentAddr = addr;
 
   if (!isRefresh) {
-    ['posCard','siteFooter','kpiGrid','calCard','txWrapper','feeNote'].forEach(function(id){
+    ['posCard','siteFooter','kpiGrid','calCard','txWrapper','feeNote','fillsCard'].forEach(function(id){
       const el = ge(id); if (el) el.style.display = 'none';
     });
     ge('balHero').style.display = 'none';
     showErr('');
+    allFills   = [];
+    allFunding = [];
   }
 
   show('loadingBar', 'flex');
-  setLoadText('Fetching portfolio data...');
+  setLoadText('Fetching portfolio data…');
 
   try {
-    const results = await Promise.all([
+    /* ── Phase 1: fast fetch ── */
+    const [perp, spot, mids, txData, portfolioData] = await Promise.all([
       post({ type: 'clearinghouseState',          user: addr }),
       post({ type: 'spotClearinghouseState',      user: addr }),
       post({ type: 'allMids' }),
       post({ type: 'userNonFundingLedgerUpdates', user: addr, startTime: 0 }),
       post({ type: 'portfolio',                   user: addr }),
     ]);
-    const perp          = results[0];
-    const spot          = results[1];
-    const mids          = results[2];
-    const txData        = results[3];
-    const portfolioData = results[4];
-
-    allFills   = await fetchAllFills(addr);
-    setLoadText('Fetching funding payments...');
-    allFunding = await fetchAllFunding(addr);
 
     updateBadge(addr);
     const wt = ge('walletTag');
     wt.style.display = 'flex';
     ge('walletAddr').textContent = addr.slice(0,6) + '...' + addr.slice(-4);
 
-    renderBalance(perp, spot, allFills, allFunding, portfolioData);
-    renderKPI(allFills, allFunding, portfolioData);
+    /* render immediately from portfolio data */
+    renderBalance(perp, spot);
+    renderKPI([], [], portfolioData);              /* portfolio KPIs shown now */
     renderPositions(perp, mids);
-    buildCalendar(allFills, allFunding);
+    buildCalendarFromPnlHistory(portfolioData);    /* calendar from pnlHistory */
     renderTx(txData, addr);
 
     ['posCard','siteFooter','feeNote','txWrapper','calCard'].forEach(function(id){
       const el = ge(id); if (el) el.style.display = '';
     });
-    ge('kpiGrid').style.display = 'grid';
-    ge('balHero').style.display = 'block';
-    ge('updTime').textContent = new Date().toLocaleTimeString();
+    ge('kpiGrid').style.display  = 'grid';
+    ge('balHero').style.display  = 'block';
+    ge('updTime').textContent    = new Date().toLocaleTimeString();
     showErr('');
+    hide('loadingBar');
 
     if (!isRefresh) startCountdown();
     else {
@@ -363,11 +359,49 @@ async function analyze(isRefresh) {
       tb.classList.add('flash');
       setTimeout(function(){ tb.classList.remove('flash'); }, 350);
     }
+
+    /* ── Phase 2: background fill loading ── */
+    loadFillsBackground(addr, portfolioData);
+
   } catch(e) {
     showErr('Error: ' + e.message);
     console.error(e);
+    hide('loadingBar');
+  }
+}
+
+/* ── Background fills + funding ── */
+async function loadFillsBackground(addr, portfolioData) {
+  try {
+    show('loadingBar', 'flex');
+    allFills   = await fetchAllFills(addr);
+
+    setLoadText('Fetching funding payments…');
+    allFunding = await fetchAllFunding(addr);
+
+    /* enrich calendar trade counts */
+    enrichCalendarWithFills(allFills, allFunding);
+
+    /* full KPI with trading stats */
+    renderKPI(allFills, allFunding, portfolioData);
+
+    /* update fees in balance row */
+    const feeEl = ge('totalFees');
+    if (feeEl) {
+      const feeTot = allFills.reduce(function(a, f){ return a + parseFloat(f.fee || 0); }, 0);
+      feeEl.textContent = fmt(Math.abs(feeTot), 2);
+    }
+
+    /* fills table */
+    renderFills(allFills);
+    show('fillsCard');
+
+  } catch(e) {
+    console.warn('Background fills:', e.message);
   } finally {
     hide('loadingBar');
+    const pfn = ge('pnlFetchNote');
+    if (pfn) pfn.style.display = 'none';
   }
 }
 
@@ -385,7 +419,7 @@ function startCountdown() {
 }
 
 /* ══════════════════════════════════════════════
-   PORTFOLIO ENDPOINT → true PnL
+   PORTFOLIO — parse period PnLs
 ══════════════════════════════════════════════ */
 function parsePortfolio(portfolioData) {
   const result = { allTimePnl: null, monthPnl: null, weekPnl: null, dayPnl: null };
@@ -398,8 +432,8 @@ function parsePortfolio(portfolioData) {
     const lastVal = parseFloat(history[history.length - 1][1]);
     if (period === 'allTime') result.allTimePnl = lastVal;
     if (period === 'month')   result.monthPnl   = lastVal;
-    if (period === 'week')    result.weekPnl    = lastVal;
-    if (period === 'day')     result.dayPnl     = lastVal;
+    if (period === 'week')    result.weekPnl     = lastVal;
+    if (period === 'day')     result.dayPnl      = lastVal;
   });
   return result;
 }
@@ -407,7 +441,7 @@ function parsePortfolio(portfolioData) {
 /* ══════════════════════════════════════════════
    RENDER — BALANCE HERO
 ══════════════════════════════════════════════ */
-function renderBalance(perp, spot, fills, funding, portfolioData) {
+function renderBalance(perp, spot) {
   const s     = perp.marginSummary || perp.crossMarginSummary || {};
   const perpV = parseFloat(s.accountValue || 0);
   const mU    = parseFloat(s.totalMarginUsed || 0);
@@ -421,7 +455,6 @@ function renderBalance(perp, spot, fills, funding, portfolioData) {
   let spotV = 0;
   (spot.balances || []).forEach(function(b){ spotV += parseFloat(b.total || 0); });
 
-  const feeTot = fills.reduce(function(a, f){ return a + parseFloat(f.fee || 0); }, 0);
   const active = (perp.assetPositions || []).filter(function(p){
     return parseFloat(p.position.szi) !== 0;
   }).length;
@@ -440,49 +473,48 @@ function renderBalance(perp, spot, fills, funding, portfolioData) {
     uEl.textContent = (unrealPnl >= 0 ? '+' : '') + fmt(unrealPnl, 2);
     uEl.className   = 'si-val ' + (unrealPnl >= 0 ? 'green' : 'red');
   }
-  ge('totalFees').textContent  = fmt(Math.abs(feeTot), 2);
-  ge('openCount').textContent  = active;
+  ge('openCount').textContent = active;
+  /* fees updated later in loadFillsBackground */
+  ge('totalFees').textContent = '…';
 }
 
 /* ══════════════════════════════════════════════
    RENDER — KPI
+   Phase 1 (fills=[]): shows portfolio PnLs only
+   Phase 2 (fills loaded): adds trading stats
 ══════════════════════════════════════════════ */
 function renderKPI(fills, funding, portfolioData) {
   const grid = ge('kpiGrid');
+  const port = parsePortfolio(portfolioData);
 
-  const port       = parsePortfolio(portfolioData);
-  const allTimePnl = port.allTimePnl;
-
+  /* ── Trading stats (only when fills available) ── */
+  const hasFills   = fills.length > 0;
   const tradesPnl  = fills.reduce(function(a, f){ return a + parseFloat(f.closedPnl || 0); }, 0);
   const fundingPnl = funding.reduce(function(a, f){ return a + parseFloat((f.delta && f.delta.usdc) || 0); }, 0);
-  const totalReal  = tradesPnl + fundingPnl;
   const feeAll     = fills.reduce(function(a, f){ return a + parseFloat(f.fee || 0); }, 0);
-  const netReal    = totalReal - feeAll;
+  const netReal    = tradesPnl + fundingPnl - feeAll;
 
-  /* only trades that close a position */
   const closing = fills.filter(function(f){ return parseFloat(f.closedPnl || 0) !== 0; });
   const wins    = closing.filter(function(f){ return parseFloat(f.closedPnl) > 0; }).length;
   const losses  = closing.filter(function(f){ return parseFloat(f.closedPnl) < 0; }).length;
-  const wr      = closing.length > 0 ? (wins / closing.length * 100).toFixed(1) : '0.0';
+  const wr      = closing.length > 0 ? (wins / closing.length * 100).toFixed(1) : null;
 
   const winPnls  = closing.filter(function(f){ return parseFloat(f.closedPnl) > 0; })
                           .map(function(f){ return parseFloat(f.closedPnl); });
   const lossPnls = closing.filter(function(f){ return parseFloat(f.closedPnl) < 0; })
                           .map(function(f){ return parseFloat(f.closedPnl); });
-  const avgWin   = winPnls.length  ? winPnls.reduce(function(a,b){ return a+b; }, 0)  / winPnls.length  : 0;
-  const avgLoss  = lossPnls.length ? lossPnls.reduce(function(a,b){ return a+b; }, 0) / lossPnls.length : 0;
+  const avgWin   = winPnls.length  ? winPnls.reduce(function(a,b){ return a+b;},0)  / winPnls.length  : 0;
+  const avgLoss  = lossPnls.length ? lossPnls.reduce(function(a,b){ return a+b;},0) / lossPnls.length : 0;
   const rr       = avgLoss !== 0 ? Math.abs(avgWin / avgLoss).toFixed(2) : '—';
 
-  const makers   = fills.filter(function(f){
+  const makers = fills.filter(function(f){
     return f.crossed === false || (f.crossed == null && parseFloat(f.fee || 0) <= 0);
   }).length;
-  const mkPct    = fills.length > 0 ? Math.round(makers / fills.length * 100) : 0;
+  const mkPct  = fills.length > 0 ? Math.round(makers / fills.length * 100) : 0;
 
-  /* best / worst day */
   const dayPnl = {};
   fills.forEach(function(f){
-    const pnl = parseFloat(f.closedPnl || 0);
-    if (!pnl) return;
+    const pnl = parseFloat(f.closedPnl || 0); if (!pnl) return;
     const key = keyFromTime(f.time);
     dayPnl[key] = (dayPnl[key] || 0) + pnl;
   });
@@ -493,141 +525,91 @@ function renderKPI(fills, funding, portfolioData) {
   const totalVol = fills.reduce(function(a, f){
     return a + parseFloat(f.sz||0) * parseFloat(f.px||0);
   }, 0);
-
-  const allPnls   = fills.map(function(f){ return parseFloat(f.closedPnl||0); });
-  const bigWin    = allPnls.length ? Math.max.apply(null, allPnls) : 0;
-  const bigLoss   = allPnls.length ? Math.min.apply(null, allPnls) : 0;
+  const bigWin  = fills.length ? Math.max.apply(null, fills.map(function(f){ return parseFloat(f.closedPnl||0); })) : 0;
+  const bigLoss = fills.length ? Math.min.apply(null, fills.map(function(f){ return parseFloat(f.closedPnl||0); })) : 0;
 
   let html = '';
 
-  if (allTimePnl != null) {
-    html += '<div class="kpi kpi-highlight" style="animation-delay:.02s">'
-      + '<div class="kpi-lbl">True Total PnL ✦</div>'
-      + '<div class="kpi-val ' + (allTimePnl >= 0 ? 'green' : 'red') + '">' + (allTimePnl >= 0 ? '+' : '') + fmt(allTimePnl) + '</div>'
-      + '<div class="kpi-sub">portfolio · most accurate</div>'
-      + '</div>';
+  /* ── All-Time PnL (portfolio — most accurate) ── */
+  if (port.allTimePnl != null) {
+    html += kpiCard(
+      'All-Time PnL ✦',
+      (port.allTimePnl >= 0 ? '+' : '') + fmt(port.allTimePnl),
+      port.allTimePnl >= 0 ? 'green' : 'red',
+      'portfolio · most accurate',
+      .02, true
+    );
   }
 
-  html += '<div class="kpi" style="animation-delay:.04s">'
-    + '<div class="kpi-lbl">Realized PnL</div>'
-    + '<div class="kpi-val ' + (totalReal >= 0 ? 'green' : 'red') + '">' + (totalReal >= 0 ? '+' : '') + fmt(totalReal) + '</div>'
-    + '<div class="kpi-sub">trades + funding</div>'
-    + '</div>';
-
-  html += '<div class="kpi" style="animation-delay:.06s">'
-    + '<div class="kpi-lbl">Net (after fees)</div>'
-    + '<div class="kpi-val ' + (netReal >= 0 ? 'green' : 'red') + '">' + (netReal >= 0 ? '+' : '') + fmt(netReal) + '</div>'
-    + '<div class="kpi-sub">USDC</div>'
-    + '</div>';
-
+  /* ── Period PnLs from portfolio ── */
   if (port.dayPnl != null) {
-    html += '<div class="kpi" style="animation-delay:.08s">'
-      + '<div class="kpi-lbl">24h PnL</div>'
-      + '<div class="kpi-val ' + (port.dayPnl >= 0 ? 'green' : 'red') + '">' + (port.dayPnl >= 0 ? '+' : '') + fmt(port.dayPnl) + '</div>'
-      + '<div class="kpi-sub">USDC</div>'
-      + '</div>';
+    html += kpiCard('24h PnL', (port.dayPnl >= 0 ? '+' : '') + fmt(port.dayPnl),
+      port.dayPnl >= 0 ? 'green' : 'red', 'USDC', .04);
   }
-
   if (port.weekPnl != null) {
-    html += '<div class="kpi" style="animation-delay:.10s">'
-      + '<div class="kpi-lbl">7-Day PnL</div>'
-      + '<div class="kpi-val ' + (port.weekPnl >= 0 ? 'green' : 'red') + '">' + (port.weekPnl >= 0 ? '+' : '') + fmt(port.weekPnl) + '</div>'
-      + '<div class="kpi-sub">USDC</div>'
-      + '</div>';
+    html += kpiCard('7-Day PnL', (port.weekPnl >= 0 ? '+' : '') + fmt(port.weekPnl),
+      port.weekPnl >= 0 ? 'green' : 'red', 'USDC', .06);
   }
-
   if (port.monthPnl != null) {
-    html += '<div class="kpi" style="animation-delay:.12s">'
-      + '<div class="kpi-lbl">30-Day PnL</div>'
-      + '<div class="kpi-val ' + (port.monthPnl >= 0 ? 'green' : 'red') + '">' + (port.monthPnl >= 0 ? '+' : '') + fmt(port.monthPnl) + '</div>'
-      + '<div class="kpi-sub">USDC</div>'
-      + '</div>';
+    html += kpiCard('30-Day PnL', (port.monthPnl >= 0 ? '+' : '') + fmt(port.monthPnl),
+      port.monthPnl >= 0 ? 'green' : 'red', 'USDC', .08);
   }
 
-  html += '<div class="kpi" style="animation-delay:.14s">'
-    + '<div class="kpi-lbl">Win Rate</div>'
-    + '<div class="kpi-val ' + (parseFloat(wr) >= 50 ? 'green' : 'red') + '">' + wr + '%</div>'
-    + '<div class="bar-w"><div class="bar-f" style="width:' + wr + '%"></div></div>'
-    + '<div class="kpi-sub">' + wins + 'W / ' + losses + 'L</div>'
-    + '</div>';
+  /* ── Stats below only after fills loaded ── */
+  if (hasFills) {
+    html += kpiCard('Net (after fees)',
+      (netReal >= 0 ? '+' : '') + fmt(netReal),
+      netReal >= 0 ? 'green' : 'red', 'realized − fees', .10);
 
-  html += '<div class="kpi" style="animation-delay:.16s">'
-    + '<div class="kpi-lbl">Total Trades</div>'
-    + '<div class="kpi-val yellow">' + fills.length.toLocaleString() + '</div>'
-    + '<div class="kpi-sub">' + closing.length.toLocaleString() + ' closing</div>'
-    + '</div>';
+    if (wr !== null) {
+      html += '<div class="kpi" style="animation-delay:.12s">'
+        + '<div class="kpi-lbl">Win Rate</div>'
+        + '<div class="kpi-val ' + (parseFloat(wr) >= 50 ? 'green' : 'red') + '">' + wr + '%</div>'
+        + '<div class="bar-w"><div class="bar-f" style="width:' + wr + '%"></div></div>'
+        + '<div class="kpi-sub">' + wins + 'W / ' + losses + 'L</div>'
+        + '</div>';
+    }
 
-  html += '<div class="kpi" style="animation-delay:.18s">'
-    + '<div class="kpi-lbl">Risk / Reward</div>'
-    + '<div class="kpi-val ' + (rr !== '—' && parseFloat(rr) >= 1 ? 'green' : 'orange') + '">' + rr + '</div>'
-    + '<div class="kpi-sub">avg win / avg loss</div>'
-    + '</div>';
+    html += kpiCard('Total Trades', fills.length.toLocaleString(), 'yellow',
+      closing.length.toLocaleString() + ' closing', .14);
 
-  html += '<div class="kpi" style="animation-delay:.20s">'
-    + '<div class="kpi-lbl">Avg Win</div>'
-    + '<div class="kpi-val green">+' + fmt(avgWin) + '</div>'
-    + '<div class="kpi-sub">per closing trade</div>'
-    + '</div>';
+    html += kpiCard('Risk / Reward', rr,
+      rr !== '—' && parseFloat(rr) >= 1 ? 'green' : 'orange', 'avg win / avg loss', .16);
 
-  html += '<div class="kpi" style="animation-delay:.22s">'
-    + '<div class="kpi-lbl">Avg Loss</div>'
-    + '<div class="kpi-val red">' + fmt(avgLoss) + '</div>'
-    + '<div class="kpi-sub">per closing trade</div>'
-    + '</div>';
+    html += kpiCard('Avg Win',  '+' + fmt(avgWin),  'green', 'per closing trade', .18);
+    html += kpiCard('Avg Loss', fmt(avgLoss),        'red',   'per closing trade', .20);
 
-  html += '<div class="kpi" style="animation-delay:.24s">'
-    + '<div class="kpi-lbl">Maker Rate</div>'
-    + '<div class="kpi-val purple">' + mkPct + '%</div>'
-    + '<div class="kpi-sub">' + makers.toLocaleString() + ' trades</div>'
-    + '</div>';
+    html += kpiCard('Maker Rate', mkPct + '%', 'purple',
+      makers.toLocaleString() + ' trades', .22);
 
-  html += '<div class="kpi" style="animation-delay:.26s">'
-    + '<div class="kpi-lbl">Total Fees</div>'
-    + '<div class="kpi-val orange">' + fmt(Math.abs(feeAll)) + '</div>'
-    + '<div class="kpi-sub">' + (feeAll < 0 ? 'net rebates' : 'USDC paid') + '</div>'
-    + '</div>';
+    html += kpiCard('Total Fees', fmt(Math.abs(feeAll)), 'orange',
+      feeAll < 0 ? 'net rebates' : 'USDC paid', .24);
 
-  html += '<div class="kpi" style="animation-delay:.28s">'
-    + '<div class="kpi-lbl">Funding PnL</div>'
-    + '<div class="kpi-val ' + (fundingPnl >= 0 ? 'cyan' : 'red') + '">' + (fundingPnl >= 0 ? '+' : '') + fmt(fundingPnl) + '</div>'
-    + '<div class="kpi-sub">' + funding.length + ' events</div>'
-    + '</div>';
+    html += kpiCard('Funding PnL',
+      (fundingPnl >= 0 ? '+' : '') + fmt(fundingPnl),
+      fundingPnl >= 0 ? 'cyan' : 'red',
+      funding.length + ' events', .26);
 
-  html += '<div class="kpi" style="animation-delay:.30s">'
-    + '<div class="kpi-lbl">Best Day</div>'
-    + '<div class="kpi-val green">+' + fmt(bestDay) + '</div>'
-    + '<div class="kpi-sub">USDC</div>'
-    + '</div>';
-
-  html += '<div class="kpi" style="animation-delay:.32s">'
-    + '<div class="kpi-lbl">Worst Day</div>'
-    + '<div class="kpi-val red">' + fmt(worstDay) + '</div>'
-    + '<div class="kpi-sub">USDC</div>'
-    + '</div>';
-
-  html += '<div class="kpi" style="animation-delay:.34s">'
-    + '<div class="kpi-lbl">Biggest Win</div>'
-    + '<div class="kpi-val green">+' + fmt(bigWin) + '</div>'
-    + '<div class="kpi-sub">single trade</div>'
-    + '</div>';
-
-  html += '<div class="kpi" style="animation-delay:.36s">'
-    + '<div class="kpi-lbl">Biggest Loss</div>'
-    + '<div class="kpi-val red">' + fmt(bigLoss) + '</div>'
-    + '<div class="kpi-sub">single trade</div>'
-    + '</div>';
-
-  html += '<div class="kpi" style="animation-delay:.38s">'
-    + '<div class="kpi-lbl">Total Volume</div>'
-    + '<div class="kpi-val blue">' + fmtLarge(totalVol) + '</div>'
-    + '<div class="kpi-sub">USDC notional</div>'
-    + '</div>';
+    html += kpiCard('Best Day',   '+' + fmt(bestDay),  'green', 'USDC', .28);
+    html += kpiCard('Worst Day',  fmt(worstDay),       'red',   'USDC', .30);
+    html += kpiCard('Biggest Win',  '+' + fmt(bigWin),  'green', 'single trade', .32);
+    html += kpiCard('Biggest Loss', fmt(bigLoss),       'red',   'single trade', .34);
+    html += kpiCard('Total Volume', fmtLarge(totalVol), 'blue',  'USDC notional', .36);
+  }
 
   grid.innerHTML = html;
 }
 
+function kpiCard(lbl, val, cls, sub, delay, highlight) {
+  return '<div class="kpi' + (highlight ? ' kpi-highlight' : '') + '" style="animation-delay:' + delay + 's">'
+    + '<div class="kpi-lbl">' + lbl + '</div>'
+    + '<div class="kpi-val ' + cls + '">' + val + '</div>'
+    + '<div class="kpi-sub">' + sub + '</div>'
+    + '</div>';
+}
+
 /* ══════════════════════════════════════════════
-   RENDER — POSITIONS (full details)
+   RENDER — POSITIONS
 ══════════════════════════════════════════════ */
 function renderPositions(perp, mids) {
   const active = (perp.assetPositions || []).filter(function(p){
@@ -640,7 +622,6 @@ function renderPositions(perp, mids) {
     return;
   }
 
-  /* per-coin fill stats */
   const coinStats = {};
   allFills.forEach(function(f){
     if (!coinStats[f.coin]) coinStats[f.coin] = { fees: 0, count: 0, takers: 0, lastFill: null };
@@ -661,7 +642,6 @@ function renderPositions(perp, mids) {
     const notional = Math.abs(size) * mark;
     const leverage = (pos.leverage && pos.leverage.value) ? pos.leverage.value : null;
     const levType  = (pos.leverage && pos.leverage.type)  ? pos.leverage.type  : '';
-    const maxLev   = (pos.leverage && pos.leverage.maxTradeLeverage) ? pos.leverage.maxTradeLeverage : null;
 
     const pnlPct = entry > 0 && mark > 0
       ? (mark - entry) / entry * 100 * (size > 0 ? 1 : -1) : null;
@@ -669,7 +649,6 @@ function renderPositions(perp, mids) {
     let liqDist = null;
     if (liq && mark > 0) liqDist = Math.abs((liq - mark) / mark * 100);
 
-    /* ROE relative to margin */
     const marginUsed = leverage && notional > 0 ? notional / parseFloat(leverage) : 0;
     const roe = marginUsed > 0 ? (unreal / marginUsed * 100) : null;
 
@@ -677,7 +656,6 @@ function renderPositions(perp, mids) {
     const makerPct = cs.count > 0 ? Math.round((1 - cs.takers / cs.count) * 100) : null;
     const lastOt   = cs.lastFill ? orderType(cs.lastFill) : null;
 
-    /* cumulative realized for this coin */
     const coinRealized = (allFills.filter(function(f){ return f.coin === pos.coin; })
                                   .reduce(function(a,f){ return a + parseFloat(f.closedPnl||0); }, 0));
 
@@ -707,35 +685,48 @@ function renderPositions(perp, mids) {
 }
 
 /* ══════════════════════════════════════════════
-   PnL CALENDAR — enhanced
-   Daily: net PnL (closes + funding - fees), volume, trade count
+   PnL CALENDAR — accurate daily from pnlHistory
+   ─────────────────────────────────────────────
+   Source: portfolio.allTime.pnlHistory
+     [[ts_ms, cumulativePnl], ...]
+   Algorithm:
+     1. Group by YYYY-MM-DD, keep LAST value per day
+     2. Daily PnL = last_today - last_yesterday
+   Progressive: trade counts added by enrichCalendarWithFills()
 ══════════════════════════════════════════════ */
-function buildCalendar(fills, funding) {
+function buildCalendarFromPnlHistory(portfolioData) {
   calPnlData = {};
 
-  function day(key) {
-    if (!calPnlData[key]) calPnlData[key] = { pnl: 0, volume: 0, trades: 0, funding: 0 };
-    return calPnlData[key];
+  if (!Array.isArray(portfolioData)) {
+    renderCalendar(); show('calCard'); return;
   }
 
-  fills.forEach(function(f){
-    const pnl = parseFloat(f.closedPnl || 0);
-    const fee = parseFloat(f.fee || 0);
-    const vol = parseFloat(f.sz||0) * parseFloat(f.px||0);
-    const key = keyFromTime(f.time);
-    const d   = day(key);
-    d.pnl    += pnl - fee;
-    d.volume += vol;
-    d.trades++;
+  const allTimeItem = portfolioData.find(function(item){ return item[0] === 'allTime'; });
+  if (!allTimeItem || !allTimeItem[1] || !Array.isArray(allTimeItem[1].pnlHistory)) {
+    renderCalendar(); show('calCard'); return;
+  }
+
+  const hist = allTimeItem[1].pnlHistory; /* [[ts_ms, cum_pnl], ...] */
+
+  /* Group: keep last cumulative PnL value per calendar day */
+  const dayLast = {};
+  hist.forEach(function(pt){
+    const key = keyFromTime(pt[0]);
+    dayLast[key] = parseFloat(pt[1]);
   });
 
-  funding.forEach(function(f){
-    const usdc = parseFloat((f.delta && f.delta.usdc) || 0);
-    if (!usdc) return;
-    const key = keyFromTime(f.time);
-    const d   = day(key);
-    d.pnl     += usdc;
-    d.funding += usdc;
+  /* Sort days ascending to compute diffs */
+  const days = Object.keys(dayLast).sort();
+
+  days.forEach(function(key, i){
+    const prev = i > 0 ? dayLast[days[i - 1]] : 0;
+    const curr = dayLast[key];
+    calPnlData[key] = {
+      pnl:     curr - prev,
+      volume:  0,
+      trades:  -1,   /* -1 = "not yet loaded" */
+      funding: 0,
+    };
   });
 
   const now = new Date();
@@ -743,6 +734,33 @@ function buildCalendar(fills, funding) {
   calMonth  = now.getMonth();
   renderCalendar();
   show('calCard');
+}
+
+/* Enrich calendar with fill trade counts (Phase 2) */
+function enrichCalendarWithFills(fills, funding) {
+  /* reset trade counts */
+  Object.keys(calPnlData).forEach(function(k){
+    calPnlData[k].trades  = 0;
+    calPnlData[k].volume  = 0;
+    calPnlData[k].funding = 0;
+  });
+
+  fills.forEach(function(f){
+    const key = keyFromTime(f.time);
+    if (!calPnlData[key]) calPnlData[key] = { pnl: 0, volume: 0, trades: 0, funding: 0 };
+    calPnlData[key].volume += parseFloat(f.sz||0) * parseFloat(f.px||0);
+    calPnlData[key].trades++;
+  });
+
+  funding.forEach(function(f){
+    const usdc = parseFloat((f.delta && f.delta.usdc) || 0);
+    if (!usdc) return;
+    const key = keyFromTime(f.time);
+    if (!calPnlData[key]) calPnlData[key] = { pnl: 0, volume: 0, trades: 0, funding: 0 };
+    calPnlData[key].funding += usdc;
+  });
+
+  renderCalendar();
 }
 
 function calNav(dir) {
@@ -758,15 +776,14 @@ function renderCalendar() {
   const firstDay    = new Date(calYear, calMonth, 1).getDay();
   const today       = new Date();
 
-  let monthPnl = 0, monthVol = 0, monthTrades = 0;
-  let maxAbs   = 0;
+  let monthPnl = 0, monthVol = 0, monthTrades = 0, maxAbs = 0;
   for (let d = 1; d <= daysInMonth; d++) {
     const key  = calYear + '-' + pad2(calMonth + 1) + '-' + pad2(d);
     const data = calPnlData[key];
     if (data) {
       monthPnl    += data.pnl;
       monthVol    += data.volume;
-      monthTrades += data.trades;
+      if (data.trades > 0) monthTrades += data.trades;
       if (Math.abs(data.pnl) > maxAbs) maxAbs = Math.abs(data.pnl);
     }
   }
@@ -775,7 +792,10 @@ function renderCalendar() {
   sumEl.innerHTML = '<span style="color:' + (monthPnl >= 0 ? 'var(--green)' : 'var(--red)') + '; font-size:14px; font-weight:700">'
     + (monthPnl >= 0 ? '+' : '') + fmt(monthPnl, 2) + ' $'
     + '</span>'
-    + '<span class="cal-sum-sub">' + monthTrades.toLocaleString() + ' trades &middot; ' + fmtLarge(monthVol) + ' vol</span>';
+    + '<span class="cal-sum-sub">'
+    + (monthTrades > 0 ? monthTrades.toLocaleString() + ' trades · ' : '')
+    + (monthVol > 0 ? fmtLarge(monthVol) + ' vol' : '')
+    + '</span>';
 
   let html = '';
   for (let i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
@@ -792,17 +812,25 @@ function renderCalendar() {
     if (data && pnl !== 0) {
       cls += pnl > 0 ? 'pnl-pos' : 'pnl-neg';
       const intensity = maxAbs > 0 ? Math.min(Math.abs(pnl) / maxAbs, 1) : 0;
-      const abs    = Math.abs(pnl);
-      const sign   = pnl > 0 ? '+' : '';
-      const pnlStr = abs >= 100000 ? sign + (pnl/1000).toFixed(0) + 'k'
-                   : abs >= 10000  ? sign + (pnl/1000).toFixed(1) + 'k'
-                   : abs >= 1000   ? sign + pnl.toFixed(0)
-                   : sign + pnl.toFixed(1);
+      const abs       = Math.abs(pnl);
+      const sign      = pnl > 0 ? '+' : '';
+      const pnlStr    = abs >= 100000 ? sign + (pnl/1000).toFixed(0) + 'k'
+                      : abs >= 10000  ? sign + (pnl/1000).toFixed(1) + 'k'
+                      : abs >= 1000   ? sign + pnl.toFixed(0)
+                      : sign + pnl.toFixed(1);
+
+      /* trades count display */
+      let tradesStr = '';
+      if (data.trades === -1) {
+        tradesStr = '<div class="cal-trades" style="color:var(--dim)">…</div>';
+      } else if (data.trades > 0) {
+        tradesStr = '<div class="cal-trades">' + data.trades + 't</div>';
+      }
 
       inner = '<div class="cal-intensity" style="height:' + Math.round(intensity * 100) + '%;opacity:' + (0.15 + intensity * 0.3) + '"></div>'
             + '<div class="cal-dn">' + d + '</div>'
             + '<div class="cal-pnl">' + pnlStr + '</div>'
-            + (data.trades > 0 ? '<div class="cal-trades">' + data.trades + 't</div>' : '');
+            + tradesStr;
     } else {
       cls  += 'no-data';
       inner = '<div class="cal-dn">' + d + '</div>';
@@ -810,13 +838,49 @@ function renderCalendar() {
 
     if (isToday) cls += ' today';
 
+    const tooltipTrades = data && data.trades > 0 ? '\nTrades: ' + data.trades + '\nVolume: ' + fmtLarge(data.volume) : '';
+    const tooltipFund   = data && data.funding ? '\nFunding: ' + fmt(data.funding, 2) + ' $' : '';
     const tooltip = data
-      ? key + '\nPnL: ' + (pnl >= 0 ? '+' : '') + fmt(pnl, 2) + ' $\nTrades: ' + data.trades + '\nVolume: ' + fmtLarge(data.volume) + '\nFunding: ' + fmt(data.funding, 2) + ' $'
+      ? key + '\nPnL: ' + (pnl >= 0 ? '+' : '') + fmt(pnl, 2) + ' $' + tooltipTrades + tooltipFund
       : key;
 
     html += '<div class="' + cls + '" title="' + tooltip + '" style="animation:fade-up .22s ' + (((firstDay + d - 1) % 7) * 0.025) + 's both">' + inner + '</div>';
   }
   ge('calDays').innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════
+   RENDER — FILLS TABLE
+══════════════════════════════════════════════ */
+function renderFills(fills) {
+  ge('fillsBadge').textContent = fills.length.toLocaleString();
+  const tbody = ge('fillsTbody');
+  if (!fills.length) {
+    tbody.innerHTML = '<tr class="no-data-row"><td colspan="9">No trades found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = fills.slice(0, 500).map(function(f, i){
+    const pnl   = parseFloat(f.closedPnl || 0);
+    const fee   = parseFloat(f.fee || 0);
+    const sz    = parseFloat(f.sz || 0);
+    const px    = parseFloat(f.px || 0);
+    const notl  = sz * px;
+    const feePct = notl > 0 ? (Math.abs(fee) / notl * 100).toFixed(4) : '—';
+    const ot    = orderType(f);
+    return '<tr class="row-anim" style="animation-delay:' + Math.min(i * 0.01, 0.3) + 's">'
+      + '<td class="tx-time">' + fmtTime(f.time) + '</td>'
+      + '<td class="fw7">' + f.coin + '</td>'
+      + '<td><span class="tag ' + (f.side === 'B' ? 'tag-buy' : 'tag-sell') + '">'
+          + (f.side === 'B' ? '▲ Buy' : '▼ Sell') + '</span></td>'
+      + '<td><span class="tag ' + ot.cls + '">' + ot.label + '</span></td>'
+      + '<td class="mono">' + fmt(px, 2) + '</td>'
+      + '<td class="mono">' + fmt(sz, 4) + '</td>'
+      + '<td class="mono ' + colClass(pnl) + ' fw7">'
+          + (pnl !== 0 ? (pnl >= 0 ? '+' : '') + fmt(pnl, 2) : '—') + '</td>'
+      + '<td class="mono orange">' + fmt(Math.abs(fee), 4) + '</td>'
+      + '<td class="mono muted-txt">' + feePct + (feePct !== '—' ? '%' : '') + '</td>'
+      + '</tr>';
+  }).join('');
 }
 
 /* ══════════════════════════════════════════════
@@ -983,9 +1047,9 @@ function animNum(id, val, decimals) {
 /* ══════════════════════════════════════════════
    UTILS
 ══════════════════════════════════════════════ */
-function ge(id)            { return document.getElementById(id); }
-function show(id, d)       { d = d || 'block'; const e = ge(id); if (e) e.style.display = d; }
-function hide(id)          { const e = ge(id); if (e) e.style.display = 'none'; }
+function ge(id)  { return document.getElementById(id); }
+function show(id, d) { d = d || 'block'; const e = ge(id); if (e) e.style.display = d; }
+function hide(id)    { const e = ge(id); if (e) e.style.display = 'none'; }
 function fmt(n, d) {
   d = d != null ? d : 2;
   const v = parseFloat(n);
