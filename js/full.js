@@ -13,7 +13,7 @@
     style.textContent = `
         #fs-btn {
             position: fixed;
-            bottom: 18px;
+            top: 18px;
             left: 18px;
             z-index: 99999;
             width: 36px;
