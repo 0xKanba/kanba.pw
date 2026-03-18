@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compound Interest Calculator | Kanba Trader</title>
+<meta name="description" content="Calculate compound interest period by period. See how your investment grows with detailed breakdowns and instant results.">
+<meta property="og:title" content="Compound Interest Calculator | Kanba Trader">
+<meta property="og:description" content="Professional compound interest calculator with detailed period breakdown.">
+<meta property="og:image" content="/images/0xbtc.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="/images/0xbtc.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inconsolata:wght@400;500;600;700&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/ccr.css">
+<link rel="icon" href="/images/0xbtc.png" type="image/png">
+</head>
+<body>
+
+<!-- SEO Hidden -->
+<h1 class="seo-only">Compound Interest Calculator — Period by Period Results</h1>
+
+<main class="calc-main">
+  <div class="calc-container">
+
+    <!-- Header -->
+    <div class="calc-hero">
+      <div class="calc-hero-badge">COMPOUNDING CALCULATOR</div>
+      <h2 class="calc-hero-title">Visualize Exponential Growth</h2>
+      <p class="calc-hero-sub">Enter your starting balance, gain per period, and number of periods to see instant results.</p>
+    </div>
+
+    <!-- Input Panel -->
+    <div class="calc-panel">
+      <div class="calc-inputs-row">
+
+        <div class="calc-field">
+          <label class="calc-label" for="principalAmount">
+            <span class="calc-label-ico">◈</span> Starting Balance
+          </label>
+          <div class="calc-input-wrap">
+            <span class="calc-prefix">$</span>
+            <input type="number" id="principalAmount" class="calc-input calc-numeric"
+              placeholder="10,000" inputmode="decimal" min="0.01" step="0.01">
+          </div>
+        </div>
+
+        <div class="calc-field">
+          <label class="calc-label" for="gainRate">
+            <span class="calc-label-ico">◈</span> Gain Per Period
+          </label>
+          <div class="calc-input-wrap">
+            <input type="number" id="gainRate" class="calc-input calc-numeric"
+              placeholder="5" inputmode="decimal" min="0.01" max="1000" step="0.01">
+            <span class="calc-suffix">%</span>
+          </div>
+        </div>
+
+        <div class="calc-field">
+          <label class="calc-label" for="numPeriods">
+            <span class="calc-label-ico">◈</span> No. of Periods
+          </label>
+          <div class="calc-input-wrap">
+            <input type="number" id="numPeriods" class="calc-input calc-numeric"
+              placeholder="12" inputmode="numeric" min="1" max="1000" step="1">
+            <span class="calc-suffix">×</span>
+          </div>
+        </div>
+
+        <button id="calcBtn" class="calc-btn">
+          <span class="calc-btn-text">Calculate</span>
+          <span class="calc-btn-arrow">→</span>
+        </button>
+
+      </div>
+      <div id="calcError" class="calc-error-bar hidden">⚠ Please enter valid values in all fields.</div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsArea" class="calc-results hidden">
+
+      <!-- Summary Row -->
+      <div class="calc-summary-row">
+        <div class="calc-stat-card">
+          <div class="calc-stat-label">Final Balance</div>
+          <div class="calc-stat-value mono" id="finalAmountDisplay">—</div>
+          <div class="calc-stat-badge" id="totalGainPct">—</div>
+        </div>
+        <div class="calc-stat-card accent-card">
+          <div class="calc-stat-label">Total Profit</div>
+          <div class="calc-stat-value mono" id="totalProfitDisplay">—</div>
+          <div class="calc-stat-badge" id="profitVsPrincipal">—</div>
+        </div>
+        <div class="calc-stat-card">
+          <div class="calc-stat-label">Avg Profit / Period</div>
+          <div class="calc-stat-value mono" id="avgProfitDisplay">—</div>
+          <div class="calc-stat-sub" id="periodCountLabel">—</div>
+        </div>
+        <div class="calc-stat-card">
+          <div class="calc-stat-label">Starting Balance</div>
+          <div class="calc-stat-value mono" id="principalDisplay">—</div>
+          <div class="calc-stat-sub">initial capital</div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="calc-table-wrap">
+        <div class="calc-table-header">
+          <span class="calc-table-title">Period Breakdown</span>
+          <span class="calc-table-count" id="tableRowCount">— periods</span>
+        </div>
+        <div class="calc-table-scroll">
+          <table class="calc-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Starting Balance</th>
+                <th>Profit</th>
+                <th>Ending Balance</th>
+                <th>Cumulative Profit</th>
+                <th>Total Gain</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Arabic Info Section -->
+    <div class="calc-info-ar" dir="rtl">
+      <p>
+        <strong>ما هو التراكم؟</strong> التراكم هو إعادة استثمار الأرباح لتوليد مزيد من الأرباح — أي الحصول على فائدة على الفائدة. عندما تتراكم أرباحك، يصبح النمو أُسّياً لا خطياً. قال ألبرت أينشتاين عن الفائدة المركبة إنها "أقوى قوة في الكون".<br><br>
+        <strong>صيغة الفائدة المركبة:</strong> القيمة المستقبلية = الأصل × (1 + r)<sup>n</sup> — حيث r هو معدل الربح للفترة وn عدد الفترات.<br><br>
+        تُحسّن قراراتك بأدواتنا الأخرى: حاسبة الربح، وحاسبة خطر الخراب، وحاسبة الهامش، وحاسبة حجم الصفقة.
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<div id="footer"></div>
+
+<script src="/js/common.js"></script>
+<script src="/js/ccr.js"></script>
+</body>
+</html>
