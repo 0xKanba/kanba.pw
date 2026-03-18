@@ -14,19 +14,16 @@
     }
     
     function setupEventListeners() {
-        // Form submission
         const form = document.getElementById('calcForm');
         if (form) {
             form.addEventListener('submit', handleFormSubmit);
         }
         
-        // View toggle buttons
         const toggleBtns = document.querySelectorAll('.calc-toggle-btn');
         toggleBtns.forEach(btn => {
             btn.addEventListener('click', handleViewToggle);
         });
         
-        // Input validation
         const inputs = document.querySelectorAll('.calc-numeric');
         inputs.forEach(input => {
             input.addEventListener('input', handleInputValidation);
@@ -37,15 +34,12 @@
     function setupNumericInputs() {
         const numericInputs = document.querySelectorAll('.calc-numeric');
         numericInputs.forEach(input => {
-            // Force numeric keyboard on mobile
             input.setAttribute('inputmode', 'decimal');
             
-            // Select all text on focus
             input.addEventListener('focus', function() {
                 this.select();
             });
             
-            // Prevent non-numeric input
             input.addEventListener('keypress', function(e) {
                 const char = String.fromCharCode(e.which);
                 if (!char.match(/[0-9.]/) && e.which !== 8) {
@@ -88,12 +82,10 @@
     function handleFormSubmit(e) {
         e.preventDefault();
         
-        // Get input values
         const principal = parseFloat(document.getElementById('principalAmount').value);
         const rate = parseFloat(document.getElementById('interestRate').value) / 100;
         const periods = parseInt(document.getElementById('numPeriods').value);
         
-        // Validate inputs
         if (isNaN(principal) || principal <= 0 ||
             isNaN(rate) || rate <= 0 ||
             isNaN(periods) || periods <= 0) {
@@ -101,21 +93,18 @@
             return;
         }
         
-        // Calculate compound interest
         const results = calculateCompoundInterest(principal, rate, periods);
         currentData = results.data;
         
-        // Display results
         displayResults(results);
         
-        // Show results section
         const resultsArea = document.getElementById('resultsArea');
         resultsArea.classList.remove('hidden');
         
-        // Smooth scroll to results
+        // Smooth scroll to results — 10ms delay
         setTimeout(() => {
             resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+        }, 10);
     }
     
     function calculateCompoundInterest(principal, rate, periods) {
@@ -150,19 +139,15 @@
     }
     
     function displayResults(results) {
-        // Update summary cards
-        animateValue('finalAmountDisplay', 0, results.finalAmount, 1000, true);
-        animateValue('totalInterestDisplay', 0, results.totalInterest, 1000, true);
-        animateValue('avgGrowthDisplay', 0, results.averageGrowth, 1000, true);
+        // 10ms animation duration = instant display (0.01s)
+        animateValue('finalAmountDisplay', 0, results.finalAmount, 10, true);
+        animateValue('totalInterestDisplay', 0, results.totalInterest, 10, true);
+        animateValue('avgGrowthDisplay', 0, results.averageGrowth, 10, true);
         
-        // Update percentage badge
         const percentBadge = document.getElementById('totalGainPercent');
         percentBadge.textContent = `+${results.totalGainPercent.toFixed(2)}%`;
         
-        // Create chart
         createChart(results.data);
-        
-        // Create table
         createTable(results.data);
     }
     
@@ -195,14 +180,12 @@
         const tooltip = document.getElementById('chartTooltip');
         if (!tooltip) return;
         
-        // Update tooltip content
         document.getElementById('tooltipPeriod').textContent = `Time ${dataPoint.period}`;
         document.getElementById('tooltipBalance').textContent = 
             '$' + dataPoint.endBalance.toLocaleString('en-US', { minimumFractionDigits: 2 });
         document.getElementById('tooltipInterest').textContent = 
             '$' + dataPoint.interest.toLocaleString('en-US', { minimumFractionDigits: 2 });
         
-        // Show tooltip
         tooltip.classList.add('show');
     }
     
@@ -217,12 +200,10 @@
         const ctx = document.getElementById('growthChart');
         if (!ctx) return;
         
-        // Destroy existing chart
         if (chartInstance) {
             chartInstance.destroy();
         }
         
-        // Create new chart
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -287,7 +268,7 @@
                         }
                     },
                     tooltip: {
-                        enabled: false // Disable default tooltip
+                        enabled: false
                     }
                 },
                 scales: {
@@ -323,7 +304,6 @@
             }
         });
         
-        // Hide tooltip when mouse leaves chart
         ctx.addEventListener('mouseleave', hideTooltip);
     }
     
@@ -349,25 +329,21 @@
         const btn = e.target;
         const view = btn.dataset.view;
         
-        // Update active button
         document.querySelectorAll('.calc-toggle-btn').forEach(b => {
             b.classList.remove('active');
         });
         btn.classList.add('active');
         
-        // Toggle views
         const chartContainer = document.getElementById('chartContainer');
         const tableContainer = document.getElementById('tableContainer');
         
         if (view === 'chart') {
             chartContainer.classList.remove('calc-view-hidden');
             tableContainer.classList.add('calc-view-hidden');
-            // Hide tooltip when switching to chart
             hideTooltip();
         } else {
             chartContainer.classList.add('calc-view-hidden');
             tableContainer.classList.remove('calc-view-hidden');
-            // Hide tooltip when switching to table
             hideTooltip();
         }
     }
