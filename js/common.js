@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded',function(){const link=document.crea
           <a href="/younis.html" class="footer-tab" data-page="younis">Younis</a>
           <a href="/ccr.html" class="footer-tab"  data-page="ccr">Compounding Calc.</a>
           <a href="/HLsee.html" class="footer-tab" data-page="hlsee">see analysis</a>
-          <a href="/video2026mar.html" class="footer-tab" target="_blank" data-page="video2026mar">video2026mar</a>
+          <a href="/videos.html" class="footer-tab" target="_blank" data-page="videos">my videos</a>
 
         </div>
         <div class="copyright">
