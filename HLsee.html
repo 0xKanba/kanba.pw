@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>HLsee — Portfolio</title>
+<meta name="description" content="Hyperliquid wallet portfolio analyzer">
 <link rel="icon" href="/images/0xbtc.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -13,195 +14,218 @@
 </head>
 <body>
 
-<!-- ─── Topbar ─── -->
-<div class="topbar">
-  <div class="tb-left">
+<!-- ═══ TOPBAR ═══ -->
+<header class="topbar">
+  <div class="tb-brand">
     <span class="tb-logo">HL</span>
-    <div class="alias-chips" id="aliasRow"></div>
+    <span class="tb-name">Portfolio</span>
   </div>
-  <div class="tb-right">
-    <div class="search-row">
+  <div class="tb-search">
+    <div class="search-wrap">
       <input id="addrInput" class="addr-input" type="text"
              placeholder="0x address or alias"
              autocomplete="off" spellcheck="false"/>
-      <button class="go-btn" onclick="analyze()">Go</button>
+      <button class="go-btn" onclick="analyze()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
     </div>
+    <div class="aliases" id="aliasRow"></div>
   </div>
+</header>
+
+<!-- ═══ LOADING BAR ═══ -->
+<div class="load-bar" id="loadBar" style="display:none">
+  <div class="lb-track"><div class="lb-fill" id="lbFill"></div></div>
+  <span class="lb-txt" id="loadTxt">Fetching…</span>
 </div>
 
-<!-- ─── Status / Error ─── -->
-<div class="status-strip" id="statusStrip" style="display:none">
-  <span class="ss-spin"></span>
-  <span id="statusText"></span>
-</div>
-<div class="err-strip" id="errBox" style="display:none"></div>
+<!-- ═══ ERROR ═══ -->
+<div class="err-bar" id="errBar" style="display:none"></div>
 
-<!-- ─── Content ─── -->
-<main id="hlMain" style="display:none">
+<!-- ═══ MAIN ═══ -->
+<main id="main" style="display:none">
 
-  <!-- Account header -->
-  <div class="acct-header">
-    <div class="acct-addr-row">
-      <span class="acct-addr" id="acctAddr">—</span>
-      <span class="acct-refresh" id="refreshTimer" style="display:none">
-        ↺ <span id="countdown">30</span>s
-      </span>
+  <!-- Wallet header -->
+  <div class="wallet-hd">
+    <div class="wh-left">
+      <button class="addr-chip" id="addrChip" onclick="copyAddr()" title="Click to copy">
+        <span class="ac-dot"></span>
+        <span class="ac-addr" id="acAddr">—</span>
+        <svg class="ac-copy" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span class="ac-copied" id="acCopied">Copied!</span>
+      </button>
     </div>
-    <div class="acct-value-row">
-      <div class="av-block">
-        <div class="av-label">Account Value</div>
-        <div class="av-num" id="totalBal">—</div>
-        <div class="av-sub">USDC</div>
-      </div>
-      <div class="acct-meta">
-        <div class="am-item">
-          <span class="am-l">Perp Account</span>
-          <span class="am-v" id="perpBal">—</span>
+    <div class="wh-right">
+      <span class="upd-time" id="updTime" style="display:none">Updated <span id="updTimeVal">—</span></span>
+      <div class="refresh-wrap">
+        <div class="cd-ring" id="cdRing">
+          <svg width="28" height="28" viewBox="0 0 28 28">
+            <circle class="cd-bg" cx="14" cy="14" r="11"/>
+            <circle class="cd-arc" id="cdArc" cx="14" cy="14" r="11"/>
+          </svg>
+          <span class="cd-num" id="cdNum">60</span>
         </div>
-        <div class="am-item">
-          <span class="am-l">Spot</span>
-          <span class="am-v yellow" id="spotBal">—</span>
-        </div>
-        <div class="am-item">
-          <span class="am-l">Unrealized PnL</span>
-          <span class="am-v" id="unrealPnl">—</span>
-        </div>
-        <div class="am-item">
-          <span class="am-l">Margin Used</span>
-          <span class="am-v red" id="marginUsed">—</span>
-        </div>
-        <div class="am-item">
-          <span class="am-l">Free Margin</span>
-          <span class="am-v green" id="marginFree">—</span>
-        </div>
+        <button class="ref-btn" id="refBtn" onclick="analyze(true)" title="Refresh">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- PnL stats bar -->
-  <div class="pnl-bar" id="pnlBar" style="display:none">
-    <div class="pnl-item pnl-hi">
-      <div class="pi-l">All-Time PnL</div>
-      <div class="pi-v" id="pnlAllTime">—</div>
+  <!-- Account overview -->
+  <div class="acct-overview">
+    <div class="ao-main">
+      <div class="ao-label">Total Portfolio Value</div>
+      <div class="ao-total"><span id="totalBal">—</span> <span class="ao-unit">USDC</span></div>
     </div>
-    <div class="pnl-sep"></div>
-    <div class="pnl-item">
-      <div class="pi-l">30-Day</div>
-      <div class="pi-v" id="pnlMonth">—</div>
+    <div class="ao-stats">
+      <div class="aos-item">
+        <span class="aos-l">Perp Account</span>
+        <span class="aos-v" id="perpBal">—</span>
+      </div>
+      <div class="aos-item">
+        <span class="aos-l">Spot</span>
+        <span class="aos-v yellow" id="spotBal">—</span>
+      </div>
+      <div class="aos-item">
+        <span class="aos-l">Unrealized PnL</span>
+        <span class="aos-v" id="unrealPnl">—</span>
+      </div>
+      <div class="aos-item">
+        <span class="aos-l">Margin Used</span>
+        <span class="aos-v red" id="marginUsed">—</span>
+      </div>
+      <div class="aos-item">
+        <span class="aos-l">Free Margin</span>
+        <span class="aos-v green" id="marginFree">—</span>
+      </div>
+      <div class="aos-item">
+        <span class="aos-l">Open Positions</span>
+        <span class="aos-v cyan" id="openCount">—</span>
+      </div>
     </div>
-    <div class="pnl-sep"></div>
-    <div class="pnl-item">
-      <div class="pi-l">7-Day</div>
-      <div class="pi-v" id="pnlWeek">—</div>
+  </div>
+
+  <!-- PnL row -->
+  <div class="pnl-row" id="pnlRow" style="display:none">
+    <div class="pr-item pr-accent">
+      <div class="pr-l">All-Time PnL</div>
+      <div class="pr-v" id="pnlAllTime">—</div>
     </div>
-    <div class="pnl-sep"></div>
-    <div class="pnl-item">
-      <div class="pi-l">24h</div>
-      <div class="pi-v" id="pnlDay">—</div>
+    <div class="pr-div"></div>
+    <div class="pr-item">
+      <div class="pr-l">30-Day</div>
+      <div class="pr-v" id="pnlMonth">—</div>
     </div>
-    <div class="pnl-sep"></div>
-    <div class="pnl-item">
-      <div class="pi-l">Win Rate</div>
-      <div class="pi-v" id="statWinRate">—</div>
+    <div class="pr-div"></div>
+    <div class="pr-item">
+      <div class="pr-l">7-Day</div>
+      <div class="pr-v" id="pnlWeek">—</div>
     </div>
-    <div class="pnl-sep"></div>
-    <div class="pnl-item">
-      <div class="pi-l">Total Fees</div>
-      <div class="pi-v orange" id="statFees">—</div>
+    <div class="pr-div"></div>
+    <div class="pr-item">
+      <div class="pr-l">24h</div>
+      <div class="pr-v" id="pnlDay">—</div>
     </div>
-    <div class="pnl-sep"></div>
-    <div class="pnl-item">
-      <div class="pi-l">Volume</div>
-      <div class="pi-v blue" id="statVol">—</div>
+    <div class="pr-div"></div>
+    <div class="pr-item">
+      <div class="pr-l">Win Rate</div>
+      <div class="pr-v" id="statWr">—</div>
+    </div>
+    <div class="pr-div"></div>
+    <div class="pr-item">
+      <div class="pr-l">Total Fees</div>
+      <div class="pr-v orange" id="statFees">—</div>
+    </div>
+    <div class="pr-div"></div>
+    <div class="pr-item">
+      <div class="pr-l">Volume</div>
+      <div class="pr-v blue" id="statVol">—</div>
+    </div>
+    <div class="pr-div"></div>
+    <div class="pr-item">
+      <div class="pr-l">Trades</div>
+      <div class="pr-v" id="statTrades">—</div>
     </div>
   </div>
 
   <!-- Open Positions -->
-  <div class="section" id="posSection">
-    <div class="sec-hd">
-      <span class="sec-title">Open Positions</span>
-      <span class="sec-count" id="posCnt">0</span>
+  <div class="card" id="posCard">
+    <div class="card-hd">
+      <span class="card-title">Open Positions</span>
+      <span class="badge" id="posBadge">0</span>
     </div>
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Asset</th>
-          <th>Side</th>
-          <th>Size</th>
-          <th>Entry</th>
-          <th>Mark</th>
-          <th>Unrealized PnL</th>
-          <th>PnL %</th>
-          <th>ROE %</th>
-          <th>Leverage</th>
-          <th>Liq. Price</th>
-          <th>Notional</th>
+          <th>Asset</th><th>Side</th><th>Size</th>
+          <th>Entry</th><th>Mark</th>
+          <th>Unrealized PnL</th><th>PnL %</th><th>ROE %</th>
+          <th>Leverage</th><th>Liq. Price</th><th>Notional</th>
         </tr></thead>
         <tbody id="posTbody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- Trade History -->
-  <div class="section" id="fillsSection" style="display:none">
-    <div class="sec-hd">
-      <span class="sec-title">Recent Trades</span>
-      <span class="sec-count" id="fillsCnt">0</span>
-      <span class="loading-inline" id="fillsLoading" style="display:none">loading…</span>
+  <!-- Trade History (last 100) -->
+  <div class="card" id="fillsCard" style="display:none">
+    <div class="card-hd">
+      <span class="card-title">Recent Trades</span>
+      <span class="badge" id="fillsBadge">0</span>
+      <span class="load-dot" id="fillsDot" style="display:none"></span>
     </div>
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Time</th>
-          <th>Asset</th>
-          <th>Side</th>
-          <th>Type</th>
-          <th>Price</th>
-          <th>Size</th>
-          <th>Notional</th>
-          <th>Realized PnL</th>
-          <th>Fee</th>
+          <th>Time</th><th>Asset</th><th>Side</th><th>Type</th>
+          <th>Price</th><th>Size</th><th>Notional</th>
+          <th>Realized PnL</th><th>Fee</th>
         </tr></thead>
         <tbody id="fillsTbody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- Deposits / Withdrawals -->
-  <div class="section" id="txSection" style="display:none">
-    <div class="sec-hd">
-      <span class="sec-title">Deposits & Withdrawals</span>
-      <span class="sec-count" id="txCnt">0</span>
+  <!-- Deposits & Withdrawals -->
+  <div class="card" id="txCard" style="display:none">
+    <div class="card-hd">
+      <span class="card-title">Deposits & Withdrawals</span>
+      <span class="badge" id="txBadge">0</span>
     </div>
-    <div class="tx-summary" id="txSummary"></div>
+    <div class="tx-sumrow" id="txSumrow"></div>
     <div class="tx-tabs">
-      <button class="ttab active" id="ttab-all" onclick="txSwitch('all')">All</button>
-      <button class="ttab" id="ttab-in"  onclick="txSwitch('in')">Deposits</button>
-      <button class="ttab" id="ttab-out" onclick="txSwitch('out')">Withdrawals</button>
-      <button class="ttab" id="ttab-int" onclick="txSwitch('int')">Internal</button>
+      <button class="ttab active" id="tt-all" onclick="txSwitch('all')">All</button>
+      <button class="ttab"        id="tt-in"  onclick="txSwitch('in')">Deposits</button>
+      <button class="ttab"        id="tt-out" onclick="txSwitch('out')">Withdrawals</button>
+      <button class="ttab"        id="tt-int" onclick="txSwitch('int')">Internal</button>
     </div>
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Type</th>
-          <th>Amount</th>
-          <th>Token</th>
-          <th>From</th>
-          <th>To</th>
-          <th>Time</th>
+          <th>Type</th><th>Amount</th><th>Token</th>
+          <th>From</th><th>To</th><th>Time</th>
         </tr></thead>
         <tbody id="txTbody"></tbody>
       </table>
-      <div class="tbl-empty" id="txEmpty" style="display:none">No transactions</div>
+      <div class="empty-row" id="txEmpty" style="display:none">No transactions</div>
     </div>
-    <div class="tbl-pager" id="txPager" style="display:none">
-      <span id="txPagerInfo"></span>
-      <button class="pg-btn" id="txBtnPrev" onclick="txPrev()">‹</button>
-      <button class="pg-btn" id="txBtnNext" onclick="txNext()">›</button>
+    <div class="pager" id="txPager" style="display:none">
+      <span id="txPageInfo"></span>
+      <div class="pager-btns">
+        <button class="pg" id="pgPrev" onclick="txPrev()">‹</button>
+        <button class="pg" id="pgNext" onclick="txNext()">›</button>
+      </div>
     </div>
   </div>
 
-  <div class="page-foot">Updated <span id="updTime">—</span> · Hyperliquid Public API · auto-refresh 30s</div>
+  <footer class="page-foot">
+    Hyperliquid Public API · data updates every 60s
+  </footer>
 
 </main>
 
