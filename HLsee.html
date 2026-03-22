@@ -4,9 +4,6 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>HLsee — Portfolio</title>
-<meta name="description" content="Hyperliquid wallet portfolio analyzer">
-<meta property="og:title" content="HLsee — Hyperliquid Portfolio">
-<meta property="og:image" content="/images/0xbtc.png">
 <link rel="icon" href="/images/0xbtc.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -16,186 +13,195 @@
 </head>
 <body>
 
-<!-- ─── Top bar ─── -->
+<!-- ─── Topbar ─── -->
 <div class="topbar">
-  <div class="tb-brand">
+  <div class="tb-left">
     <span class="tb-logo">HL</span>
-    <span class="tb-label">Portfolio Analyzer</span>
+    <div class="alias-chips" id="aliasRow"></div>
   </div>
   <div class="tb-right">
-    <div class="wallet-pill" id="walletPill" style="display:none">
-      <span class="wp-dot"></span>
-      <span id="walletPillAddr">—</span>
-      <span class="wp-refresh" id="refreshTimer" style="display:none">↺ <span id="countdown">30</span>s</span>
-    </div>
-    <div class="tb-time" id="tbTime">--:--:--</div>
-  </div>
-</div>
-
-<!-- ─── Search panel ─── -->
-<div class="search-panel">
-  <div class="sp-inner">
-    <div class="sp-row">
-      <input id="addrInput" class="sp-input" type="text"
-             placeholder="0x wallet address or alias"
+    <div class="search-row">
+      <input id="addrInput" class="addr-input" type="text"
+             placeholder="0x address or alias"
              autocomplete="off" spellcheck="false"/>
-      <button class="sp-btn" onclick="analyze()">Analyze</button>
+      <button class="go-btn" onclick="analyze()">Go</button>
     </div>
-    <div class="sp-aliases" id="aliasRow"></div>
   </div>
 </div>
 
-<!-- ─── Loading / Error ─── -->
-<div class="hl-loading" id="loadingBar" style="display:none">
-  <div class="hl-spinner"></div>
-  <span id="loadingText">Fetching…</span>
+<!-- ─── Status / Error ─── -->
+<div class="status-strip" id="statusStrip" style="display:none">
+  <span class="ss-spin"></span>
+  <span id="statusText"></span>
 </div>
-<div class="hl-error" id="errBox" style="display:none"></div>
+<div class="err-strip" id="errBox" style="display:none"></div>
 
-<!-- ─── Main content ─── -->
-<main class="hl-main" id="hlMain" style="display:none">
+<!-- ─── Content ─── -->
+<main id="hlMain" style="display:none">
 
-  <!-- Account overview -->
-  <section class="acct-overview">
-    <div class="acct-left">
-      <div class="acct-lbl">Account Value</div>
-      <div class="acct-total" id="totalBal">0.00</div>
-      <div class="acct-usdc">USDC</div>
+  <!-- Account header -->
+  <div class="acct-header">
+    <div class="acct-addr-row">
+      <span class="acct-addr" id="acctAddr">—</span>
+      <span class="acct-refresh" id="refreshTimer" style="display:none">
+        ↺ <span id="countdown">30</span>s
+      </span>
     </div>
-    <div class="acct-right">
-      <div class="acct-stat">
-        <span class="as-lbl">Perp Account</span>
-        <span class="as-val" id="perpBal">0.00</span>
+    <div class="acct-value-row">
+      <div class="av-block">
+        <div class="av-label">Account Value</div>
+        <div class="av-num" id="totalBal">—</div>
+        <div class="av-sub">USDC</div>
       </div>
-      <div class="acct-stat">
-        <span class="as-lbl">Spot</span>
-        <span class="as-val yellow" id="spotBal">0.00</span>
-      </div>
-      <div class="acct-stat">
-        <span class="as-lbl">Unrealized PnL</span>
-        <span class="as-val" id="unrealPnl">0.00</span>
-      </div>
-      <div class="acct-stat">
-        <span class="as-lbl">Margin Used</span>
-        <span class="as-val red" id="marginUsed">0.00</span>
-      </div>
-      <div class="acct-stat">
-        <span class="as-lbl">Free Margin</span>
-        <span class="as-val green" id="marginFree">0.00</span>
-      </div>
-      <div class="acct-stat">
-        <span class="as-lbl">Total Fees</span>
-        <span class="as-val orange" id="totalFees">—</span>
+      <div class="acct-meta">
+        <div class="am-item">
+          <span class="am-l">Perp Account</span>
+          <span class="am-v" id="perpBal">—</span>
+        </div>
+        <div class="am-item">
+          <span class="am-l">Spot</span>
+          <span class="am-v yellow" id="spotBal">—</span>
+        </div>
+        <div class="am-item">
+          <span class="am-l">Unrealized PnL</span>
+          <span class="am-v" id="unrealPnl">—</span>
+        </div>
+        <div class="am-item">
+          <span class="am-l">Margin Used</span>
+          <span class="am-v red" id="marginUsed">—</span>
+        </div>
+        <div class="am-item">
+          <span class="am-l">Free Margin</span>
+          <span class="am-v green" id="marginFree">—</span>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- PnL KPIs -->
-  <section class="pnl-row" id="kpiGrid"></section>
+  <!-- PnL stats bar -->
+  <div class="pnl-bar" id="pnlBar" style="display:none">
+    <div class="pnl-item pnl-hi">
+      <div class="pi-l">All-Time PnL</div>
+      <div class="pi-v" id="pnlAllTime">—</div>
+    </div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-item">
+      <div class="pi-l">30-Day</div>
+      <div class="pi-v" id="pnlMonth">—</div>
+    </div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-item">
+      <div class="pi-l">7-Day</div>
+      <div class="pi-v" id="pnlWeek">—</div>
+    </div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-item">
+      <div class="pi-l">24h</div>
+      <div class="pi-v" id="pnlDay">—</div>
+    </div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-item">
+      <div class="pi-l">Win Rate</div>
+      <div class="pi-v" id="statWinRate">—</div>
+    </div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-item">
+      <div class="pi-l">Total Fees</div>
+      <div class="pi-v orange" id="statFees">—</div>
+    </div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-item">
+      <div class="pi-l">Volume</div>
+      <div class="pi-v blue" id="statVol">—</div>
+    </div>
+  </div>
 
-  <!-- Positions -->
-  <section class="hl-section" id="posCard" style="display:none">
-    <div class="sec-head">
+  <!-- Open Positions -->
+  <div class="section" id="posSection">
+    <div class="sec-hd">
       <span class="sec-title">Open Positions</span>
-      <span class="sec-badge" id="posBadge">0</span>
+      <span class="sec-count" id="posCnt">0</span>
     </div>
-    <div class="tbl-scroll">
-      <table class="hl-tbl">
+    <div class="tbl-wrap">
+      <table>
         <thead><tr>
-          <th>Asset</th><th>Side</th><th>Size</th>
-          <th>Entry</th><th>Mark</th>
-          <th>Unrealized PnL</th><th>PnL%</th><th>ROE</th>
-          <th>Leverage</th><th>Liq. Price</th>
-          <th>Notional</th><th>Last Order</th>
+          <th>Asset</th>
+          <th>Side</th>
+          <th>Size</th>
+          <th>Entry</th>
+          <th>Mark</th>
+          <th>Unrealized PnL</th>
+          <th>PnL %</th>
+          <th>ROE %</th>
+          <th>Leverage</th>
+          <th>Liq. Price</th>
+          <th>Notional</th>
         </tr></thead>
         <tbody id="posTbody"></tbody>
       </table>
     </div>
-  </section>
-
-  <!-- PnL Calendar -->
-  <section class="hl-section" id="calCard" style="display:none">
-    <div class="sec-head">
-      <div class="sec-head-left">
-        <span class="sec-title">PnL Calendar</span>
-        <div class="cal-nav">
-          <button class="cnav" onclick="calNav(-1)">‹</button>
-          <span id="calMonthLbl">—</span>
-          <button class="cnav" onclick="calNav(1)">›</button>
-        </div>
-      </div>
-      <div id="calSummary" class="cal-summary"></div>
-    </div>
-    <div class="cal-grid">
-      <div class="cal-dow">
-        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
-        <span>Thu</span><span>Fri</span><span>Sat</span>
-      </div>
-      <div class="cal-days" id="calDays"></div>
-    </div>
-  </section>
+  </div>
 
   <!-- Trade History -->
-  <section class="hl-section" id="fillsCard" style="display:none">
-    <div class="sec-head">
-      <span class="sec-title">Trade History</span>
-      <span class="sec-badge" id="fillsBadge">0</span>
-      <span class="fills-loading" id="fillsLoading" style="display:none">
-        <span class="hl-spinner small"></span> Loading…
-      </span>
+  <div class="section" id="fillsSection" style="display:none">
+    <div class="sec-hd">
+      <span class="sec-title">Recent Trades</span>
+      <span class="sec-count" id="fillsCnt">0</span>
+      <span class="loading-inline" id="fillsLoading" style="display:none">loading…</span>
     </div>
-    <div class="tbl-scroll">
-      <table class="hl-tbl">
+    <div class="tbl-wrap">
+      <table>
         <thead><tr>
-          <th>Time</th><th>Asset</th><th>Side</th><th>Type</th>
-          <th>Price</th><th>Size</th><th>Realized PnL</th>
-          <th>Fee</th><th>Fee%</th>
+          <th>Time</th>
+          <th>Asset</th>
+          <th>Side</th>
+          <th>Type</th>
+          <th>Price</th>
+          <th>Size</th>
+          <th>Notional</th>
+          <th>Realized PnL</th>
+          <th>Fee</th>
         </tr></thead>
         <tbody id="fillsTbody"></tbody>
       </table>
     </div>
-  </section>
+  </div>
 
-  <!-- Transactions -->
-  <section class="hl-section" id="txSection" style="display:none">
-    <div class="sec-head">
-      <span class="sec-title">Transactions</span>
-      <div class="tx-stats-inline">
-        <span class="tsi green">+<span id="txStatIn">0</span></span>
-        <span class="tsi-sep">/</span>
-        <span class="tsi red">-<span id="txStatOut">0</span></span>
-        <span class="tsi-sep">net</span>
-        <span class="tsi" id="txStatNetWrap"><span id="txStatNet">0</span></span>
-      </div>
+  <!-- Deposits / Withdrawals -->
+  <div class="section" id="txSection" style="display:none">
+    <div class="sec-hd">
+      <span class="sec-title">Deposits & Withdrawals</span>
+      <span class="sec-count" id="txCnt">0</span>
     </div>
-    <div class="tx-tabs-row">
-      <button class="tx-tab active" id="txtab-all"  onclick="txSwitch('all')">All  <span class="tc" id="txcnt-all">0</span></button>
-      <button class="tx-tab t-in"   id="txtab-in"   onclick="txSwitch('in')">In   <span class="tc" id="txcnt-in">0</span></button>
-      <button class="tx-tab t-out"  id="txtab-out"  onclick="txSwitch('out')">Out  <span class="tc" id="txcnt-out">0</span></button>
-      <button class="tx-tab"        id="txtab-int"  onclick="txSwitch('int')">Internal <span class="tc" id="txcnt-int">0</span></button>
+    <div class="tx-summary" id="txSummary"></div>
+    <div class="tx-tabs">
+      <button class="ttab active" id="ttab-all" onclick="txSwitch('all')">All</button>
+      <button class="ttab" id="ttab-in"  onclick="txSwitch('in')">Deposits</button>
+      <button class="ttab" id="ttab-out" onclick="txSwitch('out')">Withdrawals</button>
+      <button class="ttab" id="ttab-int" onclick="txSwitch('int')">Internal</button>
     </div>
-    <div class="tbl-scroll">
-      <table class="hl-tbl tx-tbl">
+    <div class="tbl-wrap">
+      <table>
         <thead><tr>
-          <th>Type</th><th>Amount</th><th>Token</th>
-          <th>From</th><th>To</th><th>Time</th><th>Details</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Token</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Time</th>
         </tr></thead>
         <tbody id="txTbody"></tbody>
       </table>
       <div class="tbl-empty" id="txEmpty" style="display:none">No transactions</div>
     </div>
-    <div class="hl-pager" id="txPager" style="display:none">
+    <div class="tbl-pager" id="txPager" style="display:none">
       <span id="txPagerInfo"></span>
-      <div class="pager-btns">
-        <button class="pg-btn" id="txBtnPrev" onclick="txPrev()">‹ Prev</button>
-        <button class="pg-btn" id="txBtnNext" onclick="txNext()">Next ›</button>
-      </div>
+      <button class="pg-btn" id="txBtnPrev" onclick="txPrev()">‹</button>
+      <button class="pg-btn" id="txBtnNext" onclick="txNext()">›</button>
     </div>
-  </section>
-
-  <div class="hl-foot">
-    Last updated: <span id="updTime">—</span> · Hyperliquid Public API · Auto-refresh every 30s
   </div>
+
+  <div class="page-foot">Updated <span id="updTime">—</span> · Hyperliquid Public API · auto-refresh 30s</div>
 
 </main>
 
