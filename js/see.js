@@ -28,6 +28,7 @@ const ALIASES = {
   'Younes': '0x751d8d19760907d5d68c5ea758d1984282a0b39d',
   'Allawi': '0x8fb06d076cb42b3480a19bab8f1d7d4170839e0f',
   'Kanba':  '0x0640F5Bfc50AC53eC68C435a60cB0ffF5C555FAD',
+   'kzm':   '0xe8ed44072089b32bd8cc5efe217e49d13aaa8b3f',
 };
 
 const TX_PER = 30;
