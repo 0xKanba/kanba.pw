@@ -29,9 +29,19 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
     </div>
-    <div class="aliases" id="aliasRow"></div>
+    <!-- Built-in aliases + saved wallets -->
+    <div class="chips-row" id="chipsRow"></div>
   </div>
 </header>
+
+<!-- ═══ SAVE BAR ═══ -->
+<div class="save-bar" id="saveBar" style="display:none">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:.6"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+  <span class="sb-label">Save wallet as:</span>
+  <input id="saveName" class="save-input" type="text" placeholder="e.g. Kanba, Main…" maxlength="20" autocomplete="off"/>
+  <button class="save-btn" onclick="doSave()">Save</button>
+  <button class="save-skip" onclick="closeSaveBar()" title="Dismiss">×</button>
+</div>
 
 <!-- ═══ LOADING BAR ═══ -->
 <div class="load-bar" id="loadBar" style="display:none">
@@ -56,6 +66,7 @@
         </svg>
         <span class="ac-copied" id="acCopied">Copied!</span>
       </button>
+      <span class="wallet-alias" id="walletAlias"></span>
     </div>
     <div class="wh-right">
       <span class="upd-time" id="updTime" style="display:none">Updated <span id="updTimeVal">—</span></span>
@@ -76,24 +87,26 @@
     </div>
   </div>
 
-  <!-- Account overview -->
+  <!-- Account overview — UNIFIED -->
   <div class="acct-overview">
-    <div class="ao-main">
-      <div class="ao-label">Total Portfolio Value</div>
-      <div class="ao-total"><span id="totalBal">—</span> <span class="ao-unit">USDC</span></div>
+    <div class="ao-top">
+      <div class="ao-main-block">
+        <div class="ao-label">Total Portfolio Value</div>
+        <div class="ao-total"><span id="totalBal">—</span> <span class="ao-unit">USDC</span></div>
+      </div>
+      <div class="ao-pnl-block" id="aoPnlBlock" style="display:none">
+        <div class="ao-label">Unrealized PnL</div>
+        <div class="ao-upnl" id="aoUpnl">—</div>
+      </div>
     </div>
     <div class="ao-stats">
       <div class="aos-item">
-        <span class="aos-l">Perp Account</span>
+        <span class="aos-l">Perp Balance</span>
         <span class="aos-v" id="perpBal">—</span>
       </div>
       <div class="aos-item">
-        <span class="aos-l">Spot</span>
+        <span class="aos-l">Spot Value</span>
         <span class="aos-v yellow" id="spotBal">—</span>
-      </div>
-      <div class="aos-item">
-        <span class="aos-l">Unrealized PnL</span>
-        <span class="aos-v" id="unrealPnl">—</span>
       </div>
       <div class="aos-item">
         <span class="aos-l">Margin Used</span>
@@ -107,10 +120,14 @@
         <span class="aos-l">Open Positions</span>
         <span class="aos-v cyan" id="openCount">—</span>
       </div>
+      <div class="aos-item">
+        <span class="aos-l">Withdrawable</span>
+        <span class="aos-v" id="withdrawable">—</span>
+      </div>
     </div>
   </div>
 
-  <!-- PnL row -->
+  <!-- PnL Period Row -->
   <div class="pnl-row" id="pnlRow" style="display:none">
     <div class="pr-item pr-accent">
       <div class="pr-l">All-Time PnL</div>
@@ -131,25 +148,45 @@
       <div class="pr-l">24h</div>
       <div class="pr-v" id="pnlDay">—</div>
     </div>
-    <div class="pr-div"></div>
-    <div class="pr-item">
-      <div class="pr-l">Win Rate</div>
-      <div class="pr-v" id="statWr">—</div>
+  </div>
+
+  <!-- Trade Stats Row (filled after fills load) -->
+  <div class="stats-row" id="statsRow" style="display:none">
+    <div class="sr-item">
+      <div class="sr-l">Win Rate</div>
+      <div class="sr-v" id="statWr">—</div>
     </div>
-    <div class="pr-div"></div>
-    <div class="pr-item">
-      <div class="pr-l">Total Fees</div>
-      <div class="pr-v orange" id="statFees">—</div>
+    <div class="sr-item">
+      <div class="sr-l">Avg Win</div>
+      <div class="sr-v green" id="statAvgW">—</div>
     </div>
-    <div class="pr-div"></div>
-    <div class="pr-item">
-      <div class="pr-l">Volume</div>
-      <div class="pr-v blue" id="statVol">—</div>
+    <div class="sr-item">
+      <div class="sr-l">Avg Loss</div>
+      <div class="sr-v red" id="statAvgL">—</div>
     </div>
-    <div class="pr-div"></div>
-    <div class="pr-item">
-      <div class="pr-l">Trades</div>
-      <div class="pr-v" id="statTrades">—</div>
+    <div class="sr-item">
+      <div class="sr-l">Profit Factor</div>
+      <div class="sr-v" id="statPF">—</div>
+    </div>
+    <div class="sr-item">
+      <div class="sr-l">Best Trade</div>
+      <div class="sr-v green" id="statBest">—</div>
+    </div>
+    <div class="sr-item">
+      <div class="sr-l">Worst Trade</div>
+      <div class="sr-v red" id="statWorst">—</div>
+    </div>
+    <div class="sr-item">
+      <div class="sr-l">Total Fees</div>
+      <div class="sr-v orange" id="statFees">—</div>
+    </div>
+    <div class="sr-item">
+      <div class="sr-l">Volume</div>
+      <div class="sr-v blue" id="statVol">—</div>
+    </div>
+    <div class="sr-item">
+      <div class="sr-l">Trades (close)</div>
+      <div class="sr-v" id="statTrades">—</div>
     </div>
   </div>
 
@@ -172,17 +209,18 @@
     </div>
   </div>
 
-  <!-- Trade History (last 100) -->
+  <!-- Trade History — last 100 closed trades -->
   <div class="card" id="fillsCard" style="display:none">
     <div class="card-hd">
-      <span class="card-title">Recent Trades</span>
+      <span class="card-title">Trade History</span>
       <span class="badge" id="fillsBadge">0</span>
+      <span class="badge" style="margin-left:2px;font-size:9px;color:var(--dim)">last 100 closed</span>
       <span class="load-dot" id="fillsDot" style="display:none"></span>
     </div>
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Time</th><th>Asset</th><th>Side</th><th>Type</th>
+          <th>Time</th><th>Asset</th><th>Dir</th><th>Type</th>
           <th>Price</th><th>Size</th><th>Notional</th>
           <th>Realized PnL</th><th>Fee</th>
         </tr></thead>
@@ -194,7 +232,7 @@
   <!-- Deposits & Withdrawals -->
   <div class="card" id="txCard" style="display:none">
     <div class="card-hd">
-      <span class="card-title">Deposits & Withdrawals</span>
+      <span class="card-title">Deposits &amp; Withdrawals</span>
       <span class="badge" id="txBadge">0</span>
     </div>
     <div class="tx-sumrow" id="txSumrow"></div>
@@ -224,7 +262,7 @@
   </div>
 
   <footer class="page-foot">
-    Hyperliquid Public API · data updates every 60s
+    Hyperliquid Public API · HIP-3 (xyz DEX) · updates every 60s
   </footer>
 
 </main>
