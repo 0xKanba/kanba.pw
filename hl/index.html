@@ -9,16 +9,18 @@
   <title>HL Trade · Hyperliquid Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- ✅ ملف التنسيقات الخاص بك لم يتم تعديله -->
-  <link rel="stylesheet" href="/hl/hl.css">
+  <link rel="stylesheet" href=/hl/hl.css">
 </head>
 <body>
 
-<!-- شاشة الدخول -->
+<!-- ── شاشة الدخول ── -->
 <div class="screen" id="loginScreen">
-  <div class="login-brand"><div class="login-icon">⚡</div><div class="login-title">HL<em>Trade</em></div></div>
+  <div class="login-brand">
+    <div class="login-icon">⚡</div>
+    <div class="login-title">HL<em>Trade</em></div>
+  </div>
   <div class="login-card">
-    <div class="login-header">تداول مباشر على Hyperliquid</div>
+    <div class="login-header">تداول مباشر على Hyperliquid × trade.xyz</div>
     <label class="field-label" for="privateKey">المفتاح الخاص</label>
     <div class="key-wrapper">
       <input class="key-input" id="privateKey" type="password" placeholder="0x4a3b..." autocomplete="off">
@@ -29,27 +31,38 @@
   </div>
 </div>
 
-<!-- التطبيق -->
+<!-- ── التطبيق الرئيسي ── -->
 <div class="screen hidden" id="appScreen">
+
   <nav class="nav">
-    <div class="nav-left"><div class="nav-logo">⚡ HL<em>Trade</em></div><div class="nav-status"><span class="status-dot"></span>LIVE</div></div>
-    <div class="nav-right"><div class="nav-address" id="navAddress" title="انقر للنسخ">—</div></div>
+    <div class="nav-left">
+      <div class="nav-logo">⚡ HL<em>Trade</em></div>
+      <div class="nav-status"><span class="status-dot"></span>LIVE</div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-address" id="navAddress" title="انقر للنسخ">—</div>
+    </div>
   </nav>
-  
+
   <div class="tabs">
     <button class="tab active" data-asset="GOLD"><span class="tab-icon">🟡</span><span class="tab-name">ذهب</span><span class="tab-price" id="priceGOLD">—</span></button>
     <button class="tab" data-asset="SILVER"><span class="tab-icon">⚪</span><span class="tab-name">فضة</span><span class="tab-price" id="priceSILVER">—</span></button>
     <button class="tab" data-asset="CL"><span class="tab-icon">🛢</span><span class="tab-name">نفط</span><span class="tab-price" id="priceCL">—</span></button>
   </div>
-  
+
   <main class="main">
+    <!-- العمود الأيمن: السعر + التداول -->
     <div class="col-left">
       <div class="price-card" id="priceCard">
         <div class="price-asset" id="priceAssetName">ذهب</div>
         <div class="price-value" id="priceValue">—</div>
         <div class="price-delta" id="priceDelta"></div>
-        <div class="price-timer" id="priceTimer">↻ —</div>
+        <div class="price-meta-row">
+          <span class="price-bid-ask" id="priceBidAsk"></span>
+          <span class="price-timer" id="priceTimer">↻ —</span>
+        </div>
       </div>
+
       <div class="trade-panel">
         <div class="panel-header">تنفيذ صفقة · <span id="tradeAssetName">ذهب</span></div>
         <div class="qty-presets" id="qtyPresets"></div>
@@ -59,23 +72,34 @@
           <span class="qty-unit" id="qtyUnit">أونصة</span>
         </div>
         <div class="trade-buttons">
-          <button class="btn-trade btn-buy" id="btnBuy"><span class="btn-label">شراء ↑</span><span class="btn-price" id="buyPrice">—</span></button>
-          <button class="btn-trade btn-sell" id="btnSell"><span class="btn-label">بيع ↓</span><span class="btn-price" id="sellPrice">—</span></button>
+          <button class="btn-trade btn-buy" id="btnBuy">
+            <span class="btn-label">شراء ↑</span>
+            <span class="btn-price" id="buyPrice">—</span>
+          </button>
+          <button class="btn-trade btn-sell" id="btnSell">
+            <span class="btn-label">بيع ↓</span>
+            <span class="btn-price" id="sellPrice">—</span>
+          </button>
         </div>
       </div>
     </div>
+
+    <!-- العمود الأيسر: الصفقات المفتوحة -->
     <div class="col-right">
       <div class="positions-card">
         <div class="positions-header">
           <span class="positions-title">الصفقات المفتوحة</span>
           <span class="positions-count" id="positionsCount">0</span>
           <span class="positions-pnl" id="totalPnl"></span>
+          <button class="btn-close-all hidden" id="btnCloseAll">إغلاق الكل ✕</button>
         </div>
-        <div class="positions-list" id="positionsList"><div class="positions-empty">📂 لا توجد صفقات مفتوحة</div></div>
+        <div class="positions-list" id="positionsList">
+          <div class="positions-empty">📂 لا توجد صفقات مفتوحة</div>
+        </div>
       </div>
     </div>
   </main>
-  
+
   <footer class="footer">
     <button class="footer-btn" id="btnBalance"><span class="footer-icon">💼</span>رصيد</button>
     <button class="footer-btn" id="btnDeposit"><span class="footer-icon">💵</span>إيداع</button>
@@ -84,19 +108,168 @@
   </footer>
 </div>
 
-<!-- MODALS -->
-<div class="modal-overlay" id="modalConfirm"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title" id="confirmTitle">تأكيد الصفقة</h3><p class="modal-subtitle" id="confirmSubtitle"></p><div class="confirm-details" id="confirmDetails"></div><div class="modal-buttons"><button class="btn-modal btn-cancel" id="confirmCancel">إلغاء ✕</button><button class="btn-modal btn-confirm" id="confirmExecute">تأكيد ←</button></div></div></div>
-<div class="modal-overlay" id="modalClose"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title" id="closeTitle">إغلاق الصفقة</h3><p class="modal-subtitle">سيتم الإغلاق فوراً بالسعر الحالي</p><div class="confirm-details" id="closeDetails"></div><div class="modal-buttons"><button class="btn-modal btn-cancel" id="closeCancel">إبقاء</button><button class="btn-modal btn-confirm btn-danger" id="closeExecute">إغلاق الآن ✕</button></div></div></div>
-<div class="modal-overlay" id="modalBalance"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title">💼 رصيد Hyperliquid</h3><div class="balance-content" id="balanceContent"><div class="balance-loading">⏳ جاري جلب الرصيد...</div></div><div class="modal-buttons modal-buttons-center"><button class="btn-modal btn-cancel" id="balanceClose">إغلاق</button></div></div></div>
-<div class="modal-overlay" id="modalDeposit"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title">💵 إيداع USDC</h3><div class="form-group"><label>المبلغ (USDC)</label><input type="number" class="form-input" id="depositAmount" placeholder="100" min="1"></div><p class="form-note">يُرسل USDC من Arbitrum عبر الجسر الرسمي</p><div class="modal-buttons"><button class="btn-modal btn-cancel" id="depositCancel">إلغاء</button><button class="btn-modal btn-confirm btn-success" id="depositExecute">إيداع ✓</button></div></div></div>
-<div class="modal-overlay" id="modalWithdraw"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title">📤 سحب USDC</h3><div class="form-group"><label>المبلغ (USDC)</label><input type="number" class="form-input" id="withdrawAmount" placeholder="100" min="1"></div><div class="form-group"><label>عنوان الاستلام (Arbitrum)</label><input type="text" class="form-input" id="withdrawAddress" placeholder="0x..." dir="ltr"></div><div class="modal-buttons"><button class="btn-modal btn-cancel" id="withdrawCancel">إلغاء</button><button class="btn-modal btn-confirm btn-success" id="withdrawExecute">سحب ✓</button></div></div></div>
-<div class="modal-overlay" id="modalLogout"><div class="modal"><div class="modal-handle"></div><div class="logout-content"><div class="logout-icon">🔐</div><h3 class="modal-title">تسجيل الخروج</h3><p class="logout-text">سيتم مسح المفتاح الخاص من الذاكرة.<br>صفقاتك المفتوحة <strong>تبقى نشطة</strong> على Hyperliquid.</p></div><div class="modal-buttons"><button class="btn-modal btn-cancel" id="logoutCancel">بقاء — إلغاء</button><button class="btn-modal btn-confirm btn-danger" id="logoutExecute">خروج 🔒</button></div></div></div>
+<!-- ════════════════════════════════════
+     MODALS
+════════════════════════════════════ -->
 
-<!-- UI -->
+<!-- تأكيد الصفقة -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="confirmTitle">تأكيد الصفقة</h3>
+    <p class="modal-subtitle" id="confirmSubtitle"></p>
+    <div class="confirm-details" id="confirmDetails"></div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="confirmCancel">إلغاء ✕</button>
+      <button class="btn-modal btn-confirm" id="confirmExecute">تأكيد ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- إغلاق صفقة -->
+<div class="modal-overlay" id="modalClose">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="closeTitle">إغلاق الصفقة</h3>
+    <p class="modal-subtitle">سيتم الإغلاق فوراً بالسعر الحالي</p>
+    <div class="confirm-details" id="closeDetails"></div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="closeCancel">إبقاء</button>
+      <button class="btn-modal btn-confirm btn-danger" id="closeExecute">إغلاق الآن ✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- إغلاق الكل -->
+<div class="modal-overlay" id="modalCloseAll">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">⚠️ إغلاق جميع الصفقات</h3>
+    <p class="modal-subtitle">سيتم إغلاق كل المراكز المفتوحة فوراً بالسعر الحالي</p>
+    <div class="confirm-details" id="closeAllDetails"></div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="closeAllCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-danger" id="closeAllExecute">إغلاق الكل ✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- TP / جني أرباح -->
+<div class="modal-overlay" id="modalTP">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="tpTitle">🎯 جني الأرباح</h3>
+    <p class="modal-subtitle" id="tpSubtitle"></p>
+    <div class="confirm-details" id="tpCurrentDetails"></div>
+    <div class="form-group" id="tpInputGroup">
+      <label>مبلغ الربح المستهدف ($)</label>
+      <input type="number" class="form-input" id="tpAmount" placeholder="مثال: 10" min="0.1" step="any">
+      <div class="calc-preview" id="tpPreview">سعر التفعيل: —</div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="tpCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-success" id="tpExecute">تعيين TP ✓</button>
+    </div>
+    <div id="tpDeleteRow" class="delete-row hidden">
+      <button class="btn-delete-tpsl" id="tpDelete">🗑️ إلغاء TP الحالي</button>
+    </div>
+  </div>
+</div>
+
+<!-- SL / وقف الخسارة -->
+<div class="modal-overlay" id="modalSL">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="slTitle">🛡️ وقف الخسارة</h3>
+    <p class="modal-subtitle" id="slSubtitle"></p>
+    <div class="confirm-details" id="slCurrentDetails"></div>
+    <div class="form-group" id="slInputGroup">
+      <label>مبلغ الخسارة المسموح بها ($)</label>
+      <input type="number" class="form-input" id="slAmount" placeholder="مثال: 5" min="0.1" step="any">
+      <div class="calc-preview" id="slPreview">سعر التفعيل: —</div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="slCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-danger" id="slExecute">تعيين SL ✓</button>
+    </div>
+    <div id="slDeleteRow" class="delete-row hidden">
+      <button class="btn-delete-tpsl" id="slDelete">🗑️ إلغاء SL الحالي</button>
+    </div>
+  </div>
+</div>
+
+<!-- الرصيد -->
+<div class="modal-overlay" id="modalBalance">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">💼 رصيد Hyperliquid</h3>
+    <div class="balance-content" id="balanceContent">
+      <div class="balance-loading">⏳ جاري جلب الرصيد...</div>
+    </div>
+    <div class="modal-buttons modal-buttons-center">
+      <button class="btn-modal btn-cancel" id="balanceClose">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- إيداع -->
+<div class="modal-overlay" id="modalDeposit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">💵 إيداع USDC</h3>
+    <div class="form-group">
+      <label>المبلغ (USDC)</label>
+      <input type="number" class="form-input" id="depositAmount" placeholder="100" min="8">
+    </div>
+    <p class="form-note">يُرسل USDC من Arbitrum عبر الجسر الرسمي · الحد الأدنى $8 · 1-3 دقائق</p>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="depositCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-success" id="depositExecute">إيداع ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- سحب -->
+<div class="modal-overlay" id="modalWithdraw">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">📤 سحب USDC</h3>
+    <div class="form-group">
+      <label>المبلغ (USDC)</label>
+      <input type="number" class="form-input" id="withdrawAmount" placeholder="100" min="1">
+    </div>
+    <div class="form-group">
+      <label>عنوان الاستلام (Arbitrum)</label>
+      <input type="text" class="form-input" id="withdrawAddress" placeholder="0x..." dir="ltr">
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="withdrawCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-success" id="withdrawExecute">سحب ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- خروج -->
+<div class="modal-overlay" id="modalLogout">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="logout-content">
+      <div class="logout-icon">🔐</div>
+      <h3 class="modal-title">تسجيل الخروج</h3>
+      <p class="logout-text">سيتم مسح المفتاح الخاص من الذاكرة.<br>صفقاتك المفتوحة <strong>تبقى نشطة</strong> على Hyperliquid.</p>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="logoutCancel">بقاء — إلغاء</button>
+      <button class="btn-modal btn-confirm btn-danger" id="logoutExecute">خروج 🔒</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── عناصر UI ── -->
 <div id="toast"></div>
 <div id="loader"><div class="spinner"></div><div class="loader-text" id="loaderText">جاري...</div></div>
 
-<!-- ✅ تحميل المكتبات بترتيب صحيح مع حماية من الحجب -->
+<!-- ethers.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
   if (typeof ethers === 'undefined') {
@@ -106,7 +279,6 @@
     document.head.appendChild(s);
   }
 </script>
-
 <script src="/hl/hl.js"></script>
 </body>
 </html>
