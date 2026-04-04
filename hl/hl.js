@@ -241,10 +241,11 @@ function updatePriceUI() {
 async function pollAccount() {
   if (!State.wallet) return;
   try {
+    // ✅ dex:"xyz" مطلوب لقراءة مراكز trade.xyz (مطابق للبوت)
     const [perp, spot, openOrders] = await Promise.all([
-      hlInfo({type:'clearinghouseState', user:State.wallet.address}),
+      hlInfo({type:'clearinghouseState',   user:State.wallet.address, dex:'xyz'}),
       hlInfo({type:'spotClearinghouseState', user:State.wallet.address}),
-      hlInfo({type:'frontendOpenOrders', user:State.wallet.address}).catch(()=>[])
+      hlInfo({type:'frontendOpenOrders',   user:State.wallet.address, dex:'xyz'}).catch(()=>[])
     ]);
 
     State.openOrders = Array.isArray(openOrders) ? openOrders : [];
@@ -275,7 +276,9 @@ async function pollAccount() {
 
     renderPositions();
   } catch(e) {
-    if (e.message.toLowerCase().includes('exist')||e.message.toLowerCase().includes('not found')) {
+    const msg = e.message.toLowerCase();
+    if (msg.includes('exist')||msg.includes('not found')||msg.includes('user')) {
+      // حساب جديد لم يُفعَّل بعد — طبيعي
       State.balance = {total:0,free:0,margin:0,floatPnl:0};
       State.positions = [];
       renderPositions();
