@@ -11,12 +11,11 @@
 
 <!-- LOGIN -->
 <div class="sc" id="sL">
-  <div class="lbrand"><div class="lico">⚡</div><div class="ltit">HL<em>Trade</em></div></div>
   <div class="lcard">
-    <div class="lcard-h">تداول مباشر</div>
+    <div class="lbrand">⚡ HL<em>Trade</em></div>
     <label class="flbl">المفتاح الخاص</label>
     <div class="kw">
-      <input class="ki" id="kI" type="password" placeholder="0x...">
+      <input class="ki" id="kI" type="password" placeholder="0x..." autocomplete="off">
     </div>
     <button class="lbtn" id="lBtn">دخول</button>
   </div>
@@ -25,28 +24,22 @@
 <!-- APP -->
 <div class="sc off" id="sA">
   <div class="nav">
-    <div class="nl">
-      <div class="nlo">HL<em>Trade</em></div>
-      <div class="nlv"><div class="dot"></div><span>LIVE</span></div>
-    </div>
-    <div class="nr"><div class="nad" id="nAd">—</div></div>
+    <div class="nlo">⚡ HL<em>Trade</em></div>
+    <div class="nad" id="nAd">—</div>
   </div>
 
   <div class="body">
-    <!-- Tabs -->
-    <div style="display:flex;gap:10px;width:100%;max-width:500px">
+    <div class="tabs">
       <div class="tab on" data-s="GOLD">🟡 ذهب</div>
       <div class="tab" data-s="SILVER">⚪ فضة</div>
       <div class="tab" data-s="CL">🛢 نفط</div>
     </div>
 
-    <!-- Price Card -->
     <div class="pxcard">
       <div class="pxsym" id="pxSym">ذهب</div>
       <div class="pxval" id="pxVal">—</div>
     </div>
 
-    <!-- Trade Panel -->
     <div class="tpanel">
       <div class="psets" id="psets"></div>
       <div class="qrow">
@@ -59,16 +52,14 @@
       </div>
     </div>
 
-    <!-- Positions -->
     <div class="posp">
       <div class="poshd">الصفقات المفتوحة</div>
       <div class="poslist" id="pList"><div style="padding:20px;text-align:center;color:var(--t2)">جاري التحميل...</div></div>
     </div>
   </div>
 
-  <!-- Bottom Bar -->
   <div class="btm">
-    <button class="bb hi" id="bBal"><div>💼</div>رصيد</button>
+    <button class="bb" id="bBal"><div>💼</div>رصيد</button>
     <button class="bb out" id="bOut"><div>🔒</div>خروج</button>
   </div>
 </div>
@@ -101,7 +92,7 @@
 <div class="ov" id="mLg">
   <div class="sht" style="text-align:center">
     <div class="stt">تسجيل الخروج</div>
-    <p style="color:var(--t2);margin:15px 0">هل تريد تسجيل الخروج ومسح بيانات الجلسة؟</p>
+    <p style="color:var(--t2);margin:15px 0">هل تريد تسجيل الخروج؟</p>
     <div class="sbtns">
       <button class="sc2" onclick="cm('mLg')">إلغاء</button>
       <button class="sok wok" onclick="doLogout()">خروج</button>
@@ -115,12 +106,7 @@
 
 <!-- SCRIPTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous"></script>
-<script>
-  // Silent fail guard
-  window.addEventListener('load', () => {
-    if (typeof ethers === 'undefined') console.error('Ethers missing');
-  });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3/dist/msgpack.umd.min.js" crossorigin="anonymous"></script>
 <script src="/hl/hl.js"></script>
 
 </body>
