@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>HL Trade · Hyperliquid Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- ✅ CSS الخاص بك — لم أغيره -->
+  <!-- ✅ ملف التنسيقات الخاص بك لم يتم تعديله -->
   <link rel="stylesheet" href="/hl/hl.css">
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- شاشة الدخول -->
 <div class="screen" id="loginScreen">
   <div class="login-brand"><div class="login-icon">⚡</div><div class="login-title">HL<em>Trade</em></div></div>
   <div class="login-card">
@@ -28,17 +29,19 @@
   </div>
 </div>
 
-<!-- APP -->
+<!-- التطبيق -->
 <div class="screen hidden" id="appScreen">
   <nav class="nav">
     <div class="nav-left"><div class="nav-logo">⚡ HL<em>Trade</em></div><div class="nav-status"><span class="status-dot"></span>LIVE</div></div>
     <div class="nav-right"><div class="nav-address" id="navAddress" title="انقر للنسخ">—</div></div>
   </nav>
+  
   <div class="tabs">
     <button class="tab active" data-asset="GOLD"><span class="tab-icon">🟡</span><span class="tab-name">ذهب</span><span class="tab-price" id="priceGOLD">—</span></button>
     <button class="tab" data-asset="SILVER"><span class="tab-icon">⚪</span><span class="tab-name">فضة</span><span class="tab-price" id="priceSILVER">—</span></button>
     <button class="tab" data-asset="CL"><span class="tab-icon">🛢</span><span class="tab-name">نفط</span><span class="tab-price" id="priceCL">—</span></button>
   </div>
+  
   <main class="main">
     <div class="col-left">
       <div class="price-card" id="priceCard">
@@ -72,6 +75,7 @@
       </div>
     </div>
   </main>
+  
   <footer class="footer">
     <button class="footer-btn" id="btnBalance"><span class="footer-icon">💼</span>رصيد</button>
     <button class="footer-btn" id="btnDeposit"><span class="footer-icon">💵</span>إيداع</button>
@@ -92,95 +96,17 @@
 <div id="toast"></div>
 <div id="loader"><div class="spinner"></div><div class="loader-text" id="loaderText">جاري...</div></div>
 
-<!-- ═══════════════════════════════════════════════════
-     SCRIPTS — الترتيب مهم جداً
-══════════════════════════════════════════════════════ -->
-
-<!-- 1. ✅ MessagePack مدمج 100% (لا يحتاج CDN) -->
-<script>
-/* ═══════════════════════════════════════════════════
-   Minimal MessagePack Encoder for Hyperliquid
-   ✅ يدعم: objects, arrays, strings, numbers, null, boolean, Uint8Array
-   ✅ مطابق لمواصفة MessagePack الرسمية للأجزاء التي يحتاجها Hyperliquid
-════════════════════════════════════════════════════ */
-const MsgPack = (function(){
-  const te = new TextEncoder();
-  function enc(v, b) {
-    if (v === null) { b.push(0xc0); return; }
-    if (v === true) { b.push(0xc3); return; }
-    if (v === false) { b.push(0xc2); return; }
-    if (typeof v === 'number') {
-      if (Number.isInteger(v)) {
-        if (v >= 0 && v <= 127) { b.push(v); return; }
-        if (v < 0 && v >= -32) { b.push(0xe0 | (v + 32)); return; }
-        if (v >= 0 && v <= 255) { b.push(0xcc, v); return; }
-        if (v >= -128 && v < 0) { b.push(0xd0, (v + 256) & 0xff); return; }
-        if (v >= 0 && v <= 65535) { b.push(0xcd, (v>>8)&0xff, v&0xff); return; }
-        if (v >= -32768 && v < 0) { b.push(0xd1, (v>>8)&0xff, v&0xff); return; }
-        b.push(0xce, (v>>>24)&0xff, (v>>>16)&0xff, (v>>>8)&0xff, v&0xff); return;
-      }
-      // float64 big-endian
-      const dv = new DataView(new ArrayBuffer(9));
-      dv.setFloat64(1, v, false);
-      b.push(0xcb);
-      for (let i=1;i<=8;i++) b.push(dv.getUint8(i));
-      return;
-    }
-    if (typeof v === 'string') {
-      const utf8 = te.encode(v);
-      if (utf8.length <= 31) { b.push(0xa0 | utf8.length); }
-      else if (utf8.length <= 255) { b.push(0xd9, utf8.length); }
-      else { b.push(0xda, (utf8.length>>8)&0xff, utf8.length&0xff); }
-      for (const c of utf8) b.push(c);
-      return;
-    }
-    if (Array.isArray(v)) {
-      if (v.length <= 15) { b.push(0x90 | v.length); }
-      else if (v.length <= 65535) { b.push(0xdc, (v.length>>8)&0xff, v.length&0xff); }
-      for (const item of v) enc(item, b);
-      return;
-    }
-    if (v instanceof Uint8Array) {
-      if (v.length <= 255) { b.push(0xc4, v.length); }
-      else { b.push(0xc5, (v.length>>8)&0xff, v.length&0xff); }
-      for (const c of v) b.push(c);
-      return;
-    }
-    if (typeof v === 'object') {
-      const keys = Object.keys(v);
-      if (keys.length <= 15) { b.push(0x80 | keys.length); }
-      else if (keys.length <= 65535) { b.push(0xde, (keys.length>>8)&0xff, keys.length&0xff); }
-      for (const k of keys) { enc(k, b); enc(v[k], b); }
-      return;
-    }
-  }
-  return {
-    encode: function(obj) {
-      const buf = [];
-      enc(obj, buf);
-      return new Uint8Array(buf);
-    }
-  };
-})();
-// ✅ تعريف عالمي لضمان التعرف عليه في كل مكان
-if (typeof window !== 'undefined') window.MessagePack = MsgPack;
-</script>
-
-<!-- 2. ✅ ethers.js من CDN مع fallback تلقائي -->
+<!-- ✅ تحميل المكتبات بترتيب صحيح مع حماية من الحجب -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-  // ✅ Fallback إذا حُجب cdnjs
   if (typeof ethers === 'undefined') {
     const s = document.createElement('script');
     s.src = 'https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js';
-    s.crossOrigin = 'anonymous';
-    s.referrerPolicy = 'no-referrer';
+    s.crossOrigin = 'anonymous'; s.referrerPolicy = 'no-referrer';
     document.head.appendChild(s);
   }
 </script>
 
-<!-- 3. ✅ تطبيقنا -->
 <script src="/hl/hl.js"></script>
-
 </body>
 </html>
