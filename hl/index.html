@@ -2,149 +2,141 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HL Trade Web</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>HL Trade · xyz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/hl/hl.css">
 </head>
 <body>
 
-<!-- ══════════════════════════════
-     LOGIN SCREEN
-══════════════════════════════ -->
+<!-- شاشة الدخول -->
 <div class="sc" id="sL">
+  <div class="lbrand"><div class="lico">⚡</div><div class="ltit">HL<em>Trade</em> · xyz</div></div>
   <div class="lcard">
-    <div class="lbrand">⚡ HL<em>Trade</em> Web</div>
     <div class="lcard-h">تداول مباشر على Hyperliquid xyz</div>
-    <label class="flbl">المفتاح الخاص (Private Key)</label>
+    <label class="flbl" for="kI">المفتاح الخاص</label>
     <div class="kw">
-      <input class="ki" id="kI" type="password" placeholder="0x..." autocomplete="off">
+      <input class="ki" id="kI" type="password" placeholder="0x4a3b..." autocomplete="off">
+      <button class="ke" id="kE" type="button">👁</button>
     </div>
-    <button class="lbtn" id="lBtn">🚀 دخول للتداول</button>
-    <div class="lnote">
-      🔒 المفتاح يُستخدم محلياً للتوقيع فقط.<br>
-      لا يُرسل لأي خادم خارجي.
-    </div>
+    <button class="lbtn" id="lBtn">دخول — بدء التداول ←</button>
+    <div class="lnote"><strong>🔒 المفتاح لا يغادر متصفحك</strong><br>التوقيعات محلياً عبر ethers.js</div>
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     APP SCREEN
-══════════════════════════════ -->
+<!-- التطبيق -->
 <div class="sc off" id="sA">
+  <!-- NAV -->
   <div class="nav">
-    <div class="nl">
-      <div class="nlo">⚡ HL<em>Trade</em></div>
-      <div class="nlv"><div class="dot"></div><span>LIVE</span></div>
-    </div>
-    <div class="nr">
-      <div class="nad" id="nAd" title="انقر للنسخ">—</div>
-    </div>
+    <div class="nl"><div class="nlo">⚡ HL<em>Trade</em></div><div class="nlv"><div class="dot"></div><span>LIVE</span></div></div>
+    <div class="nr"><div class="nad" id="nAd" title="انقر للنسخ">—</div></div>
   </div>
 
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab on" data-s="GOLD"><div class="ti">🟡</div><div class="tn">ذهب</div><div class="tp" id="tpGOLD">—</div></div>
+    <div class="tab" data-s="SILVER"><div class="ti">⚪</div><div class="tn">فضة</div><div class="tp" id="tpSILVER">—</div></div>
+    <div class="tab" data-s="CL"><div class="ti">🛢</div><div class="tn">نفط</div><div class="tp" id="tpCL">—</div></div>
+  </div>
+
+  <!-- BODY -->
   <div class="body">
-    <!-- Asset Tabs -->
-    <div class="tabs">
-      <div class="tab on" data-s="GOLD">🟡 ذهب</div>
-      <div class="tab" data-s="SILVER">⚪ فضة</div>
-      <div class="tab" data-s="CL">🛢 نفط</div>
-    </div>
-
-    <!-- Price Display -->
-    <div class="pxcard">
-      <div class="pxsym" id="pxSym">ذهب</div>
-      <div class="pxval" id="pxVal">—</div>
-      <div class="pxdelta" id="pxDlt"></div>
-    </div>
-
-    <!-- Trade Panel -->
-    <div class="tpanel">
-      <div class="phd">تنفيذ صفقة</div>
-      <div class="psets" id="psets"></div>
-      <div class="qrow">
-        <input class="qin" id="qI" type="number" placeholder="0.00" min="0" step="any">
-        <div class="ul" id="uLb">أونصة</div>
+    <div class="lcol">
+      <!-- PRICE - سعر واحد فقط -->
+      <div class="pxband" id="pxB">
+        <div class="pxmid">
+          <div class="pxan" id="pxAN">ذهب</div>
+          <div class="pxn n" id="pxM">—</div>
+          <div class="pxdel n" id="pxMd"></div>
+          <div class="ptmr" id="pxT">—</div>
+        </div>
       </div>
-      <div class="tbtns">
-        <button class="tb tbb" id="bBu">
-          <div class="tbd">شراء ↑</div>
-          <div class="tbp" id="bBuP">—</div>
-        </button>
-        <button class="tb tbs" id="bSe">
-          <div class="tbd">بيع ↓</div>
-          <div class="tbp" id="bSeP">—</div>
-        </button>
+
+      <!-- TRADE PANEL -->
+      <div class="tpanel">
+        <div class="phd">تنفيذ صفقة · <span id="pSym">ذهب</span></div>
+        <div class="psets" id="psets"></div>
+        <div class="qrow">
+          <input class="qin" id="qI" type="number" placeholder="0.00" min="0" step="any">
+          <button class="q100" id="q100">100%</button>
+          <div class="ul" id="uLb">أونصة</div>
+        </div>
+        <div class="tbtns">
+          <button class="tb tbb" id="bBu"><div class="tbd">شراء ↑</div><div class="tbp" id="bBuP">—</div></button>
+          <button class="tb tbs" id="bSe"><div class="tbd">بيع ↓</div><div class="tbp" id="bSeP">—</div></button>
+        </div>
       </div>
     </div>
 
-    <!-- Positions List -->
-    <div class="posp">
-      <div class="poshd">
-        <div>الصفقات المفتوحة</div>
-        <div class="postot" id="pTot"></div>
-      </div>
-      <div class="poslist" id="pList">
-        <div class="posmt">📂 لا توجد صفقات</div>
+    <!-- POSITIONS -->
+    <div class="rcol">
+      <div class="posp">
+        <div class="poshd">
+          <div class="poshdl"><div class="postt">الصفقات المفتوحة</div><div class="poscnt" id="pCnt">0</div></div>
+          <div class="postot" id="pTot"></div>
+        </div>
+        <div id="pList"><div class="posmt">📂 لا توجد صفقات مفتوحة</div></div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Bar -->
+  <!-- BOTTOM BAR -->
   <div class="btm">
-    <button class="bb" id="bBal"><div>💼</div>رصيد</button>
-    <button class="bb" id="bOut"><div>🔒</div>خروج</button>
+    <button class="bb hi" id="bBal"><div class="bbi">💼</div>رصيد</button>
+    <button class="bb" id="bDp"><div class="bbi">💵</div>إيداع</button>
+    <button class="bb" id="bWd"><div class="bbi">📤</div>سحب</button>
+    <button class="bb out" id="bOut"><div class="bbi">🔒</div>خروج</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     MODALS
-══════════════════════════════ -->
-
-<!-- Confirm Trade -->
+<!-- MODALS -->
 <div class="ov" id="mCf">
   <div class="sht">
+    <div class="grp"></div>
     <div class="stt" id="cfT">تأكيد الصفقة</div>
+    <div class="ssb" id="cfS"></div>
     <div class="cb" id="cfB"></div>
     <div class="sbtns">
-      <button class="sc2" onclick="cm('mCf')">إلغاء</button>
-      <button class="sok bok" id="cfOk" onclick="execTrade()">تأكيد</button>
+      <button class="sc2" id="cfCancel">إلغاء ✕</button>
+      <button class="sok" id="cfOk">تأكيد ←</button>
     </div>
   </div>
 </div>
 
-<!-- Close Position -->
 <div class="ov" id="mCl">
   <div class="sht">
+    <div class="grp"></div>
     <div class="stt" id="clT">إغلاق الصفقة</div>
+    <div class="ssb">سيتم الإغلاق فوراً بالسعر الحالي</div>
     <div class="cb" id="clB"></div>
     <div class="sbtns">
-      <button class="sc2" onclick="cm('mCl')">إلغاء</button>
-      <button class="sok wok" onclick="execClose()">إغلاق الآن</button>
+      <button class="sc2" id="clCancel">إبقاء</button>
+      <button class="sok wok" id="clOk">إغلاق الآن ✕</button>
     </div>
   </div>
 </div>
 
-<!-- Balance Modal -->
-<div class="ov" id="mBl">
-  <div class="sht">
-    <div class="stt">💼 الرصيد</div>
-    <div id="blC">⏳ جاري التحميل...</div>
-    <div class="sbtns s1">
-      <button class="sc2" onclick="cm('mBl')">إغلاق</button>
-    </div>
-  </div>
-</div>
+<div class="ov" id="mBl"><div class="sht"><div class="grp"></div><div class="stt">💼 الرصيد</div><div id="blC"></div><div class="sbtns s1"><button class="sc2" id="blClose">إغلاق</button></div></div></div>
+<div class="ov" id="mDp"><div class="sht"><div class="grp"></div><div class="stt">💵 إيداع USDC</div><div class="sfl"><label class="sl">المبلغ</label><input class="sin" id="dA" type="number" placeholder="100"></div><div class="sbtns"><button class="sc2" id="dpCancel">إلغاء</button><button class="sok blok" id="dOk">إيداع ✓</button></div></div></div>
+<div class="ov" id="mWd"><div class="sht"><div class="grp"></div><div class="stt">📤 سحب USDC</div><div class="sfl"><label class="sl">المبلغ</label><input class="sin" id="wA" type="number" placeholder="100"></div><div class="sfl"><label class="sl">العنوان</label><input class="sin" id="wD" type="text" placeholder="0x..."></div><div class="sbtns"><button class="sc2" id="wdCancel">إلغاء</button><button class="sok blok" id="wOk">سحب ✓</button></div></div></div>
+<div class="ov" id="mLg"><div class="sht"><div class="grp"></div><div class="logout-modal"><div class="logout-icon">🔐</div><div class="logout-title">تسجيل الخروج</div><div class="logout-sub">سيتم مسح المفتاح. صفقاتك تبقى نشطة.</div></div><div class="sbtns"><button class="sc2" id="lgCancel">بقاء</button><button class="sok wok" id="lgOk">خروج 🔒</button></div></div></div>
 
-<!-- Toast & Loader -->
+<!-- UI GLOBAL -->
 <div id="tst"></div>
-<div id="ldr"><div class="spin"></div><div class="ldrt"></div></div>
+<div id="ldr"><div class="spin"></div><div class="ldrt" id="ldrt">جاري...</div></div>
 
-<!-- ══════════════════════════════
-     SCRIPTS
-══════════════════════════════ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3.0.0/dist.es5+umd/msgpack.min.js"></script>
+<!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3/dist/msgpack.umd.min.js" crossorigin="anonymous"></script>
+<script>
+  // Silent fail - no user alerts
+  window.addEventListener('load', () => {
+    if (typeof ethers === 'undefined') console.error('[HL] ethers.js failed');
+    if (typeof MessagePack === 'undefined') console.error('[HL] msgpack failed');
+  });
+</script>
 <script src="/hl/hl.js"></script>
-
 </body>
 </html>
