@@ -10,258 +10,314 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/hl/hl.css">
+  <style>
+    /* ═══════════════════════════════════════════════════
+       HL Trade · CSS مدمج (لا ملف خارجي)
+    ═════════════════════════════════════════════════════ */
+    :root{--bg:#07090f;--card:#0d1018;--elev:#111520;--input:#161c2a;--border:#1e2a3e;--border2:#263245;--up:#00e87a;--dn:#ff3355;--ac:#3b82f6;--warn:#f5a623;--t1:#e0eaf8;--t2:#6b7f9e;--t3:#3a4f6a;--shadow:0 8px 32px rgba(0,0,0,.45);--r:12px;--r2:18px;--ui:'Cairo',sans-serif;--mono:'IBM Plex Mono',monospace}
+    @media(prefers-color-scheme:light){:root{--bg:#f0f3f8;--card:#fff;--elev:#f7f9fc;--input:#edf1f7;--border:#cdd6e3;--border2:#b8c6d8;--up:#00924c;--dn:#d4213b;--ac:#1d5cc8;--warn:#b07000;--t1:#0f1d30;--t2:#4a6078;--t3:#8fa3b8;--shadow:0 4px 20px rgba(0,0,0,.1)}}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+    html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--ui);overflow:hidden;font-size:15px}
+    input,button{font-family:inherit}
+    button{cursor:pointer;border:none;background:none;transition:transform .1s,filter .15s}
+    button:active{transform:scale(.97)}
+    button:disabled{opacity:.5;pointer-events:none}
+    input{background:var(--input);border:1.5px solid var(--border2);border-radius:var(--r);padding:11px 14px;color:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+    input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+    input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    
+    .screen{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1;background:var(--bg)}
+    .screen.hidden{display:none!important}
+    
+    /* Login */
+    #loginScreen{align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(59,130,246,.12) 0%,transparent 70%)}
+    .login-brand{display:flex;align-items:center;gap:14px;margin-bottom:32px}
+    .login-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(140deg,var(--ac),#2563cc);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 36px rgba(59,130,246,.15)}
+    .login-title{font-size:30px;font-weight:900;letter-spacing:.5px}
+    .login-title em{color:var(--ac);font-style:normal}
+    .login-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r2);padding:26px 22px;width:100%;max-width:440px;box-shadow:var(--shadow)}
+    .login-header{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:3px;text-transform:uppercase;padding-bottom:14px;margin-bottom:18px;border-bottom:1px solid var(--border)}
+    .field-label{display:block;font-size:9px;font-weight:700;color:var(--t2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+    .key-wrapper{position:relative}
+    .key-input{width:100%;font-family:var(--mono);font-size:13px;padding:14px 48px 14px 14px;direction:ltr}
+    .key-toggle{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--t3);padding:4px}
+    .key-toggle:hover{color:var(--t2)}
+    .login-btn{width:100%;margin-top:18px;padding:15px;border-radius:var(--r);font-size:16px;font-weight:900;background:linear-gradient(135deg,var(--ac),#2563cc);color:#fff;box-shadow:0 4px 22px rgba(59,130,246,.15)}
+    .login-btn:hover{filter:brightness(1.08)}
+    .login-note{margin-top:16px;padding:12px 14px;border-radius:var(--r);background:rgba(0,232,122,.12);border:1px solid rgba(0,232,122,.25);font-size:11px;color:var(--t2);line-height:1.9;text-align:center}
+    .login-note strong{color:var(--up)}
+    
+    /* App */
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.25);flex-shrink:0}
+    .nav-left{display:flex;align-items:center;gap:10px}
+    .nav-logo{font-size:18px;font-weight:900}
+    .nav-logo em{color:var(--ac);font-style:normal}
+    .nav-status{display:flex;align-items:center;gap:5px;background:rgba(0,232,122,.12);border:1px solid rgba(0,232,122,.3);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--up)}
+    .status-dot{width:7px;height:7px;background:var(--up);border-radius:50%;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .nav-right{display:flex;align-items:center}
+    .nav-address{font-family:var(--mono);font-size:11px;color:var(--t3);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:7px}
+    .nav-address:hover{color:var(--t2);border-color:var(--border2)}
+    
+    .tabs{display:flex;padding:8px 10px 6px;gap:7px;background:var(--bg);flex-shrink:0}
+    .tab{flex:1;border-radius:var(--r);border:1.5px solid var(--border);background:var(--elev);padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all .2s}
+    .tab:active{transform:scale(.96)}
+    .tab.active{border-color:var(--ac);background:var(--input);box-shadow:0 0 16px rgba(59,130,246,.15)}
+    .tab-icon{font-size:19px}
+    .tab-name{font-size:10px;font-weight:700;color:var(--t2)}
+    .tab.active .tab-name{color:var(--t1)}
+    .tab-price{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--t3)}
+    .tab-price.up{color:var(--up)}
+    .tab-price.dn{color:var(--dn)}
+    
+    .main{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:9px 10px 6px}
+    @media(min-width:720px){.main{flex-direction:row}.col-left,.col-right{flex:1;display:flex;flex-direction:column;gap:9px}.col-left{flex:1.15}}
+    
+    .price-card{border-radius:var(--r2);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:7px;border:1.5px solid var(--border2);background:var(--elev);transition:all .3s}
+    .price-card.up{border-color:rgba(0,232,122,.45);background:rgba(0,232,122,.06);box-shadow:0 0 28px rgba(0,232,122,.12)}
+    .price-card.dn{border-color:rgba(255,51,85,.45);background:rgba(255,51,85,.06);box-shadow:0 0 28px rgba(255,51,85,.12)}
+    .price-asset{font-size:11px;font-weight:900;color:var(--t2);letter-spacing:.5px}
+    .price-value{font-family:var(--mono);font-size:36px;font-weight:700;line-height:1;transition:color .2s}
+    .price-value.up{color:var(--up)}
+    .price-value.dn{color:var(--dn)}
+    .price-value.n{color:var(--t1)}
+    .price-delta{font-family:var(--mono);font-size:12px;font-weight:600}
+    .price-delta.up{color:var(--up)}
+    .price-delta.dn{color:var(--dn)}
+    .price-delta.n{color:var(--t3)}
+    .price-timer{font-size:9px;color:var(--t3);font-family:var(--mono)}
+    
+    .trade-panel{background:var(--card);border:1px solid var(--border2);border-radius:var(--r2);padding:14px;display:flex;flex-direction:column;gap:11px}
+    .panel-header{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:2px;text-transform:uppercase;padding-bottom:9px;border-bottom:1px solid var(--border)}
+    .qty-presets{display:flex;gap:5px;flex-wrap:wrap}
+    .qty-preset{flex:1;min-width:34px;padding:9px 3px;border-radius:9px;border:1.5px solid var(--border);background:var(--input);color:var(--t2);font-size:12px;font-weight:700;text-align:center;font-family:var(--mono);transition:all .12s}
+    .qty-preset:active{transform:scale(.9)}
+    .qty-preset.active{background:rgba(59,130,246,.15);border-color:var(--ac);color:var(--ac);box-shadow:0 0 12px rgba(59,130,246,.15)}
+    .qty-input-row{display:grid;grid-template-columns:1fr auto auto;gap:9px;align-items:center}
+    .qty-input{width:100%;font-family:var(--mono);font-size:21px;font-weight:700;padding:11px 14px;text-align:center;direction:ltr}
+    .qty-100{background:var(--ac);color:#fff;border-radius:9px;padding:0 13px;font-size:11px;font-weight:700;font-family:var(--mono)}
+    .qty-100:hover{filter:brightness(1.1)}
+    .qty-unit{font-size:11px;font-weight:700;color:var(--t2);text-align:center;min-width:42px}
+    
+    .trade-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .btn-trade{border-radius:var(--r2);min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;overflow:hidden}
+    .btn-trade:disabled{opacity:.5;pointer-events:none}
+    .btn-buy{background:linear-gradient(155deg,var(--up),#00a857);box-shadow:0 4px 20px rgba(0,232,122,.12)}
+    .btn-sell{background:linear-gradient(155deg,var(--dn),#cc1838);box-shadow:0 4px 20px rgba(255,51,85,.12)}
+    .btn-label{font-size:19px;font-weight:900;color:#fff}
+    .btn-price{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.75);font-weight:600}
+    
+    .positions-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;flex-shrink:0}
+    .positions-header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border)}
+    .positions-title{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:2px;text-transform:uppercase}
+    .positions-count{background:var(--ac);color:#fff;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:900}
+    .positions-pnl{font-family:var(--mono);font-size:13px;font-weight:700}
+    .positions-pnl.pos{color:var(--up)}
+    .positions-pnl.neg{color:var(--dn)}
+    .positions-empty{padding:18px;text-align:center;color:var(--t3);font-size:11px}
+    .position-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);animation:slideIn .2s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+    .pos-info{display:flex;flex-direction:column;gap:4px}
+    .pos-name{font-size:15px;font-weight:900}
+    .pos-meta{font-size:10px;color:var(--t2);font-family:var(--mono)}
+    .pos-meta .long{color:var(--up)}
+    .pos-meta .short{color:var(--dn)}
+    .pos-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+    .pos-pnl{font-family:var(--mono);font-size:21px;font-weight:700;line-height:1}
+    .pos-pnl.pos{color:var(--up)}
+    .pos-pnl.neg{color:var(--dn)}
+    .pos-size{font-family:var(--mono);font-size:9px;color:var(--t3)}
+    .btn-close{border:1.5px solid var(--dn);background:rgba(255,51,85,.12);color:var(--dn);border-radius:9px;padding:6px 12px;font-size:10px;font-weight:700;transition:all .15s}
+    .btn-close:hover,.btn-close:active{background:var(--dn);color:#fff}
+    .btn-tp{border:1.5px solid var(--up);background:rgba(0,232,122,.12);color:var(--up);border-radius:9px;padding:6px 12px;font-size:10px;font-weight:700;transition:all .15s;margin-top:4px}
+    .btn-tp:hover,.btn-tp:active{background:var(--up);color:#fff}
+    
+    .footer{display:flex;gap:7px;padding:9px 10px max(14px,env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--border);flex-shrink:0}
+    .footer-btn{flex:1;background:var(--input);border:1.5px solid var(--border2);border-radius:var(--r);color:var(--t1);padding:9px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+    .footer-btn:active{transform:scale(.95)}
+    .footer-icon{font-size:19px}
+    .footer-btn.highlight{border-color:var(--warn);color:var(--warn);background:rgba(245,166,35,.07);box-shadow:0 0 14px rgba(245,166,35,.15)}
+    .footer-logout{opacity:.35;flex:.45;font-size:8px}
+    
+    /* Modals */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px)}
+    .modal-overlay.open{display:flex;animation:fadeIn .18s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:520px;padding:20px 20px 28px;border-top:1px solid var(--border2);box-shadow:0 -10px 48px rgba(0,0,0,.35);animation:slideUp .25s cubic-bezier(.4,0,.2,1)}
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+    .modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 17px}
+    .modal-title{font-size:20px;font-weight:900;margin-bottom:4px}
+    .modal-subtitle{font-size:12px;color:var(--t2);margin-bottom:16px}
+    .confirm-details{background:var(--input);border-radius:var(--r2);padding:15px;margin-bottom:15px;display:flex;flex-direction:column;gap:7px}
+    .confirm-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+    .confirm-row:last-child{border:none;margin-top:5px;padding-top:7px}
+    .confirm-key{font-size:11px;color:var(--t2);font-weight:600}
+    .confirm-val{font-family:var(--mono);font-size:13px;font-weight:700}
+    .confirm-val.buy{color:var(--up)}
+    .confirm-val.sell{color:var(--dn)}
+    .confirm-val.warn{color:var(--warn)}
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+    .form-group label{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:1.5px;text-transform:uppercase}
+    .form-input{width:100%;font-family:var(--mono);font-size:16px;padding:12px 14px;direction:ltr}
+    .form-note{font-size:11px;color:var(--t2);line-height:1.85;padding:10px 13px;border-radius:var(--r);background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.25);margin-bottom:14px}
+    .modal-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .modal-buttons-center{grid-template-columns:1fr}
+    .btn-modal{padding:13px;border-radius:var(--r);font-size:14px;font-weight:700;transition:all .15s}
+    .btn-cancel{border:1.5px solid var(--border2);background:var(--input);color:var(--t2)}
+    .btn-cancel:hover{border-color:var(--t2)}
+    .btn-confirm{border:none;color:#fff;display:flex;align-items:center;justify-content:center;gap:9px}
+    .btn-confirm:active{filter:brightness(.88)}
+    .btn-confirm:disabled{opacity:.55;pointer-events:none}
+    .btn-success{background:linear-gradient(135deg,var(--up),#00a857);box-shadow:0 4px 18px rgba(0,232,122,.12)}
+    .btn-danger{background:linear-gradient(135deg,var(--dn),#cc1838);box-shadow:0 4px 18px rgba(255,51,85,.12)}
+    
+    .balance-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+    .balance-item{background:var(--input);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:4px}
+    .balance-item.full{grid-column:1/-1}
+    .balance-label{font-size:8px;font-weight:700;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase}
+    .balance-value{font-family:var(--mono);font-size:20px;font-weight:700}
+    .balance-value.green{color:var(--up)}
+    .balance-value.red{color:var(--dn)}
+    .balance-value.blue{color:var(--ac)}
+    .balance-value.warn{color:var(--warn)}
+    .balance-desc{font-size:10px;color:var(--t2)}
+    .btn-refresh{width:100%;padding:12px;border-radius:var(--r);border:1.5px solid var(--border2);background:var(--input);color:var(--t2);font-size:12px;font-weight:700}
+    .btn-refresh:hover{border-color:var(--ac);color:var(--ac)}
+    .balance-loading{text-align:center;padding:22px;color:var(--t2);font-size:12px}
+    
+    .logout-content{text-align:center;padding:10px 0 6px}
+    .logout-icon{font-size:44px;margin-bottom:12px}
+    .logout-text{font-size:12px;color:var(--t2);line-height:1.8;margin-bottom:18px}
+    
+    /* Toast & Loader */
+    #toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--card);border:1.5px solid var(--border2);border-radius:14px;padding:10px 22px;font-size:13px;font-weight:700;z-index:250;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap;max-width:94vw;text-align:center;box-shadow:var(--shadow)}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    #toast.ok{border-color:var(--up);color:var(--up);background:rgba(0,232,122,.08)}
+    #toast.err{border-color:var(--dn);color:var(--dn);background:rgba(255,51,85,.08)}
+    #toast.info{border-color:var(--ac);color:var(--ac)}
+    
+    #loader{position:fixed;inset:0;z-index:150;background:rgba(7,9,15,.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:15px}
+    #loader.active{display:flex;animation:fadeIn .14s}
+    .spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loader-text{font-size:13px;color:var(--t2);font-weight:600;letter-spacing:.5px}
+  </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════ LOGIN ═══════════════════════════════ -->
+<!-- LOGIN -->
 <div class="screen" id="loginScreen">
-  <div class="login-brand">
-    <div class="login-icon">⚡</div>
-    <div class="login-title">HL<em>Trade</em></div>
-  </div>
+  <div class="login-brand"><div class="login-icon">⚡</div><div class="login-title">HL<em>Trade</em></div></div>
   <div class="login-card">
     <div class="login-header">تداول مباشر على Hyperliquid</div>
-    
     <label class="field-label" for="privateKey">المفتاح الخاص</label>
     <div class="key-wrapper">
-      <input class="key-input" id="privateKey" type="password" placeholder="0x4a3b..." autocomplete="off" spellcheck="false">
-      <button class="key-toggle" id="toggleKey" type="button" aria-label="إظهار/إخفاء">👁</button>
+      <input class="key-input" id="privateKey" type="password" placeholder="0x4a3b..." autocomplete="off">
+      <button class="key-toggle" id="toggleKey" type="button">👁</button>
     </div>
-    
     <button class="login-btn" id="loginBtn">دخول — بدء التداول ←</button>
-    
-    <div class="login-note">
-      <strong>🔒 المفتاح لا يغادر متصفحك</strong><br>
-      التوقيعات تتم محلياً · لا خوادم خارجية
-    </div>
+    <div class="login-note"><strong>🔒 المفتاح لا يغادر متصفحك</strong><br>التوقيعات محلياً · لا خوادم خارجية</div>
   </div>
 </div>
 
-<!-- ══════════════════════════════ APP ═══════════════════════════════ -->
+<!-- APP -->
 <div class="screen hidden" id="appScreen">
-
-  <!-- NAV -->
   <nav class="nav">
-    <div class="nav-left">
-      <div class="nav-logo">⚡ HL<em>Trade</em></div>
-      <div class="nav-status"><span class="status-dot"></span>LIVE</div>
-    </div>
-    <div class="nav-right">
-      <div class="nav-address" id="navAddress" title="انقر للنسخ">—</div>
-    </div>
+    <div class="nav-left"><div class="nav-logo">⚡ HL<em>Trade</em></div><div class="nav-status"><span class="status-dot"></span>LIVE</div></div>
+    <div class="nav-right"><div class="nav-address" id="navAddress" title="انقر للنسخ">—</div></div>
   </nav>
-
-  <!-- ASSET TABS -->
+  
   <div class="tabs">
-    <button class="tab active" data-asset="GOLD">
-      <span class="tab-icon">🟡</span>
-      <span class="tab-name">ذهب</span>
-      <span class="tab-price" id="priceGOLD">—</span>
-    </button>
-    <button class="tab" data-asset="SILVER">
-      <span class="tab-icon">⚪</span>
-      <span class="tab-name">فضة</span>
-      <span class="tab-price" id="priceSILVER">—</span>
-    </button>
-    <button class="tab" data-asset="CL">
-      <span class="tab-icon">🛢</span>
-      <span class="tab-name">نفط</span>
-      <span class="tab-price" id="priceCL">—</span>
-    </button>
+    <button class="tab active" data-asset="GOLD"><span class="tab-icon">🟡</span><span class="tab-name">ذهب</span><span class="tab-price" id="priceGOLD">—</span></button>
+    <button class="tab" data-asset="SILVER"><span class="tab-icon">⚪</span><span class="tab-name">فضة</span><span class="tab-price" id="priceSILVER">—</span></button>
+    <button class="tab" data-asset="CL"><span class="tab-icon">🛢</span><span class="tab-name">نفط</span><span class="tab-price" id="priceCL">—</span></button>
   </div>
-
-  <!-- MAIN CONTENT -->
+  
   <main class="main">
-    
-    <!-- LEFT COLUMN -->
     <div class="col-left">
-      
-      <!-- PRICE DISPLAY -->
       <div class="price-card" id="priceCard">
         <div class="price-asset" id="priceAssetName">ذهب</div>
         <div class="price-value" id="priceValue">—</div>
         <div class="price-delta" id="priceDelta"></div>
         <div class="price-timer" id="priceTimer">↻ —</div>
       </div>
-
-      <!-- TRADE PANEL -->
       <div class="trade-panel">
         <div class="panel-header">تنفيذ صفقة · <span id="tradeAssetName">ذهب</span></div>
-        
-        <!-- Quantity Presets -->
         <div class="qty-presets" id="qtyPresets"></div>
-        
-        <!-- Quantity Input -->
         <div class="qty-input-row">
           <input type="number" class="qty-input" id="qtyInput" placeholder="0.00" min="0" step="any">
           <button class="qty-100" id="qty100">100%</button>
           <span class="qty-unit" id="qtyUnit">أونصة</span>
         </div>
-        
-        <!-- Trade Buttons -->
         <div class="trade-buttons">
-          <button class="btn-trade btn-buy" id="btnBuy">
-            <span class="btn-label">شراء ↑</span>
-            <span class="btn-price" id="buyPrice">—</span>
-          </button>
-          <button class="btn-trade btn-sell" id="btnSell">
-            <span class="btn-label">بيع ↓</span>
-            <span class="btn-price" id="sellPrice">—</span>
-          </button>
+          <button class="btn-trade btn-buy" id="btnBuy"><span class="btn-label">شراء ↑</span><span class="btn-price" id="buyPrice">—</span></button>
+          <button class="btn-trade btn-sell" id="btnSell"><span class="btn-label">بيع ↓</span><span class="btn-price" id="sellPrice">—</span></button>
         </div>
       </div>
-      
     </div>
-
-    <!-- RIGHT COLUMN -->
     <div class="col-right">
-      
-      <!-- POSITIONS -->
       <div class="positions-card">
         <div class="positions-header">
           <span class="positions-title">الصفقات المفتوحة</span>
           <span class="positions-count" id="positionsCount">0</span>
           <span class="positions-pnl" id="totalPnl"></span>
         </div>
-        <div class="positions-list" id="positionsList">
-          <div class="positions-empty">📂 لا توجد صفقات مفتوحة</div>
-        </div>
+        <div class="positions-list" id="positionsList"><div class="positions-empty">📂 لا توجد صفقات مفتوحة</div></div>
       </div>
-      
     </div>
-    
   </main>
-
-  <!-- BOTTOM BAR -->
+  
   <footer class="footer">
     <button class="footer-btn" id="btnBalance"><span class="footer-icon">💼</span>رصيد</button>
     <button class="footer-btn" id="btnDeposit"><span class="footer-icon">💵</span>إيداع</button>
     <button class="footer-btn" id="btnWithdraw"><span class="footer-icon">📤</span>سحب</button>
     <button class="footer-btn footer-logout" id="btnLogout"><span class="footer-icon">🔒</span>خروج</button>
   </footer>
-
 </div>
 
-<!-- ══════════════════════════════ MODALS ═══════════════════════════════ -->
+<!-- MODALS -->
+<div class="modal-overlay" id="modalConfirm"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title" id="confirmTitle">تأكيد الصفقة</h3><p class="modal-subtitle" id="confirmSubtitle"></p><div class="confirm-details" id="confirmDetails"></div><div class="modal-buttons"><button class="btn-modal btn-cancel" id="confirmCancel">إلغاء ✕</button><button class="btn-modal btn-confirm" id="confirmExecute">تأكيد ←</button></div></div></div>
+<div class="modal-overlay" id="modalClose"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title" id="closeTitle">إغلاق الصفقة</h3><p class="modal-subtitle">سيتم الإغلاق فوراً بالسعر الحالي</p><div class="confirm-details" id="closeDetails"></div><div class="modal-buttons"><button class="btn-modal btn-cancel" id="closeCancel">إبقاء</button><button class="btn-modal btn-confirm btn-danger" id="closeExecute">إغلاق الآن ✕</button></div></div></div>
+<div class="modal-overlay" id="modalBalance"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title">💼 رصيد Hyperliquid</h3><div class="balance-content" id="balanceContent"><div class="balance-loading">⏳ جاري جلب الرصيد...</div></div><div class="modal-buttons modal-buttons-center"><button class="btn-modal btn-cancel" id="balanceClose">إغلاق</button></div></div></div>
+<div class="modal-overlay" id="modalDeposit"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title">💵 إيداع USDC</h3><div class="form-group"><label>المبلغ (USDC)</label><input type="number" class="form-input" id="depositAmount" placeholder="100" min="1"></div><p class="form-note">يُرسل USDC من Arbitrum عبر الجسر الرسمي</p><div class="modal-buttons"><button class="btn-modal btn-cancel" id="depositCancel">إلغاء</button><button class="btn-modal btn-confirm btn-success" id="depositExecute">إيداع ✓</button></div></div></div>
+<div class="modal-overlay" id="modalWithdraw"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title">📤 سحب USDC</h3><div class="form-group"><label>المبلغ (USDC)</label><input type="number" class="form-input" id="withdrawAmount" placeholder="100" min="1"></div><div class="form-group"><label>عنوان الاستلام (Arbitrum)</label><input type="text" class="form-input" id="withdrawAddress" placeholder="0x..." dir="ltr"></div><div class="modal-buttons"><button class="btn-modal btn-cancel" id="withdrawCancel">إلغاء</button><button class="btn-modal btn-confirm btn-success" id="withdrawExecute">سحب ✓</button></div></div></div>
+<div class="modal-overlay" id="modalLogout"><div class="modal"><div class="modal-handle"></div><div class="logout-content"><div class="logout-icon">🔐</div><h3 class="modal-title">تسجيل الخروج</h3><p class="logout-text">سيتم مسح المفتاح الخاص من الذاكرة.<br>صفقاتك المفتوحة <strong>تبقى نشطة</strong> على Hyperliquid.</p></div><div class="modal-buttons"><button class="btn-modal btn-cancel" id="logoutCancel">بقاء — إلغاء</button><button class="btn-modal btn-confirm btn-danger" id="logoutExecute">خروج 🔒</button></div></div></div>
 
-<!-- Trade Confirm -->
-<div class="modal-overlay" id="modalConfirm">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h3 class="modal-title" id="confirmTitle">تأكيد الصفقة</h3>
-    <p class="modal-subtitle" id="confirmSubtitle"></p>
-    <div class="confirm-details" id="confirmDetails"></div>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-cancel" id="confirmCancel">إلغاء ✕</button>
-      <button class="btn-modal btn-confirm" id="confirmExecute">تأكيد ←</button>
-    </div>
-  </div>
-</div>
-
-<!-- Close Position Confirm -->
-<div class="modal-overlay" id="modalClose">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h3 class="modal-title" id="closeTitle">إغلاق الصفقة</h3>
-    <p class="modal-subtitle">سيتم الإغلاق فوراً بالسعر الحالي</p>
-    <div class="confirm-details" id="closeDetails"></div>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-cancel" id="closeCancel">إبقاء</button>
-      <button class="btn-modal btn-confirm btn-danger" id="closeExecute">إغلاق الآن ✕</button>
-    </div>
-  </div>
-</div>
-
-<!-- Balance Modal -->
-<div class="modal-overlay" id="modalBalance">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h3 class="modal-title">💼 رصيد Hyperliquid</h3>
-    <div class="balance-content" id="balanceContent">
-      <div class="balance-loading">⏳ جاري جلب الرصيد...</div>
-    </div>
-    <div class="modal-buttons modal-buttons-center">
-      <button class="btn-modal btn-cancel" id="balanceClose">إغلاق</button>
-    </div>
-  </div>
-</div>
-
-<!-- Deposit Modal -->
-<div class="modal-overlay" id="modalDeposit">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h3 class="modal-title">💵 إيداع USDC</h3>
-    <div class="form-group">
-      <label>المبلغ (USDC)</label>
-      <input type="number" class="form-input" id="depositAmount" placeholder="100" min="1">
-    </div>
-    <p class="form-note">يُرسل USDC من Arbitrum عبر الجسر الرسمي</p>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-cancel" id="depositCancel">إلغاء</button>
-      <button class="btn-modal btn-confirm btn-success" id="depositExecute">إيداع ✓</button>
-    </div>
-  </div>
-</div>
-
-<!-- Withdraw Modal -->
-<div class="modal-overlay" id="modalWithdraw">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h3 class="modal-title">📤 سحب USDC</h3>
-    <div class="form-group">
-      <label>المبلغ (USDC)</label>
-      <input type="number" class="form-input" id="withdrawAmount" placeholder="100" min="1">
-    </div>
-    <div class="form-group">
-      <label>عنوان الاستلام (Arbitrum)</label>
-      <input type="text" class="form-input" id="withdrawAddress" placeholder="0x..." dir="ltr">
-    </div>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-cancel" id="withdrawCancel">إلغاء</button>
-      <button class="btn-modal btn-confirm btn-success" id="withdrawExecute">سحب ✓</button>
-    </div>
-  </div>
-</div>
-
-<!-- Logout Confirm -->
-<div class="modal-overlay" id="modalLogout">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="logout-content">
-      <div class="logout-icon">🔐</div>
-      <h3 class="modal-title">تسجيل الخروج</h3>
-      <p class="logout-text">
-        سيتم مسح المفتاح الخاص من الذاكرة.<br>
-        صفقاتك المفتوحة <strong>تبقى نشطة</strong> على Hyperliquid.
-      </p>
-    </div>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-cancel" id="logoutCancel">بقاء — إلغاء</button>
-      <button class="btn-modal btn-confirm btn-danger" id="logoutExecute">خروج 🔒</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════ UI ELEMENTS ═══════════════════════════════ -->
+<!-- UI -->
 <div id="toast"></div>
-<div id="loader">
-  <div class="spinner"></div>
-  <div class="loader-text" id="loaderText">جاري...</div>
-</div>
+<div id="loader"><div class="spinner"></div><div class="loader-text" id="loaderText">جاري...</div></div>
 
-<!-- 1. ethers -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous"></script>
-
-<!-- 2. msgpack (رابط بديل موثوق) -->
-<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3.0.0/dist/msgpack.umd.min.js" crossorigin="anonymous"></script>
-
-<!-- 3. ضمان التعريف العالمي -->
+<!-- SCRIPTS - الترتيب مهم جداً -->
+<!-- 1. ethers.js من CDN موثوق مع fallback -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-  if (typeof MessagePack === 'undefined' && typeof msgpack !== 'undefined') window.MessagePack = msgpack;
+  // Fallback إذا حُجب cdnjs
+  if (typeof ethers === 'undefined') {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js';
+    s.crossOrigin = 'anonymous';
+    document.head.appendChild(s);
+  }
 </script>
 
-<!-- 4. تطبيقك -->
+<!-- 2. @msgpack/msgpack الرسمي من unpkg مع fallback -->
+<script src="https://unpkg.com/@msgpack/msgpack@3.0.0/dist/msgpack.umd.min.js" crossorigin="anonymous"></script>
+<script>
+  // Fallback إذا حُجب unpkg
+  if (typeof MessagePack === 'undefined' && typeof msgpack !== 'undefined') {
+    window.MessagePack = msgpack;
+  }
+  if (typeof MessagePack === 'undefined') {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3.0.0/dist/msgpack.umd.min.js';
+    s.crossOrigin = 'anonymous';
+    s.onload = () => { if (typeof msgpack !== 'undefined') window.MessagePack = msgpack; };
+    document.head.appendChild(s);
+  }
+</script>
+
+<!-- 3. تطبيقنا -->
 <script src="/hl/hl.js"></script>
+
 </body>
 </html>
