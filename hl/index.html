@@ -250,10 +250,18 @@
   <div class="loader-text" id="loaderText">جاري...</div>
 </div>
 
-<!-- ══════════════════════════════ SCRIPTS ═══════════════════════════════ -->
+<!-- 1. ethers -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3/dist/msgpack.umd.min.js" crossorigin="anonymous"></script>
-<script src="/hl/hl.js"></script>
 
+<!-- 2. msgpack (رابط بديل موثوق) -->
+<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3.0.0/dist/msgpack.umd.min.js" crossorigin="anonymous"></script>
+
+<!-- 3. ضمان التعريف العالمي -->
+<script>
+  if (typeof MessagePack === 'undefined' && typeof msgpack !== 'undefined') window.MessagePack = msgpack;
+</script>
+
+<!-- 4. تطبيقك -->
+<script src="/hl/hl.js"></script>
 </body>
 </html>
