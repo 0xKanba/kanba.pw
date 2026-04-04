@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════
-   HL Trade · app.js (Fixed & Optimized)
+   HL Trade · app.js (Fixed & Robust)
 ════════════════════════════════════════ */
 
-const HL_API  = 'https://api.hyperliquid.xyz';
+const HL_API = 'https://api.hyperliquid.xyz';
 const ASSETS = {
   GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, szDp:4, pxDp:1, unit:'أونصة', pre:[0.1,0.5,1,2,5], ico:'🟡', ar:'ذهب' },
   SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, szDp:2, pxDp:3, unit:'أونصة', pre:[1,5,10],      ico:'⚪', ar:'فضة' },
@@ -27,10 +27,7 @@ function toast(msg, type = 'if', dur = 3000) {
   el._t = setTimeout(() => el.className = '', dur);
 }
 
-function ld(msg) { 
-  $('ldrt').textContent = msg || '...'; 
-  $('ldr').classList.add('on'); 
-}
+function ld(msg) { $('ldrt').textContent = msg || '...'; $('ldr').classList.add('on'); }
 function ul() { $('ldr').classList.remove('on'); }
 
 function setBtn(id, loading) {
@@ -47,36 +44,72 @@ function setBtn(id, loading) {
 
 /* ── HYPERLIQUID API ── */
 async function hlInfo(body) {
-  const res = await fetch(HL_API + '/info', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  return res.json();
+  try {
+    const res = await fetch(HL_API + '/info', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    return res.json();
+  } catch (e) {
+    console.error("HL Info Error", e);
+    return null;
+  }
 }
 
+// Correct EIP-712 Signing for Hyperliquid
 async function hlExchange(action) {
   if (!wallet) throw new Error('No Wallet');
-  
-  // EIP-712 Signing
+
   const nonce = Date.now();
-  const connectionId = ethers.keccak256(
-    ethers.toUtf8Bytes(JSON.stringify(action) + nonce)
-  );
   
-  const domain = { name:'Exchange', version:'1', chainId:1337, verifyingContract:'0x0000000000000000000000000000000000000000' };
-  const types = { Agent: [{name:'source',type:'string'}, {name:'connectionId',type:'bytes32'}] };
-  const value = { source:'a', connectionId };
+  // 1. MessagePack Encode Action
+  // Using the globally loaded msgpack library
+  if (typeof MessagePack === 'undefined') throw new Error('Msgpack not loaded');
+  const actionBytes = MessagePack.encode(action); // Uint8Array
+
+  // 2. Create ConnectionId Hash
+  // Structure: action_bytes + nonce(8 bytes big-endian) + phantom_byte(0x00)
+  const nonceBuf = new ArrayBuffer(8);
+  new DataView(nonceBuf).setBigUint64(0, BigInt(nonce), false); // false = big-endian
+  
+  const buf = new Uint8Array(actionBytes.length + 8 + 1);
+  buf.set(actionBytes, 0);
+  buf.set(new Uint8Array(nonceBuf), actionBytes.length);
+  buf.set([0x00], actionBytes.length + 8);
+
+  const connectionId = ethers.keccak256(buf);
+
+  // 3. Sign Typed Data (EIP-712)
+  const domain = {
+    name: 'Exchange',
+    version: '1',
+    chainId: 42161, // Arbitrum Chain ID used by HL
+    verifyingContract: '0x0000000000000000000000000000000000000000'
+  };
+  const types = {
+    Agent: [
+      { name: 'source', type: 'string' },
+      { name: 'connectionId', type: 'bytes32' }
+    ]
+  };
+  const value = { source: 'a', connectionId };
   
   const sig = await wallet.signTypedData(domain, types, value);
   const { r, s, v } = ethers.Signature.from(sig);
 
+  // 4. Send Request
   const res = await fetch(HL_API + '/exchange', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, nonce, signature: { r, s, v }, vaultAddress: null }),
+    body: JSON.stringify({
+      action,
+      nonce,
+      signature: { r, s, v },
+      vaultAddress: null
+    }),
   });
-  
+
   const data = await res.json();
   if (data.status === 'ok') return data;
   throw new Error(data.response || 'Exchange Error');
@@ -86,12 +119,14 @@ async function hlExchange(action) {
 async function pollPrices() {
   for (const [s, a] of Object.entries(ASSETS)) {
     try {
-      const lb = await hlInfo({ type:'l2Book', coin:a.coin });
-      const bid = parseFloat(lb.levels?.[0]?.[0]?.px || 0);
-      const ask = parseFloat(lb.levels?.[1]?.[0]?.px || 0);
-      const mid = (bid && ask) ? (bid + ask) / 2 : 0;
-      PX[s] = { bid, ask, mid };
-    } catch (e) { /* silent fail for price polling */ }
+      const lb = await hlInfo({ type: 'l2Book', coin: a.coin });
+      if (lb && lb.levels) {
+        const bid = parseFloat(lb.levels[0]?.[0]?.px || 0);
+        const ask = parseFloat(lb.levels[1]?.[0]?.px || 0);
+        const mid = (bid && ask) ? (bid + ask) / 2 : 0;
+        PX[s] = { bid, ask, mid };
+      }
+    } catch (e) {}
   }
   updateUI();
 }
@@ -101,14 +136,13 @@ function updateUI() {
   const p = PX[sym];
   if (!a || !p || !p.mid) return;
 
-  // Price Display
   $('pxVal').textContent = fx(p.mid, a.pxDp);
-  $('pxVal').className = 'pxval ' + (p.mid > (PRV[sym]||0) ? 'u' : p.mid < (PRV[sym]||0) ? 'd' : '');
+  // Flash effect
+  const dir = p.mid > (PRV[sym] || 0) ? 'u' : p.mid < (PRV[sym] || 0) ? 'd' : '';
+  $('pxVal').className = 'pxval' + (dir ? ' ' + dir : '');
   
-  // Buttons Price
   $('bBuP').textContent = fx(p.ask, a.pxDp);
   $('bSeP').textContent = fx(p.bid, a.pxDp);
-
   PRV[sym] = p.mid;
 }
 
@@ -116,9 +150,11 @@ function updateUI() {
 async function pollAccount() {
   if (!wallet) return;
   try {
-    const st = await hlInfo({ type:'clearinghouseState', user:wallet.address });
-    positions = (st.assetPositions || []).filter(p => parseFloat(p.position?.szi || 0) !== 0);
-    renderPositions();
+    const st = await hlInfo({ type: 'clearinghouseState', user: wallet.address });
+    if (st && st.assetPositions) {
+      positions = st.assetPositions.filter(p => parseFloat(p.position?.szi || 0) !== 0);
+      renderPositions();
+    }
   } catch (e) {}
 }
 
@@ -134,7 +170,7 @@ function renderPositions() {
     const szi = parseFloat(pos.szi);
     const pnl = parseFloat(pos.unrealizedPnl || 0);
     const coin = pos.coin.replace('xyz:', '');
-    const a = ASSETS[coin] || { ar:coin, unit:'', ico:'' };
+    const a = ASSETS[coin] || { ar: coin, unit: '', ico: '' };
     
     return `<div class="posit">
       <div>
@@ -158,6 +194,9 @@ function askTrade(isBuy) {
   
   const a = ASSETS[sym];
   const p = PX[sym];
+  if(!p || !p.mid) { toast('لا يوجد سعر حالياً', 'er'); return; }
+
+  const price = isBuy ? p.ask : p.bid;
   
   $('cfT').textContent = `${isBuy ? 'شراء' : 'بيع'} ${a.ico} ${a.ar}`;
   $('cfB').innerHTML = `
@@ -165,10 +204,10 @@ function askTrade(isBuy) {
       <span>الكمية</span><span style="font-family:var(--mono)">${qty} ${a.unit}</span>
     </div>
     <div style="display:flex;justify-content:space-between;margin-bottom:10px">
-      <span>السعر التقريبي</span><span style="font-family:var(--mono)">${fx(isBuy ? p.ask : p.bid, a.pxDp)} $</span>
+      <span>السعر</span><span style="font-family:var(--mono)">${fx(price, a.pxDp)} $</span>
     </div>
     <div style="display:flex;justify-content:space-between">
-      <span>الهامش (${a.lev}x)</span><span style="font-family:var(--mono);color:var(--ac)">${((isBuy ? p.ask : p.bid) * qty / a.lev).toFixed(2)} $</span>
+      <span>الهامش (${a.lev}x)</span><span style="font-family:var(--mono);color:var(--ac)">${(price * qty / a.lev).toFixed(2)} $</span>
     </div>`;
 
   pendTrade = { isBuy, qty, sym };
@@ -182,19 +221,36 @@ window.execTrade = async function() {
   const a = ASSETS[s];
   const p = PX[s];
 
-  cm('mCf'); // Close modal immediately to prevent freeze feeling
-  setBtn('bBu', true); setBtn('bSe', true); // Disable buttons
+  cm('mCf'); // Close modal immediately
+  setBtn('bBu', true); setBtn('bSe', true);
   ld('جاري التنفيذ...');
 
   try {
-    // 1. Set Leverage
-    await hlExchange({ type:'updateLeverage', asset:a.idx, isCross:true, leverage:a.lev }).catch(()=>{});
+    // 1. Set Leverage (Cross Margin)
+    // Wrap in try-catch to ignore if already set
+    try {
+      await hlExchange({ 
+        type: 'updateLeverage', 
+        asset: a.idx, 
+        isCross: true, 
+        leverage: a.lev 
+      });
+    } catch(e) {}
+
+    // 2. Place Order (IOC Limit)
+    // Slippage protection: 2% from mid price
+    const limitPrice = fx(p.mid * (isBuy ? 1.02 : 0.98), a.pxDp);
     
-    // 2. Place Order
-    const price = fx(p.mid * (isBuy ? 1.02 : 0.98), a.pxDp); // 2% slippage protection
     await hlExchange({
       type: 'order',
-      orders: [{ a:a.idx, b:isBuy, p:price, s:fx(qty, a.szDp), r:false, t:{ limit:{ tif:'Ioc' } } }],
+      orders: [{
+        a: a.idx,
+        b: isBuy,
+        p: limitPrice,
+        s: fx(qty, a.szDp),
+        r: false,
+        t: { limit: { tif: 'Ioc' } }
+      }],
       grouping: 'na'
     });
 
@@ -202,7 +258,7 @@ window.execTrade = async function() {
     setTimeout(pollAccount, 2000);
 
   } catch (e) {
-    toast(`❌ فشل: ${e.message.slice(0, 50)}`, 'er');
+    toast(`❌ فشل: ${e.message.slice(0, 60)}`, 'er');
   } finally {
     ul();
     setBtn('bBu', false); setBtn('bSe', false);
@@ -224,6 +280,7 @@ window.askClose = async function(i) {
       <div style="color:var(--t2)">${szi>0?'شراء':'بيع'}</div>
     </div>`;
   
+  // Close logic: just reverse the trade
   pendTrade = { isBuy: szi < 0, qty: Math.abs(szi), sym: a.coin.replace('xyz:', ''), closeIdx: i };
   om('mCl');
 };
@@ -232,16 +289,23 @@ window.execClose = async function() {
   if (!pendTrade) return;
   const { qty, sym: s } = pendTrade;
   const a = ASSETS[s];
+  const p = PX[s];
   
   cm('mCl');
   ld('جاري الإغلاق...');
   
   try {
-    const mid = PX[s]?.mid;
-    const price = fx(mid * (pendTrade.isBuy ? 1.02 : 0.98), a.pxDp);
+    const limitPrice = fx(p.mid * (pendTrade.isBuy ? 1.02 : 0.98), a.pxDp);
     await hlExchange({
       type: 'order',
-      orders: [{ a:a.idx, b:pendTrade.isBuy, p:price, s:fx(qty, a.szDp), r:true, t:{ limit:{ tif:'Ioc' } } }],
+      orders: [{
+        a: a.idx,
+        b: pendTrade.isBuy,
+        p: limitPrice,
+        s: fx(qty, a.szDp),
+        r: true, // Reduce only
+        t: { limit: { tif: 'Ioc' } }
+      }],
       grouping: 'na'
     });
     toast('✅ تم الإغلاق', 'ok');
@@ -261,26 +325,32 @@ async function login() {
   if (!key.startsWith('0x')) key = '0x' + key;
   
   setBtn('lBtn', true);
-  ld('جاري التحقق...');
-  
+  ld('جاري فك التشفير...');
+
   try {
+    // 1. Init Wallet
     wallet = new ethers.Wallet(key);
     sessionStorage.setItem('hl_k', key);
     
+    // 2. UI Switch Immediately (Fix Freeze)
     $('nAd').textContent = wallet.address.slice(0,6) + '...' + wallet.address.slice(-4);
     $('sL').classList.add('off');
     $('sA').classList.remove('off');
+    ul(); // Hide loader immediately
     
+    // 3. Init Data in Background
     switchSym('GOLD');
-    await Promise.all([pollPrices(), pollAccount()]);
+    // Don't await, let it run in background
+    pollPrices().then(() => pollAccount());
     
+    // Start loops
     timers.push(setInterval(pollPrices, 2000));
     timers.push(setInterval(pollAccount, 10000));
     
   } catch (e) {
-    toast('خطأ في المفتاح', 'er');
     ul();
     setBtn('lBtn', false);
+    toast('خطأ في المفتاح: ' + e.message.slice(0, 30), 'er');
   }
 }
 
@@ -313,7 +383,6 @@ window.doLogout = function() {
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Listeners
   $('lBtn').onclick = login;
   $('bBu').onclick = () => askTrade(true);
   $('bSe').onclick = () => askTrade(false);
@@ -325,7 +394,4 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auto Login
   const k = sessionStorage.getItem('hl_k');
   if (k) { $('kI').value = k; login(); }
-  
-  // Safety check silent
-  window.addEventListener('error', (e) => console.error('Script Error:', e.message));
 });
