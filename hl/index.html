@@ -3,84 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HL Trade</title>
+  <title>HL Trade Web</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/hl/hl.css">
-</head>
+</heaapp
 <body>
 
-<!-- LOGIN -->
+<!-- ══════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════ -->
 <div class="sc" id="sL">
   <div class="lcard">
-    <div class="lbrand">⚡ HL<em>Trade</em></div>
-    <label class="flbl">المفتاح الخاص</label>
+    <div class="lbrand">⚡ HL<em>Trade</em> Web</div>
+    <div class="lcard-h">تداول مباشر على Hyperliquid xyz</div>
+    <label class="flbl">المفتاح الخاص (Private Key)</label>
     <div class="kw">
       <input class="ki" id="kI" type="password" placeholder="0x..." autocomplete="off">
     </div>
-    <button class="lbtn" id="lBtn">دخول</button>
+    <button class="lbtn" id="lBtn">🚀 دخول للتداول</button>
+    <div class="lnote">
+      🔒 المفتاح يُستخدم محلياً للتوقيع فقط.<br>
+      لا يُرسل لأي خادم خارجي.
+    </div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══════════════════════════════
+     APP SCREEN
+══════════════════════════════ -->
 <div class="sc off" id="sA">
   <div class="nav">
-    <div class="nlo">⚡ HL<em>Trade</em></div>
-    <div class="nad" id="nAd">—</div>
+    <div class="nl">
+      <div class="nlo">⚡ HL<em>Trade</em></div>
+      <div class="nlv"><div class="dot"></div><span>LIVE</span></div>
+    </div>
+    <div class="nr">
+      <div class="nad" id="nAd" title="انقر للنسخ">—</div>
+    </div>
   </div>
 
   <div class="body">
+    <!-- Asset Tabs -->
     <div class="tabs">
       <div class="tab on" data-s="GOLD">🟡 ذهب</div>
       <div class="tab" data-s="SILVER">⚪ فضة</div>
       <div class="tab" data-s="CL">🛢 نفط</div>
     </div>
 
+    <!-- Price Display -->
     <div class="pxcard">
       <div class="pxsym" id="pxSym">ذهب</div>
       <div class="pxval" id="pxVal">—</div>
+      <div class="pxdelta" id="pxDlt"></div>
     </div>
 
+    <!-- Trade Panel -->
     <div class="tpanel">
+      <div class="phd">تنفيذ صفقة</div>
       <div class="psets" id="psets"></div>
       <div class="qrow">
-        <input class="qin" id="qI" type="number" placeholder="الكمية">
+        <input class="qin" id="qI" type="number" placeholder="0.00" min="0" step="any">
         <div class="ul" id="uLb">أونصة</div>
       </div>
       <div class="tbtns">
-        <button class="tb tbb" id="bBu"><div class="tbd">شراء ↑</div><div class="tbp" id="bBuP">—</div></button>
-        <button class="tb tbs" id="bSe"><div class="tbd">بيع ↓</div><div class="tbp" id="bSeP">—</div></button>
+        <button class="tb tbb" id="bBu">
+          <div class="tbd">شراء ↑</div>
+          <div class="tbp" id="bBuP">—</div>
+        </button>
+        <button class="tb tbs" id="bSe">
+          <div class="tbd">بيع ↓</div>
+          <div class="tbp" id="bSeP">—</div>
+        </button>
       </div>
     </div>
 
+    <!-- Positions List -->
     <div class="posp">
-      <div class="poshd">الصفقات المفتوحة</div>
-      <div class="poslist" id="pList"><div style="padding:20px;text-align:center;color:var(--t2)">جاري التحميل...</div></div>
+      <div class="poshd">
+        <div>الصفقات المفتوحة</div>
+        <div class="postot" id="pTot"></div>
+      </div>
+      <div class="poslist" id="pList">
+        <div class="posmt">📂 لا توجد صفقات</div>
+      </div>
     </div>
   </div>
 
+  <!-- Bottom Bar -->
   <div class="btm">
     <button class="bb" id="bBal"><div>💼</div>رصيد</button>
-    <button class="bb out" id="bOut"><div>🔒</div>خروج</button>
+    <button class="bb" id="bOut"><div>🔒</div>خروج</button>
   </div>
 </div>
 
-<!-- CONFIRM MODAL -->
+<!-- ══════════════════════════════
+     MODALS
+══════════════════════════════ -->
+
+<!-- Confirm Trade -->
 <div class="ov" id="mCf">
   <div class="sht">
-    <div class="stt" id="cfT">تأكيد</div>
-    <div id="cfB"></div>
+    <div class="stt" id="cfT">تأكيد الصفقة</div>
+    <div class="cb" id="cfB"></div>
     <div class="sbtns">
       <button class="sc2" onclick="cm('mCf')">إلغاء</button>
-      <button class="sok" id="cfOk" onclick="execTrade()">تأكيد</button>
+      <button class="sok bok" id="cfOk" onclick="execTrade()">تأكيد</button>
     </div>
   </div>
 </div>
 
-<!-- CLOSE MODAL -->
+<!-- Close Position -->
 <div class="ov" id="mCl">
   <div class="sht">
-    <div class="stt" id="clT">إغلاق صفقة</div>
-    <div id="clB"></div>
+    <div class="stt" id="clT">إغلاق الصفقة</div>
+    <div class="cb" id="clB"></div>
     <div class="sbtns">
       <button class="sc2" onclick="cm('mCl')">إلغاء</button>
       <button class="sok wok" onclick="execClose()">إغلاق الآن</button>
@@ -88,26 +124,27 @@
   </div>
 </div>
 
-<!-- LOGOUT MODAL -->
-<div class="ov" id="mLg">
-  <div class="sht" style="text-align:center">
-    <div class="stt">تسجيل الخروج</div>
-    <p style="color:var(--t2);margin:15px 0">هل تريد تسجيل الخروج؟</p>
-    <div class="sbtns">
-      <button class="sc2" onclick="cm('mLg')">إلغاء</button>
-      <button class="sok wok" onclick="doLogout()">خروج</button>
+<!-- Balance Modal -->
+<div class="ov" id="mBl">
+  <div class="sht">
+    <div class="stt">💼 الرصيد</div>
+    <div id="blC">⏳ جاري التحميل...</div>
+    <div class="sbtns s1">
+      <button class="sc2" onclick="cm('mBl')">إغلاق</button>
     </div>
   </div>
 </div>
 
-<!-- UI ELEMENTS -->
+<!-- Toast & Loader -->
 <div id="tst"></div>
 <div id="ldr"><div class="spin"></div><div class="ldrt"></div></div>
 
-<!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3/dist/msgpack.umd.min.js" crossorigin="anonymous"></script>
-<script src="/hl/hl.js"></script>
+<!-- ══════════════════════════════
+     SCRIPTS
+══════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3.0.0/dist.es5+umd/msgpack.min.js"></script>
+<script src="/hl/hstyl"></script>
 
 </body>
 </html>
