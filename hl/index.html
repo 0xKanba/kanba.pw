@@ -1,320 +1,84 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>HL Trade · xyz</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-:root{
-  --bg0:#07090f;--bg1:#0d1018;--bg2:#111520;--bg3:#161c2a;--bg4:#1c2335;
-  --bdr:#1e2a3e;--bdr2:#263245;
-  --up:#00e87a;--up2:#00a857;--up-g:rgba(0,232,122,.14);
-  --dn:#ff3355;--dn2:#cc1838;--dn-g:rgba(255,51,85,.14);
-  --neu:#3b82f6;--neu2:#2563cc;--neu-g:rgba(59,130,246,.17);
-  --warn:#f5a623;
-  --t1:#e0eaf8;--t2:#6b7f9e;--t3:#3a4f6a;
-  --r:10px;--r2:14px;--r3:18px;
-  --mono:'IBM Plex Mono',monospace;--ui:'Cairo',sans-serif;
-}
-body.alt{--up:#3b82f6;--up2:#2563cc;--up-g:rgba(59,130,246,.14);--dn:#f5a623;--dn2:#d48a10;--dn-g:rgba(245,166,35,.14)}
-html,body{height:100%;background:var(--bg0);color:var(--t1);font-family:var(--ui);overflow:hidden;font-size:15px;-webkit-font-smoothing:antialiased}
-input,button{font-family:inherit}
-button{cursor:pointer;user-select:none}
-
-/* ── SCREENS ── */
-.sc{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1}
-.sc.off{display:none!important}
-
-/* ══ LOGIN ══ */
-#sL{align-items:center;justify-content:center;padding:22px;
-  background:radial-gradient(ellipse 70% 55% at 50% -10%,rgba(59,130,246,.1) 0%,transparent 70%)}
-.lb{display:flex;align-items:center;gap:12px;margin-bottom:26px}
-.li{width:52px;height:52px;border-radius:15px;background:linear-gradient(140deg,var(--neu),var(--neu2));
-  display:flex;align-items:center;justify-content:center;font-size:26px;
-  box-shadow:0 0 36px var(--neu-g)}
-.lt{font-size:28px;font-weight:900;letter-spacing:.5px}
-.lt em{color:var(--neu);font-style:normal}
-.lc{background:var(--bg1);border:1px solid var(--bdr2);border-radius:var(--r3);
-  padding:24px 20px;width:100%;max-width:420px;box-shadow:0 16px 48px rgba(0,0,0,.6)}
-.lh{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:2.5px;text-transform:uppercase;
-  padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid var(--bdr)}
-.fl{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:block}
-.kw{position:relative}
-.ki{width:100%;background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:var(--r);
-  color:var(--t1);font-family:var(--mono);font-size:12px;padding:13px 46px 13px 13px;
-  outline:none;direction:ltr;transition:border-color .2s,box-shadow .2s}
-.ki:focus{border-color:var(--neu);box-shadow:0 0 0 3px var(--neu-g)}
-.ke{position:absolute;left:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);font-size:17px;padding:4px;transition:color .15s}
-.ke:hover{color:var(--t2)}
-.lb2{width:100%;margin-top:15px;padding:14px;border-radius:var(--r);border:none;
-  background:linear-gradient(135deg,var(--neu),var(--neu2));color:#fff;
-  font-size:15px;font-weight:900;letter-spacing:.5px;
-  transition:filter .15s,transform .1s;box-shadow:0 4px 22px var(--neu-g)}
-.lb2:hover{filter:brightness(1.1)}
-.lb2:active{transform:scale(.97)}
-.ln{margin-top:13px;padding:11px 13px;border-radius:var(--r);
-  background:rgba(0,232,122,.05);border:1px solid rgba(0,232,122,.17);
-  font-size:11px;color:var(--t2);line-height:1.8;text-align:center}
-.ln strong{color:var(--up)}
-
-/* ══ APP ══ */
-#sA{background:var(--bg0);overflow:hidden}
-
-/* NAV */
-.nav{display:flex;align-items:center;justify-content:space-between;
-  padding:9px 13px;background:var(--bg1);border-bottom:1px solid var(--bdr);
-  box-shadow:0 2px 18px rgba(0,0,0,.4);flex-shrink:0}
-.nl{display:flex;align-items:center;gap:9px}
-.nlo{font-size:17px;font-weight:900;letter-spacing:.5px}
-.nlo em{color:var(--neu);font-style:normal}
-.nlv{display:flex;align-items:center;gap:4px;
-  background:rgba(0,232,122,.07);border:1px solid rgba(0,232,122,.2);
-  border-radius:20px;padding:3px 9px}
-.dot{width:6px;height:6px;background:var(--up);border-radius:50%;animation:blink 1.8s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.nr{display:flex;align-items:center;gap:9px}
-.nad{font-family:var(--mono);font-size:10px;color:var(--t3);cursor:pointer;transition:color .15s}
-.nad:hover{color:var(--t2)}
-.tsw{background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;
-  padding:5px 9px;color:var(--t2);font-size:9px;font-weight:700;letter-spacing:.5px;
-  text-transform:uppercase;transition:all .15s}
-.tsw:hover{border-color:var(--neu);color:var(--neu)}
-
-/* TABS */
-.tabs{display:flex;padding:7px 9px 5px;gap:6px;background:var(--bg0);flex-shrink:0}
-.tab{flex:1;border-radius:var(--r);border:1.5px solid var(--bdr);background:var(--bg2);
-  padding:7px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;
-  transition:all .2s cubic-bezier(.4,0,.2,1);cursor:pointer}
-.tab:active{transform:scale(.95)}
-.tab.on{border-color:var(--neu);background:var(--bg3);box-shadow:0 0 16px rgba(59,130,246,.16)}
-.ti{font-size:18px;line-height:1}
-.tn{font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px}
-.tab.on .tn{color:var(--t1)}
-.tp{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--t3);transition:color .25s,text-shadow .25s}
-.tp.up{color:var(--up);text-shadow:0 0 12px var(--up-g)}
-.tp.dn{color:var(--dn);text-shadow:0 0 12px var(--dn-g)}
-
-/* BODY */
-.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  display:flex;flex-direction:column;gap:8px;padding:8px 9px 5px}
-.body::-webkit-scrollbar{width:2px}
-.body::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
-
-/* PRICE BAND */
-.pxband{border-radius:var(--r2);padding:13px 15px;
-  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;
-  transition:background .35s,border-color .35s,box-shadow .35s;
-  border:1.5px solid var(--bdr2);background:var(--bg2)}
-.pxband.pu{background:linear-gradient(135deg,rgba(0,232,122,.07),var(--bg2));
-  border-color:rgba(0,232,122,.28);box-shadow:0 0 26px rgba(0,232,122,.07)}
-.pxband.pd{background:linear-gradient(135deg,rgba(255,51,85,.07),var(--bg2));
-  border-color:rgba(255,51,85,.28);box-shadow:0 0 26px rgba(255,51,85,.07)}
-.pxc{display:flex;flex-direction:column;gap:2px}
-.pxc.r{align-items:flex-end}
-.pxl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
-.pxl.b{color:var(--up)}
-.pxl.s{color:var(--dn)}
-.pxn{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;
-  transition:color .18s,text-shadow .18s}
-.pxn.u{color:var(--up);text-shadow:0 0 22px var(--up-g)}
-.pxn.d{color:var(--dn);text-shadow:0 0 22px var(--dn-g)}
-.pxn.n{color:var(--t1)}
-.pxdel{font-family:var(--mono);font-size:10px;font-weight:600;margin-top:2px}
-.pxdel.u{color:var(--up)}.pxdel.d{color:var(--dn)}.pxdel.n{color:var(--t3)}
-.pxmid{display:flex;flex-direction:column;align-items:center;gap:5px}
-.pxan{font-size:11px;font-weight:900;color:var(--t2);letter-spacing:.5px}
-.sprbox{background:var(--bg0);border:1px solid var(--bdr);border-radius:8px;padding:4px 8px;text-align:center}
-.sprl{font-size:7px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
-.sprv{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--warn)}
-.ptmr{font-size:9px;color:var(--t3);font-family:var(--mono)}
-
-/* TRADE PANEL */
-.tp2{background:var(--bg1);border:1px solid var(--bdr2);border-radius:var(--r2);
-  padding:12px;display:flex;flex-direction:column;gap:9px}
-.phd{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:2px;text-transform:uppercase;
-  padding-bottom:7px;border-bottom:1px solid var(--bdr)}
-.psets{display:flex;gap:4px;flex-wrap:wrap}
-.ps{flex:1;min-width:32px;padding:8px 2px;border-radius:8px;border:1.5px solid var(--bdr);
-  background:var(--bg3);color:var(--t2);font-size:12px;font-weight:700;text-align:center;
-  font-family:var(--mono);transition:all .12s}
-.ps:active{transform:scale(.88)}
-.ps.on{background:rgba(59,130,246,.1);border-color:var(--neu);color:var(--neu);box-shadow:0 0 10px var(--neu-g)}
-.qrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-.qin{width:100%;background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:var(--r);
-  color:var(--t1);font-family:var(--mono);font-size:20px;font-weight:700;
-  padding:10px 13px;outline:none;text-align:center;direction:ltr;
-  transition:border-color .2s,box-shadow .2s}
-.qin:focus{border-color:var(--neu);box-shadow:0 0 0 3px var(--neu-g)}
-.ul{font-size:11px;font-weight:700;color:var(--t2);white-space:nowrap;min-width:36px;text-align:center}
-.tbtns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.tb{border:none;border-radius:var(--r2);min-height:66px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:2px;position:relative;overflow:hidden;
-  transition:filter .1s,transform .1s}
-.tb:active{transform:scale(.955);filter:brightness(.82)}
-.tbb{background:linear-gradient(155deg,var(--up),var(--up2));box-shadow:0 4px 18px var(--up-g)}
-.tbs{background:linear-gradient(155deg,var(--dn),var(--dn2));box-shadow:0 4px 18px var(--dn-g)}
-.tbd{font-size:18px;font-weight:900;color:#fff}
-.tbp{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.72);font-weight:600}
-.tbs2{font-size:9px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px}
-.rpl{position:absolute;border-radius:50%;background:rgba(255,255,255,.24);
-  transform:scale(0);animation:rp .5s ease-out;pointer-events:none}
-@keyframes rp{to{transform:scale(5);opacity:0}}
-
-/* POSITIONS */
-.posp{background:var(--bg1);border:1.5px solid var(--bdr);border-radius:var(--r2);overflow:hidden;flex-shrink:0}
-.poshd{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-bottom:1px solid var(--bdr)}
-.poshdl{display:flex;align-items:center;gap:8px}
-.postt{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:2px;text-transform:uppercase}
-.poscnt{background:var(--neu);color:#fff;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:900}
-.postot{font-family:var(--mono);font-size:13px;font-weight:700}
-.posmt{padding:16px;text-align:center;color:var(--t3);font-size:11px;display:flex;align-items:center;justify-content:center;gap:8px}
-.posit{display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center;
-  padding:11px 13px;border-bottom:1px solid var(--bdr);animation:fi .2s ease}
-@keyframes fi{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.pil{display:flex;flex-direction:column;gap:3px}
-.pin{font-size:14px;font-weight:900}
-.pim{font-size:10px;color:var(--t2);font-family:var(--mono)}
-.pim .lo{color:var(--up)}.pim .sh{color:var(--dn)}
-.pir{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-.pip{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1}
-.pip.po{color:var(--up)}.pip.ne{color:var(--dn)}
-.pisz{font-family:var(--mono);font-size:9px;color:var(--t3)}
-.bclr{border:1.5px solid var(--dn);background:rgba(255,51,85,.08);color:var(--dn);
-  border-radius:8px;padding:5px 11px;font-size:10px;font-weight:700;letter-spacing:.5px;
-  transition:all .15s}
-.bclr:hover,.bclr:active{background:var(--dn);color:#fff}
-
-/* BOTTOM */
-.btm{display:flex;gap:6px;padding:8px 9px max(13px,env(safe-area-inset-bottom));
-  background:var(--bg1);border-top:1px solid var(--bdr);flex-shrink:0}
-.bb{flex:1;background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:var(--r);
-  color:var(--t1);padding:8px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;
-  font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;transition:all .12s}
-.bb:active{transform:scale(.94)}
-.bbi{font-size:18px}
-.bb.hi{border-color:var(--warn);color:var(--warn);background:rgba(245,166,35,.06);box-shadow:0 0 12px rgba(245,166,35,.1)}
-
-/* MODALS */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:50;display:none;
-  align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.ov.open{display:flex;animation:fdi .18s ease}
-@keyframes fdi{from{opacity:0}to{opacity:1}}
-.sht{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:500px;
-  padding:18px 18px 26px;border-top:1px solid var(--bdr2);animation:su .25s cubic-bezier(.4,0,.2,1)}
-@keyframes su{from{transform:translateY(100%)}to{transform:none}}
-.grp{width:36px;height:4px;background:var(--bdr2);border-radius:2px;margin:0 auto 15px}
-.stt{font-size:19px;font-weight:900;margin-bottom:3px}
-.ssb{font-size:12px;color:var(--t2);margin-bottom:16px}
-.cb{background:var(--bg3);border-radius:var(--r2);padding:14px;margin-bottom:13px;display:flex;flex-direction:column;gap:7px}
-.cr{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--bdr)}
-.cr:last-child{border:none;margin-top:3px;padding-top:7px}
-.ck{font-size:11px;color:var(--t2);font-weight:600}
-.cv{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--t1)}
-.cv.bc{color:var(--up)}.cv.sc{color:var(--dn)}.cv.wc{color:var(--warn)}
-.sfl{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
-.sl{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:1.5px;text-transform:uppercase;display:block}
-.sin{width:100%;background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:var(--r);
-  color:var(--t1);font-size:15px;font-family:var(--mono);padding:11px 13px;
-  outline:none;direction:ltr;transition:all .2s}
-.sin:focus{border-color:var(--neu);box-shadow:0 0 0 3px var(--neu-g)}
-.snote{font-size:11px;color:var(--t2);line-height:1.8;padding:9px 12px;
-  background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);
-  border-radius:var(--r);margin-bottom:12px}
-.sbtns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.sbtns.s1{grid-template-columns:1fr}
-.sc2{padding:12px;border-radius:var(--r);border:1.5px solid var(--bdr2);
-  background:var(--bg3);color:var(--t2);font-size:14px;font-weight:700;transition:all .15s}
-.sc2:hover{border-color:var(--t2)}
-.sok{padding:12px;border-radius:var(--r);border:none;font-size:14px;font-weight:900;transition:filter .15s}
-.sok:active{filter:brightness(.86)}
-.sok.bok{background:linear-gradient(135deg,var(--up),var(--up2));color:#fff;box-shadow:0 4px 18px var(--up-g)}
-.sok.sok2{background:linear-gradient(135deg,var(--dn),var(--dn2));color:#fff;box-shadow:0 4px 18px var(--dn-g)}
-.sok.blok{background:linear-gradient(135deg,var(--neu),var(--neu2));color:#fff;box-shadow:0 4px 15px var(--neu-g)}
-.sok.wok{background:linear-gradient(135deg,var(--warn),#d48a10);color:#fff}
-/* balance */
-.bg2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}
-.bi{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:11px;display:flex;flex-direction:column;gap:3px}
-.bi.fw{grid-column:1/-1}
-.bil{font-size:8px;font-weight:700;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase}
-.biv{font-family:var(--mono);font-size:18px;font-weight:700}
-.biv.g{color:var(--up)}.biv.r{color:var(--dn)}.biv.b{color:var(--neu)}.biv.w{color:var(--warn)}
-.bis{font-size:10px;color:var(--t2)}
-.bref{width:100%;padding:11px;border-radius:var(--r);border:1.5px solid var(--bdr2);
-  background:var(--bg3);color:var(--t2);font-size:12px;font-weight:700;transition:all .15s}
-.bref:hover{border-color:var(--neu);color:var(--neu)}
-.bld{text-align:center;padding:18px;color:var(--t2);font-size:12px}
-
-/* Toast */
-#tst{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(13px);
-  background:var(--bg2);border:1.5px solid var(--bdr2);border-radius:13px;
-  padding:9px 19px;font-size:13px;font-weight:700;z-index:100;opacity:0;
-  transition:all .23s cubic-bezier(.4,0,.2,1);pointer-events:none;
-  white-space:nowrap;max-width:92vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.55)}
-#tst.on{opacity:1;transform:translateX(-50%) translateY(0)}
-#tst.ok{border-color:var(--up);color:var(--up);background:rgba(0,232,122,.07)}
-#tst.er{border-color:var(--dn);color:var(--dn);background:rgba(255,51,85,.07)}
-#tst.if{border-color:var(--neu);color:var(--neu)}
-
-/* Loader */
-#ldr{position:fixed;inset:0;background:rgba(7,9,15,.9);z-index:90;display:none;
-  flex-direction:column;align-items:center;justify-content:center;gap:13px}
-#ldr.on{display:flex;animation:fdi .14s}
-.spin{width:34px;height:34px;border:3px solid var(--bdr2);border-top-color:var(--neu);
-  border-radius:50%;animation:rot .7s linear infinite}
-@keyframes rot{to{transform:rotate(360deg)}}
-.ldrt{font-size:13px;color:var(--t2);font-weight:600;letter-spacing:.5px}
-
-/* Desktop */
-@media(min-width:680px){
-  .body{flex-direction:row;align-items:flex-start;gap:10px}
-  .lcol,.rcol{flex:1;display:flex;flex-direction:column;gap:8px}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>HL Trade · xyz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/hl/hl.css">
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ══════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════ -->
 <div class="sc" id="sL">
-  <div class="lb"><div class="li">⚡</div><div class="lt">HL<em>Trade</em> · xyz</div></div>
-  <div class="lc">
-    <div class="lh">تداول مباشر على Hyperliquid xyz</div>
-    <label class="fl">المفتاح الخاص (Private Key)</label>
+  <div class="lbrand">
+    <div class="lico">⚡</div>
+    <div class="ltit">HL<em>Trade</em> · xyz</div>
+  </div>
+  <div class="lcard">
+    <div class="lcard-h">تداول مباشر على Hyperliquid xyz</div>
+    <label class="flbl" for="kI">المفتاح الخاص (Private Key)</label>
     <div class="kw">
-      <input class="ki" id="kI" type="password" placeholder="0x4a3b..." autocomplete="off" spellcheck="false">
-      <button class="ke" id="kE">👁</button>
+      <input class="ki" id="kI" type="password"
+             placeholder="0x4a3b..." autocomplete="off" spellcheck="false">
+      <button class="ke" id="kE" type="button" aria-label="إظهار/إخفاء">👁</button>
     </div>
-    <button class="lb2" id="lB">دخول — بدء التداول ←</button>
-    <div class="ln"><strong>🔒 المفتاح يعمل محلياً فقط</strong><br>لا يُرسل لأي خادم · كل التوقيعات عبر ethers.js داخل متصفحك</div>
+    <button class="lbtn" id="lBtn">دخول — بدء التداول ←</button>
+    <div class="lnote">
+      <strong>🔒 المفتاح لا يغادر متصفحك أبداً</strong><br>
+      التوقيعات تتم محلياً عبر ethers.js · لا خوادم خارجية
+    </div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══════════════════════════════
+     APP SCREEN
+══════════════════════════════ -->
 <div class="sc off" id="sA">
 
   <!-- NAV -->
   <div class="nav">
     <div class="nl">
       <div class="nlo">⚡ HL<em>Trade</em></div>
-      <div class="nlv"><div class="dot"></div><span style="font-size:9px;font-weight:700;color:var(--up);letter-spacing:.5px">LIVE</span></div>
+      <div class="nlv">
+        <div class="dot"></div>
+        <span>LIVE</span>
+      </div>
     </div>
     <div class="nr">
       <div class="nad" id="nAd" title="انقر لنسخ العنوان">—</div>
-      <button class="tsw" id="tSw">🎨 لون</button>
     </div>
   </div>
 
-  <!-- TABS -->
+  <!-- ASSET TABS -->
   <div class="tabs">
-    <div class="tab on" data-s="GOLD"><div class="ti">🟡</div><div class="tn">ذهب</div><div class="tp" id="tpGOLD">—</div></div>
-    <div class="tab" data-s="SILVER"><div class="ti">⚪</div><div class="tn">فضة</div><div class="tp" id="tpSILVER">—</div></div>
-    <div class="tab" data-s="CL"><div class="ti">🛢</div><div class="tn">نفط</div><div class="tp" id="tpCL">—</div></div>
+    <div class="tab on" data-s="GOLD">
+      <div class="ti">🟡</div>
+      <div class="tn">ذهب</div>
+      <div class="tp" id="tpGOLD">—</div>
+    </div>
+    <div class="tab" data-s="SILVER">
+      <div class="ti">⚪</div>
+      <div class="tn">فضة</div>
+      <div class="tp" id="tpSILVER">—</div>
+    </div>
+    <div class="tab" data-s="CL">
+      <div class="ti">🛢</div>
+      <div class="tn">نفط</div>
+      <div class="tp" id="tpCL">—</div>
+    </div>
   </div>
 
   <!-- BODY -->
   <div class="body">
+
     <div class="lcol">
 
       <!-- PRICE BAND -->
@@ -326,7 +90,10 @@ button{cursor:pointer;user-select:none}
         </div>
         <div class="pxmid">
           <div class="pxan" id="pxAN">ذهب</div>
-          <div class="sprbox"><div class="sprl">سبريد</div><div class="sprv" id="pxS">—</div></div>
+          <div class="sprbox">
+            <div class="sprl">سبريد</div>
+            <div class="sprv" id="pxS">—</div>
+          </div>
           <div class="ptmr" id="pxT">—</div>
         </div>
         <div class="pxc r">
@@ -337,7 +104,7 @@ button{cursor:pointer;user-select:none}
       </div>
 
       <!-- TRADE PANEL -->
-      <div class="tp2">
+      <div class="tpanel">
         <div class="phd">تنفيذ صفقة · <span id="pSym">ذهب</span></div>
         <div class="psets" id="psets"></div>
         <div class="qrow">
@@ -358,10 +125,11 @@ button{cursor:pointer;user-select:none}
         </div>
       </div>
 
-    </div>
+    </div><!-- /lcol -->
+
     <div class="rcol">
 
-      <!-- POSITIONS -->
+      <!-- OPEN POSITIONS -->
       <div class="posp">
         <div class="poshd">
           <div class="poshdl">
@@ -370,511 +138,156 @@ button{cursor:pointer;user-select:none}
           </div>
           <div class="postot" id="pTot"></div>
         </div>
-        <div id="pList"><div class="posmt">📂 &nbsp; لا توجد صفقات مفتوحة</div></div>
+        <div id="pList">
+          <div class="posmt">📂 &nbsp; لا توجد صفقات مفتوحة</div>
+        </div>
       </div>
 
-    </div>
-  </div>
+    </div><!-- /rcol -->
 
-  <!-- BOTTOM -->
+  </div><!-- /body -->
+
+  <!-- BOTTOM BAR -->
   <div class="btm">
     <button class="bb hi" id="bBal"><div class="bbi">💼</div>رصيد</button>
-    <button class="bb" id="bDp"><div class="bbi">💵</div>إيداع</button>
-    <button class="bb" id="bWd"><div class="bbi">📤</div>سحب</button>
-    <button class="bb" id="bOut" style="opacity:.28;flex:.45"><div class="bbi">🔒</div>خروج</button>
+    <button class="bb"    id="bDp"><div class="bbi">💵</div>إيداع</button>
+    <button class="bb"    id="bWd"><div class="bbi">📤</div>سحب</button>
+    <button class="bb out" id="bOut"><div class="bbi">🔒</div>خروج</button>
   </div>
 
-</div>
+</div><!-- /sA -->
 
-<!-- TRADE CONFIRM -->
+<!-- ══════════════════════════════
+     MODALS
+══════════════════════════════ -->
+
+<!-- Trade Confirm -->
 <div class="ov" id="mCf">
   <div class="sht">
     <div class="grp"></div>
     <div class="stt" id="cfT">تأكيد الصفقة</div>
     <div class="ssb" id="cfS"></div>
-    <div class="cb" id="cfB"></div>
+    <div class="cb"  id="cfB"></div>
     <div class="sbtns">
-      <button class="sc2" onclick="cm('mCf')">إلغاء ✕</button>
-      <button class="sok" id="cfOk">تأكيد ←</button>
+      <button class="sc2" onclick="document.getElementById('mCf').classList.remove('open')">إلغاء ✕</button>
+      <button class="sok" id="cfOk" onclick="execTrade()">تأكيد ←</button>
     </div>
   </div>
 </div>
 
-<!-- CLOSE CONFIRM -->
+<!-- Close Confirm -->
 <div class="ov" id="mCl">
   <div class="sht">
     <div class="grp"></div>
     <div class="stt" id="clT">إغلاق الصفقة</div>
     <div class="ssb">سيتم إغلاق الصفقة بالسعر الحالي فوراً</div>
-    <div class="cb" id="clB"></div>
+    <div class="cb"  id="clB"></div>
     <div class="sbtns">
-      <button class="sc2" onclick="cm('mCl')">إبقاء الصفقة</button>
-      <button class="sok wok" id="clOk">إغلاق الآن ✕</button>
+      <button class="sc2" onclick="document.getElementById('mCl').classList.remove('open')">إبقاء الصفقة</button>
+      <button class="sok wok" id="clOk" onclick="execClose()">إغلاق الآن ✕</button>
     </div>
   </div>
 </div>
 
-<!-- BALANCE -->
+<!-- Balance -->
 <div class="ov" id="mBl">
   <div class="sht">
     <div class="grp"></div>
-    <div class="stt">💼 رصيد الحساب</div>
-    <div id="blC"><div class="bld">⏳ جاري جلب الرصيد...</div></div>
+    <div class="stt">💼 رصيد Hyperliquid</div>
+    <div id="blC"><div class="bld">⏳ جاري...</div></div>
     <div class="sbtns s1" style="margin-top:11px">
-      <button class="sc2" onclick="cm('mBl')">إغلاق</button>
+      <button class="sc2" onclick="document.getElementById('mBl').classList.remove('open')">إغلاق</button>
     </div>
   </div>
 </div>
 
-<!-- DEPOSIT -->
+<!-- Deposit -->
 <div class="ov" id="mDp">
   <div class="sht">
     <div class="grp"></div>
     <div class="stt">💵 إيداع USDC</div>
-    <div class="sfl"><label class="sl">المبلغ (USDC)</label><input class="sin" id="dA" type="number" placeholder="100"></div>
-    <div class="snote">سيُرسل USDC من Arbitrum للجسر الرسمي لـ Hyperliquid.<br>تحتاج ETH بسيط على Arbitrum للغاز.</div>
+    <div class="sfl">
+      <label class="sl" for="dA">المبلغ (USDC)</label>
+      <input class="sin" id="dA" type="number" placeholder="100" min="1">
+    </div>
+    <div class="snote">
+      سيُرسل USDC من Arbitrum للجسر الرسمي لـ Hyperliquid.<br>
+      تحتاج رصيد ETH بسيط على Arbitrum لرسوم الغاز.
+    </div>
     <div class="sbtns">
-      <button class="sc2" onclick="cm('mDp')">إلغاء</button>
+      <button class="sc2" onclick="document.getElementById('mDp').classList.remove('open')">إلغاء</button>
       <button class="sok blok" id="dOk">إيداع ✓</button>
     </div>
   </div>
 </div>
 
-<!-- WITHDRAW -->
+<!-- Withdraw -->
 <div class="ov" id="mWd">
   <div class="sht">
     <div class="grp"></div>
     <div class="stt">📤 سحب USDC</div>
-    <div class="sfl"><label class="sl">المبلغ (USDC)</label><input class="sin" id="wA" type="number" placeholder="100"></div>
-    <div class="sfl"><label class="sl">عنوان الاستلام (Arbitrum)</label><input class="sin" id="wD" type="text" placeholder="0x..." dir="ltr"></div>
+    <div class="sfl">
+      <label class="sl" for="wA">المبلغ (USDC)</label>
+      <input class="sin" id="wA" type="number" placeholder="100" min="1">
+    </div>
+    <div class="sfl">
+      <label class="sl" for="wD">عنوان الاستلام على Arbitrum</label>
+      <input class="sin" id="wD" type="text" placeholder="0x..." dir="ltr" autocomplete="off">
+    </div>
     <div class="sbtns">
-      <button class="sc2" onclick="cm('mWd')">إلغاء</button>
+      <button class="sc2" onclick="document.getElementById('mWd').classList.remove('open')">إلغاء</button>
       <button class="sok blok" id="wOk">سحب ✓</button>
     </div>
   </div>
 </div>
 
+<!-- Logout Confirm -->
+<div class="ov" id="mLg">
+  <div class="sht">
+    <div class="grp"></div>
+    <div class="logout-modal">
+      <div class="logout-icon">🔐</div>
+      <div class="logout-title" id="lgT">تسجيل الخروج</div>
+      <div class="logout-sub">
+        سيتم مسح المفتاح الخاص من ذاكرة المتصفح فوراً.<br>
+        جميع صفقاتك المفتوحة <strong>تبقى نشطة</strong> على Hyperliquid.<br>
+        يمكنك العودة في أي وقت بإدخال مفتاحك من جديد.
+      </div>
+    </div>
+    <div class="sbtns">
+      <button class="sc2" onclick="document.getElementById('mLg').classList.remove('open')">بقاء — إلغاء</button>
+      <button class="sok wok" onclick="doLogout()">خروج بأمان 🔒</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     GLOBAL UI
+══════════════════════════════ -->
 <div id="tst"></div>
-<div id="ldr"><div class="spin"></div><div class="ldrt" id="ldrT">جاري...</div></div>
+<div id="ldr">
+  <div class="spin"></div>
+  <div class="ldrt" id="ldrt">جاري...</div>
+</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js"></script>
-<script src="https://unpkg.com/@msgpack/msgpack/dist/msgpack.umd.min.js"></script>
+<!-- ══════════════════════════════
+     SCRIPTS (order matters)
+     1. ethers.js v6
+     2. msgpack
+     3. app.js
+══════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3/dist/msgpack.umd.min.js"
+        crossorigin="anonymous"></script>
 <script>
-const HL   = "https://api.hyperliquid.xyz";
-const ARPC = "https://arb1.arbitrum.io/rpc";
-const USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
-const BRDG = "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7";
-const UABI = ["function approve(address,uint256) returns (bool)","function balanceOf(address) view returns (uint256)"];
-const BABI = ["function deposit(address,uint64) external"];
-
-const AS = {
-  GOLD:  {coin:"xyz:GOLD",  idx:110003,lev:25,cross:true, szDp:4,pxDp:1,unit:"أونصة",pre:[0.1,0.5,1,2,5],  ico:"🟡",ar:"ذهب"},
-  SILVER:{coin:"xyz:SILVER",idx:110026,lev:25,cross:true, szDp:2,pxDp:3,unit:"أونصة",pre:[1,2,3,5,10,20],  ico:"⚪",ar:"فضة"},
-  CL:    {coin:"xyz:CL",    idx:110029,lev:20,cross:false,szDp:3,pxDp:2,unit:"برميل",pre:[1,2,3,5,10,20],  ico:"🛢",ar:"نفط خام"},
-};
-
-let W=null, sym="GOLD", selQ=0.1;
-let PX={GOLD:{bid:0,ask:0,mid:0},SILVER:{bid:0,ask:0,mid:0},CL:{bid:0,ask:0,mid:0}};
-let PRV={GOLD:0,SILVER:0,CL:0};
-let POSITIONS=[], timers=[], altC=false;
-let pendT=null, pendC=null, secC=0;
-
-const $=id=>document.getElementById(id);
-const fx=(n,d)=>(+n).toFixed(d);
-function om(id){$(id).classList.add("open")}
-function cm(id){$(id).classList.remove("open")}
-function toast(m,t="if",d=3500){const el=$("tst");el.textContent=m;el.className=`on ${t}`;clearTimeout(el._t);el._t=setTimeout(()=>el.className="",d)}
-function ld(m){$("ldrT").textContent=m||"جاري...";$("ldr").className="on"}
-function ul(){$("ldr").className=""}
-function rpl(btn,e){const r=document.createElement("span");r.className="rpl";const b=btn.getBoundingClientRect(),s=Math.max(b.width,b.height)*2;r.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-b.left-s/2}px;top:${e.clientY-b.top-s/2}px`;btn.appendChild(r);setTimeout(()=>r.remove(),550)}
-
-async function hlInfo(body){
-  const r=await fetch(`${HL}/info`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-  if(!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
-}
-async function hlEx(action){
-  if(!W) throw new Error("لا يوجد محفظة");
-  const nonce=Date.now();
-  const ab=MessagePack.encode(action);
-  const nb=new ArrayBuffer(8);
-  new DataView(nb).setBigUint64(0,BigInt(nonce),false);
-  const buf=new Uint8Array(ab.length+9);
-  buf.set(ab);buf.set(new Uint8Array(nb),ab.length);buf.set([0x00],ab.length+8);
-  const cid=ethers.keccak256(buf);
-  const sig=await W.signTypedData(
-    {name:"Exchange",version:"1",chainId:1337,verifyingContract:"0x0000000000000000000000000000000000000000"},
-    {Agent:[{name:"source",type:"string"},{name:"connectionId",type:"bytes32"}]},
-    {source:"a",connectionId:cid}
-  );
-  const {r,s,v}=ethers.Signature.from(sig);
-  const res=await fetch(`${HL}/exchange`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,nonce,signature:{r,s,v},vaultAddress:null})});
-  const d=await res.json();
-  if(d.status!=="ok") throw new Error(d.response?.data?.statuses?.[0]||JSON.stringify(d).slice(0,200));
-  return d;
-}
-
-// ── PRICES every 1s ──
-async function pollPx(){
-  await Promise.all(Object.keys(AS).map(async s=>{
-    try{
-      const a=AS[s];
-      const lb=await hlInfo({type:"l2Book",coin:a.coin});
-      const bid=parseFloat(lb.levels?.[0]?.[0]?.px||0);
-      const ask=parseFloat(lb.levels?.[1]?.[0]?.px||0);
-      const mid=bid&&ask?(bid+ask)/2:0;
-      PX[s]={bid,ask,mid};
-      const tp=$(`tp${s}`);
-      if(mid){
-        const prev=PRV[s]||0;
-        const dir=mid>prev?"up":mid<prev?"dn":"";
-        tp.textContent=fx(mid,a.pxDp);
-        tp.className=`tp${dir?" "+dir:""}`;
-        if(dir) setTimeout(()=>{tp.className="tp"},800);
-      }
-    }catch{}
-  }));
-  updatePxDisp();
-}
-
-function updatePxDisp(){
-  const a=AS[sym],p=PX[sym];
-  if(!p.mid) return;
-  const prev=PRV[sym]||p.mid;
-  const dir=p.mid>prev?1:p.mid<prev?-1:0;
-  const cl=dir>0?"u":dir<0?"d":"n";
-  // band
-  $("pxB").className="pxband"+(dir>0?" pu":dir<0?" pd":"");
-  // ask/bid
-  $("pxA").textContent=fx(p.ask,a.pxDp); $("pxA").className=`pxn ${cl}`;
-  $("pxBD").textContent=fx(p.bid,a.pxDp); $("pxBD").className=`pxn ${cl}`;
-  $("bBuP").textContent=fx(p.ask,a.pxDp);
-  $("bSeP").textContent=fx(p.bid,a.pxDp);
-  $("pxS").textContent=fx(p.ask-p.bid,a.pxDp);
-  // delta
-  if(prev&&p.mid!==prev){
-    const diff=p.mid-prev;
-    const txt=(diff>0?"+":"")+fx(diff,a.pxDp);
-    $("pxAd").textContent=txt; $("pxAd").className=`pxdel ${cl}`;
-    $("pxBd").textContent=txt; $("pxBd").className=`pxdel ${cl}`;
-  }
-  PRV[sym]=p.mid;
-  // timer
-  secC=1; clearInterval(window._ti);
-  $("pxT").textContent="↻ 1s";
-  window._ti=setInterval(()=>{secC++;$("pxT").textContent=`↻ ${secC}s`;},1000);
-}
-
-// ── ACCOUNT ──
-async function pollAcc(){
-  if(!W) return;
-  try{
-    const [st,sp]=await Promise.all([
-      hlInfo({type:"clearinghouseState",user:W.address,dex:"xyz"}),
-      hlInfo({type:"spotClearinghouseState",user:W.address})
-    ]);
-    const ms=st.marginSummary||{};
-    const av=parseFloat(ms.accountValue||0);
-    const mu=parseFloat(ms.totalMarginUsed||0);
-    const wd=parseFloat(st.withdrawable||0);
-    let spU=0;
-    for(const b of sp?.balances||[]) if(b.coin==="USDC"||b.coin==="USDC:0") spU+=parseFloat(b.total||0);
-    POSITIONS=(st.assetPositions||[]).filter(p=>parseFloat(p.position?.szi||0)!==0);
-    window._BAL={av,mu,fr:av-mu,wd,spU};
-    renderPos();
-  }catch(e){console.warn("acc:",e.message)}
-}
-
-// ── SWITCH ASSET ──
-function switchSym(s){
-  sym=s;
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.s===s));
-  const a=AS[s];
-  $("pxAN").textContent=a.ar;
-  $("uLb").textContent=a.unit;
-  $("pSym").textContent=a.ar;
-  renderPresets(a.pre);
-  PRV[s]=0; updatePxDisp();
-}
-function renderPresets(pre){
-  $("psets").innerHTML=pre.map((v,i)=>`<button class="ps${i===0?" on":""}" onclick="pickQ(${v},this)">${v}</button>`).join("");
-  selQ=pre[0]; $("qI").value=pre[0];
-}
-function pickQ(v,btn){
-  selQ=v; $("qI").value=v;
-  $("psets").querySelectorAll(".ps").forEach(b=>b.classList.remove("on"));
-  btn.classList.add("on");
-}
-
-// ── POSITIONS ──
-function renderPos(){
-  $("pCnt").textContent=POSITIONS.length;
-  if(!POSITIONS.length){
-    $("pList").innerHTML='<div class="posmt">📂 &nbsp; لا توجد صفقات مفتوحة</div>';
-    $("pTot").textContent=""; return;
-  }
-  let tot=0;
-  $("pList").innerHTML=POSITIONS.map((p,i)=>{
-    const pos=p.position;
-    const szi=parseFloat(pos.szi);
-    const pnl=parseFloat(pos.unrealizedPnl||0);
-    tot+=pnl;
-    const cs=pos.coin.replace("xyz:","");
-    const a=AS[cs]||{ar:cs,unit:"",ico:"",pxDp:2};
-    const sAr=szi>0?"شراء ↑":"بيع ↓";
-    const sCl=szi>0?"lo":"sh";
-    const pCl=pnl>=0?"po":"ne";
-    const sg=pnl>=0?"+":"";
-    const ep=parseFloat(pos.entryPx||0);
-    const cur=PX[cs]?.mid||0;
-    return `<div class="posit">
-      <div class="pil">
-        <div class="pin">${a.ico} ${a.ar}</div>
-        <div class="pim"><span class="${sCl}">${sAr}</span> | دخول: ${fx(ep,a.pxDp)} | حالي: ${cur?fx(cur,a.pxDp):"—"}</div>
-        <button class="bclr" onclick="askClose(${i})">إغلاق ✕</button>
-      </div>
-      <div class="pir">
-        <div class="pip ${pCl}">${sg}$${fx(pnl,2)}</div>
-        <div class="pisz">${Math.abs(szi)} ${a.unit}</div>
-      </div>
-    </div>`;
-  }).join("");
-  const ts=tot>=0?"+":"";
-  $("pTot").textContent=`${ts}$${fx(tot,2)}`;
-  $("pTot").style.color=tot>=0?"var(--up)":"var(--dn)";
-}
-
-// ── TRADE CONFIRM ──
-function askTrade(isBuy,e){
-  rpl(isBuy?$("bBu"):$("bSe"),e);
-  const qty=parseFloat($("qI").value||selQ||0);
-  if(!qty||qty<=0){toast("أدخل الكمية أولاً","er");return}
-  const a=AS[sym],p=PX[sym];
-  if(!p.mid){toast("لا يوجد سعر — السوق مغلق؟","er");return}
-  const px=isBuy?p.ask:p.bid;
-  const usd=(px*qty).toFixed(2);
-  const mgn=(px*qty/a.lev).toFixed(2);
-  const liq=isBuy?fx(px*(1-1/a.lev),a.pxDp):fx(px*(1+1/a.lev),a.pxDp);
-  const dir=isBuy?"شراء ↑":"بيع ↓";
-  $("cfT").textContent=`تأكيد — ${a.ico} ${dir}`;
-  $("cfS").textContent=`${a.ar} · رافعة ${a.lev}x`;
-  $("cfB").innerHTML=`
-    <div class="cr"><div class="ck">الاتجاه</div><div class="cv ${isBuy?"bc":"sc"}">${dir}</div></div>
-    <div class="cr"><div class="ck">الكمية</div><div class="cv">${qty} ${a.unit}</div></div>
-    <div class="cr"><div class="ck">السعر التقريبي</div><div class="cv">${fx(px,a.pxDp)} $</div></div>
-    <div class="cr"><div class="ck">القيمة الكلية</div><div class="cv">≈ $${usd}</div></div>
-    <div class="cr"><div class="ck">الهامش المطلوب</div><div class="cv wc">≈ $${mgn}</div></div>
-    <div class="cr"><div class="ck">تصفية تقريبية</div><div class="cv sc">≈ ${liq} $</div></div>`;
-  const ok=$("cfOk");
-  ok.className=`sok ${isBuy?"bok":"sok2"}`;
-  ok.textContent=`${isBuy?"شراء":"بيع"} — تأكيد ←`;
-  pendT={isBuy,qty,sym};
-  om("mCf");
-}
-
-async function execTrade(){
-  cm("mCf");
-  const {isBuy,qty,sym:s}=pendT;
-  const a=AS[s],p=PX[s];
-  if(!p.mid){toast("لا يوجد سعر","er");return}
-  const dir=isBuy?"شراء ↑":"بيع ↓";
-  ld(`${a.ico} ${dir} ${qty} ${a.unit}...`);
-  try{
-    try{await hlEx({type:"updateLeverage",asset:a.idx,isCross:a.cross,leverage:a.lev})}catch{}
-    const px=fx(p.mid*(isBuy?1.02:0.98),a.pxDp);
-    const sz=fx(qty,a.szDp);
-    await hlEx({type:"order",orders:[{a:a.idx,b:isBuy,p:px,s:sz,r:false,t:{limit:{tif:"Ioc"}}}],grouping:"na"});
-    toast(`✅ ${dir} ${qty} ${a.unit} ${a.ar} — تم التنفيذ`,"ok",5000);
-    setTimeout(pollAcc,2000);
-  }catch(e){toast(`❌ ${e.message.slice(0,110)}`,"er",5000)}
-  finally{ul()}
-}
-
-// ── CLOSE CONFIRM ──
-function askClose(i){
-  const p=POSITIONS[i];if(!p) return;
-  const pos=p.position;
-  const szi=parseFloat(pos.szi);
-  const cs=pos.coin.replace("xyz:","");
-  const a=AS[cs]||{ar:cs,unit:"",ico:"",pxDp:2};
-  const pnl=parseFloat(pos.unrealizedPnl||0);
-  const sg=pnl>=0?"+":"";
-  const pclr=pnl>=0?"var(--up)":"var(--dn)";
-  const cur=PX[cs]?.mid||0;
-  $("clT").textContent=`إغلاق — ${a.ico} ${a.ar}`;
-  $("clB").innerHTML=`
-    <div class="cr"><div class="ck">الاتجاه</div><div class="cv">${szi>0?"شراء ↑":"بيع ↓"}</div></div>
-    <div class="cr"><div class="ck">الكمية</div><div class="cv">${Math.abs(szi)} ${a.unit}</div></div>
-    <div class="cr"><div class="ck">سعر الدخول</div><div class="cv">${fx(pos.entryPx||0,a.pxDp)} $</div></div>
-    <div class="cr"><div class="ck">السعر الحالي</div><div class="cv">${cur?fx(cur,a.pxDp):"—"} $</div></div>
-    <div class="cr"><div class="ck">الربح / الخسارة</div><div class="cv" style="color:${pclr}">${sg}$${fx(pnl,2)}</div></div>`;
-  pendC=i;
-  om("mCl");
-}
-
-async function execClose(){
-  cm("mCl");
-  const i=pendC;
-  const p=POSITIONS[i];if(!p) return;
-  const pos=p.position;
-  const szi=parseFloat(pos.szi);
-  const cs=pos.coin.replace("xyz:","");
-  const a=AS[cs];if(!a){toast("أصل غير معروف","er");return}
-  const mid=PX[cs]?.mid;if(!mid){toast("لا يوجد سعر","er");return}
-  ld(`إغلاق ${a.ico} ${a.ar}...`);
-  try{
-    const isBuy=szi<0;
-    const sz=fx(Math.abs(szi),a.szDp);
-    const px=fx(mid*(isBuy?1.02:0.98),a.pxDp);
-    await hlEx({type:"order",orders:[{a:a.idx,b:isBuy,p:px,s:sz,r:true,t:{limit:{tif:"Ioc"}}}],grouping:"na"});
-    const pnl=parseFloat(pos.unrealizedPnl||0);
-    const sg=pnl>=0?"+":"";
-    toast(`✅ أُغلقت ${a.ar} | P&L: ${sg}$${fx(pnl,2)}`,pnl>=0?"ok":"er",5000);
-    setTimeout(pollAcc,2000);
-  }catch(e){toast(`❌ ${e.message.slice(0,110)}`,"er",5000)}
-  finally{ul()}
-}
-
-// ── BALANCE ──
-async function showBal(){
-  om("mBl"); $("blC").innerHTML='<div class="bld">⏳ جاري جلب الرصيد...</div>';
-  try{
-    const [st,sp]=await Promise.all([
-      hlInfo({type:"clearinghouseState",user:W.address,dex:"xyz"}),
-      hlInfo({type:"spotClearinghouseState",user:W.address})
-    ]);
-    const ms=st.marginSummary||{};
-    const av=parseFloat(ms.accountValue||0);
-    const mu=parseFloat(ms.totalMarginUsed||0);
-    const fr=av-mu;
-    const wd=parseFloat(st.withdrawable||0);
-    let spU=0;
-    for(const b of sp?.balances||[]) if(b.coin==="USDC"||b.coin==="USDC:0") spU+=parseFloat(b.total||0);
-    const pnl=POSITIONS.reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
-    const ps=pnl>=0?"+":"";
-    $("blC").innerHTML=`
-      <div class="bg2">
-        <div class="bi fw"><div class="bil">قيمة الحساب — Perps (xyz DEX)</div>
-          <div class="biv b">$${fx(av,2)}</div><div class="bis">Hyperliquid xyz</div></div>
-        <div class="bi"><div class="bil">رصيد حر</div><div class="biv g">$${fx(fr,2)}</div><div class="bis">متاح للتداول</div></div>
-        <div class="bi"><div class="bil">هامش مستخدم</div><div class="biv w">$${fx(mu,2)}</div><div class="bis">في صفقات مفتوحة</div></div>
-        <div class="bi"><div class="bil">قابل للسحب</div><div class="biv g">$${fx(wd,2)}</div></div>
-        <div class="bi"><div class="bil">ربح/خسارة عائم</div>
-          <div class="biv ${pnl>=0?"g":"r"}">${ps}$${fx(pnl,2)}</div>
-          <div class="bis">${POSITIONS.length} صفقة مفتوحة</div></div>
-        ${spU>0?`<div class="bi fw"><div class="bil">Spot USDC — Hyperliquid</div><div class="biv b">$${fx(spU,2)}</div></div>`:""}
-      </div>
-      <button class="bref" onclick="showBal()">🔄 تحديث الرصيد</button>`;
-  }catch(e){$("blC").innerHTML=`<div class="bld" style="color:var(--dn)">❌ ${e.message.slice(0,150)}</div>`}
-}
-
-// ── WITHDRAW ──
-async function doWd(){
-  const amt=parseFloat($("wA").value||0);
-  const dest=$("wD").value.trim();
-  if(!amt||amt<=0){toast("أدخل المبلغ","er");return}
-  if(!/^0x[0-9a-fA-F]{40}$/.test(dest)){toast("عنوان غير صحيح","er");return}
-  cm("mWd"); ld("توقيع طلب السحب...");
-  try{
-    const nonce=Date.now(), to=dest.toLowerCase();
-    const action={type:"withdraw3",hyperliquidChain:"Mainnet",signatureChainId:"0xa4b1",destination:to,amount:amt.toFixed(2),time:nonce};
-    const sig=await W.signTypedData(
-      {name:"HyperliquidSignTransaction",version:"1",chainId:42161,verifyingContract:"0x0000000000000000000000000000000000000000"},
-      {"HyperliquidTransaction:Withdraw":[{name:"hyperliquidChain",type:"string"},{name:"destination",type:"string"},{name:"amount",type:"string"},{name:"time",type:"uint64"}]},
-      {hyperliquidChain:"Mainnet",destination:to,amount:action.amount,time:nonce}
-    );
-    const {r,s,v}=ethers.Signature.from(sig);
-    const res=await fetch(`${HL}/exchange`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,nonce,signature:{r,s,v}})});
-    const d=await res.json();
-    if(d.status!=="ok") throw new Error(JSON.stringify(d));
-    toast(`✅ طلب السحب — ${amt} USDC قيد المعالجة`,"ok",5000);
-    setTimeout(pollAcc,5000);
-  }catch(e){toast(`❌ ${e.message.slice(0,120)}`,"er",5000)}
-  finally{ul()}
-}
-
-// ── DEPOSIT ──
-async function doDp(){
-  const amt=parseFloat($("dA").value||0);
-  if(!amt||amt<=0){toast("أدخل المبلغ","er");return}
-  cm("mDp"); ld("موافقة USDC على Arbitrum...");
-  try{
-    const prov=new ethers.JsonRpcProvider(ARPC);
-    const w2=new ethers.Wallet(W.privateKey,prov);
-    const uc=new ethers.Contract(USDC,UABI,w2);
-    const bc=new ethers.Contract(BRDG,BABI,w2);
-    const raw=ethers.parseUnits(amt.toString(),6);
-    const bal=await uc.balanceOf(w2.address);
-    if(bal<raw) throw new Error(`رصيد USDC غير كافٍ: ${ethers.formatUnits(bal,6)}`);
-    const a=await uc.approve(BRDG,raw); await a.wait();
-    ld("إرسال للجسر...");
-    const dep=await bc.deposit(w2.address,raw);
-    const rec=await dep.wait();
-    toast(`✅ إيداع ناجح! ${amt} USDC | ${rec.hash.slice(0,10)}...`,"ok",6000);
-    setTimeout(pollAcc,7000);
-  }catch(e){toast(`❌ ${e.message.slice(0,120)}`,"er",5000)}
-  finally{ul()}
-}
-
-// ── LOGIN ──
-async function login(){
-  let k=$("kI").value.trim();
-  if(!k){toast("أدخل المفتاح الخاص","er");return}
-  if(!k.startsWith("0x")) k="0x"+k;
-  if(!/^0x[0-9a-fA-F]{64}$/.test(k)){toast("المفتاح يجب أن يكون 64 حرف hex","er");return}
-  ld("التحقق من المحفظة...");
-  try{
-    W=new ethers.Wallet(k);
-    sessionStorage.setItem("hl_k",k);
-    const addr=W.address;
-    $("nAd").textContent=addr.slice(0,6)+"..."+addr.slice(-4);
-    $("wD").value=addr;
-    $("sL").classList.add("off");
-    $("sA").classList.remove("off");
-    switchSym("GOLD");
-    ld("جلب الأسعار والمراكز...");
-    await Promise.all([pollPx(),pollAcc()]);
-    ul(); toast(`مرحباً · ${addr.slice(0,6)}...`,"ok");
-    timers.push(setInterval(pollPx,1000));
-    timers.push(setInterval(pollAcc,8000));
-  }catch(e){ul();W=null;toast("خطأ: "+e.message,"er",5000)}
-}
-
-function logout(){
-  timers.forEach(clearInterval); timers=[];
-  clearInterval(window._ti);
-  sessionStorage.removeItem("hl_k");
-  W=null; POSITIONS=[];
-  PX={GOLD:{bid:0,ask:0,mid:0},SILVER:{bid:0,ask:0,mid:0},CL:{bid:0,ask:0,mid:0}};
-  PRV={GOLD:0,SILVER:0,CL:0};
-  $("sA").classList.add("off");
-  $("sL").classList.remove("off");
-  $("kI").value="";
-}
-
-// ── EVENTS ──
-$("lB").addEventListener("click",login);
-$("kI").addEventListener("keydown",e=>e.key==="Enter"&&login());
-$("kE").addEventListener("click",()=>{const i=$("kI"),s=i.type==="password";i.type=s?"text":"password";$("kE").textContent=s?"🙈":"👁"});
-document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchSym(t.dataset.s)));
-$("bBu").addEventListener("click",e=>{if(!W){toast("سجّل الدخول أولاً","er");return}askTrade(true,e)});
-$("bSe").addEventListener("click",e=>{if(!W){toast("سجّل الدخول أولاً","er");return}askTrade(false,e)});
-$("cfOk").addEventListener("click",execTrade);
-$("clOk").addEventListener("click",execClose);
-$("bBal").addEventListener("click",()=>W&&showBal());
-$("bDp").addEventListener("click",()=>W&&om("mDp"));
-$("bWd").addEventListener("click",()=>W&&om("mWd"));
-$("bOut").addEventListener("click",()=>W&&confirm("تسجيل الخروج؟")&&logout());
-$("dOk").addEventListener("click",doDp);
-$("wOk").addEventListener("click",doWd);
-$("tSw").addEventListener("click",()=>{altC=!altC;document.body.classList.toggle("alt",altC);$("tSw").textContent=altC?"🟢 أخضر":"🎨 لون";toast(altC?"اللون: أزرق / برتقالي":"اللون: أخضر / أحمر","if",2000)});
-$("nAd").addEventListener("click",()=>{if(W){navigator.clipboard?.writeText(W.address);toast("تم نسخ العنوان","if",2000)}});
-document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open")}));
-
-window.addEventListener("load",()=>{
-  const k=sessionStorage.getItem("hl_k");
-  if(k){$("kI").value=k;login();}
-});
+  /* Safety check — alert if libs failed to load */
+  window.addEventListener('load', () => {
+    if (typeof ethers       === 'undefined') alert('تعذّر تحميل ethers.js — تحقق من اتصالك');
+    if (typeof MessagePack  === 'undefined') alert('تعذّر تحميل msgpack — تحقق من اتصالك');
+  });
 </script>
+<script src="/hl/hl.js"></script>
+
 </body>
 </html>
