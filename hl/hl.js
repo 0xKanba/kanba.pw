@@ -183,30 +183,33 @@ function updatePriceUI(){
 async function pollAccount(){
   if(!State.wallet) return;
   try {
-    // ✅ dex:"xyz" مطلوب لقراءة مراكز trade.xyz
-    const [perp, spot, openOrders]=await Promise.all([
-      hlInfo({type:'clearinghouseState',    user:State.wallet.address, dex:'xyz'}),
-      hlInfo({type:'spotClearinghouseState', user:State.wallet.address}),
+    // native perp = الرصيد الحقيقي | xyz = المراكز والهامش | spot = USDC جاهز
+    const [native, xyz, spot, openOrders]=await Promise.all([
+      hlInfo({type:'clearinghouseState',    user:State.wallet.address}).catch(()=>({})),
+      hlInfo({type:'clearinghouseState',    user:State.wallet.address, dex:'xyz'}).catch(()=>({})),
+      hlInfo({type:'spotClearinghouseState', user:State.wallet.address}).catch(()=>({})),
       hlInfo({type:'frontendOpenOrders',    user:State.wallet.address, dex:'xyz'}).catch(()=>[])
     ]);
     State.openOrders=Array.isArray(openOrders)?openOrders:[];
-    const ms=perp.marginSummary||{};
-    // الحساب الموحد 2026: accountValue يشمل كل شيء
-    const accountVal=parseFloat(ms.accountValue||0);
-    const marginUsed=parseFloat(ms.totalMarginUsed||0);
-    const floatPnl=(perp.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
-    State.balance={ total:accountVal, margin:marginUsed, floatPnl };
-    const rawPos=(perp.assetPositions||[]).filter(p=>parseFloat(p.position?.szi||0)!==0);
+
+    // الرصيد الكلي = native perp accountValue + spot USDC
+    const nativeVal=parseFloat(native?.marginSummary?.accountValue||0);
+    let spotUSDC=0;
+    for(const b of spot?.balances||[])
+      if(b.coin==='USDC'||b.coin==='USDC:0') spotUSDC+=parseFloat(b.total||0);
+    const total=nativeVal+spotUSDC;
+
+    // الهامش وعائم PnL من xyz (حيث المراكز الفعلية)
+    const marginUsed=parseFloat(xyz?.marginSummary?.totalMarginUsed||0);
+    const floatPnl=(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
+
+    State.balance={ total, margin:marginUsed, floatPnl };
+
+    // المراكز المفتوحة من xyz فقط
+    const rawPos=(xyz?.assetPositions||[]).filter(p=>parseFloat(p.position?.szi||0)!==0);
     State.positions=rawPos.map(p=>({...p, tpsl:parseTpslFromOrders(State.openOrders,p.position.coin)}));
     renderPositions();
-  } catch(e){
-    const m=e.message.toLowerCase();
-    if(m.includes('exist')||m.includes('not found')||m.includes('user')){
-      State.balance={total:0,margin:0,floatPnl:0};
-      State.positions=[];
-      renderPositions();
-    } else { console.warn('[pollAccount]',e.message); }
-  }
+  } catch(e){ console.warn('[pollAccount]',e.message); }
 }
 
 // ════════════════════════════════════════
@@ -636,12 +639,18 @@ async function showBalance(){
   openModal('modalBalance');
   $('balanceContent').innerHTML='<div class="balance-loading">⏳ جاري جلب الرصيد...</div>';
   try {
-    // الحساب الموحد 2026 — clearinghouseState مع dex:"xyz"
-    const perp=await hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'});
-    const ms=perp.marginSummary||{};
-    const total=parseFloat(ms.accountValue||0);
-    const margin=parseFloat(ms.totalMarginUsed||0);
-    const floatPnl=(perp.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
+    const [native, xyz, spot]=await Promise.all([
+      hlInfo({type:'clearinghouseState',    user:State.wallet.address}).catch(()=>({})),
+      hlInfo({type:'clearinghouseState',    user:State.wallet.address, dex:'xyz'}).catch(()=>({})),
+      hlInfo({type:'spotClearinghouseState', user:State.wallet.address}).catch(()=>({}))
+    ]);
+    const nativeVal=parseFloat(native?.marginSummary?.accountValue||0);
+    let spotUSDC=0;
+    for(const b of spot?.balances||[])
+      if(b.coin==='USDC'||b.coin==='USDC:0') spotUSDC+=parseFloat(b.total||0);
+    const total=nativeVal+spotUSDC;
+    const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0);
+    const floatPnl=(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
     const pCls=floatPnl>=0?'green':'red';
     $('balanceContent').innerHTML=`
       <div class="balance-grid">
@@ -733,7 +742,7 @@ async function login(){
     $('withdrawAddress').value=State.wallet.address;
     $('loginScreen').classList.add('hidden');
     $('appScreen').classList.remove('hidden');
-    switchAsset('GOLD');
+    switchAsset('CL');
     showLoader('جلب الأسعار والحساب...');
     await Promise.all([pollPrices(),pollAccount()]);
     hideLoader();
