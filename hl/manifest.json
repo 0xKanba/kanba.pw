@@ -1,6 +1,6 @@
 {
   "name": "HL Trade · Hyperliquid Terminal",
-  "short_name": "HLTrade",
+  "short_name": "النفط",
   "description": "تداول مباشر على Hyperliquid trade.xyz",
   "start_url": "/hl/",
   "scope": "/hl/",
