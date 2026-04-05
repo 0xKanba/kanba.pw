@@ -638,10 +638,14 @@ async function showBalance(){
   try {
     // الحساب الموحد 2026 — clearinghouseState مع dex:"xyz"
     const perp=await hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'});
+// 👇 أضف هذا السطر هنا:
+const spot=await hlInfo({type:'spotClearinghouseState',user:State.wallet.address});
     const ms=perp.marginSummary||{};
-    const total=parseFloat(ms.accountValue||0);
-    const margin=parseFloat(ms.totalMarginUsed||0);
-    const floatPnl=(perp.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
+    // ✅ أضف هذه بدلاً منها:
+const spot=await hlInfo({type:'spotClearinghouseState',user:State.wallet.address});
+const spotUsdc=(spot.balances||[]).find(b=>b.coin==='USDC')?.hold??'0';
+const floatPnl=(perp.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
+const total=parseFloat(spotUsdc)+parseFloat(ms.accountValue||0)+floatPnl;
     const pCls=floatPnl>=0?'green':'red';
     $('balanceContent').innerHTML=`
       <div class="balance-grid">
