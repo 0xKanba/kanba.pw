@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HLTrade">
+  <meta name="theme-color" content="#c96442">
+  <title>HL Trade · Hyperliquid Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/hl2/hl.css">
+  <link rel="manifest" href="/hl2/manifest.json">
+  <link rel="apple-touch-icon" href="/hl2/icon-512.png">
+</head>
+<body>
+
+<!-- ── شاشة الدخول ── -->
+<div class="screen" id="loginScreen">
+  <div class="login-brand">
+    <div class="login-icon">⚡</div>
+    <div class="login-title">HL<em>Trade</em></div>
+  </div>
+  <div class="login-card">
+    <div class="login-header">تداول مباشر على Hyperliquid × trade.xyz</div>
+    <label class="field-label" for="privateKey">المفتاح الخاص</label>
+    <div class="key-wrapper">
+      <input class="key-input" id="privateKey" type="password" placeholder="0x4a3b..." autocomplete="off">
+      <button class="key-toggle" id="toggleKey" type="button">👁</button>
+    </div>
+    <button class="login-btn" id="loginBtn">دخول — بدء التداول ←</button>
+    <div class="login-note"><strong>🔒 المفتاح يُحفظ محلياً فقط</strong><br>التوقيعات في متصفحك · لا خوادم خارجية</div>
+  </div>
+</div>
+
+<!-- ── التطبيق ── -->
+<div class="screen hidden" id="appScreen">
+
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-logo">⚡ HL<em>Trade</em></div>
+      <div class="nav-status"><span class="status-dot"></span>LIVE</div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-address" id="navAddress" title="انقر للنسخ">—</div>
+    </div>
+  </nav>
+
+  <div class="tabs">
+    <button class="tab active" data-asset="GOLD"><span class="tab-icon">🟡</span><span class="tab-name">ذهب</span><span class="tab-price" id="priceGOLD">—</span></button>
+    <button class="tab" data-asset="SILVER"><span class="tab-icon">⚪</span><span class="tab-name">فضة</span><span class="tab-price" id="priceSILVER">—</span></button>
+    <button class="tab" data-asset="CL"><span class="tab-icon">🛢</span><span class="tab-name">نفط</span><span class="tab-price" id="priceCL">—</span></button>
+    <!-- زر الرسم البياني -->
+    <button class="tab tab-chart" id="tabChart">
+      <span class="tab-icon">📈</span>
+      <span class="tab-name">رسم</span>
+    </button>
+  </div>
+
+  <main class="main">
+    <div class="col-left">
+      <div class="price-card" id="priceCard">
+        <div class="price-asset" id="priceAssetName">نفط خام</div>
+        <div class="price-value" id="priceValue">—</div>
+        <div class="price-delta" id="priceDelta"></div>
+        <div class="price-meta-row">
+          <span class="price-bid-ask" id="priceBidAsk"></span>
+          <span class="price-timer" id="priceTimer">↻ —</span>
+        </div>
+      </div>
+      <div class="trade-panel">
+        <div class="panel-header">تنفيذ صفقة · <span id="tradeAssetName">نفط خام</span></div>
+        <div class="qty-presets" id="qtyPresets"></div>
+        <div class="qty-input-row">
+          <input type="number" class="qty-input" id="qtyInput" placeholder="0.00" min="0" step="any">
+          <button class="qty-100" id="qty100">100%</button>
+          <span class="qty-unit" id="qtyUnit">برميل</span>
+        </div>
+        <div class="trade-buttons">
+          <button class="btn-trade btn-buy" id="btnBuy"><span class="btn-label">شراء ↑</span><span class="btn-price" id="buyPrice">—</span></button>
+          <button class="btn-trade btn-sell" id="btnSell"><span class="btn-label">بيع ↓</span><span class="btn-price" id="sellPrice">—</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="positions-card">
+        <div class="positions-header">
+          <span class="positions-title">الصفقات المفتوحة</span>
+          <span class="positions-count" id="positionsCount">0</span>
+          <span class="positions-pnl" id="totalPnl"></span>
+          <button class="btn-close-all hidden" id="btnCloseAll">إغلاق الكل ✕</button>
+        </div>
+        <div class="positions-list" id="positionsList">
+          <div class="positions-empty">📂 لا توجد صفقات مفتوحة</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <button class="footer-btn" id="btnBalance"><span class="footer-icon">💼</span>رصيد</button>
+    <button class="footer-btn" id="btnDeposit"><span class="footer-icon">💵</span>إيداع</button>
+    <button class="footer-btn" id="btnWithdraw"><span class="footer-icon">📤</span>سحب</button>
+    <button class="footer-btn footer-logout" id="btnLogout"><span class="footer-icon">🔒</span>خروج</button>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════
+     شاشة الرسم البياني (overlay كامل)
+══════════════════════════════════════ -->
+<div id="chartScreen" class="chart-screen hidden">
+  <div class="chart-nav">
+    <button class="chart-back" id="chartBack">← رجوع</button>
+    <div class="chart-header-info">
+      <span id="chartAssetIcon">🛢</span>
+      <span id="chartAssetName" class="chart-asset-name">نفط خام</span>
+      <span id="chartCurrentPrice" class="chart-current-price">—</span>
+    </div>
+    <div class="chart-ws-status" id="chartWsStatus">⏳</div>
+  </div>
+  <div class="chart-intervals">
+    <button class="iv-btn" data-iv="1m">1د</button>
+    <button class="iv-btn" data-iv="5m">5د</button>
+    <button class="iv-btn" data-iv="15m">15د</button>
+    <button class="iv-btn active" data-iv="1h">1س</button>
+    <button class="iv-btn" data-iv="4h">4س</button>
+    <button class="iv-btn" data-iv="1d">يوم</button>
+  </div>
+  <div id="chartContainer" class="chart-container"></div>
+  <div id="chartLegend" class="chart-legend"></div>
+</div>
+
+<!-- ════ MODALS ════ -->
+
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="confirmTitle">تأكيد الصفقة</h3>
+    <p class="modal-subtitle" id="confirmSubtitle"></p>
+    <div class="confirm-details" id="confirmDetails"></div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="confirmCancel">إلغاء ✕</button>
+      <button class="btn-modal btn-confirm" id="confirmExecute">تأكيد ←</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalClose">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="closeTitle">إغلاق الصفقة</h3>
+    <p class="modal-subtitle">سيتم الإغلاق فوراً بالسعر الحالي</p>
+    <div class="confirm-details" id="closeDetails"></div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="closeCancel">إبقاء</button>
+      <button class="btn-modal btn-confirm btn-danger" id="closeExecute">إغلاق الآن ✕</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalCloseAll">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">⚠️ إغلاق جميع الصفقات</h3>
+    <p class="modal-subtitle">سيتم إغلاق كل المراكز المفتوحة فوراً</p>
+    <div class="confirm-details" id="closeAllDetails"></div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="closeAllCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-danger" id="closeAllExecute">إغلاق الكل ✕</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalTP">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="tpTitle">🎯 تحديد حجم الربح</h3>
+    <p class="modal-subtitle" id="tpSubtitle"></p>
+    <div class="confirm-details" id="tpCurrentDetails"></div>
+    <div class="form-group">
+      <label>الربح المستهدف بالدولار ($)</label>
+      <input type="number" class="form-input" id="tpAmount" placeholder="مثال: 10" min="0.1" step="any">
+      <div class="calc-preview" id="tpPreview">سعر التفعيل: —</div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="tpCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-success" id="tpExecute">تعيين الربح ✓</button>
+    </div>
+    <div id="tpDeleteRow" class="delete-row hidden">
+      <button class="btn-delete-tpsl" id="tpDelete">🗑 إلغاء هدف الربح الحالي</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalSL">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="slTitle">🛡 تحديد حجم الخسارة</h3>
+    <p class="modal-subtitle" id="slSubtitle"></p>
+    <div class="confirm-details" id="slCurrentDetails"></div>
+    <div class="form-group">
+      <label>الخسارة المسموح بها بالدولار ($)</label>
+      <input type="number" class="form-input" id="slAmount" placeholder="مثال: 5" min="0.1" step="any">
+      <div class="calc-preview" id="slPreview">سعر التفعيل: —</div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="slCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-danger" id="slExecute">تعيين الخسارة ✓</button>
+    </div>
+    <div id="slDeleteRow" class="delete-row hidden">
+      <button class="btn-delete-tpsl" id="slDelete">🗑 إلغاء وقف الخسارة الحالي</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalBalance">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">💼 الرصيد</h3>
+    <div class="balance-content" id="balanceContent">
+      <div class="balance-loading">⏳ جاري جلب الرصيد...</div>
+    </div>
+    <div class="modal-buttons modal-buttons-center">
+      <button class="btn-modal btn-cancel" id="balanceClose">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalDeposit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">💵 إيداع USDC</h3>
+    <div class="form-group">
+      <label>المبلغ بالدولار (USDC)</label>
+      <input type="number" class="form-input" id="depositAmount" placeholder="100" min="8">
+    </div>
+    <p class="form-note">يُرسل USDC من شبكة Arbitrum عبر الجسر الرسمي · الحد الأدنى $8 · المدة 1-3 دقائق</p>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="depositCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-success" id="depositExecute">إيداع ✓</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalWithdraw">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">📤 سحب USDC</h3>
+    <div class="form-group">
+      <label>المبلغ بالدولار (USDC)</label>
+      <input type="number" class="form-input" id="withdrawAmount" placeholder="100" min="1">
+    </div>
+    <div class="form-group">
+      <label>عنوان المحفظة على Arbitrum</label>
+      <input type="text" class="form-input" id="withdrawAddress" placeholder="0x..." dir="ltr">
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="withdrawCancel">إلغاء</button>
+      <button class="btn-modal btn-confirm btn-success" id="withdrawExecute">سحب ✓</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalLogout">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="logout-content">
+      <div class="logout-icon">🔐</div>
+      <h3 class="modal-title">تسجيل الخروج</h3>
+      <p class="logout-text">سيتم حذف المفتاح الخاص من الذاكرة والمتصفح.<br>صفقاتك المفتوحة <strong>تبقى نشطة</strong> على Hyperliquid.</p>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-cancel" id="logoutCancel">بقاء — إلغاء</button>
+      <button class="btn-modal btn-confirm btn-danger" id="logoutExecute">خروج 🔒</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="loader"><div class="spinner"></div><div class="loader-text" id="loaderText">جاري...</div></div>
+
+<!-- زر تثبيت PWA -->
+<button id="pwaInstallBtn" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#c96442,#a8502f);color:#fff;border:none;border-radius:12px;padding:10px 24px;font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;box-shadow:0 4px 16px rgba(201,100,66,.4);cursor:pointer;z-index:999;">
+  ⬇️ تثبيت التطبيق
+</button>
+
+<!-- ── Scripts ── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+  if(typeof ethers==='undefined'){
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js';
+    s.crossOrigin='anonymous'; document.head.appendChild(s);
+  }
+</script>
+
+<!-- Lightweight Charts v4 — Apache 2.0 مجانية -->
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+
+<script src="/hl2/hl.js"></script>
+<script src="/hl2/chart.js"></script>
+
+<script>
+// ── Service Worker ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/hl2/sw.js',{scope:'/hl2/'})
+      .then(r=>console.log('[SW] registered'))
+      .catch(e=>console.warn('[SW]',e));
+  });
+}
+// ── PWA Install ──
+let _pwaP=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); _pwaP=e;
+  document.getElementById('pwaInstallBtn').style.display='block';
+  setTimeout(()=>document.getElementById('pwaInstallBtn').style.display='none',8000);
+});
+document.getElementById('pwaInstallBtn').onclick=()=>{
+  if(!_pwaP)return;
+  _pwaP.prompt();
+  _pwaP.userChoice.then(()=>{ _pwaP=null; document.getElementById('pwaInstallBtn').style.display='none'; });
+};
+window.addEventListener('appinstalled',()=>{ document.getElementById('pwaInstallBtn').style.display='none'; });
+</script>
+</body>
+</html>
