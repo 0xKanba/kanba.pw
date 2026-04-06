@@ -304,10 +304,12 @@ function renderPositions(){
 // ════════════════════════════════════════
 function switchAsset(sym){
   State.asset=sym;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.asset===sym));
+  document.querySelectorAll('.tab[data-asset]').forEach(t=>t.classList.toggle('active',t.dataset.asset===sym));
   const a=ASSETS[sym];
   setTxt('priceAssetName',a.name); setTxt('tradeAssetName',a.name); setTxt('qtyUnit',a.unit);
   renderPresets(a.presets); State.prevMid[sym]=0; updatePriceUI();
+  // تحديث الرسم البياني إذا كان مفتوحاً على نفس أو أصل مختلف
+  if(typeof ChartModule!=='undefined') ChartModule.switchAssetChart(sym);
 }
 function renderPresets(arr){
   $('qtyPresets').innerHTML=arr.map((v,i)=>`<button class="qty-preset${i===0?' active':''}" data-v="${v}">${v}</button>`).join('');
@@ -787,8 +789,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!State.wallet) return toast('سجّل الدخول أولاً','err');
     ChartModule.open(State.asset);
   };
-  $('chartBack').onclick=()=>ChartModule.close();
-  document.querySelectorAll('.iv-btn').forEach(b=>b.onclick=()=>ChartModule.switchInterval(b.dataset.iv));
 
   $('btnBuy').onclick  =()=>State.wallet?askTrade(true) :toast('سجّل الدخول أولاً','err');
   $('btnSell').onclick =()=>State.wallet?askTrade(false):toast('سجّل الدخول أولاً','err');
