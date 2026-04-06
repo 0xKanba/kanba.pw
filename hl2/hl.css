@@ -30,8 +30,8 @@
 
   --shadow:    0 8px 32px rgba(0,0,0,.55);
   --shadow-sm: 0 4px 16px rgba(0,0,0,.35);
-  --radius:    14px;
-  --radius-lg: 20px;
+  --radius:    999px;
+  --radius-lg: 999px;
   --font-ui:   'Cairo', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 }
@@ -124,8 +124,6 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .tab-price { font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--text-muted);transition:color .2s; }
 .tab-price.up { color:var(--up); }
 .tab-price.dn { color:var(--dn); }
-/* زر tab الرسم — عرض أضيق قليلاً */
-.tab-chart { flex:.8; }
 
 /* ── MAIN ── */
 .main { flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:7px;padding:7px 8px 5px; }
@@ -187,6 +185,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .btn-close-all.hidden { display:none; }
 .positions-empty { padding:28px;text-align:center;color:var(--text-muted);font-size:15px; }
 
+/* كارت الصفقة */
 .position-item { border-bottom:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:12px;animation:slideIn .2s ease; }
 @keyframes slideIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none} }
 .pos-top { display:flex;justify-content:space-between;align-items:flex-start;gap:8px; }
@@ -200,6 +199,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .pos-pnl.neg { color:var(--dn); }
 .pos-size { font-family:var(--font-mono);font-size:10px;color:var(--text-muted); }
 
+/* شبكة بيانات الصفقة */
 .pos-data-grid { display:grid;grid-template-columns:1fr 1fr;gap:5px;background:var(--bg-elev);border-radius:8px;padding:9px; }
 .pos-data-item { display:flex;flex-direction:column;gap:2px; }
 .pos-data-label { font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px; }
@@ -208,6 +208,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .pos-data-value.sl-c { color:var(--sl); }
 .pos-data-value.muted { color:var(--text-secondary); }
 
+/* أزرار تحديد ربح/خسارة */
 .pos-tpsl-row { display:grid;grid-template-columns:1fr 1fr;gap:5px; }
 .tpsl-btn {
   border-radius:8px;padding:8px 5px;
@@ -223,6 +224,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .tpsl-btn:hover { filter:brightness(1.15); }
 .tpsl-btn:active { transform:scale(.95); }
 
+/* أزرار إغلاق */
 .pos-actions-row { display:grid;grid-template-columns:1fr 1fr;gap:5px; }
 .btn-pos-close  { border:2px solid var(--dn);background:var(--dn-dim);color:var(--dn);border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;text-align:center;transition:all .15s; }
 .btn-pos-close:hover,.btn-pos-close:active  { background:var(--dn);color:#fff; }
@@ -280,6 +282,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .btn-success { background:linear-gradient(135deg,var(--up),#1a7f37);box-shadow:0 3px 14px var(--up-dim); }
 .btn-danger  { background:linear-gradient(135deg,var(--dn),#a0281e);box-shadow:0 3px 14px var(--dn-dim); }
 
+/* ── BALANCE ── */
 .balance-grid { display:flex;flex-direction:column;gap:8px;margin-bottom:14px; }
 .balance-item { background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius);padding:14px;display:flex;justify-content:space-between;align-items:center; }
 .balance-label { font-size:13px;font-weight:700;color:var(--text-secondary); }
@@ -292,101 +295,44 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .btn-refresh:hover { border-color:var(--ac);color:var(--ac); }
 .balance-loading { text-align:center;padding:20px;color:var(--text-secondary);font-size:12px; }
 
+/* ── LOGOUT ── */
 .logout-content { text-align:center;padding:8px 0 6px; }
 .logout-icon { font-size:38px;margin-bottom:10px; }
 .logout-text { font-size:12px;color:var(--text-secondary);line-height:1.8;margin-bottom:14px; }
 
+/* ── TOAST ── */
 #toast { position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--bg-card);border:2px solid var(--border-strong);border-radius:12px;padding:10px 22px;font-size:13px;font-weight:700;z-index:250;opacity:0;transition:all .22s cubic-bezier(.4,0,.2,1);pointer-events:none;white-space:nowrap;max-width:94vw;text-align:center;box-shadow:var(--shadow); }
 #toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
 #toast.ok   { border-color:var(--up);color:var(--up);background:color-mix(in srgb,var(--up) 9%,var(--bg-card)); }
 #toast.err  { border-color:var(--dn);color:var(--dn);background:color-mix(in srgb,var(--dn) 9%,var(--bg-card)); }
 #toast.info { border-color:var(--ac);color:var(--ac); }
 
+/* ── LOADER ── */
 #loader { position:fixed;inset:0;z-index:150;background:color-mix(in srgb,var(--bg-app) 93%,transparent);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px; }
 #loader.active { display:flex;animation:fadeIn .14s; }
 .spinner { width:32px;height:32px;border:3px solid var(--border-strong);border-top-color:var(--ac);border-radius:50%;animation:spin .75s linear infinite; }
 @keyframes spin { to{transform:rotate(360deg)} }
 .loader-text { font-size:13px;color:var(--text-secondary);font-weight:700; }
 
-/* ════════════════════════════════════════════
-   CHART SCREEN — شاشة الرسم البياني الكامل
-════════════════════════════════════════════ */
-.chart-screen {
-  position:fixed;inset:0;
-  z-index:50; /* فوق المحتوى، تحت المودالز */
-  display:flex;flex-direction:column;
-  background:var(--bg-app);
+/* ── زر إنشاء محفظة جديدة ── */
+.create-wallet-btn {
+  width: 100%; margin-top: 12px; padding: 12px;
+  border-radius: 999px;
+  border: 2px solid var(--border-strong);
+  background: var(--bg-elev);
+  color: var(--text-secondary);
+  font-size: 13px; font-weight: 700;
+  font-family: var(--font-ui);
+  cursor: pointer; transition: all .2s;
 }
+.create-wallet-btn:hover {
+  border-color: var(--ac); color: var(--ac);
+  background: var(--ac-dim);
+}
+
+/* ── tab الرسم (أضيق قليلاً) ── */
+.tab-chart { flex: .75; }
+
+/* ── شاشة الرسم البياني ── */
+.chart-screen { position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--bg-app); }
 .chart-screen.hidden { display:none !important; }
-
-/* شريط العنوان */
-.chart-nav {
-  display:flex;align-items:center;gap:10px;
-  padding:9px 12px;
-  background:var(--bg-card);
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-.chart-back {
-  color:var(--ac);font-size:13px;font-weight:700;
-  padding:5px 10px;border-radius:8px;
-  border:1.5px solid var(--ac-dim);
-  background:var(--ac-dim);
-  white-space:nowrap;
-}
-.chart-back:active { opacity:.7; }
-.chart-header-info {
-  flex:1;display:flex;align-items:center;gap:7px;
-  overflow:hidden;
-}
-#chartAssetIcon { font-size:18px;line-height:1; }
-.chart-asset-name { font-size:14px;font-weight:900; }
-.chart-current-price {
-  font-family:var(--font-mono);font-size:16px;font-weight:700;
-  color:var(--text-primary);
-}
-.chart-ws-status { font-size:14px;flex-shrink:0; }
-
-/* أزرار الفترات */
-.chart-intervals {
-  display:flex;gap:5px;padding:6px 10px;
-  background:var(--bg-card);border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-.iv-btn {
-  flex:1;padding:6px 3px;border-radius:8px;
-  border:1.5px solid var(--border);
-  background:var(--bg-elev);
-  color:var(--text-muted);
-  font-size:11px;font-weight:700;font-family:var(--font-mono);
-  text-align:center;transition:all .15s;
-}
-.iv-btn:active { transform:scale(.9); }
-.iv-btn.active {
-  border-color:var(--ac);background:var(--ac-dim);
-  color:var(--ac);
-}
-
-/* حاوية الرسم — تملأ كل المساحة المتبقية */
-.chart-container {
-  flex:1;
-  min-height:0; /* مهم لـ flexbox */
-  width:100%;
-  overflow:hidden;
-}
-
-/* legend أسفل الرسم */
-.chart-legend {
-  padding:5px 12px;
-  background:var(--bg-card);
-  border-top:1px solid var(--border);
-  font-family:var(--font-mono);font-size:10px;color:var(--text-muted);
-  display:flex;gap:14px;flex-wrap:wrap;
-  flex-shrink:0;min-height:24px;
-}
-.chart-legend-item {
-  display:flex;align-items:center;gap:4px;
-}
-.chart-legend-dot {
-  width:8px;height:2px;border-radius:1px;display:inline-block;
-}
