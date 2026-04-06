@@ -109,29 +109,9 @@
 </div>
 
 <!-- ══════════════════════════════════════
-     شاشة الرسم البياني (overlay كامل)
+     شاشة الرسم البياني — تُبنى ديناميكياً من chart.js
 ══════════════════════════════════════ -->
-<div id="chartScreen" class="chart-screen hidden">
-  <div class="chart-nav">
-    <button class="chart-back" id="chartBack">← رجوع</button>
-    <div class="chart-header-info">
-      <span id="chartAssetIcon">🛢</span>
-      <span id="chartAssetName" class="chart-asset-name">نفط خام</span>
-      <span id="chartCurrentPrice" class="chart-current-price">—</span>
-    </div>
-    <div class="chart-ws-status" id="chartWsStatus">⏳</div>
-  </div>
-  <div class="chart-intervals">
-    <button class="iv-btn" data-iv="1m">1د</button>
-    <button class="iv-btn" data-iv="5m">5د</button>
-    <button class="iv-btn" data-iv="15m">15د</button>
-    <button class="iv-btn active" data-iv="1h">1س</button>
-    <button class="iv-btn" data-iv="4h">4س</button>
-    <button class="iv-btn" data-iv="1d">يوم</button>
-  </div>
-  <div id="chartContainer" class="chart-container"></div>
-  <div id="chartLegend" class="chart-legend"></div>
-</div>
+<div id="chartScreen" class="chart-screen hidden"></div>
 
 <!-- ════ MODALS ════ -->
 
