@@ -6,14 +6,16 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="HLTrade">
-  <meta name="theme-color" content="#c96442">
   <title>HL Trade · Hyperliquid Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/hl2/hl.css">
   <link rel="manifest" href="/hl2/manifest.json">
-  <link rel="apple-touch-icon" href="/hl2/icon-512.png">
+<meta name="theme-color" content="#c96442">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HLTrade">
+<link rel="apple-touch-icon" href="/hl2/icon-512.png">
 </head>
 <body>
 
@@ -32,6 +34,7 @@
     </div>
     <button class="login-btn" id="loginBtn">دخول — بدء التداول ←</button>
     <div class="login-note"><strong>🔒 المفتاح يُحفظ محلياً فقط</strong><br>التوقيعات في متصفحك · لا خوادم خارجية</div>
+    <button class="create-wallet-btn" id="createWalletBtn">ليس لديك محفظة؟ أنشئ واحدة ←</button>
   </div>
 </div>
 
@@ -52,17 +55,13 @@
     <button class="tab active" data-asset="GOLD"><span class="tab-icon">🟡</span><span class="tab-name">ذهب</span><span class="tab-price" id="priceGOLD">—</span></button>
     <button class="tab" data-asset="SILVER"><span class="tab-icon">⚪</span><span class="tab-name">فضة</span><span class="tab-price" id="priceSILVER">—</span></button>
     <button class="tab" data-asset="CL"><span class="tab-icon">🛢</span><span class="tab-name">نفط</span><span class="tab-price" id="priceCL">—</span></button>
-    <!-- زر الرسم البياني -->
-    <button class="tab tab-chart" id="tabChart">
-      <span class="tab-icon">📈</span>
-      <span class="tab-name">رسم</span>
-    </button>
+    <button class="tab tab-chart" id="tabChart"><span class="tab-icon">📈</span><span class="tab-name">رسم</span></button>
   </div>
 
   <main class="main">
     <div class="col-left">
       <div class="price-card" id="priceCard">
-        <div class="price-asset" id="priceAssetName">نفط خام</div>
+        <div class="price-asset" id="priceAssetName">ذهب</div>
         <div class="price-value" id="priceValue">—</div>
         <div class="price-delta" id="priceDelta"></div>
         <div class="price-meta-row">
@@ -71,12 +70,12 @@
         </div>
       </div>
       <div class="trade-panel">
-        <div class="panel-header">تنفيذ صفقة · <span id="tradeAssetName">نفط خام</span></div>
+        <div class="panel-header">تنفيذ صفقة · <span id="tradeAssetName">ذهب</span></div>
         <div class="qty-presets" id="qtyPresets"></div>
         <div class="qty-input-row">
           <input type="number" class="qty-input" id="qtyInput" placeholder="0.00" min="0" step="any">
           <button class="qty-100" id="qty100">100%</button>
-          <span class="qty-unit" id="qtyUnit">برميل</span>
+          <span class="qty-unit" id="qtyUnit">أونصة</span>
         </div>
         <div class="trade-buttons">
           <button class="btn-trade btn-buy" id="btnBuy"><span class="btn-label">شراء ↑</span><span class="btn-price" id="buyPrice">—</span></button>
@@ -108,13 +107,9 @@
   </footer>
 </div>
 
-<!-- ══════════════════════════════════════
-     شاشة الرسم البياني — تُبنى ديناميكياً من chart.js
-══════════════════════════════════════ -->
-<div id="chartScreen" class="chart-screen hidden"></div>
-
 <!-- ════ MODALS ════ -->
 
+<!-- تأكيد صفقة -->
 <div class="modal-overlay" id="modalConfirm">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -128,6 +123,7 @@
   </div>
 </div>
 
+<!-- إغلاق فردي -->
 <div class="modal-overlay" id="modalClose">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -141,6 +137,7 @@
   </div>
 </div>
 
+<!-- إغلاق الكل -->
 <div class="modal-overlay" id="modalCloseAll">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -154,6 +151,7 @@
   </div>
 </div>
 
+<!-- تحديد حجم الربح (TP) -->
 <div class="modal-overlay" id="modalTP">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -175,6 +173,7 @@
   </div>
 </div>
 
+<!-- تحديد حجم الخسارة (SL) -->
 <div class="modal-overlay" id="modalSL">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -196,6 +195,7 @@
   </div>
 </div>
 
+<!-- الرصيد -->
 <div class="modal-overlay" id="modalBalance">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -209,6 +209,7 @@
   </div>
 </div>
 
+<!-- إيداع -->
 <div class="modal-overlay" id="modalDeposit">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -225,6 +226,7 @@
   </div>
 </div>
 
+<!-- سحب -->
 <div class="modal-overlay" id="modalWithdraw">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -244,6 +246,7 @@
   </div>
 </div>
 
+<!-- خروج -->
 <div class="modal-overlay" id="modalLogout">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -259,15 +262,11 @@
   </div>
 </div>
 
+<div id="chartScreen" class="chart-screen hidden"></div>
+
 <div id="toast"></div>
 <div id="loader"><div class="spinner"></div><div class="loader-text" id="loaderText">جاري...</div></div>
 
-<!-- زر تثبيت PWA -->
-<button id="pwaInstallBtn" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#c96442,#a8502f);color:#fff;border:none;border-radius:12px;padding:10px 24px;font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;box-shadow:0 4px 16px rgba(201,100,66,.4);cursor:pointer;z-index:999;">
-  ⬇️ تثبيت التطبيق
-</button>
-
-<!-- ── Scripts ── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
   if(typeof ethers==='undefined'){
@@ -276,35 +275,22 @@
     s.crossOrigin='anonymous'; document.head.appendChild(s);
   }
 </script>
-
-<!-- Lightweight Charts v4 — Apache 2.0 مجانية -->
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-
 <script src="/hl2/hl.js"></script>
 <script src="/hl2/chart.js"></script>
-
 <script>
-// ── Service Worker ──
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/hl2/sw.js',{scope:'/hl2/'})
-      .then(r=>console.log('[SW] registered'))
-      .catch(e=>console.warn('[SW]',e));
+    navigator.serviceWorker.register('/hl2/sw.js',{scope:'/hl2/'}).catch(()=>{});
   });
 }
-// ── PWA Install ──
 let _pwaP=null;
 window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault(); _pwaP=e;
-  document.getElementById('pwaInstallBtn').style.display='block';
-  setTimeout(()=>document.getElementById('pwaInstallBtn').style.display='none',8000);
+  e.preventDefault();_pwaP=e;
+  const b=document.getElementById('_pwaBtn');
+  if(b){b.style.display='block';setTimeout(()=>b.style.display='none',8000);}
 });
-document.getElementById('pwaInstallBtn').onclick=()=>{
-  if(!_pwaP)return;
-  _pwaP.prompt();
-  _pwaP.userChoice.then(()=>{ _pwaP=null; document.getElementById('pwaInstallBtn').style.display='none'; });
-};
-window.addEventListener('appinstalled',()=>{ document.getElementById('pwaInstallBtn').style.display='none'; });
 </script>
+<button id="_pwaBtn" onclick="if(_pwaP){_pwaP.prompt();_pwaP.userChoice.then(()=>{_pwaP=null;this.style.display='none';});}" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#c96442,#a8502f);color:#fff;border:none;border-radius:999px;padding:10px 24px;font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;box-shadow:0 4px 16px rgba(201,100,66,.4);cursor:pointer;z-index:999;">⬇️ تثبيت التطبيق</button>
 </body>
 </html>
