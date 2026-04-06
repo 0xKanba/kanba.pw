@@ -295,7 +295,6 @@ function renderPositions(){
   const totalEl=$('totalPnl');
   totalEl.textContent=`${total>=0?'+':''}$${fmt(total,2)}`;
   totalEl.className=`positions-pnl ${total>=0?'pos':'neg'}`;
-  // تحديث خطوط الدخول في الرسم البياني
   if(typeof ChartModule!=='undefined') ChartModule.refreshLines();
 }
 
@@ -308,7 +307,6 @@ function switchAsset(sym){
   const a=ASSETS[sym];
   setTxt('priceAssetName',a.name); setTxt('tradeAssetName',a.name); setTxt('qtyUnit',a.unit);
   renderPresets(a.presets); State.prevMid[sym]=0; updatePriceUI();
-  // تحديث الرسم البياني إذا كان مفتوحاً على نفس أو أصل مختلف
   if(typeof ChartModule!=='undefined') ChartModule.switchAssetChart(sym);
 }
 function renderPresets(arr){
@@ -730,6 +728,37 @@ async function doWithdraw(){
 // ════════════════════════════════════════
 // دخول / خروج — localStorage للمفتاح
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// 🔑 إنشاء محفظة EVM جديدة
+// ════════════════════════════════════════
+function createNewWallet() {
+  // ethers.Wallet.createRandom() يولّد مفتاح خاص عشوائي آمن محلياً
+  const wallet = ethers.Wallet.createRandom();
+  const key    = wallet.privateKey;   // 0x + 64 hex
+  const addr   = wallet.address;
+
+  // عرض نافذة تأكيد مع المفتاح
+  const msg =
+    `✅ تم إنشاء محفظة جديدة!\n\n` +
+    `العنوان:\n${addr}\n\n` +
+    `المفتاح الخاص (احفظه الآن — لن يُعرض مجدداً):\n${key}\n\n` +
+    `⚠️ احفظ المفتاح في مكان آمن قبل المتابعة.`;
+
+  // نسخ المفتاح للحافظة تلقائياً
+  navigator.clipboard?.writeText(key).catch(()=>{});
+
+  // وضعه في حقل الإدخال مباشرة
+  const input = $('privateKey');
+  if (input) { input.value = key; input.type = 'text'; }
+
+  alert(msg);
+
+  // إعادة الحقل لوضع password بعد 2 ثانية
+  setTimeout(()=>{ if(input) input.type='password'; }, 2000);
+
+  toast('✅ تم نسخ المفتاح — احفظه الآن!','ok',6000);
+}
+
 async function login(){
   let key=$('privateKey').value.trim();
   if(!key) return toast('أدخل المفتاح الخاص','err');
@@ -782,13 +811,16 @@ document.addEventListener('DOMContentLoaded',()=>{
     $('toggleKey').textContent=i.type==='password'?'👁':'🙈';
   };
 
-  // أصول: فقط الـ tabs التي لها data-asset
   document.querySelectorAll('.tab[data-asset]').forEach(t=>t.onclick=()=>switchAsset(t.dataset.asset));
+
   // زر الرسم البياني
-  $('tabChart').onclick=()=>{
+  $('tabChart')?.addEventListener('click',()=>{
     if(!State.wallet) return toast('سجّل الدخول أولاً','err');
     ChartModule.open(State.asset);
-  };
+  });
+
+  // زر إنشاء محفظة جديدة
+  $('createWalletBtn')?.addEventListener('click', createNewWallet);
 
   $('btnBuy').onclick  =()=>State.wallet?askTrade(true) :toast('سجّل الدخول أولاً','err');
   $('btnSell').onclick =()=>State.wallet?askTrade(false):toast('سجّل الدخول أولاً','err');
