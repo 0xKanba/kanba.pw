@@ -26,7 +26,7 @@ const State = {
   positions: [], openOrders: [], timers: [],
   pendingTrade: null, pendingClose: null,
   pendingTP: null, pendingSL: null,
-  balance: null, priceTimer: null
+  balance: null, priceTimer: null, _balTimer: null
 };
 
 // ════════════════════════════════════════
@@ -639,7 +639,21 @@ async function placeNativeTpsl(sym,sziStr,tpslType,triggerPxNum){
 // ════════════════════════════════════════
 async function showBalance(){
   openModal('modalBalance');
-  $('balanceContent').innerHTML='<div class="balance-loading">⏳ جاري جلب الرصيد...</div>';
+  await _renderBalance();
+  // تحديث تلقائي كل 4 ثوانٍ طالما المودال مفتوح
+  clearInterval(State._balTimer);
+  State._balTimer = setInterval(async()=>{
+    if(!document.getElementById('modalBalance')?.classList.contains('open')){
+      clearInterval(State._balTimer); return;
+    }
+    await _renderBalance();
+  }, 4000);
+}
+
+async function _renderBalance(){
+  if(!State.wallet) return;
+  const el=$('balanceContent'); if(!el) return;
+  // لا نضع loading spinner عند التحديث التلقائي لتجنب الوميض
   try {
     const [native, xyz, spot]=await Promise.all([
       hlInfo({type:'clearinghouseState',    user:State.wallet.address}).catch(()=>({})),
@@ -654,7 +668,7 @@ async function showBalance(){
     const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0);
     const floatPnl=(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
     const pCls=floatPnl>=0?'green':'red';
-    $('balanceContent').innerHTML=`
+    el.innerHTML=`
       <div class="balance-grid">
         <div class="balance-item">
           <span class="balance-label">💰 الرصيد</span>
@@ -669,9 +683,9 @@ async function showBalance(){
           <span class="balance-value ${pCls}">${floatPnl>=0?'+':''}$${fmt(floatPnl,2)}</span>
         </div>
       </div>
-      <button class="btn-refresh" onclick="showBalance()">🔄 تحديث</button>`;
+      <div class="balance-auto-note">↻ تحديث تلقائي كل 4 ثوانٍ</div>`;
   } catch(e){
-    $('balanceContent').innerHTML=`<div class="balance-loading" style="color:var(--dn)">❌ ${e.message.slice(0,150)}</div>`;
+    el.innerHTML=`<div class="balance-loading" style="color:var(--dn)">❌ ${e.message.slice(0,150)}</div>`;
   }
 }
 
@@ -729,34 +743,28 @@ async function doWithdraw(){
 // دخول / خروج — localStorage للمفتاح
 // ════════════════════════════════════════
 // ════════════════════════════════════════
-// 🔑 إنشاء محفظة EVM جديدة
+// 🔑 إنشاء محفظة EVM جديدة محلياً
 // ════════════════════════════════════════
-function createNewWallet() {
-  // ethers.Wallet.createRandom() يولّد مفتاح خاص عشوائي آمن محلياً
+function createNewWallet(){
   const wallet = ethers.Wallet.createRandom();
-  const key    = wallet.privateKey;   // 0x + 64 hex
+  const key    = wallet.privateKey;
   const addr   = wallet.address;
 
-  // عرض نافذة تأكيد مع المفتاح
-  const msg =
-    `✅ تم إنشاء محفظة جديدة!\n\n` +
-    `العنوان:\n${addr}\n\n` +
-    `المفتاح الخاص (احفظه الآن — لن يُعرض مجدداً):\n${key}\n\n` +
-    `⚠️ احفظ المفتاح في مكان آمن قبل المتابعة.`;
-
-  // نسخ المفتاح للحافظة تلقائياً
+  // وضع المفتاح في حقل الإدخال
+  const input=$('privateKey');
+  if(input){ input.value=key; input.type='text'; }
+  // نسخ للحافظة
   navigator.clipboard?.writeText(key).catch(()=>{});
 
-  // وضعه في حقل الإدخال مباشرة
-  const input = $('privateKey');
-  if (input) { input.value = key; input.type = 'text'; }
+  alert(
+    `✅ تم إنشاء محفظة جديدة!\n\n`+
+    `العنوان:\n${addr}\n\n`+
+    `المفتاح الخاص (احفظه الآن):\n${key}\n\n`+
+    `⚠️ المفتاح نُسخ للحافظة — احفظه في مكان آمن قبل المتابعة!`
+  );
 
-  alert(msg);
-
-  // إعادة الحقل لوضع password بعد 2 ثانية
-  setTimeout(()=>{ if(input) input.type='password'; }, 2000);
-
-  toast('✅ تم نسخ المفتاح — احفظه الآن!','ok',6000);
+  toast('✅ المفتاح جاهز في الحقل — احفظه الآن!','ok',6000);
+  setTimeout(()=>{ if(input) input.type='password'; }, 3000);
 }
 
 async function login(){
@@ -788,7 +796,9 @@ async function login(){
 }
 
 function doLogout(){
-  State.timers.forEach(clearInterval); clearInterval(State.priceTimer);
+  State.timers.forEach(clearInterval);
+  clearInterval(State.priceTimer);
+  clearInterval(State._balTimer);
   // ✅ حذف المفتاح من localStorage عند الخروج
   localStorage.removeItem(LS_KEY);
   State.wallet=null; State.positions=[]; State.openOrders=[];
@@ -813,13 +823,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   document.querySelectorAll('.tab[data-asset]').forEach(t=>t.onclick=()=>switchAsset(t.dataset.asset));
 
-  // زر الرسم البياني
   $('tabChart')?.addEventListener('click',()=>{
     if(!State.wallet) return toast('سجّل الدخول أولاً','err');
     ChartModule.open(State.asset);
   });
 
-  // زر إنشاء محفظة جديدة
   $('createWalletBtn')?.addEventListener('click', createNewWallet);
 
   $('btnBuy').onclick  =()=>State.wallet?askTrade(true) :toast('سجّل الدخول أولاً','err');
@@ -858,7 +866,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('slDelete').onclick  =deleteSL;
   $('slAmount').oninput  =recalcSlPreview;
 
-  $('balanceClose').onclick  =()=>closeModal('modalBalance');
+  $('balanceClose').onclick=()=>{ clearInterval(State._balTimer); closeModal('modalBalance'); };
   $('depositCancel').onclick  =()=>closeModal('modalDeposit');
   $('depositExecute').onclick =doDeposit;
   $('withdrawCancel').onclick =()=>closeModal('modalWithdraw');
