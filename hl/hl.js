@@ -1,17 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════
-   HL Trade · hl.js v7.0
-   ✅ dex:"xyz" في كل طلبات الحساب
-   ✅ TP/SL native — تحديد حجم ربح/خسارة
-   ✅ إلغاء TP/SL يجلب أوامر طازجة قبل الإلغاء
-   ✅ رصيد موحد 3 حقول (unified account 2026)
-   ✅ localStorage — المفتاح يُحفظ تلقائياً
+   HL Trade · hl.js v8.0
+   ✅ Fix TP/SL Cancel logic
+   ✅ Trade History implementation
+   ✅ Main Clock & About Modal
+   ✅ Improved Error Handling
 ═══════════════════════════════════════════════════════════════ */
 
 const HL_API  = 'https://api.hyperliquid.xyz';
 const ARB_RPC = 'https://arb1.arbitrum.io/rpc';
 const USDC_CA = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
 const BRDG_CA = '0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7';
-const LS_KEY  = 'hl_trade_pk'; // localStorage key
+const LS_KEY  = 'hl_trade_pk';
 
 const ASSETS = {
   GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:1, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'    },
@@ -26,11 +25,11 @@ const State = {
   positions: [], openOrders: [], timers: [],
   pendingTrade: null, pendingClose: null,
   pendingTP: null, pendingSL: null,
-  balance: null, priceTimer: null
+  balance: null, priceTimer: null, _balTimer: null, _clockTimer: null
 };
 
 // ════════════════════════════════════════
-// MsgPack مدمج
+// MsgPack
 // ════════════════════════════════════════
 const MsgPack = (function(){
   const te = new TextEncoder();
@@ -132,7 +131,7 @@ function tradeErr(msg){
 }
 
 // ════════════════════════════════════════
-// تحديث الأسعار (كل ثانية)
+// تحديث الأسعار
 // ════════════════════════════════════════
 async function pollPrices(){
   await Promise.all(Object.keys(ASSETS).map(async sym=>{
@@ -178,43 +177,36 @@ function updatePriceUI(){
 }
 
 // ════════════════════════════════════════
-// تحديث الحساب (كل 8 ثوانٍ)
+// تحديث الحساب
 // ════════════════════════════════════════
 async function pollAccount(){
   if(!State.wallet) return;
   try {
-    // native perp = الرصيد الحقيقي | xyz = المراكز والهامش | spot = USDC جاهز
     const [native, xyz, spot, openOrders]=await Promise.all([
       hlInfo({type:'clearinghouseState',    user:State.wallet.address}).catch(()=>({})),
       hlInfo({type:'clearinghouseState',    user:State.wallet.address, dex:'xyz'}).catch(()=>({})),
-      hlInfo({type:'spotClearinghouseState', user:State.wallet.address}).catch(()=>({})),
+      hlInfo({type:'spotClearinghouseState', user:State.wallet.address}).catch(()=>({})) ,
       hlInfo({type:'frontendOpenOrders',    user:State.wallet.address, dex:'xyz'}).catch(()=>[])
     ]);
     State.openOrders=Array.isArray(openOrders)?openOrders:[];
 
-    // الرصيد الكلي = native perp accountValue + spot USDC
     const nativeVal=parseFloat(native?.marginSummary?.accountValue||0);
     let spotUSDC=0;
     for(const b of spot?.balances||[])
       if(b.coin==='USDC'||b.coin==='USDC:0') spotUSDC+=parseFloat(b.total||0);
     const total=nativeVal+spotUSDC;
 
-    // الهامش وعائم PnL من xyz (حيث المراكز الفعلية)
     const marginUsed=parseFloat(xyz?.marginSummary?.totalMarginUsed||0);
     const floatPnl=(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
 
     State.balance={ total, margin:marginUsed, floatPnl };
 
-    // المراكز المفتوحة من xyz فقط
     const rawPos=(xyz?.assetPositions||[]).filter(p=>parseFloat(p.position?.szi||0)!==0);
     State.positions=rawPos.map(p=>({...p, tpsl:parseTpslFromOrders(State.openOrders,p.position.coin)}));
     renderPositions();
   } catch(e){ console.warn('[pollAccount]',e.message); }
 }
 
-// ════════════════════════════════════════
-// TP/SL helpers
-// ════════════════════════════════════════
 function parseTpslFromOrders(orders,coin){
   const r={tp:null,sl:null,tpOid:null,slOid:null};
   for(const o of orders||[]){
@@ -228,9 +220,6 @@ function parseTpslFromOrders(orders,coin){
 function calcTpPrice(entryPx,szi,pnlTarget){ const sz=parseFloat(szi),ep=parseFloat(entryPx); return sz>0?ep+pnlTarget/sz:ep-pnlTarget/Math.abs(sz); }
 function calcSlPrice(entryPx,szi,slAmount){  const sz=parseFloat(szi),ep=parseFloat(entryPx); return sz>0?ep-slAmount/sz:ep+slAmount/Math.abs(sz); }
 
-// ════════════════════════════════════════
-// عرض الصفقات
-// ════════════════════════════════════════
 function renderPositions(){
   const count=State.positions.length;
   setTxt('positionsCount',count);
@@ -241,16 +230,15 @@ function renderPositions(){
     list.innerHTML='<div class="positions-empty">📂 لا توجد صفقات مفتوحة</div>';
     setTxt('totalPnl',''); $('totalPnl').className='positions-pnl'; return;
   }
-  let total=0;
+  let totalPnl=0;
   list.innerHTML=State.positions.map((p,i)=>{
     const pos=p.position, szi=parseFloat(pos.szi), pnl=parseFloat(pos.unrealizedPnl||0);
-    total+=pnl;
+    totalPnl+=pnl;
     const coin=shortCoin(pos.coin), a=ASSETS[coin]||{name:coin,unit:'',icon:'📊',pxDp:2,szDp:2};
     const isLong=szi>0, sign=pnl>=0?'+':'', pCls=pnl>=0?'pos':'neg';
     const curPx=State.prices[coin]?.mid;
     const curStr=curPx?fmt(curPx,a.pxDp):'—';
     const tpsl=p.tpsl||{};
-    // أزرار تحديد ربح/خسارة
     const tpLabel=tpsl.tp?`$${fmt(tpsl.tp,a.pxDp)}`:'تعيين';
     const slLabel=tpsl.sl?`$${fmt(tpsl.sl,a.pxDp)}`:'تعيين';
     const tpCls=tpsl.tp?'tp-set':'tp-unset';
@@ -287,14 +275,14 @@ function renderPositions(){
         </button>
       </div>
       <div class="pos-actions-row">
-        <button class="btn-pos-close"  onclick="askClose(${i})">إغلاق الصفقة ✕</button>
-        <button class="btn-pos-tp100" onclick="tp100(${i})">إغلاق وجني الربح ✓</button>
+        <button class="btn-pos-close" onclick="askClose(${i})">إغلاق الصفقة ✕</button>
       </div>
     </div>`;
   }).join('');
   const totalEl=$('totalPnl');
-  totalEl.textContent=`${total>=0?'+':''}$${fmt(total,2)}`;
-  totalEl.className=`positions-pnl ${total>=0?'pos':'neg'}`;
+  totalEl.textContent=`${totalPnl>=0?'+':''}$${fmt(totalPnl,2)}`;
+  totalEl.className=`positions-pnl ${totalPnl>=0?'pos':'neg'}`;
+  if(typeof ChartModule!=='undefined') ChartModule.refreshLines();
 }
 
 // ════════════════════════════════════════
@@ -302,10 +290,11 @@ function renderPositions(){
 // ════════════════════════════════════════
 function switchAsset(sym){
   State.asset=sym;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.asset===sym));
+  document.querySelectorAll('.tab[data-asset]').forEach(t=>t.classList.toggle('active',t.dataset.asset===sym));
   const a=ASSETS[sym];
   setTxt('priceAssetName',a.name); setTxt('tradeAssetName',a.name); setTxt('qtyUnit',a.unit);
   renderPresets(a.presets); State.prevMid[sym]=0; updatePriceUI();
+  if(typeof ChartModule!=='undefined') ChartModule.switchAssetChart(sym);
 }
 function renderPresets(arr){
   $('qtyPresets').innerHTML=arr.map((v,i)=>`<button class="qty-preset${i===0?' active':''}" data-v="${v}">${v}</button>`).join('');
@@ -368,7 +357,7 @@ async function execTrade(){
 window.askClose=function(i){
   const p=State.positions[i]; if(!p)return;
   const pos=p.position, szi=parseFloat(pos.szi), coin=shortCoin(pos.coin);
-  const a=ASSETS[coin]||{name:coin,unit:'',icon:'📊',pxDp:2};
+  const a=ASSETS[coin]||{name:coin,unit:'',icon:'📊',pxDp:2,szDp:2};
   const pnl=parseFloat(pos.unrealizedPnl||0), cur=State.prices[coin]?.mid||0;
   setTxt('closeTitle',`${a.icon} إغلاق — ${a.name}`);
   $('closeDetails').innerHTML=`
@@ -404,8 +393,8 @@ function askCloseAll(){
   if(!State.positions.length) return toast('لا توجد صفقات','info');
   $('closeAllDetails').innerHTML=State.positions.map(p=>{
     const pos=p.position, pnl=parseFloat(pos.unrealizedPnl||0), coin=shortCoin(pos.coin);
-    const a=ASSETS[coin]||{name:coin,pxDp:2};
-    return `<div class="confirm-row"><span class="confirm-key">${a.icon||'📊'} ${a.name}</span><span class="confirm-val ${pnl>=0?'buy':'sell'}">${pnl>=0?'+':''}$${fmt(pnl,2)}</span></div>`;
+    const a=ASSETS[coin]||{name:coin,pxDp:2,icon:'📊'};
+    return `<div class="confirm-row"><span class="confirm-key">${a.icon} ${a.name}</span><span class="confirm-val ${pnl>=0?'buy':'sell'}">${pnl>=0?'+':''}$${fmt(pnl,2)}</span></div>`;
   }).join('');
   openModal('modalCloseAll');
 }
@@ -427,31 +416,13 @@ async function execCloseAll(){
       } catch(e){fail++;console.warn('[closeAll]',coin,e.message);}
     }
     closeModal('modalCloseAll');
-    toast(`✅ أُغلق ${ok} مركز${fail?` · فشل ${fail}`:'`'}`,'ok',5000);
+    toast(`✅ أُغلق ${ok} مركز${fail?` · فشل ${fail}`:''}`,'ok',5000);
     setTimeout(pollAccount,2000);
   } finally { resetBtn('closeAllExecute'); hideLoader(); }
 }
 
 // ════════════════════════════════════════
-// جني ربح 100%
-// ════════════════════════════════════════
-window.tp100=async function(i){
-  const p=State.positions[i]; if(!p) return toast('الصفقة غير موجودة','err');
-  const pos=p.position, szi=parseFloat(pos.szi), coin=shortCoin(pos.coin);
-  const a=ASSETS[coin], mid=State.prices[coin]?.mid;
-  if(!a||!mid) return toast('لا يوجد سعر','err');
-  showLoader(`${a.icon} إغلاق وجني الربح...`);
-  try {
-    const isBuy=szi<0;
-    await hlExchange({type:'order',orders:[{a:a.idx,b:isBuy,p:wire(mid*(isBuy?1.02:0.98),a.pxDp),s:wire(Math.abs(szi),a.szDp),r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
-    toast(`✅ تم جني الربح — ${a.icon} ${a.name}`,'ok',4000);
-    setTimeout(pollAccount,2000);
-  } catch(e){ toast(tradeErr(e.message),'err',5000); }
-  finally { hideLoader(); }
-};
-
-// ════════════════════════════════════════
-// TP — تحديد حجم الربح
+// TP/SL
 // ════════════════════════════════════════
 window.openTP=async function(i){
   const p=State.positions[i]; if(!p)return;
@@ -462,13 +433,11 @@ window.openTP=async function(i){
   setTxt('tpTitle',`🎯 تحديد حجم الربح — ${a.icon||''} ${a.name}`);
   setTxt('tpSubtitle',`${isLong?'▲ شراء':'▼ بيع'} | دخول: $${fmt(pos.entryPx||0,a.pxDp)}`);
 
-  // جلب أوامر طازجة للحصول على OID الصحيح
   showLoader('جلب الأوامر...');
   let freshTpsl={tp:null,sl:null,tpOid:null,slOid:null};
   try {
     const orders=await hlInfo({type:'frontendOpenOrders',user:State.wallet.address,dex:'xyz'});
     freshTpsl=parseTpslFromOrders(Array.isArray(orders)?orders:[],pos.coin);
-    // تحديث في State
     if(State.positions[i]) State.positions[i].tpsl=freshTpsl;
   } catch{}
   hideLoader();
@@ -512,7 +481,6 @@ async function execTP(){
 async function deleteTP(){
   const tp=State.pendingTP; if(!tp)return;
   const a=ASSETS[tp.sym]; if(!a)return;
-  // إلغاء آخر OID معروف أو جلب طازج
   let oid=tp.tpsl?.tpOid;
   if(!oid){
     showLoader('جلب الأمر...'); 
@@ -533,9 +501,6 @@ async function deleteTP(){
   finally { hideLoader(); }
 }
 
-// ════════════════════════════════════════
-// SL — تحديد حجم الخسارة
-// ════════════════════════════════════════
 window.openSL=async function(i){
   const p=State.positions[i]; if(!p)return;
   const pos=p.position, coin=shortCoin(pos.coin);
@@ -613,9 +578,6 @@ async function deleteSL(){
   finally { hideLoader(); }
 }
 
-// ════════════════════════════════════════
-// placeNativeTpsl (مطابق للبوت)
-// ════════════════════════════════════════
 async function placeNativeTpsl(sym,sziStr,tpslType,triggerPxNum){
   const asset=ASSETS[sym];
   const sz=parseFloat(sziStr), isBuy=sz<0;
@@ -633,11 +595,68 @@ async function placeNativeTpsl(sym,sziStr,tpslType,triggerPxNum){
 }
 
 // ════════════════════════════════════════
-// الرصيد — موحد 3 حقول
+// تاريخ الصفقات
+// ════════════════════════════════════════
+async function showHistory(){
+  if(!State.wallet) return toast('سجّل الدخول أولاً','err');
+  openModal('modalHistory');
+  const list=$('historyList');
+  list.innerHTML='<div class="balance-loading">⏳ جاري جلب التاريخ...</div>';
+  try {
+    const fills=await hlInfo({type:'userFills',user:State.wallet.address});
+    if(!Array.isArray(fills)||fills.length===0){
+      list.innerHTML='<div class="positions-empty">📂 لا يوجد تاريخ صفقات</div>';
+      return;
+    }
+    // نأخذ آخر 10 عمليات
+    const lastFills=fills.slice(0,10);
+    list.innerHTML=lastFills.map(f=>{
+      const coin=shortCoin(f.coin), a=ASSETS[coin]||{name:coin,icon:'📊',pxDp:2,szDp:2,unit:''};
+      const isBuy=f.side==='B', pnl=parseFloat(f.closedPnl||0), fee=parseFloat(f.fee||0);
+      
+      // تنسيق التاريخ والوقت (12 ساعة، أرقام إنجليزية، DD-MM-YYYY)
+      const d = new Date(f.time);
+      const dateStr = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+      const timeStr = d.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
+      
+      const pCls=pnl>0?'pos':pnl<0?'neg':'';
+      return `<div class="history-item">
+        <div class="hist-top">
+          <div class="hist-asset">${a.icon} ${a.name}</div>
+          <div class="hist-type ${isBuy?'buy':'sell'}">${isBuy?'شراء ↑':'بيع ↓'}</div>
+          <div class="hist-pnl ${pCls}">${pnl!==0?(pnl>0?'+':'')+'$'+fmt(pnl,2):'—'}</div>
+        </div>
+        <div class="hist-grid">
+          <div class="hist-cell"><span class="hist-lbl">الحجم</span><span class="hist-val">${f.sz} ${a.unit}</span></div>
+          <div class="hist-cell"><span class="hist-lbl">السعر</span><span class="hist-val">${fmt(f.px,a.pxDp)} $</span></div>
+          <div class="hist-cell"><span class="hist-lbl">الرسوم</span><span class="hist-val">${fmt(fee,4)} $</span></div>
+          <div class="hist-cell"><span class="hist-lbl">التاريخ</span><span class="hist-val" style="font-size:9px">${dateStr} ${timeStr}</span></div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    list.innerHTML=`<div class="balance-loading" style="color:var(--dn)">❌ فشل جلب التاريخ</div>`;
+  }
+}
+
+// ════════════════════════════════════════
+// الرصيد
 // ════════════════════════════════════════
 async function showBalance(){
   openModal('modalBalance');
-  $('balanceContent').innerHTML='<div class="balance-loading">⏳ جاري جلب الرصيد...</div>';
+  await _renderBalance();
+  clearInterval(State._balTimer);
+  State._balTimer = setInterval(async()=>{
+    if(!document.getElementById('modalBalance')?.classList.contains('open')){
+      clearInterval(State._balTimer); return;
+    }
+    await _renderBalance();
+  }, 4000);
+}
+
+async function _renderBalance(){
+  if(!State.wallet) return;
+  const el=$('balanceContent'); if(!el) return;
   try {
     const [native, xyz, spot]=await Promise.all([
       hlInfo({type:'clearinghouseState',    user:State.wallet.address}).catch(()=>({})),
@@ -652,10 +671,10 @@ async function showBalance(){
     const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0);
     const floatPnl=(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
     const pCls=floatPnl>=0?'green':'red';
-    $('balanceContent').innerHTML=`
+    el.innerHTML=`
       <div class="balance-grid">
         <div class="balance-item">
-          <span class="balance-label">💰 الرصيد</span>
+          <span class="balance-label">💰 الرصيد الكلي</span>
           <span class="balance-value blue">$${fmt(total,2)}</span>
         </div>
         <div class="balance-item">
@@ -663,13 +682,13 @@ async function showBalance(){
           <span class="balance-value warn">$${fmt(margin,2)}</span>
         </div>
         <div class="balance-item">
-          <span class="balance-label">📊 الربح والخسارة الحالية</span>
+          <span class="balance-label">📊 الربح العائم</span>
           <span class="balance-value ${pCls}">${floatPnl>=0?'+':''}$${fmt(floatPnl,2)}</span>
         </div>
       </div>
-      <button class="btn-refresh" onclick="showBalance()">🔄 تحديث</button>`;
+      <div class="balance-auto-note">↻ تحديث تلقائي كل 4 ثوانٍ</div>`;
   } catch(e){
-    $('balanceContent').innerHTML=`<div class="balance-loading" style="color:var(--dn)">❌ ${e.message.slice(0,150)}</div>`;
+    el.innerHTML=`<div class="balance-loading" style="color:var(--dn)">❌ ${e.message.slice(0,150)}</div>`;
   }
 }
 
@@ -724,8 +743,18 @@ async function doWithdraw(){
 }
 
 // ════════════════════════════════════════
-// دخول / خروج — localStorage للمفتاح
+// دخول / خروج
 // ════════════════════════════════════════
+function createNewWallet(){
+  const wallet = ethers.Wallet.createRandom();
+  const key    = wallet.privateKey;
+  const input=$('privateKey');
+  if(input){ input.value=key; input.type='text'; }
+  navigator.clipboard?.writeText(key).catch(()=>{});
+  alert(`✅ تم إنشاء محفظة جديدة!\n\nالمفتاح الخاص (احفظه الآن):\n${key}\n\n⚠️ المفتاح نُسخ للحافظة!`);
+  toast('✅ المفتاح جاهز في الحقل!','ok',6000);
+}
+
 async function login(){
   let key=$('privateKey').value.trim();
   if(!key) return toast('أدخل المفتاح الخاص','err');
@@ -735,7 +764,6 @@ async function login(){
   showLoader('التحقق من المحفظة...');
   try {
     State.wallet=new ethers.Wallet(key);
-    // ✅ حفظ في localStorage — يبقى حتى بعد إغلاق المتصفح
     localStorage.setItem(LS_KEY,key);
     const short=State.wallet.address.slice(0,6)+'...'+State.wallet.address.slice(-4);
     setTxt('navAddress',short);
@@ -748,6 +776,7 @@ async function login(){
     hideLoader();
     toast('مرحباً 🤝','ok');
     State.timers.push(setInterval(pollPrices,1000),setInterval(pollAccount,8000));
+    startMainClock();
   } catch(e){
     hideLoader(); State.wallet=null;
     toast('خطأ: '+e.message.slice(0,80),'err');
@@ -755,8 +784,10 @@ async function login(){
 }
 
 function doLogout(){
-  State.timers.forEach(clearInterval); clearInterval(State.priceTimer);
-  // ✅ حذف المفتاح من localStorage عند الخروج
+  State.timers.forEach(clearInterval);
+  clearInterval(State.priceTimer);
+  clearInterval(State._balTimer);
+  clearInterval(State._clockTimer);
   localStorage.removeItem(LS_KEY);
   State.wallet=null; State.positions=[]; State.openOrders=[];
   closeModal('modalLogout');
@@ -764,6 +795,22 @@ function doLogout(){
   $('loginScreen').classList.remove('hidden');
   $('privateKey').value='';
   toast('تم الخروج — المفتاح حُذف','info');
+}
+
+// ════════════════════════════════════════
+// الساعة الرئيسية
+// ════════════════════════════════════════
+function startMainClock(){
+  clearInterval(State._clockTimer);
+  const tick = () => {
+    const now = new Date();
+    // استخدام en-US لضمان الأرقام الإنجليزية وتنسيق 12 ساعة
+    const timeStr = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dateStr = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${now.getFullYear()}`;
+    setTxt('mainClock', `${dateStr} ${timeStr}`);
+  };
+  tick();
+  State._clockTimer = setInterval(tick, 1000);
 }
 
 // ════════════════════════════════════════
@@ -778,7 +825,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     $('toggleKey').textContent=i.type==='password'?'👁':'🙈';
   };
 
-  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchAsset(t.dataset.asset));
+  document.querySelectorAll('.tab[data-asset]').forEach(t=>t.onclick=()=>switchAsset(t.dataset.asset));
+
+  $('tabChart')?.addEventListener('click',()=>{
+    if(!State.wallet) return toast('سجّل الدخول أولاً','err');
+    ChartModule.open(State.asset);
+  });
+
+  $('createWalletBtn')?.addEventListener('click', createNewWallet);
 
   $('btnBuy').onclick  =()=>State.wallet?askTrade(true) :toast('سجّل الدخول أولاً','err');
   $('btnSell').onclick =()=>State.wallet?askTrade(false):toast('سجّل الدخول أولاً','err');
@@ -794,6 +848,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   };
 
   $('btnBalance').onclick =()=>State.wallet&&showBalance();
+  $('btnHistory').onclick =()=>State.wallet&&showHistory();
   $('btnDeposit').onclick =()=>State.wallet&&openModal('modalDeposit');
   $('btnWithdraw').onclick=()=>State.wallet&&openModal('modalWithdraw');
   $('btnLogout').onclick  =()=>State.wallet&&openModal('modalLogout');
@@ -816,7 +871,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('slDelete').onclick  =deleteSL;
   $('slAmount').oninput  =recalcSlPreview;
 
-  $('balanceClose').onclick  =()=>closeModal('modalBalance');
+  $('balanceClose').onclick=()=>{ clearInterval(State._balTimer); closeModal('modalBalance'); };
+  $('historyClose').onclick=()=>closeModal('modalHistory');
   $('depositCancel').onclick  =()=>closeModal('modalDeposit');
   $('depositExecute').onclick =doDeposit;
   $('withdrawCancel').onclick =()=>closeModal('modalWithdraw');
@@ -824,10 +880,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('logoutCancel').onclick   =()=>closeModal('modalLogout');
   $('logoutExecute').onclick  =doLogout;
 
+  $('navLogo').onclick=()=>openModal('modalAbout');
+  $('aboutClose').onclick=()=>closeModal('modalAbout');
+
   $('navAddress').onclick=()=>State.wallet&&navigator.clipboard?.writeText(State.wallet.address).then(()=>toast('تم نسخ العنوان','info',2000));
   document.querySelectorAll('.modal-overlay').forEach(o=>o.onclick=e=>{if(e.target===o)o.classList.remove('open');});
 
-  // ✅ استعادة المفتاح من localStorage تلقائياً
   const saved=localStorage.getItem(LS_KEY);
   if(saved){ $('privateKey').value=saved; login(); }
 });
