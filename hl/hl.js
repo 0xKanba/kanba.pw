@@ -26,6 +26,7 @@ const State = {
   wallet: null, asset: 'GOLD', qty: 0.1,
   prices:  { GOLD:{bid:0,ask:0,mid:0}, SILVER:{bid:0,ask:0,mid:0}, CL:{bid:0,ask:0,mid:0} },
   prevMid: { GOLD:0, SILVER:0, CL:0 },
+  prevDayPx: { GOLD:0, SILVER:0, CL:0 },
   positions: [], openOrders: [], timers: [],
   pendingTrade: null, pendingClose: null,
   pendingTP: null, pendingSL: null,
@@ -40,12 +41,10 @@ function resetInactivityTimer() {
   State.inactivityTimer = setTimeout(lockApp, PIN_TIMEOUT);
 }
 
-function lockApp() {
+function lockApp(isManual = false) {
   const pin = localStorage.getItem(PIN_KEY);
   if (!pin) {
-    toast('يرجى تعيين رمز PIN أولاً', 'info');
-    $('setPinInput').value = '';
-    openModal('modalSetPIN');
+    if (isManual) openModal('modalSetPIN');
     return;
   }
   State.isLocked = true;
@@ -94,9 +93,8 @@ function updatePinDots() {
 function requirePin(callback) {
   const pin = localStorage.getItem(PIN_KEY);
   if (!pin) {
-    State.pinCallback = callback;
-    $('setPinInput').value = '';
-    openModal('modalSetPIN');
+    // PIN is optional, if not set, just proceed
+    callback();
     return;
   }
   
@@ -167,17 +165,23 @@ const MsgPack = (function(){
     if (v===true)  { b.push(0xc3); return; }
     if (v===false) { b.push(0xc2); return; }
     if (typeof v==='number') {
-      if (Number.isInteger(v)) {
+      if (Number.isInteger(v) && v >= -2147483648 && v <= 4294967295) {
         if (v>=0&&v<=127)          { b.push(v); return; }
         if (v<0&&v>=-32)           { b.push(0xe0|(v+32)); return; }
         if (v>=0&&v<=255)          { b.push(0xcc,v); return; }
         if (v>=-128&&v<0)          { b.push(0xd0,(v+256)&0xff); return; }
         if (v>=0&&v<=65535)        { b.push(0xcd,(v>>8)&0xff,v&0xff); return; }
         if (v>=-32768&&v<0)        { b.push(0xd1,(v>>8)&0xff,v&0xff); return; }
-        b.push(0xce,(v>>>24)&0xff,(v>>>16)&0xff,(v>>>8)&0xff,v&0xff); return;
+        if (v>=0)                  { b.push(0xce,(v>>>24)&0xff,(v>>>16)&0xff,(v>>>8)&0xff,v&0xff); return; }
+        b.push(0xd2,(v>>>24)&0xff,(v>>>16)&0xff,(v>>>8)&0xff,v&0xff); return;
       }
       const dv=new DataView(new ArrayBuffer(9)); dv.setFloat64(1,v,false);
       b.push(0xcb); for(let i=1;i<=8;i++) b.push(dv.getUint8(i)); return;
+    }
+    if (typeof v==='bigint') {
+      b.push(0xcf);
+      const dv=new DataView(new ArrayBuffer(8)); dv.setBigUint64(0,v,false);
+      for(let i=0;i<8;i++) b.push(dv.getUint8(i)); return;
     }
     if (typeof v==='string') {
       const u=te.encode(v);
@@ -222,7 +226,10 @@ function shortCoin(c){ return c.includes(':') ? c.split(':')[1] : c; }
 async function hlInfo(body){
   const r=await fetch(HL_API+'/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
+  const text = await r.text();
+  // Preserve precision for large integers (oid) by converting them to strings before parsing
+  const sanitized = text.replace(/"oid":\s*(\d{15,})/g, '"oid":"$1"');
+  return JSON.parse(sanitized);
 }
 
 async function hlExchange(action){
@@ -241,8 +248,20 @@ async function hlExchange(action){
     {source:'a',connectionId:connId}
   );
   const {r,s,v}=ethers.Signature.from(sig);
-  const res=await fetch(HL_API+'/exchange',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,nonce,signature:{r,s,v},vaultAddress:null})});
-  const data=await res.json();
+  const jsonBody = JSON.stringify(
+    {action,nonce,signature:{r,s,v},vaultAddress:null},
+    (key, value) => typeof value === 'bigint' ? `:BIGINT:${value}:` : value
+  );
+  const finalBody = jsonBody.replace(/":BIGINT:(\d+):"/g, '$1');
+  
+  const res=await fetch(HL_API+'/exchange',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: finalBody
+  });
+  const textRes = await res.text();
+  const sanitizedRes = textRes.replace(/"oid":\s*(\d{15,})/g, '"oid":"$1"');
+  const data = JSON.parse(sanitizedRes);
   if(data.status!=='ok'){
     const err=data.response?.data?.statuses?.[0]||data.response||JSON.stringify(data).slice(0,200);
     throw new Error(typeof err==='string'?err:JSON.stringify(err));
@@ -277,7 +296,30 @@ function tradeErr(msg){
 // ════════════════════════════════════════
 // تحديث الأسعار
 // ════════════════════════════════════════
+let _ctxCounter = 0;
 async function pollPrices(){
+  if (_ctxCounter % 30 === 0) {
+    try {
+      const ctxs = await hlInfo({type:'metaAndAssetCtxs'});
+      const xyzCtxs = await hlInfo({type:'metaAndAssetCtxs', dex:'xyz'}).catch(()=>null);
+      
+      const processCtxs = (data) => {
+        if (Array.isArray(data) && data[1]) {
+          const universe = data[0].universe;
+          const assetCtxs = data[1];
+          universe.forEach((u, i) => {
+            const sym = u.name;
+            if (ASSETS[sym]) State.prevDayPx[sym] = parseFloat(assetCtxs[i].prevDayPx || 0);
+          });
+        }
+      };
+
+      processCtxs(ctxs);
+      if(xyzCtxs) processCtxs(xyzCtxs);
+    } catch(e){ console.warn('[24h Context]', e.message); }
+  }
+  _ctxCounter++;
+
   await Promise.all(Object.keys(ASSETS).map(async sym=>{
     try {
       const a=ASSETS[sym];
@@ -307,9 +349,13 @@ function updatePriceUI(){
   setText('priceValue',fmt(p.mid,a.pxDp),`price-value ${cls}`);
   setTxt('buyPrice',fmt(p.mid,a.pxDp));
   setTxt('sellPrice',fmt(p.mid,a.pxDp));
-  if(State.prevMid[State.asset]&&p.mid!==State.prevMid[State.asset]){
-    const d=p.mid-State.prevMid[State.asset];
-    setText('priceDelta',(d>0?'+':'')+fmt(d,a.pxDp),`price-delta ${cls}`);
+
+  const prevDay = State.prevDayPx[State.asset];
+  if(prevDay > 0){
+    const chg = ((p.mid - prevDay) / prevDay) * 100;
+    const sign = chg >= 0 ? '+' : '';
+    const chgCls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'n';
+    setText('priceDelta', `تغيير آخر 24 ساعة : ${sign}${chg.toFixed(2)}%`, `price-delta ${chgCls}`);
   }
   if(p.bid&&p.ask) setTxt('priceBidAsk',`شراء ${fmt(p.bid,a.pxDp)} · بيع ${fmt(p.ask,a.pxDp)}`);
   State.prevMid[State.asset]=p.mid;
@@ -357,8 +403,8 @@ function parseTpslFromOrders(orders,coin){
   for(const o of orders||[]){
     if(o.coin!==coin||!o.isTrigger) continue;
     const ot=(o.orderType||'').toLowerCase();
-    if(ot.includes('take profit'))   { r.tp=parseFloat(o.triggerPx); r.tpOid=o.oid; }
-    else if(ot.includes('stop'))     { r.sl=parseFloat(o.triggerPx); r.slOid=o.oid; }
+    if(ot.includes('take profit') || ot.includes('tp')) { r.tp=parseFloat(o.triggerPx); r.tpOid=o.oid; }
+    else if(ot.includes('stop') || ot.includes('sl'))   { r.sl=parseFloat(o.triggerPx); r.slOid=o.oid; }
   }
   return r;
 }
@@ -639,7 +685,7 @@ async function deleteTP(){
   if(!oid){ toast('لا يوجد هدف ربح نشط لإلغائه','info'); return; }
   showLoader(`${a.icon} إلغاء هدف الربح...`);
   try {
-    await hlExchange({type:'cancel',cancels:[{a:a.idx,o:Number(oid)}]});
+    await hlExchange({type:'cancel',cancels:[{a:a.idx,o:BigInt(oid)}]});
     closeModal('modalTP');
     toast('✅ تم إلغاء هدف الربح','ok',3000);
     setTimeout(pollAccount,1500);
@@ -716,7 +762,7 @@ async function deleteSL(){
   if(!oid){ toast('لا يوجد وقف خسارة نشط لإلغائه','info'); return; }
   showLoader(`${a.icon} إلغاء وقف الخسارة...`);
   try {
-    await hlExchange({type:'cancel',cancels:[{a:a.idx,o:Number(oid)}]});
+    await hlExchange({type:'cancel',cancels:[{a:a.idx,o:BigInt(oid)}]});
     closeModal('modalSL');
     toast('✅ تم إلغاء وقف الخسارة','ok',3000);
     setTimeout(pollAccount,1500);
@@ -763,7 +809,7 @@ async function showHistory(){
       // تنسيق التاريخ والوقت (12 ساعة، أرقام إنجليزية، DD-MM-YYYY)
       const d = new Date(f.time);
       const dateStr = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
-      const timeStr = d.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
+      const timeStr = d.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
       
       const pCls=pnl>0?'pos':pnl<0?'neg':'';
       return `<div class="history-item">
@@ -1069,7 +1115,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   });
 
-  $('btnLock').onclick = lockApp;
+  $('btnLock').onclick = () => lockApp(true);
 
   $('navAddress').onclick=()=>State.wallet&&navigator.clipboard?.writeText(State.wallet.address).then(()=>toast('تم نسخ العنوان','info',2000));
   document.querySelectorAll('.modal-overlay').forEach(o=>o.onclick=e=>{
@@ -1082,24 +1128,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   const saved=localStorage.getItem(LS_KEY);
   if(saved){ $('privateKey').value=saved; login(); }
 
-  // Check lock state on boot
-  const isLocked = localStorage.getItem(LOCKED_KEY) === 'true';
-  const lastPin = parseInt(localStorage.getItem(LAST_PIN_KEY) || '0');
-  const now = Date.now();
-  State.lastPinTime = lastPin;
-  
-  if (localStorage.getItem(PIN_KEY)) {
-    if (isLocked || (now - lastPin > PIN_TIMEOUT)) {
-      lockApp();
-    } else {
-      resetInactivityTimer();
-    }
-  }
+  // Initialize lastPinTime to now so the timer starts fresh
+  State.lastPinTime = Date.now();
 
-  // Lock on exit/close
-  window.addEventListener('beforeunload', () => {
-    if (localStorage.getItem(PIN_KEY)) {
-      localStorage.setItem(LOCKED_KEY, 'true');
-    }
-  });
+  // Start inactivity timer if PIN exists
+  if (localStorage.getItem(PIN_KEY)) {
+    resetInactivityTimer();
+  }
 });
