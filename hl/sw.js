@@ -4,7 +4,7 @@
    Network-first للـ API دائماً
 ═══════════════════════════════════════════════ */
 
-const CACHE  = 'hl-trade-v7';
+const CACHE  = 'hl-trade-v8';
 const SHELL  = [
   '/hl/',
   '/hl/index.html',
