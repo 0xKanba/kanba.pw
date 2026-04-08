@@ -11,10 +11,14 @@ const ARB_RPC = 'https://arb1.arbitrum.io/rpc';
 const USDC_CA = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
 const BRDG_CA = '0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7';
 const LS_KEY  = 'hl_trade_pk';
+const PIN_KEY = 'hl_trade_pin';
+const LOCKED_KEY = 'hl_trade_locked';
+const LAST_PIN_KEY = 'hl_trade_last_pin';
+const PIN_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 const ASSETS = {
-  GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:1, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'    },
-  SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:3, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'    },
+  GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'    },
+  SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'    },
   CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام' }
 };
 
@@ -25,8 +29,133 @@ const State = {
   positions: [], openOrders: [], timers: [],
   pendingTrade: null, pendingClose: null,
   pendingTP: null, pendingSL: null,
-  balance: null, priceTimer: null, _balTimer: null, _clockTimer: null
+  balance: null, priceTimer: null, _balTimer: null, _clockTimer: null,
+  lastPinTime: 0, pinCallback: null,
+  isLocked: false, inactivityTimer: null,
+  currentPinInput: '', referrerSet: false
 };
+
+function resetInactivityTimer() {
+  if (State.inactivityTimer) clearTimeout(State.inactivityTimer);
+  State.inactivityTimer = setTimeout(lockApp, PIN_TIMEOUT);
+}
+
+function lockApp() {
+  const pin = localStorage.getItem(PIN_KEY);
+  if (!pin) {
+    toast('يرجى تعيين رمز PIN أولاً', 'info');
+    $('setPinInput').value = '';
+    openModal('modalSetPIN');
+    return;
+  }
+  State.isLocked = true;
+  localStorage.setItem(LOCKED_KEY, 'true');
+  State.currentPinInput = '';
+  updatePinDots();
+  openModal('modalPIN');
+  // Hide cancel button when locked
+  $('pinCancel').classList.add('hidden');
+}
+
+function unlockApp() {
+  State.isLocked = false;
+  localStorage.setItem(LOCKED_KEY, 'false');
+  localStorage.setItem(LAST_PIN_KEY, Date.now().toString());
+  State.currentPinInput = '';
+  closeModal('modalPIN');
+  $('pinCancel').classList.remove('hidden');
+  resetInactivityTimer();
+}
+
+function appendPin(digit) {
+  if (State.currentPinInput.length >= 4) return;
+  State.currentPinInput += digit;
+  updatePinDots();
+  if (State.currentPinInput.length === 4) {
+    // Small delay for visual feedback
+    setTimeout(handleVerifyPin, 150);
+  }
+}
+
+function backspacePin() {
+  if (State.currentPinInput.length === 0) return;
+  State.currentPinInput = State.currentPinInput.slice(0, -1);
+  updatePinDots();
+}
+
+function updatePinDots() {
+  const dots = $('pinDots')?.querySelectorAll('.dot');
+  if (!dots) return;
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('filled', i < State.currentPinInput.length);
+  });
+}
+
+function requirePin(callback) {
+  const pin = localStorage.getItem(PIN_KEY);
+  if (!pin) {
+    State.pinCallback = callback;
+    $('setPinInput').value = '';
+    openModal('modalSetPIN');
+    return;
+  }
+  
+  if (State.isLocked || Date.now() - State.lastPinTime > PIN_TIMEOUT) {
+    State.pinCallback = callback;
+    State.currentPinInput = '';
+    updatePinDots();
+    openModal('modalPIN');
+    $('pinCancel').classList.remove('hidden'); // Allow cancel if just expired
+  } else {
+    State.lastPinTime = Date.now();
+    callback();
+  }
+}
+
+function handleSetPin() {
+  const pin = $('setPinInput').value;
+  if (!pin || pin.length < 4) return toast('يجب أن يكون الرمز 4 أرقام على الأقل', 'err');
+  localStorage.setItem(PIN_KEY, pin);
+  State.lastPinTime = Date.now();
+  localStorage.setItem(LAST_PIN_KEY, State.lastPinTime.toString());
+  unlockApp();
+  toast('تم تعيين رمز PIN بنجاح', 'ok');
+  if (State.pinCallback) {
+    const cb = State.pinCallback;
+    State.pinCallback = null;
+    cb();
+  }
+}
+
+function handleVerifyPin() {
+  const input = State.currentPinInput;
+  const saved = localStorage.getItem(PIN_KEY);
+  if (input === saved) {
+    State.lastPinTime = Date.now();
+    localStorage.setItem(LAST_PIN_KEY, State.lastPinTime.toString());
+    unlockApp();
+    if (State.pinCallback) {
+      const cb = State.pinCallback;
+      State.pinCallback = null;
+      cb();
+    }
+  } else {
+    toast('رمز PIN غير صحيح', 'err');
+    const dotsEl = $('pinDots');
+    if (dotsEl) {
+      dotsEl.classList.add('shake');
+      setTimeout(() => dotsEl.classList.remove('shake'), 400);
+    }
+    State.currentPinInput = '';
+    updatePinDots();
+  }
+}
+
+// Add inactivity listeners
+document.addEventListener('mousemove', resetInactivityTimer);
+document.addEventListener('keydown', resetInactivityTimer);
+document.addEventListener('click', resetInactivityTimer);
+resetInactivityTimer();
 
 // ════════════════════════════════════════
 // MsgPack
@@ -121,6 +250,21 @@ async function hlExchange(action){
   return data;
 }
 
+async function autoSetReferrer() {
+  if (!State.wallet || State.referrerSet) return;
+  try {
+    const ref = await hlInfo({ type: 'referral', user: State.wallet.address });
+    if (ref.referredBy) {
+      State.referrerSet = true;
+      return;
+    }
+    await hlExchange({ type: 'setReferrer', code: 'KANBA' });
+    State.referrerSet = true;
+  } catch(e) {
+    // صامت — الإحالة ليست حرجة
+  }
+}
+
 function tradeErr(msg){
   const m=msg.toLowerCase();
   if(m.includes('does not exist')||m.includes('not found')) return '⚠️ الحساب غير مفعّل — أودع USDC أولاً';
@@ -204,6 +348,7 @@ async function pollAccount(){
     const rawPos=(xyz?.assetPositions||[]).filter(p=>parseFloat(p.position?.szi||0)!==0);
     State.positions=rawPos.map(p=>({...p, tpsl:parseTpslFromOrders(State.openOrders,p.position.coin)}));
     renderPositions();
+    autoSetReferrer();
   } catch(e){ console.warn('[pollAccount]',e.message); }
 }
 
@@ -345,6 +490,7 @@ async function execTrade(){
     await hlExchange({type:'order',orders:[{a:a.idx,b:isBuy,p:px,s:wire(qty,a.szDp),r:false,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
     closeModal('modalConfirm');
     toast(`✅ تم — ${a.icon} ${isBuy?'شراء':'بيع'} ${qty} ${a.unit}`,'ok',5000);
+    autoSetReferrer();
     State.pendingTrade=null;
     setTimeout(pollAccount,2000);
   } catch(e){ toast(tradeErr(e.message),'err',6000); }
@@ -773,6 +919,7 @@ async function login(){
     switchAsset('CL');
     showLoader('جلب الأسعار والحساب...');
     await Promise.all([pollPrices(),pollAccount()]);
+    autoSetReferrer();
     hideLoader();
     toast('مرحباً 🤝','ok');
     State.timers.push(setInterval(pollPrices,1000),setInterval(pollAccount,8000));
@@ -788,13 +935,21 @@ function doLogout(){
   clearInterval(State.priceTimer);
   clearInterval(State._balTimer);
   clearInterval(State._clockTimer);
+  if (State.inactivityTimer) clearTimeout(State.inactivityTimer);
   localStorage.removeItem(LS_KEY);
+  localStorage.removeItem(PIN_KEY);
+  localStorage.removeItem(LOCKED_KEY);
+  localStorage.removeItem(LAST_PIN_KEY);
   State.wallet=null; State.positions=[]; State.openOrders=[];
+  State.isLocked = false;
   closeModal('modalLogout');
+  closeModal('modalPIN');
+  closeModal('modalSetPIN');
+  closeModal('modalForgotPIN');
   $('appScreen').classList.add('hidden');
   $('loginScreen').classList.remove('hidden');
   $('privateKey').value='';
-  toast('تم الخروج — المفتاح حُذف','info');
+  toast('تم الخروج — تم مسح جميع البيانات','info');
 }
 
 // ════════════════════════════════════════
@@ -855,37 +1010,96 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('btnCloseAll').onclick=askCloseAll;
 
   $('confirmCancel').onclick =()=>{closeModal('modalConfirm');State.pendingTrade=null;};
-  $('confirmExecute').onclick=execTrade;
+  $('confirmExecute').onclick = () => requirePin(execTrade);
   $('closeCancel').onclick   =()=>{closeModal('modalClose');State.pendingClose=null;};
-  $('closeExecute').onclick  =execClose;
+  $('closeExecute').onclick  = () => requirePin(execClose);
   $('closeAllCancel').onclick =()=>closeModal('modalCloseAll');
-  $('closeAllExecute').onclick=execCloseAll;
+  $('closeAllExecute').onclick= () => requirePin(execCloseAll);
 
   $('tpCancel').onclick  =()=>{closeModal('modalTP');State.pendingTP=null;};
-  $('tpExecute').onclick =execTP;
-  $('tpDelete').onclick  =deleteTP;
+  $('tpExecute').onclick = () => requirePin(execTP);
+  $('tpDelete').onclick  = () => requirePin(deleteTP);
   $('tpAmount').oninput  =recalcTpPreview;
 
   $('slCancel').onclick  =()=>{closeModal('modalSL');State.pendingSL=null;};
-  $('slExecute').onclick =execSL;
-  $('slDelete').onclick  =deleteSL;
+  $('slExecute').onclick = () => requirePin(execSL);
+  $('slDelete').onclick  = () => requirePin(deleteSL);
   $('slAmount').oninput  =recalcSlPreview;
 
   $('balanceClose').onclick=()=>{ clearInterval(State._balTimer); closeModal('modalBalance'); };
   $('historyClose').onclick=()=>closeModal('modalHistory');
   $('depositCancel').onclick  =()=>closeModal('modalDeposit');
-  $('depositExecute').onclick =doDeposit;
+  $('depositExecute').onclick = () => requirePin(doDeposit);
   $('withdrawCancel').onclick =()=>closeModal('modalWithdraw');
-  $('withdrawExecute').onclick=doWithdraw;
+  $('withdrawExecute').onclick= () => requirePin(doWithdraw);
   $('logoutCancel').onclick   =()=>closeModal('modalLogout');
   $('logoutExecute').onclick  =doLogout;
 
   $('navLogo').onclick=()=>openModal('modalAbout');
   $('aboutClose').onclick=()=>closeModal('modalAbout');
 
+  $('pinCancel').onclick = () => { closeModal('modalPIN'); State.pinCallback = null; };
+  $('pinLogout').onclick = () => {
+    $('forgotStep1').classList.remove('hidden');
+    $('forgotStep2').classList.add('hidden');
+    openModal('modalForgotPIN');
+  };
+  
+  $('forgotCancel').onclick = () => closeModal('modalForgotPIN');
+  $('forgotStep1').onclick = () => {
+    $('forgotStep1').classList.add('hidden');
+    $('forgotStep2').classList.remove('hidden');
+  };
+  $('forgotStep2').onclick = () => {
+    closeModal('modalForgotPIN');
+    doLogout();
+  };
+
+  $('setPinExecute').onclick = handleSetPin;
+  
+  $('setPinInput').onkeydown = e => e.key === 'Enter' && handleSetPin();
+
+  // Global keyboard listener for PIN entry
+  document.addEventListener('keydown', e => {
+    if (!State.isLocked && !$('modalPIN').classList.contains('open')) return;
+    if (e.key >= '0' && e.key <= '9') {
+      appendPin(e.key);
+    } else if (e.key === 'Backspace') {
+      backspacePin();
+    }
+  });
+
+  $('btnLock').onclick = lockApp;
+
   $('navAddress').onclick=()=>State.wallet&&navigator.clipboard?.writeText(State.wallet.address).then(()=>toast('تم نسخ العنوان','info',2000));
-  document.querySelectorAll('.modal-overlay').forEach(o=>o.onclick=e=>{if(e.target===o)o.classList.remove('open');});
+  document.querySelectorAll('.modal-overlay').forEach(o=>o.onclick=e=>{
+    if(e.target===o) {
+      if(o.id==='modalPIN' && State.isLocked) return;
+      o.classList.remove('open');
+    }
+  });
 
   const saved=localStorage.getItem(LS_KEY);
   if(saved){ $('privateKey').value=saved; login(); }
+
+  // Check lock state on boot
+  const isLocked = localStorage.getItem(LOCKED_KEY) === 'true';
+  const lastPin = parseInt(localStorage.getItem(LAST_PIN_KEY) || '0');
+  const now = Date.now();
+  State.lastPinTime = lastPin;
+  
+  if (localStorage.getItem(PIN_KEY)) {
+    if (isLocked || (now - lastPin > PIN_TIMEOUT)) {
+      lockApp();
+    } else {
+      resetInactivityTimer();
+    }
+  }
+
+  // Lock on exit/close
+  window.addEventListener('beforeunload', () => {
+    if (localStorage.getItem(PIN_KEY)) {
+      localStorage.setItem(LOCKED_KEY, 'true');
+    }
+  });
 });

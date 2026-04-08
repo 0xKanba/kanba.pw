@@ -61,7 +61,6 @@
     </div>
     <div class="nav-right">
       <div class="nav-clock" id="mainClock" style="margin-left:10px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-secondary);"></div>
-      <button id="btnLock" style="background:none; border:none; color:var(--text-secondary); font-size:16px; margin-left:10px; cursor:pointer;" title="قفل التطبيق">🔒</button>
       <div class="nav-address" id="navAddress" title="انقر للنسخ">—</div>
     </div>
   </nav>
@@ -336,77 +335,6 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modalPIN">
-  <div class="lock-screen">
-    <div class="lock-header">
-      <div class="lock-icon">🔐</div>
-      <h3 class="lock-title">HL Trade</h3>
-      <p class="lock-subtitle">أدخل رمز PIN للمتابعة</p>
-    </div>
-    
-    <div class="pin-dots" id="pinDots">
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-    </div>
-
-    <div class="numpad">
-      <button class="num-btn" onclick="appendPin('1')">1</button>
-      <button class="num-btn" onclick="appendPin('2')">2</button>
-      <button class="num-btn" onclick="appendPin('3')">3</button>
-      <button class="num-btn" onclick="appendPin('4')">4</button>
-      <button class="num-btn" onclick="appendPin('5')">5</button>
-      <button class="num-btn" onclick="appendPin('6')">6</button>
-      <button class="num-btn" onclick="appendPin('7')">7</button>
-      <button class="num-btn" onclick="appendPin('8')">8</button>
-      <button class="num-btn" onclick="appendPin('9')">9</button>
-      <button class="num-btn num-empty"></button>
-      <button class="num-btn" onclick="appendPin('0')">0</button>
-      <button class="num-btn num-del" onclick="backspacePin()">⌫</button>
-    </div>
-
-    <div class="lock-footer">
-      <button id="pinLogout" class="lock-logout-btn">نسيت الرمز؟ تسجيل الخروج</button>
-      <button id="pinCancel" class="lock-cancel-btn">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- مودال نسيان الرمز (يجب أن يكون بعد مودال PIN ليظهر فوقه) -->
-<div class="modal-overlay" id="modalForgotPIN" style="z-index: 9999;">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="logout-content">
-      <div class="logout-icon">⚠️</div>
-      <h3 class="modal-title">هل نسيت الرمز؟</h3>
-      <p class="logout-text">لتسجيل الخروج، يجب حذف جميع البيانات المحلية (المفتاح الخاص ورمز PIN).<br><strong>هذا الإجراء لا يمكن التراجع عنه!</strong></p>
-    </div>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-cancel" id="forgotCancel">إلغاء</button>
-      <button class="btn-modal btn-confirm btn-danger" id="forgotStep1">تأكيد الخروج</button>
-      <button class="btn-modal btn-confirm btn-danger hidden" id="forgotStep2">تأكيد نهائي 🔒</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalSetPIN">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="logout-content">
-      <div class="logout-icon">🔑</div>
-      <h3 class="modal-title">تعيين رمز PIN</h3>
-      <p class="logout-text">قم بتعيين رمز PIN لحماية صفقاتك وسحوباتك</p>
-    </div>
-    <div class="form-group">
-      <input type="password" class="form-input" id="setPinInput" placeholder="****" style="text-align: center; letter-spacing: 10px; font-size: 24px;" inputmode="numeric" pattern="[0-9]*">
-    </div>
-    <div class="modal-buttons modal-buttons-center">
-      <button class="btn-modal btn-confirm btn-success" id="setPinExecute">حفظ الرمز ✓</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast"></div>
 <div id="loader"><div class="spinner"></div><div class="loader-text" id="loaderText">جاري...</div></div>
 
@@ -415,6 +343,7 @@
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/hl/hl.js"></script>
 <script src="/hl/chart.js"></script>
+  <script src="/hl/sw.js></script>
+  
 </body>
 </html>
-
