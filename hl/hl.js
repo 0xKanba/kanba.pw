@@ -33,12 +33,16 @@ const State = {
   balance: null, priceTimer: null, _balTimer: null, _clockTimer: null,
   lastPinTime: 0, pinCallback: null,
   isLocked: false, inactivityTimer: null,
-  currentPinInput: '', referrerSet: false
+  currentPinInput: '', currentSetPinInput: '', referrerSet: false
 };
 
 function resetInactivityTimer() {
   if (State.inactivityTimer) clearTimeout(State.inactivityTimer);
   State.inactivityTimer = setTimeout(lockApp, PIN_TIMEOUT);
+  // Persist last activity time
+  if (localStorage.getItem(PIN_KEY)) {
+    localStorage.setItem(LAST_PIN_KEY, Date.now().toString());
+  }
 }
 
 function lockApp(isManual = false) {
@@ -71,7 +75,6 @@ function appendPin(digit) {
   State.currentPinInput += digit;
   updatePinDots();
   if (State.currentPinInput.length === 4) {
-    // Small delay for visual feedback
     setTimeout(handleVerifyPin, 150);
   }
 }
@@ -87,6 +90,29 @@ function updatePinDots() {
   if (!dots) return;
   dots.forEach((dot, i) => {
     dot.classList.toggle('filled', i < State.currentPinInput.length);
+  });
+}
+
+function appendSetPin(digit) {
+  if (State.currentSetPinInput.length >= 4) return;
+  State.currentSetPinInput += digit;
+  updateSetPinDots();
+  if (State.currentSetPinInput.length === 4) {
+    setTimeout(handleSetPin, 150);
+  }
+}
+
+function backspaceSetPin() {
+  if (State.currentSetPinInput.length === 0) return;
+  State.currentSetPinInput = State.currentSetPinInput.slice(0, -1);
+  updateSetPinDots();
+}
+
+function updateSetPinDots() {
+  const dots = $('setPinDots')?.querySelectorAll('.dot');
+  if (!dots) return;
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('filled', i < State.currentSetPinInput.length);
   });
 }
 
@@ -111,11 +137,14 @@ function requirePin(callback) {
 }
 
 function handleSetPin() {
-  const pin = $('setPinInput').value;
-  if (!pin || pin.length < 4) return toast('يجب أن يكون الرمز 4 أرقام على الأقل', 'err');
+  const pin = State.currentSetPinInput;
+  if (!pin || pin.length < 4) return toast('يجب أن يكون الرمز 4 أرقام', 'err');
   localStorage.setItem(PIN_KEY, pin);
   State.lastPinTime = Date.now();
   localStorage.setItem(LAST_PIN_KEY, State.lastPinTime.toString());
+  State.currentSetPinInput = '';
+  updateSetPinDots();
+  closeModal('modalSetPIN');
   unlockApp();
   toast('تم تعيين رمز PIN بنجاح', 'ok');
   if (State.pinCallback) {
@@ -1101,17 +1130,26 @@ document.addEventListener('DOMContentLoaded',()=>{
     doLogout();
   };
 
-  $('setPinExecute').onclick = handleSetPin;
-  
-  $('setPinInput').onkeydown = e => e.key === 'Enter' && handleSetPin();
+  $('setPinCancel').onclick = () => {
+    closeModal('modalSetPIN');
+    State.currentSetPinInput = '';
+    updateSetPinDots();
+    State.pinCallback = null;
+  };
 
   // Global keyboard listener for PIN entry
   document.addEventListener('keydown', e => {
-    if (!State.isLocked && !$('modalPIN').classList.contains('open')) return;
+    const isPinOpen = $('modalPIN').classList.contains('open');
+    const isSetPinOpen = $('modalSetPIN').classList.contains('open');
+    
+    if (!State.isLocked && !isPinOpen && !isSetPinOpen) return;
+    
     if (e.key >= '0' && e.key <= '9') {
-      appendPin(e.key);
+      if (isSetPinOpen) appendSetPin(e.key);
+      else appendPin(e.key);
     } else if (e.key === 'Backspace') {
-      backspacePin();
+      if (isSetPinOpen) backspaceSetPin();
+      else backspacePin();
     }
   });
 
@@ -1121,6 +1159,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('.modal-overlay').forEach(o=>o.onclick=e=>{
     if(e.target===o) {
       if(o.id==='modalPIN' && State.isLocked) return;
+      if(o.id==='modalSetPIN') {
+        State.currentSetPinInput = '';
+        updateSetPinDots();
+      }
       o.classList.remove('open');
     }
   });
@@ -1128,11 +1170,21 @@ document.addEventListener('DOMContentLoaded',()=>{
   const saved=localStorage.getItem(LS_KEY);
   if(saved){ $('privateKey').value=saved; login(); }
 
-  // Initialize lastPinTime to now so the timer starts fresh
-  State.lastPinTime = Date.now();
+  // Initialize lastPinTime from storage or now
+  const lastPin = localStorage.getItem(LAST_PIN_KEY);
+  if (lastPin) {
+    State.lastPinTime = parseInt(lastPin);
+  } else {
+    State.lastPinTime = Date.now();
+  }
 
-  // Start inactivity timer if PIN exists
+  // Check if we should be locked on startup
   if (localStorage.getItem(PIN_KEY)) {
-    resetInactivityTimer();
+    const now = Date.now();
+    if (now - State.lastPinTime > PIN_TIMEOUT || localStorage.getItem(LOCKED_KEY) === 'true') {
+      lockApp();
+    } else {
+      resetInactivityTimer();
+    }
   }
 });

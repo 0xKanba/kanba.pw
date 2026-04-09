@@ -393,18 +393,37 @@
 </div>
 
 <div class="modal-overlay" id="modalSetPIN">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="logout-content">
-      <div class="logout-icon">🔑</div>
-      <h3 class="modal-title">تعيين رمز PIN</h3>
-      <p class="logout-text">قم بتعيين رمز PIN لحماية صفقاتك وسحوباتك</p>
+  <div class="lock-screen">
+    <div class="lock-header">
+      <div class="lock-icon">🔑</div>
+      <h3 class="lock-title">تعيين رمز PIN</h3>
+      <p class="lock-subtitle">قم بتعيين رمز PIN لحماية صفقاتك وسحوباتك</p>
     </div>
-    <div class="form-group">
-      <input type="password" class="form-input" id="setPinInput" placeholder="****" style="text-align: center; letter-spacing: 10px; font-size: 24px;" inputmode="numeric" pattern="[0-9]*">
+    
+    <div class="pin-dots" id="setPinDots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
     </div>
-    <div class="modal-buttons modal-buttons-center">
-      <button class="btn-modal btn-confirm btn-success" id="setPinExecute">حفظ الرمز ✓</button>
+
+    <div class="numpad">
+      <button class="num-btn" onclick="appendSetPin('1')">1</button>
+      <button class="num-btn" onclick="appendSetPin('2')">2</button>
+      <button class="num-btn" onclick="appendSetPin('3')">3</button>
+      <button class="num-btn" onclick="appendSetPin('4')">4</button>
+      <button class="num-btn" onclick="appendSetPin('5')">5</button>
+      <button class="num-btn" onclick="appendSetPin('6')">6</button>
+      <button class="num-btn" onclick="appendSetPin('7')">7</button>
+      <button class="num-btn" onclick="appendSetPin('8')">8</button>
+      <button class="num-btn" onclick="appendSetPin('9')">9</button>
+      <button class="num-btn num-empty"></button>
+      <button class="num-btn" onclick="appendSetPin('0')">0</button>
+      <button class="num-btn num-del" onclick="backspaceSetPin()">⌫</button>
+    </div>
+
+    <div class="lock-footer">
+      <button id="setPinCancel" class="lock-cancel-btn">إلغاء</button>
     </div>
   </div>
 </div>
@@ -417,6 +436,7 @@
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/hl/hl.js"></script>
 <script src="/hl/chart.js"></script>
+<script src="/hl/sw.js"></script>
 </body>
 </html>
 
