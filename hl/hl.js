@@ -182,6 +182,20 @@ function handleVerifyPin() {
 document.addEventListener('mousemove', resetInactivityTimer);
 document.addEventListener('keydown', resetInactivityTimer);
 document.addEventListener('click', resetInactivityTimer);
+document.addEventListener('touchstart', resetInactivityTimer);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    const pin = localStorage.getItem(PIN_KEY);
+    if (pin) {
+      const last = parseInt(localStorage.getItem(LAST_PIN_KEY) || '0');
+      if (Date.now() - last > PIN_TIMEOUT) {
+        lockApp();
+      } else {
+        resetInactivityTimer();
+      }
+    }
+  }
+});
 resetInactivityTimer();
 
 // ════════════════════════════════════════

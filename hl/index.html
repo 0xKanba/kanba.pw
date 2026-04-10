@@ -436,7 +436,15 @@
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/hl/hl.js"></script>
 <script src="/hl/chart.js"></script>
-<script src="/hl/sw.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW Registered'))
+        .catch(err => console.log('SW Registration Failed', err));
+    });
+  }
+</script>
 </body>
 </html>
 
