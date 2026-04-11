@@ -52,7 +52,7 @@
           "id": "futures",
           "name": "Futures",
           "accounts": [
-            { "id": "1step-futures", "name": "1-Step Futures", "path": "data/firms/thetradingpit/futures/1step.json" }
+            { "id": "1step-futures", "name": "1-Step Prime", "path": "data/firms/thetradingpit/futures/1step-prime.json" }
           ]
         }
       ]
