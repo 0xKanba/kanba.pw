@@ -36,8 +36,7 @@
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "instant-standard", "name": "instant standard", "path": "data/firms/forex/instant-standard.json }, 
-          ]
+{ "id": "instant-standard", "name": "instant standard", "path": "data/firms/finotivefunding/forex/instant-standard.json" },          ]
         }
       ]
     },
