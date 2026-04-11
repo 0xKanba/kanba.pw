@@ -1,0 +1,38 @@
+{
+  "firms": [
+    {
+      "id": "holaprime",
+      "name": "Hola Prime",
+      "markets": [
+        {
+          "id": "forex",
+          "name": "Forex",
+          "accounts": [
+            { "id": "2step-pro", "name": "2-Step Pro", "path": "data/firms/holaprime/forex/2step.pro.json" },
+            { "id": "1step-prime", "name": "1-Step Prime", "path": "data/firms/holaprime/forex/1step-prime.json" }
+          ]
+        },
+        {
+          "id": "futures",
+          "name": "Futures",
+          "accounts": [
+            { "id": "standard", "name": "Standard", "path": "data/firms/holaprime/futures/standard.json" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fundednext",
+      "name": "FundedNext",
+      "markets": [
+        {
+          "id": "forex",
+          "name": "Forex",
+          "accounts": [
+            { "id": "stellar-1step", "name": "Stellar 1-Step", "path": "data/firms/fundednext/forex/stellar-1step.json" }
+          ]
+        }
+      ]
+    }
+  ]
+}

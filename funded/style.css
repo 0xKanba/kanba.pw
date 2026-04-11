@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+    --bg: #F4F4F2;
+    --fg: #141414;
+    --card-bg: #FFFFFF;
+    --border-color: #141414;
+    --muted-fg: #666666;
+    --grid-opacity: 0.1;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0A0A0A;
+        --fg: #F4F4F2;
+        --card-bg: #141414;
+        --border-color: #F4F4F2;
+        --muted-fg: #A0A0A0;
+        --grid-opacity: 0.2;
+    }
+}
+
+/* Tailwind Overrides for System Dark Mode */
+body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.bg-background { background-color: var(--bg); }
+.text-foreground { color: var(--fg); }
+.border-foreground { border-color: var(--fg); }
+.bg-foreground { background-color: var(--fg); }
+.text-background { color: var(--bg); }
+
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(var(--fg), 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--fg), 0.4);
+}
+
+/* Grid Lines */
+.grid-line-v {
+    border-left: 1px solid rgba(var(--fg), var(--grid-opacity));
+}
+.grid-line-h {
+    border-top: 1px solid rgba(var(--fg), var(--grid-opacity));
+}
+
+/* Selection */
+::selection {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+/* Select Reset */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade { animation: fadeIn 0.5s ease-out forwards; }
+.animate-slide { animation: slideIn 0.3s ease-out forwards; }
