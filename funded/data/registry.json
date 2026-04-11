@@ -3,16 +3,17 @@
     {
       "id": "holaprime",
       "name": "Hola Prime",
+      "url": "https://holaprime.com",
       "markets": [
         {
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "2step-pro",    "name": "2-Step Pro",     "path": "data/firms/holaprime/forex/2step.pro.json" },
-            { "id": "one-challenge","name": "One Challenge",  "path": "data/firms/holaprime/forex/one-challenge.json" },
-            { "id": "direct",       "name": "Direct",         "path": "data/firms/holaprime/forex/direct.json" },
-            { "id": "2step-prime",  "name": "2-Step Prime",   "path": "data/firms/holaprime/forex/2step-prime.json" },
-            { "id": "1step-prime",  "name": "1-Step Prime",   "path": "data/firms/holaprime/forex/1step-prime.json" }
+            { "id": "2step-pro",    "name": "2-Step Pro",    "path": "data/firms/holaprime/forex/2step.pro.json" },
+            { "id": "one-challenge","name": "One Challenge", "path": "data/firms/holaprime/forex/one-challenge.json" },
+            { "id": "direct",       "name": "Direct",        "path": "data/firms/holaprime/forex/direct.json" },
+            { "id": "2step-prime",  "name": "2-Step Prime",  "path": "data/firms/holaprime/forex/2step-prime.json" },
+            { "id": "1step-prime",  "name": "1-Step Prime",  "path": "data/firms/holaprime/forex/1step-prime.json" }
           ]
         },
         {
@@ -25,14 +26,29 @@
       ]
     },
     {
-      "id": "finotivefunding",
-      "name": "Finotive Funding",
+      "id": "firm2",
+      "name": "Firm 2 Name",
+      "url": "https://firm2.com",
       "markets": [
         {
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "instant-standard", "name": "Instant Standard", "path": "data/firms/finotivefunding/forex/instant-standard.json" }
+            { "id": "account-id", "name": "Account Name", "path": "data/firms/firm2/forex/account.json" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "firm3",
+      "name": "Firm 3 Name",
+      "url": "https://firm3.com",
+      "markets": [
+        {
+          "id": "forex",
+          "name": "Forex",
+          "accounts": [
+            { "id": "account-id", "name": "Account Name", "path": "data/firms/firm3/forex/account.json" }
           ]
         }
       ]
