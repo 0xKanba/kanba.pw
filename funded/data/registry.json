@@ -26,15 +26,15 @@
       ]
     },
     {
-      "id": "firm2",
-      "name": "Firm 2 Name",
-      "url": "https://firm2.com",
+      "id": "finotivefunding",
+      "name": "finotive funding",
+      "url": "https://finotivefunding.com",
       "markets": [
         {
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "account-id", "name": "Account Name", "path": "data/firms/firm2/forex/account.json" }
+            { "id": "instant-standard", "name": "instant standard", "path": "data/firms/firm2/forex/instant-stqndard.json" }
           ]
         }
       ]
