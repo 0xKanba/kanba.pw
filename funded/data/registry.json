@@ -13,7 +13,7 @@
             { "id": "one-challenge","name": "One Challenge", "path": "data/firms/holaprime/forex/one-challenge.json" },
             { "id": "direct",       "name": "Direct",        "path": "data/firms/holaprime/forex/direct.json" },
             { "id": "2step-prime",  "name": "2-Step Prime",  "path": "data/firms/holaprime/forex/2step-prime.json" },
-            { "id": "1step-prime",  "name": "1-Step Prime",  "path": "data/firms/holaprime/forex/1step-prime.json" },
+            { "id": "1step-prime",  "name": "1-Step Prime",  "path": "data/firms/holaprime/forex/1step-prime.json" }
             
           ]
         },
@@ -22,7 +22,7 @@
           "name": "Futures",
           "accounts": [
             { "id": "1step-prime", "name": "1-Step Prime", "path": "data/firms/holaprime/futures/1step-prime.json" },
-            { "id": "direct", "name": "direct account", "path": "data/firms/holaprime/futures/direct.json" },
+            { "id": "direct", "name": "direct account", "path": "data/firms/holaprime/futures/dstandard.json" }
           ]
         }
       ]
@@ -36,7 +36,7 @@
           "id": "forex",
           "name": "Forex",
           "accounts": [
-{ "id": "instant-standard", "name": "instant standard", "path": "data/firms/finotivefunding/forex/instant-standard.json" },
+{ "id": "instant-standard", "name": "instant standard", "path": "data/firms/finotivefunding/forex/instant-standard.json" }
           ]
         }
       ]
