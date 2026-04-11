@@ -1,0 +1,50 @@
+{
+  "firm": {
+    "name": "Finotive Funding",
+    "type": "Forex",
+    "model": "2-Step Pro",
+    "last_updated": "2026-04-12",
+    "sections": [
+      {
+        "id": "risk_parameters",
+        "title": "Risk Parameters",
+        "items": [
+          { "label": "Daily Drawdown Limit", "value": "4%",   "detail": "Of previous day's closing balance. Resets daily at 17:00 NY Time. Static." },
+          { "label": "Max Overall Drawdown", "value": "8%",   "detail": "Of initial balance. Static for account lifetime. Breach = immediate closure." },
+          { "label": "Profit Target P1",     "value": "7.5%", "detail": "Phase 1 target." },
+          { "label": "Profit Target P2",     "value": "5%",   "detail": "Verification phase target." },
+          { "label": "Min Profitable Days",  "value": "2 days", "detail": "Minimum 2 profitable days (≥ 0.5% each) required per phase." },
+          { "label": "Notional Volume",      "value": "1,000–5,000%", "detail": "Limit varies by account size. Breach = Soft Breach." }
+        ]
+      },
+      {
+        "id": "ongoing_requirements",
+        "title": "Ongoing Requirements (After 30 Days Funded)",
+        "items": [
+          { "label": "Trade Consistency",      "value": "±25% baseline",  "detail": "After 30 days funded, trade count and volume per instrument must stay within ±25% of baseline averages from challenge + first 30 funded days." },
+          { "label": "Quarterly Profit Target","value": "5% per 90 days", "detail": "Rolling 90-day profit target of 5% of initial capital. Breach = downgrade to standard 2-Step funded (salary and 100% split revoked)." }
+        ]
+      },
+      {
+        "id": "breach_rules",
+        "title": "Breach System",
+        "items": [
+          { "label": "Hard Breach",            "value": "Immediate closure",  "detail": "Daily or max drawdown violation. No recovery." },
+          { "label": "Soft Breach – Challenge", "value": "Strike + conditions","detail": "Must return to positive balance before reset. 5 soft breaches = account closure. All cleared on reaching funded status." },
+          { "label": "Soft Breach – Funded",   "value": "−10% payout/cycle", "detail": "Each breach reduces next payout by 10%. 5 breaches = account closure." },
+          { "label": "Consistency/Quarterly Breach", "value": "Downgrade",   "detail": "Breach of consistency rule or quarterly target = automatic downgrade to standard funded. Salary and 100% split are revoked." }
+        ]
+      },
+      {
+        "id": "payouts",
+        "title": "Payouts & Salary",
+        "items": [
+          { "label": "Profit Split",    "value": "80% → 100%",      "detail": "Starts at 80%. Reaches 100% on 30th funded day (if in profit)." },
+          { "label": "Salary",         "value": "Accrues from day 1","detail": "Paid daily from first funded day. Accrues regardless of trading profit." },
+          { "label": "Payout Cycle",   "value": "On-demand → Weekly","detail": "On-demand after 2 min profitable days, then weekly." },
+          { "label": "Fee Refund",     "value": "30th funded day",   "detail": "Challenge fee refunded on 30th funded day if account is in profit." }
+        ]
+      }
+    ]
+  }
+}
