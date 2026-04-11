@@ -9,18 +9,116 @@
         "id": "risk_parameters",
         "title": "Risk Parameters",
         "items": [
-          { "label": "Daily Loss Limit", "value": "5.0%", "detail": "Based on previous day's end balance." },
-          { "label": "Max Overall Loss", "value": "10.0%", "detail": "Based on initial balance." },
-          { "label": "Profit Target P1", "value": "8.0%", "detail": "Phase 1 target." },
-          { "label": "Profit Target P2", "value": "5.0%", "detail": "Phase 2 target." }
+          { "label": "Daily Loss Limit", "value": "5% / 4%*", "detail": "5% of previous day's end balance. 4% for $200k accounts. Resets daily at 17:00 EST. Intraday profits expand the limit." },
+          { "label": "Max Overall Loss", "value": "10% / 8%*", "detail": "10% of initial balance. 8% for $200k accounts. Equity must never drop below this absolute floor." },
+          { "label": "Profit Target P1", "value": "8%", "detail": "8% of initial balance required to pass Phase 1." },
+          { "label": "Profit Target P2", "value": "5%", "detail": "5% of initial balance required to pass Phase 2." },
+          { "label": "Min Trading Days", "value": "2 days / phase", "detail": "Must open at least one new trade on 2 separate days per phase before claiming the target." },
+          { "label": "Risk Per Trade Idea", "value": "≤ 2% (Funded)", "detail": "Max 2% of initial balance per trade idea. Multiple trades on same/correlated asset = 1 idea. New trade within 10 min of closing same asset = same idea. Stop-Loss required. Violation = immediate irrecoverable termination. Effective 7 April 2026." },
+          { "label": "Inactivity Limit", "value": "30 days", "detail": "No new trade opened in 30 consecutive days = account terminated permanently. Closing or modifying SL/TP does not count as activity." },
+          { "label": "Time Limit", "value": "None", "detail": "No maximum time to complete the challenge, as long as inactivity rule is respected." }
         ]
       },
       {
         "id": "trading_rules",
         "title": "Trading Rules",
         "items": [
-          { "label": "News Trading", "value": "Restricted", "detail": "No trading 5 mins before/after high-impact news on funded." },
-          { "label": "Weekend Holding", "value": "Prohibited", "detail": "Close all by Friday 15:45 EST." }
+          { "label": "News Trading – Challenge", "value": "Allowed", "detail": "Full freedom to trade around high-impact news events during Phase 1 and Phase 2." },
+          { "label": "News Trading – Funded", "value": "Restricted", "detail": "No open or close within 5 minutes before/after high-impact news. Violation = profit clawback + possible account termination." },
+          { "label": "Weekend Hold – Challenge", "value": "Allowed", "detail": "Trades may remain open over the weekend during challenge phases." },
+          { "label": "Weekend Hold – Funded", "value": "Prohibited", "detail": "All trades must be closed before 15:45 EST Friday. Open positions are auto-closed by the platform." },
+          { "label": "Overnight Hold", "value": "Allowed – all phases", "detail": "No restrictions on holding positions overnight in any phase including funded." },
+          { "label": "Same EA / Multiple Accounts", "value": "Risk of ban", "detail": "Using the same Expert Advisor across multiple funded accounts simultaneously may trigger suspension." }
+        ]
+      },
+      {
+        "id": "exposure_limits",
+        "title": "Max Lot Exposure (Funded Only)",
+        "table": {
+          "headers": ["Account Size", "Max Lots"],
+          "rows": [
+            ["$5,000",   "Unlimited"],
+            ["$10,000",  "Unlimited"],
+            ["$25,000",  "10 lots"],
+            ["$50,000",  "20 lots"],
+            ["$100,000", "40 lots"],
+            ["$200,000", "80 lots"]
+          ]
+        }
+      },
+      {
+        "id": "exposure_violation",
+        "title": "Exposure Violation Penalties",
+        "items": [
+          { "label": "1st Violation", "value": "Warning", "detail": "Warning issued + excess profits from the over-sized position are clawed back." },
+          { "label": "2nd Violation", "value": "Termination", "detail": "Excess profits clawed back + profit split reduced to 30% + account terminated immediately." }
+        ]
+      },
+      {
+        "id": "leverage",
+        "title": "Leverage by Asset Class",
+        "table": {
+          "headers": ["Asset Class", "Leverage"],
+          "rows": [
+            ["Forex (Majors)", "100:1"],
+            ["Exotic Pairs",   "10:1"],
+            ["Commodities",    "5:1"],
+            ["Indices",        "10:1"],
+            ["Metals",         "20:1"],
+            ["Crypto",         "2:1"]
+          ]
+        }
+      },
+      {
+        "id": "payouts",
+        "title": "Payout Options",
+        "items": [
+          { "label": "Bi-Weekly", "value": "80% split", "detail": "Requires 3 profitable days within the last 14 days." },
+          { "label": "Monthly", "value": "95% split", "detail": "Requires 7 profitable days within the last 30 days." },
+          { "label": "On-Demand", "value": "80% split", "detail": "Two conditions: (1) Consistency ≤ 40% — biggest winning day ÷ total profit must not exceed 40%. (2) Minimum 2% profit of initial balance must be reached. Example: $11,250 biggest day / $25,000 total = 45% → need $3,125 more to bring ratio to 40%." }
+        ]
+      },
+      {
+        "id": "payout_methods",
+        "title": "Payout Methods",
+        "table": {
+          "headers": ["Method", "Min Amount", "Fee"],
+          "rows": [
+            ["Bank Wire",                    "$50",  "None"],
+            ["Crypto (BTC / USDT / USDC / ETH)", "$50", "None"],
+            ["Rise",                         "$500", "$25 flat"]
+          ]
+        }
+      },
+      {
+        "id": "fee_refund",
+        "title": "Challenge Fee Refund",
+        "items": [
+          { "label": "Refund Policy", "value": "100% refunded", "detail": "Full challenge fee returned in 4 equal installments of 25% each, paid alongside the first 4 payouts after receiving the funded account." }
+        ]
+      },
+      {
+        "id": "addons",
+        "title": "Add-ons (Purchase Only)",
+        "items": [
+          { "label": "Swap-Free", "value": "+10% of fee", "detail": "Adds 10% to the base challenge fee. Example: $619 challenge → $680.90. Must be selected at purchase, cannot be added later." },
+          { "label": "Reset", "value": "+30% of fee", "detail": "For 2-phase challenges only. On breach, a Reset button appears in the dashboard and restarts from Phase 1. Example: $619 → $804.70. Cannot be added after purchase." }
+        ]
+      },
+      {
+        "id": "account_limits",
+        "title": "Account Limits & Merging",
+        "items": [
+          { "label": "Max Total Funded", "value": "$500,000", "detail": "Maximum combined balance across all active funded accounts at the same time." },
+          { "label": "Merging", "value": "Same type only", "detail": "Funded accounts can only be merged with accounts of the same challenge type (2-Step Pro with 2-Step Pro)." }
+        ]
+      },
+      {
+        "id": "platforms",
+        "title": "Platforms & Instruments",
+        "items": [
+          { "label": "Platforms", "value": "DX Trade, MT4, MT5, Match Trader, Trade-Locker, CTrader", "detail": "" },
+          { "label": "Instruments", "value": "Forex, Crypto, Indices, Commodities", "detail": "" }
         ]
       }
     ]
