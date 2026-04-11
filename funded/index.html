@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prop Rules — Trading Firm Protocol</title>
+  <title>Prop Rules — Trading Protocol</title>
   <link rel="icon" href="/images/btc.png" type="image/png" />
   <link rel="stylesheet" href="/funded/style.css" />
 </head>
@@ -17,45 +17,44 @@
   <!-- Content -->
   <div id="content" class="hidden">
 
-    <!-- Nav -->
-    <nav id="nav">
-
-      <div class="nav-group">
-        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top bar -->
+    <div id="topbar">
+      <span class="topbar-brand">PropRules · kanba.pw</span>
+      <a class="btn-translate"
+         href="https://kanba-pw.translate.goog/funded/?_x_tr_sl=en&_x_tr_tl=ar&_x_tr_hl=en-US&_x_tr_pto=wapp"
+         target="_blank" rel="noopener">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
         </svg>
-        <select id="firm-select" aria-label="Select firm"></select>
-      </div>
-
-      <span class="nav-sep">›</span>
-
-      <div class="nav-group">
-        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-        </svg>
-        <select id="market-select" aria-label="Select market"></select>
-      </div>
-
-      <span class="nav-sep">›</span>
-
-      <div class="nav-group">
-        <span class="nav-label">Account</span>
-        <select id="account-select" aria-label="Select account"></select>
-      </div>
-
-      <a id="translate-link"
-         href="https://kanba-pw.translate.goog/funded/?_x_tr_sl=en&_x_tr_tl=ar&_x_tr_hl=en-US&_x_tr_pto=wapp"
-         target="_blank"
-         rel="noopener"
-         class="nav-translate">
-        AR ↗
+        عربي ↗
       </a>
+    </div>
 
-    </nav>
+    <!-- Selector Panel -->
+    <div id="selector-panel">
+
+      <div class="selector-row">
+        <span class="selector-label">Firm</span>
+        <div class="btn-group" id="firm-btns"></div>
+      </div>
+
+      <div class="selector-divider"></div>
+
+      <div class="selector-row">
+        <span class="selector-label">Market</span>
+        <div class="btn-group" id="market-btns"></div>
+      </div>
+
+      <div class="selector-divider"></div>
+
+      <div class="selector-row">
+        <span class="selector-label">Account</span>
+        <div class="btn-group" id="account-btns"></div>
+      </div>
+
+    </div>
 
     <!-- Main -->
     <div id="main-content">
@@ -64,12 +63,12 @@
       <header id="main-header">
         <div class="header-inner">
           <div>
-            <div class="header-badges">
-              <span class="badge-solid">Technical Protocol</span>
-              <span class="badge-outline" id="protocol-id"></span>
+            <div class="header-meta">
+              <span class="badge badge-solid">Technical Protocol</span>
+              <span class="badge badge-outline" id="protocol-id"></span>
             </div>
             <a id="firm-name" href="#" target="_blank" rel="noopener"></a>
-            <p id="firm-type-model"></p>
+            <p id="firm-sub"></p>
           </div>
           <div id="last-updated"></div>
         </div>
@@ -81,14 +80,14 @@
         <div id="right-column"></div>
       </div>
 
-    </div><!-- /main-content -->
+    </div>
 
   </div><!-- /content -->
 
   <!-- Footer -->
   <footer id="page-footer">
     <span id="footer-path"></span>
-    <span id="footer-copy">© 2026 PropRules — kanba.pw</span>
+    <span id="footer-copy">© 2026 PropRules · kanba.pw</span>
   </footer>
 
 </div><!-- /app -->
