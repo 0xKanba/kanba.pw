@@ -8,31 +8,31 @@
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "2step-pro", "name": "2-Step Pro", "path": "data/firms/holaprime/forex/2step.pro.json" },
-            { "id": "One-Challenge", "name": "One Challenge", "path": "data/firms/holaprime/forex/one-challenge.json" }
-            { "id": "Direct", "name": "Direct", "path": "data/firms/holaprime/forex/direct.json" }
-            { "id": "2step-prime", "name": "2-step Prime", "path": "data/firms/holaprime/forex/2step-prime.json" }
-            { "id": "1step-prime", "name": "1-step prime", "path": "data/firms/holaprime/forex/1step-prime.json" }
+            { "id": "2step-pro",    "name": "2-Step Pro",     "path": "data/firms/holaprime/forex/2step.pro.json" },
+            { "id": "one-challenge","name": "One Challenge",  "path": "data/firms/holaprime/forex/one-challenge.json" },
+            { "id": "direct",       "name": "Direct",         "path": "data/firms/holaprime/forex/direct.json" },
+            { "id": "2step-prime",  "name": "2-Step Prime",   "path": "data/firms/holaprime/forex/2step-prime.json" },
+            { "id": "1step-prime",  "name": "1-Step Prime",   "path": "data/firms/holaprime/forex/1step-prime.json" }
           ]
         },
         {
           "id": "futures",
           "name": "Futures",
           "accounts": [
-            { "id": "1step-prime", "name": "1step prime", "path": "data/firms/holaprime/futures/1step-prime.json" }
+            { "id": "1step-prime", "name": "1-Step Prime", "path": "data/firms/holaprime/futures/1step-prime.json" }
           ]
         }
       ]
     },
     {
       "id": "finotivefunding",
-      "name": "FinotiveFunding",
+      "name": "Finotive Funding",
       "markets": [
         {
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "instant-standard", "name": "instant Standard", "path": "data/firms/fundednext/forex/instant-standard.json" }
+            { "id": "instant-standard", "name": "Instant Standard", "path": "data/firms/finotivefunding/forex/instant-standard.json" }
           ]
         }
       ]
