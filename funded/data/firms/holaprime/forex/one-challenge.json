@@ -1,0 +1,97 @@
+{
+  "firm": {
+    "name": "Hola Prime",
+    "type": "Forex",
+    "model": "One Challenge",
+    "last_updated": "2026-04-11",
+    "sections": [
+      {
+        "id": "risk_parameters",
+        "title": "Risk Parameters",
+        "items": [
+          { "label": "Daily Loss Limit",    "value": "None",          "detail": "No daily drawdown cap. Losses are not evaluated on a per-day basis." },
+          { "label": "Max Overall Loss",    "value": "7% trailing",   "detail": "Intraday trailing drawdown based on equity High Water Mark. Trails up as equity grows. Locks at initial balance once 7% profit is reached. Example: $10k account → floor starts at $9,300, rises as HWM rises, locks at $10,000 once balance exceeds $10,700." },
+          { "label": "Profit Target",       "value": "7%",            "detail": "Single phase. 7% of initial balance required to pass. No minimum trading days." },
+          { "label": "Min Trading Days",    "value": "None",          "detail": "No minimum or maximum trading days required." },
+          { "label": "Risk Per Trade Idea", "value": "≤ 2% (Funded)", "detail": "Max 2% of initial balance per trade idea (funded only). Correlated assets = 1 idea. New trade within 10 min of close = same idea. SL required within 3 min of opening. Violation = instant termination. Effective 7 Apr 2026." },
+          { "label": "Inactivity Limit",    "value": "30 days",       "detail": "No new trade in 30 consecutive days = permanent suspension." },
+          { "label": "Time Limit",          "value": "None",          "detail": "No maximum time to complete the challenge." }
+        ]
+      },
+      {
+        "id": "trading_rules",
+        "title": "Trading Rules",
+        "items": [
+          { "label": "News Trading",   "value": "Allowed – all phases", "detail": "No restrictions on high-impact news in challenge or funded account." },
+          { "label": "Weekend Hold",   "value": "Allowed – all phases", "detail": "Positions may remain open over the weekend in challenge and funded." },
+          { "label": "Overnight Hold", "value": "Allowed – all phases", "detail": "No restrictions on overnight positions in any phase." }
+        ]
+      },
+      {
+        "id": "leverage",
+        "title": "Leverage by Asset Class",
+        "table": {
+          "headers": ["Asset Class", "Leverage"],
+          "rows": [
+            ["Forex (Majors/Minors)", "30:1"],
+            ["Exotic Pairs",          "5:1"],
+            ["Commodities",           "2:1"],
+            ["Indices",               "5:1"],
+            ["Metals",                "10:1"],
+            ["Crypto",                "1:1"]
+          ]
+        }
+      },
+      {
+        "id": "payouts",
+        "title": "Payout Options",
+        "items": [
+          { "label": "Bi-Weekly", "value": "80% split", "detail": "Min 3 profitable days in 14 days. A profitable day = net closed profit ≥ 0.5% of initial balance." },
+          { "label": "Monthly",   "value": "95% split", "detail": "Min 7 profitable days in 30 days. Same profitable-day definition applies." }
+        ]
+      },
+      {
+        "id": "payout_methods",
+        "title": "Payout Methods",
+        "table": {
+          "headers": ["Method", "Min Amount", "Fee"],
+          "rows": [
+            ["Bank Wire / Crypto (BTC, USDC, ETH, USDT)", "$50",  "None"],
+            ["Rise",                                       "$500", "$25 flat"]
+          ]
+        }
+      },
+      {
+        "id": "fee_refund",
+        "title": "Challenge Fee Refund",
+        "items": [
+          { "label": "Refund", "value": "100% in 4 installments", "detail": "25% returned with each of the first 4 payouts. Example: $709 fee → $177.25 per payout." }
+        ]
+      },
+      {
+        "id": "addons",
+        "title": "Add-ons (Purchase Only)",
+        "items": [
+          { "label": "Swap-Free", "value": "+10% of fee", "detail": "Example: $709 → $779.90. Must be selected at purchase." },
+          { "label": "Reset",     "value": "+30% of fee", "detail": "Example: $709 → $921.70. Issues a new challenge from scratch. One use only. Not available for funded stage." }
+        ]
+      },
+      {
+        "id": "account_limits",
+        "title": "Account Limits & Merging",
+        "items": [
+          { "label": "Max Total Funded", "value": "$500,000",       "detail": "Combined cap across all active funded accounts (challenges + direct)." },
+          { "label": "Merging",          "value": "Same type only", "detail": "Only One Challenge funded accounts can be merged together. No open trades and not mid-payout-cycle required." }
+        ]
+      },
+      {
+        "id": "platforms",
+        "title": "Platforms & Instruments",
+        "items": [
+          { "label": "Platforms",   "value": "DX Trade, MT4, MT5, Match Trader, Trade-Locker, CTrader", "detail": "" },
+          { "label": "Instruments", "value": "Forex, Crypto, Indices, Commodities",                      "detail": "" }
+        ]
+      }
+    ]
+  }
+}

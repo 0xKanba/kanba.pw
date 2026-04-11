@@ -1,0 +1,94 @@
+{
+  "firm": {
+    "name": "Hola Prime",
+    "type": "Forex",
+    "model": "Direct Account",
+    "last_updated": "2026-04-11",
+    "sections": [
+      {
+        "id": "risk_parameters",
+        "title": "Risk Parameters",
+        "items": [
+          { "label": "Daily Loss Limit",       "value": "3%",            "detail": "3% of previous day's closing balance. Resets at 17:00 EST. Floating + realized PnL combined. Example: $110k balance → floor at $106,700. Intraday profits expand the limit." },
+          { "label": "Max Overall Loss",       "value": "7% trailing",   "detail": "Trailing drawdown based on High Water Mark (previous day's EOD balance). Locks at initial balance once 7% profit is reached. Example: $100k → floor at $93,000, trails up as balance grows, locks at $100,000 once balance exceeds $107,000." },
+          { "label": "Consistency Score",      "value": "≤ 20%",         "detail": "Biggest winning day ÷ total account profit ≤ 20% at all times — applies during trading AND for payout eligibility. If exceeded, keep trading until ratio drops to 20% or below." },
+          { "label": "Min Trading Days",       "value": "None",          "detail": "No minimum trading days required." },
+          { "label": "Risk Per Trade Idea",    "value": "≤ 2% (Funded)", "detail": "Max 2% of initial balance per trade idea. Correlated assets = 1 idea. New trade within 10 min of close = same idea. SL required. Violation = instant termination. Effective 7 Apr 2026." },
+          { "label": "Inactivity Limit",       "value": "30 days",       "detail": "No new trade in 30 consecutive days = permanent suspension." },
+          { "label": "Time Limit",             "value": "None",          "detail": "No evaluation phase — funded from day 1. No time constraints." },
+          { "label": "KYC Deadline",           "value": "48 hours",      "detail": "KYC documents and contract must be uploaded within 48 hours of purchase. Required before any payout." },
+          { "label": "Expert Advisors (EAs)",  "value": "Prohibited",    "detail": "No EAs allowed on Direct Model accounts under any circumstances." },
+          { "label": "Active Account Limit",   "value": "2 accounts",    "detail": "Max 2 Direct accounts can be traded simultaneously. Must wait for one to be breached before activating a third." }
+        ]
+      },
+      {
+        "id": "trading_rules",
+        "title": "Trading Rules",
+        "items": [
+          { "label": "News Trading",   "value": "Restricted",           "detail": "No open/close within 5 min before/after high-impact news. SL/TP activation during this window = violation. Holding existing positions through news is allowed only if opened 5+ min before. Low/medium-impact news unaffected." },
+          { "label": "Weekend Hold",   "value": "Prohibited – hard breach", "detail": "All trades must be closed before 15:45 EST Friday. Any open position at that time is auto-closed AND account is terminated." },
+          { "label": "Overnight Hold", "value": "Allowed",              "detail": "No restrictions on overnight positions." }
+        ]
+      },
+      {
+        "id": "leverage",
+        "title": "Leverage by Asset Class",
+        "table": {
+          "headers": ["Asset Class", "Leverage"],
+          "rows": [
+            ["Forex (Majors/Minors)", "50:1"],
+            ["Exotic Pairs",          "5:1"],
+            ["Commodities",           "2:1"],
+            ["Metals",                "10:1"],
+            ["Indices",               "5:1"],
+            ["Crypto",                "1:1"]
+          ]
+        }
+      },
+      {
+        "id": "payouts",
+        "title": "Payout Options",
+        "items": [
+          { "label": "Bi-Weekly", "value": "80% split", "detail": "Every 14 calendar days from first trade. Requires Consistency Score ≤ 20%. No minimum profit threshold stated." },
+          { "label": "Upgraded",  "value": "Up to 90%", "detail": "Profit split can be increased to 90% via an add-on at purchase." }
+        ]
+      },
+      {
+        "id": "payout_methods",
+        "title": "Payout Methods",
+        "table": {
+          "headers": ["Method", "Min Amount", "Fee"],
+          "rows": [
+            ["Bank Wire / Crypto (BTC, USDC, ETH, USDT)", "$50",  "None"],
+            ["Rise",                                       "$500", "$25 flat"]
+          ]
+        }
+      },
+      {
+        "id": "addons",
+        "title": "Add-ons (Purchase Only)",
+        "items": [
+          { "label": "Swap-Free",       "value": "+10% of fee", "detail": "Example: $1,049 → $1,153.90. Must be selected at purchase." },
+          { "label": "Reset Add-on",    "value": "N/A",         "detail": "Reset add-on is NOT available for Direct accounts." },
+          { "label": "Profit Split Upgrade", "value": "Available", "detail": "Split can be upgraded up to 90% via add-on at purchase." }
+        ]
+      },
+      {
+        "id": "account_limits",
+        "title": "Account Limits & Merging",
+        "items": [
+          { "label": "Max Total Funded", "value": "$500,000",   "detail": "Combined cap across all active funded accounts (challenges + direct)." },
+          { "label": "Merging",          "value": "N/A",        "detail": "Direct accounts have no merging option — not challenge-based." }
+        ]
+      },
+      {
+        "id": "platforms",
+        "title": "Platforms & Instruments",
+        "items": [
+          { "label": "Platforms",   "value": "DX Trade, MT4, MT5, Match Trader, Trade-Locker, CTrader", "detail": "" },
+          { "label": "Instruments", "value": "Forex, Crypto, Indices, Commodities",                      "detail": "" }
+        ]
+      }
+    ]
+  }
+}
