@@ -21,6 +21,7 @@
           "name": "Futures",
           "accounts": [
             { "id": "1step-prime", "name": "1-Step Prime", "path": "data/firms/holaprime/futures/1step-prime.json" }
+            { "id": "direct", "name": "direct account", "path": "data/firms/holaprime/futures/direct.json" }
           ]
         }
       ]
@@ -28,7 +29,7 @@
     {
       "id": "finotivefunding",
       "name": "finotive funding",
-      "url": "https://finotivefunding.com",
+      "url": "https://finotivefunding.com/5Y996rY",
       "markets": [
         {
           "id": "forex",
@@ -40,15 +41,15 @@
       ]
     },
     {
-      "id": "firm3",
-      "name": "Firm 3 Name",
-      "url": "https://firm3.com",
+      "id": "thetradingpit",
+      "name": "The Trasing Pit",
+      "url": "https://client-area.thetradingpit.com/quick-checkout?refpr=G9&vchr=REFZKXO",
       "markets": [
         {
-          "id": "forex",
-          "name": "Forex",
+          "id": "futures",
+          "name": "Futures",
           "accounts": [
-            { "id": "account-id", "name": "Account Name", "path": "data/firms/firm3/forex/account.json" }
+            { "id": "1step-futues", "name": "1step futures", "path": "data/firms/firm3/forex/1step.json" }
           ]
         }
       ]
