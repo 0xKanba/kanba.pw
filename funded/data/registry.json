@@ -10,6 +10,9 @@
           "accounts": [
             { "id": "2step-pro", "name": "2-Step Pro", "path": "data/firms/holaprime/forex/2step.pro.json" },
             { "id": "One-Challenge", "name": "One Challenge", "path": "data/firms/holaprime/forex/one-challenge.json" }
+            { "id": "Direct", "name": "Direct", "path": "data/firms/holaprime/forex/direct.json" }
+            { "id": "2step-prime", "name": "2-step Prime", "path": "data/firms/holaprime/forex/2step-prime.json" }
+            { "id": "1step-prime", "name": "1-step prime", "path": "data/firms/holaprime/forex/1step-prime.json" }
           ]
         },
         {
