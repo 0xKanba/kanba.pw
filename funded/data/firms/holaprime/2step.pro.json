@@ -1,0 +1,28 @@
+{
+  "firm": {
+    "name": "Hola Prime",
+    "type": "Forex",
+    "model": "2-Step Pro",
+    "last_updated": "2026-04-11",
+    "sections": [
+      {
+        "id": "risk_parameters",
+        "title": "Risk Parameters",
+        "items": [
+          { "label": "Daily Loss Limit", "value": "5.0%", "detail": "Based on previous day's end balance." },
+          { "label": "Max Overall Loss", "value": "10.0%", "detail": "Based on initial balance." },
+          { "label": "Profit Target P1", "value": "8.0%", "detail": "Phase 1 target." },
+          { "label": "Profit Target P2", "value": "5.0%", "detail": "Phase 2 target." }
+        ]
+      },
+      {
+        "id": "trading_rules",
+        "title": "Trading Rules",
+        "items": [
+          { "label": "News Trading", "value": "Restricted", "detail": "No trading 5 mins before/after high-impact news on funded." },
+          { "label": "Weekend Holding", "value": "Prohibited", "detail": "Close all by Friday 15:45 EST." }
+        ]
+      }
+    ]
+  }
+}
