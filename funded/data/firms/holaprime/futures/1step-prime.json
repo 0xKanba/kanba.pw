@@ -1,0 +1,108 @@
+{
+  "firm": {
+    "name": "Hola Prime",
+    "type": "Futures",
+    "model": "1-Step Prime",
+    "last_updated": "2026-04-12",
+    "sections": [
+      {
+        "id": "risk_parameters",
+        "title": "Risk Parameters",
+        "items": [
+          { "label": "Max Trailing Drawdown", "value": "4% / 3%*", "detail": "EOD trailing drawdown. 4% for $25K–$50K accounts. 3% for $100K–$150K accounts. Trails daily EOD balance. Locks at initial balance once 4% profit is reached." },
+          { "label": "Daily Loss Limit",       "value": "None stated", "detail": "No explicit daily loss limit — trailing drawdown is the primary risk control." },
+          { "label": "Profit Target",          "value": "6%",           "detail": "Single phase. 6% of initial balance. No minimum trading days required." },
+          { "label": "Consistency – Challenge","value": "≤ 40%",        "detail": "Biggest winning day ÷ total profit ≤ 40% to pass. Example: $11,250 best day / $25,000 total = 45% → need $3,125 more." },
+          { "label": "Consistency – Funded",   "value": "≤ 35%",        "detail": "For payout eligibility, biggest day must be ≤ 35% of total profit." },
+          { "label": "Risk Per Trade Idea",    "value": "≤ 1% (Funded)", "detail": "Max 1% of initial balance per trade idea (funded only). Correlated assets = 1 idea. New trade within 10 min of close = same idea. SL required. Effective 7 Apr 2026." },
+          { "label": "Inactivity Limit",       "value": "1 calendar week", "detail": "No activity (Sunday–Friday) = account closure. A traded day requires at least one fully completed round-trip trade." }
+        ]
+      },
+      {
+        "id": "trading_rules",
+        "title": "Trading Rules",
+        "items": [
+          { "label": "News Trading",     "value": "Allowed",         "detail": "No restriction on news hours in challenge or funded. Not recommended due to slippage risk." },
+          { "label": "Overnight Hold",   "value": "Prohibited",      "detail": "All trades must be closed before 3:30 PM CT (Mon–Fri). Risk team starts closing at 3:28 PM CT." },
+          { "label": "Weekend Hold",     "value": "Hard breach",     "detail": "All trades must be closed before 3:30 PM CT Friday. Auto-closed and account terminated if open. Cannot be reopened or reset." },
+          { "label": "Agricultural Contracts", "value": "Earlier close", "detail": "CBOT (Corn/Wheat/Soybeans): Mon–Fri 8:30 AM–1:20 PM CT. CME Cattle/Hogs: 8:30 AM–1:05 PM CT. Close before respective market hours." }
+        ]
+      },
+      {
+        "id": "exposure_limits",
+        "title": "Max Position Size (Contracts)",
+        "table": {
+          "headers": ["Account Size", "Max Contracts (Micro/Mini)"],
+          "rows": [
+            ["$25,000",  "2 / 20"],
+            ["$50,000",  "4 / 40"],
+            ["$100,000", "8 / 80"],
+            ["$150,000", "12 / 120"]
+          ]
+        }
+      },
+      {
+        "id": "payouts",
+        "title": "Payout Conditions",
+        "items": [
+          { "label": "Profit Split",      "value": "90%",              "detail": "Every 5 calendar days from first trade on funded account." },
+          { "label": "Winning Days Req.", "value": "5 profitable days", "detail": "Must achieve 5 non-consecutive profitable days per payout cycle. Minimum daily profit per account size applies. Resets after each payout." },
+          { "label": "Consistency",       "value": "≤ 35%",            "detail": "Best day must not exceed 35% of total profit at time of payout request." }
+        ]
+      },
+      {
+        "id": "payout_min_days",
+        "title": "Min Daily Profit for Winning Day",
+        "table": {
+          "headers": ["Account Size", "Min Daily Profit"],
+          "rows": [
+            ["$25,000",  "$100"],
+            ["$50,000",  "$150"],
+            ["$100,000", "$200"],
+            ["$150,000", "$250"]
+          ]
+        }
+      },
+      {
+        "id": "payout_caps",
+        "title": "Payout Caps by Cycle",
+        "table": {
+          "headers": ["Account", "1st", "2nd", "3rd", "4th+"],
+          "rows": [
+            ["$25K",  "$1,000", "$1,250", "$1,500", "$2,000"],
+            ["$50K",  "$1,500", "$2,000", "$2,500", "$3,000"],
+            ["$100K", "$2,000", "$2,500", "$3,000", "$4,000"],
+            ["$150K", "$2,500", "$3,000", "$4,000", "$5,000"]
+          ]
+        }
+      },
+      {
+        "id": "payout_methods",
+        "title": "Payout Methods",
+        "table": {
+          "headers": ["Method", "Min Amount", "Fee"],
+          "rows": [
+            ["Bank Wire / Crypto", "Per account size table", "None"],
+            ["Rise",               "$500",                  "$25 flat"]
+          ]
+        }
+      },
+      {
+        "id": "account_limits",
+        "title": "Account Limits",
+        "items": [
+          { "label": "Max Funded Accounts", "value": "$500K or 5 accounts", "detail": "Whichever is reached first. 5 accounts of $25K each = cap reached. 2×$150K + 2×$100K = $500K cap reached." },
+          { "label": "Live Account",        "value": "Max 1",               "detail": "Invitation only. Requires 10+ payouts and $50,000+ in rewards on funded account." },
+          { "label": "Merging",             "value": "Same type only",       "detail": "Only 1-Step Prime Futures funded accounts can be merged together." }
+        ]
+      },
+      {
+        "id": "platforms",
+        "title": "Instruments",
+        "items": [
+          { "label": "Tradable Instruments", "value": "Futures contracts", "detail": "Equity Index, Currency, Energy, Agricultural, and Cryptocurrency Futures." }
+        ]
+      }
+    ]
+  }
+}
