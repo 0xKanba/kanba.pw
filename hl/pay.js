@@ -31,9 +31,9 @@ const CFG = {
   REVEAL_MAX:  60 * 60,   // ساعة واحدة — أقصى
 
   // EmailJS — اتبع التعليمات أدناه لملء هذه
-  EJ_PUBLIC_KEY:  'YOUR_PUBLIC_KEY',
-  EJ_SERVICE_ID:  'YOUR_SERVICE_ID',
-  EJ_TEMPLATE_ID: 'YOUR_TEMPLATE_ID',
+  EJ_PUBLIC_KEY:  '4S3_tB22wJ4sCknGK',
+  EJ_SERVICE_ID:  'service_2hy65tv',
+  EJ_TEMPLATE_ID: 'tamplate_xyz987',
   EMAIL_TO:       'me@kanba.pw',
 
   // T&C
