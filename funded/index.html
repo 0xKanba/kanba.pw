@@ -1,93 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="auto">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prop Rules — Trading Protocol</title>
-  <link rel="icon" href="/images/btc.png" type="image/png" />
-  <link rel="stylesheet" href="/funded/style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Prop firm trading rules — kanba.pw"/>
+  <title>PropRules · kanba.pw</title>
+  <link rel="icon" href="/images/btc.png" type="image/png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/funded/style.css"/>
 </head>
 <body>
 
+<!-- ── APP SHELL ─────────────────────────────────────── -->
 <div id="app">
 
-  <!-- Loading -->
-  <div id="loading">Initializing Protocol...</div>
+  <!-- LOADING -->
+  <div id="loading" role="status" aria-live="polite">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
 
-  <!-- Content -->
-  <div id="content" class="hidden">
+  <!-- CONTENT -->
+  <main id="content" class="hidden" aria-label="Prop firm rules dashboard">
 
-    <!-- Top bar -->
-    <div id="topbar">
-      <span class="topbar-brand">PropRules · kanba.pw</span>
-      <a class="btn-translate"
+    <!-- ── HEADER BAR ── -->
+    <header id="site-header">
+      <div class="header-left">
+        <span class="site-logo">PropRules</span>
+        <span class="site-sub">kanba.pw</span>
+      </div>
+      <a id="translate-btn"
          href="https://kanba-pw.translate.goog/funded/?_x_tr_sl=en&_x_tr_tl=ar&_x_tr_hl=en-US&_x_tr_pto=wapp"
-         target="_blank" rel="noopener">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
-        عربي ↗
+         target="_blank" rel="noopener" class="chip chip-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        AR ↗
       </a>
-    </div>
+    </header>
 
-    <!-- Selector Panel -->
-    <div id="selector-panel">
-
-      <div class="selector-row">
-        <span class="selector-label">Firm</span>
-        <div class="btn-group" id="firm-btns"></div>
+    <!-- ── SELECTOR PANEL ── -->
+    <section id="selector" aria-label="Account selector">
+      <div class="selector-row" id="row-firm">
+        <span class="sel-label">Firm</span>
+        <div class="pill-group" id="firm-pills" role="group" aria-label="Select firm"></div>
       </div>
-
       <div class="selector-divider"></div>
-
-      <div class="selector-row">
-        <span class="selector-label">Market</span>
-        <div class="btn-group" id="market-btns"></div>
+      <div class="selector-row" id="row-market">
+        <span class="sel-label">Market</span>
+        <div class="pill-group" id="market-pills" role="group" aria-label="Select market"></div>
       </div>
-
       <div class="selector-divider"></div>
-
-      <div class="selector-row">
-        <span class="selector-label">Account</span>
-        <div class="btn-group" id="account-btns"></div>
+      <div class="selector-row" id="row-account">
+        <span class="sel-label">Account</span>
+        <div class="pill-group" id="account-pills" role="group" aria-label="Select account"></div>
       </div>
+    </section>
 
+    <!-- ── ACCOUNT HEADER ── -->
+    <div id="account-header">
+      <div class="acct-meta">
+        <span class="chip chip-filled">Protocol</span>
+        <span class="chip chip-outline" id="proto-id"></span>
+      </div>
+      <a id="firm-name-link" href="#" target="_blank" rel="noopener" aria-label="Visit firm website"></a>
+      <p id="firm-subtitle"></p>
+      <p id="last-updated"></p>
     </div>
 
-    <!-- Main -->
-    <div id="main-content">
-
-      <!-- Header -->
-      <header id="main-header">
-        <div class="header-inner">
-          <div>
-            <div class="header-meta">
-              <span class="badge badge-solid">Technical Protocol</span>
-              <span class="badge badge-outline" id="protocol-id"></span>
-            </div>
-            <a id="firm-name" href="#" target="_blank" rel="noopener"></a>
-            <p id="firm-sub"></p>
-          </div>
-          <div id="last-updated"></div>
-        </div>
-      </header>
-
-      <!-- Dashboard -->
-      <div id="dashboard">
-        <div id="left-column"></div>
-        <div id="right-column"></div>
-      </div>
-
+    <!-- ── DASHBOARD ── -->
+    <div id="dashboard">
+      <div id="left-col"></div>
+      <div id="right-col"></div>
     </div>
 
-  </div><!-- /content -->
+  </main>
 
-  <!-- Footer -->
-  <footer id="page-footer">
+  <!-- FOOTER -->
+  <footer id="site-footer">
     <span id="footer-path"></span>
-    <span id="footer-copy">© 2026 PropRules · kanba.pw</span>
+    <span>© 2026 PropRules · kanba.pw</span>
   </footer>
 
 </div><!-- /app -->
