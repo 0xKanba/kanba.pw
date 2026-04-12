@@ -10,11 +10,12 @@ const HL_API  = 'https://api.hyperliquid.xyz';
 const ARB_RPC = 'https://arb1.arbitrum.io/rpc';
 const USDC_CA = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
 const BRDG_CA = '0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7';
-const LS_KEY  = 'hl_trade_pk';
-const PIN_KEY = 'hl_trade_pin';
-const LOCKED_KEY = 'hl_trade_locked';
-const LAST_PIN_KEY = 'hl_trade_last_pin';
-const PIN_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const LS_KEY          = 'hl_trade_pk';
+const PIN_KEY         = 'hl_trade_pin';
+const LOCKED_KEY      = 'hl_trade_locked';
+const LAST_PIN_KEY    = 'hl_trade_last_pin';     // آخر إدخال PIN صحيح (لـ requirePin)
+const LAST_ACTIVITY_KEY = 'hl_last_activity';    // آخر نشاط مستخدم (للقفل التلقائي)
+const PIN_TIMEOUT     = 15 * 60 * 1000;          // 15 دقيقة
 
 const ASSETS = {
   GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'    },
@@ -36,12 +37,46 @@ const State = {
   currentPinInput: '', currentSetPinInput: '', referrerSet: false
 };
 
+/* ─── قفل النشاط — مضمون 100% حتى مع Brave/Firefox throttling ───────────────
+   الاستراتيجية:
+   1. كل نشاط مستخدم → timestamp في localStorage (مصدر الحقيقة)
+   2. setInterval كل 30ث → يقرأ الـ timestamp ويقفل إن انتهت 15د
+   3. visibilitychange + focus + pageshow → فحص فوري عند العودة للتبويب
+   المنطق: setTimeout وحده يُثبَّط في الخلفية — الـ timestamp لا يُثبَّط أبداً
+──────────────────────────────────────────────────────────────────────────── */
+
+function _stampActivity() {
+  localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
+}
+
+function _isActivityExpired() {
+  const last = parseInt(localStorage.getItem(LAST_ACTIVITY_KEY) || '0');
+  return (Date.now() - last) > PIN_TIMEOUT;
+}
+
 function resetInactivityTimer() {
-  if (State.inactivityTimer) clearTimeout(State.inactivityTimer);
-  State.inactivityTimer = setTimeout(lockApp, PIN_TIMEOUT);
-  // Persist last activity time
-  if (localStorage.getItem(PIN_KEY)) {
-    localStorage.setItem(LAST_PIN_KEY, Date.now().toString());
+  _stampActivity();
+}
+
+// Heartbeat: يعمل حتى لو throttled → يفحص الـ timestamp الحقيقي
+let _heartbeat = null;
+function startHeartbeat() {
+  if (_heartbeat) clearInterval(_heartbeat);
+  _heartbeat = setInterval(() => {
+    if (!localStorage.getItem(PIN_KEY)) return;
+    if (State.isLocked) return;
+    if (_isActivityExpired()) lockApp();
+  }, 30_000); // 30 ثانية — حتى لو throttled لدقيقة فالـ visibilitychange يكفي
+}
+
+// فحص فوري عند العودة للتبويب — هذا السطر يكسر أي throttling
+function _checkOnFocus() {
+  if (!localStorage.getItem(PIN_KEY)) return;
+  if (State.isLocked) return;
+  if (_isActivityExpired()) {
+    lockApp();
+  } else {
+    _stampActivity(); // تجديد النشاط عند عودة المستخدم
   }
 }
 
@@ -64,10 +99,10 @@ function unlockApp() {
   State.isLocked = false;
   localStorage.setItem(LOCKED_KEY, 'false');
   localStorage.setItem(LAST_PIN_KEY, Date.now().toString());
+  _stampActivity(); // تجديد النشاط بعد فك القفل
   State.currentPinInput = '';
   closeModal('modalPIN');
   $('pinCancel').classList.remove('hidden');
-  resetInactivityTimer();
 }
 
 function appendPin(digit) {
@@ -178,25 +213,20 @@ function handleVerifyPin() {
   }
 }
 
-// Add inactivity listeners
-document.addEventListener('mousemove', resetInactivityTimer);
-document.addEventListener('keydown', resetInactivityTimer);
-document.addEventListener('click', resetInactivityTimer);
-document.addEventListener('touchstart', resetInactivityTimer);
+// ─── مستمعات النشاط ────────────────────────────────────────────────────────
+['mousemove','keydown','click','touchstart','scroll','wheel'].forEach(evt =>
+  document.addEventListener(evt, resetInactivityTimer, { passive: true })
+);
+
+// فحص فوري عند العودة للتبويب (يكسر أي throttling من Brave/Firefox)
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    const pin = localStorage.getItem(PIN_KEY);
-    if (pin) {
-      const last = parseInt(localStorage.getItem(LAST_PIN_KEY) || '0');
-      if (Date.now() - last > PIN_TIMEOUT) {
-        lockApp();
-      } else {
-        resetInactivityTimer();
-      }
-    }
-  }
+  if (document.visibilityState === 'visible') _checkOnFocus();
 });
-resetInactivityTimer();
+window.addEventListener('focus', _checkOnFocus);
+window.addEventListener('pageshow', _checkOnFocus); // Back/Forward cache
+
+// طابع النشاط الأولي
+_stampActivity();
 
 // ════════════════════════════════════════
 // MsgPack
@@ -1095,6 +1125,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('btnHistory').onclick =()=>State.wallet&&showHistory();
   $('btnDeposit').onclick =()=>State.wallet&&openModal('modalDeposit');
   $('btnWithdraw').onclick=()=>State.wallet&&openModal('modalWithdraw');
+  $('btnSwap').onclick    =()=>window.open('/hl/pay.html','_blank','noopener,noreferrer');
   $('btnLogout').onclick  =()=>State.wallet&&openModal('modalLogout');
   $('btnCloseAll').onclick=askCloseAll;
 
@@ -1192,13 +1223,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     State.lastPinTime = Date.now();
   }
 
+  // تشغيل الـ heartbeat لضمان القفل حتى في التبويبات الخلفية
+  startHeartbeat();
+
   // Check if we should be locked on startup
   if (localStorage.getItem(PIN_KEY)) {
-    const now = Date.now();
-    if (now - State.lastPinTime > PIN_TIMEOUT || localStorage.getItem(LOCKED_KEY) === 'true') {
+    if (_isActivityExpired() || localStorage.getItem(LOCKED_KEY) === 'true') {
       lockApp();
     } else {
-      resetInactivityTimer();
+      _stampActivity();
     }
   }
 });
