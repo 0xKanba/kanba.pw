@@ -1,0 +1,106 @@
+Does Instant Funding Starter have any limitations?
+Instant Funding Starter is available to new and existing customers. However, we have limited Instant Funding Starter to single use per trader. You can only purchase one Instant Funding Starter account.
+
+Instant Funding Starter is eligible for one payout only. After your first payout the account will be closed.  
+
+Instant Funding Starter has payout cap of 5% of initial balance.Minimum and Maximum trading days?
+We have a minimum trading period of 5 days on all phases, during which you must achieve at least 0.5% profit. These days do not have to be consecutive, any day with at least 0.5% profit counts towards the 5-day trading period.
+
+There's no maximum trading days.Are EAs & Trade Copiers allowed?
+EAs are allowed. You may use EAs (Expert Advisors) that you setup to suit your own strategy or trading style.
+
+Trade Copiers are allowed.
+
+While VPNs and VPS are allowed, using either service to bypass rules related to copy trading, group trading, or signal trading is strictly prohibited. If you are found misusing these services in violation of your contract or our Terms of Use, your account will be failed and terminated.What is the maximum capital I am allowed?
+We allow up to 5k in Instant Funded Starter Accounts.Is the Drawdown Trailing?
+Yes, max drawdown for instant funding is trailingWhat is the Guardian Shield?
+Our analysis shows that exceeding the Maximum Daily Drawdown is the main cause of account breaches, accounting for over 73% of all breaches. Our most profitable traders are those who cut losses quickly and let winning trades run. The Guardian Shield encourages proper risk management for consistent profitability.
+
+‍On Funded Stage Only :‍
+If your PnL on open trades reaches a 1% loss of initial account balance, Guardian Shield will, in most cases, automatically close all open trades for all symbols. This is a soft breach, and you may immediately begin trading afterward unless you reach maximum of 2 breaches. Updated and effective since March 3rd 2025.
+
+‍Example:
+You have a balance of $100,000 and 3 open trades. Your open PnL reaches a total loss of $1,000 (1% of initial account balance). The Guardian Shield will automatically close all trades. You can continue trading as you like afterwards.
+
+Guardian Shield is an important risk management tool that helps prevent traders from blowing their funded accounts, and ultimately helps create more consistent profits with increased risk management.
+
+‍Guardian Shield Breach Consequences:
+- 1st breach, profit split reduced to 50%.
+- 2nd breach, the account is breached.What is the Maximum Daily Loss?
+Max daily loss is based on 3% of the Initial account balance.
+We calculate daily drawdown as follows: Upon the 5pm Est day change, we will take the higher figure of either the account balance or account equity and subtract a fixed 3% of the initial balance from the higher value as the daily loss limit for the new day.
+
+Example 1:
+On a $5,000 Account, if at 5pm EST you have an open trade with a floating profit of $100, your account equity will be $5,100. With a 3% daily drawdown, the equity cannot drop below $4950 ($5,100 - $150 = $4,950) on the next trading day.
+
+Example 2:
+If on a $5,000 Account at 5pm EST you have an open trade with a floating loss of -$100, your account equity will be $4,900. Because your $5,000 balance is higher than your $4,900 equity, your daily drawdown limit of $150 will be calculated on a $5,000 balance. This means for the next trading day, the equity cannot drop below $4,850 ($5,000 - $150 = $4,850).
+‍
+Example 3:
+If there are no open trades at 5pm EST, the daily drawdown will be 3% of initial balance.How does the Max Drawdown work?
+Max drawdown will remain at 5% trailing of your Highest Watermark Closing Trade made. If your account reaches 5% of your starting balance your trailing Drawdown will lock in at your starting balance.
+
+Once your Drawdown is locked in at your starting balance we add a fixed 1% buffer on the account. This way you cannot withdraw all the profit and breach your account.
+
+Example 1: You have a 100k account. Your Daily drawdown is a fixed 3% and your Max Trailing is 5%. Your Daily drawdown level is $97,000 and your Max trailing is $95,000. If you make $8,000 profit, once your account has made over 5% of the starting balance your Trailing now locks in at $100,000. It no longer trails. Drawdown includes profits and losses from closed positions, swap fees and commissions
+
+Example 2: You start out with a 100k account. Your Daily drawdown is 3% and your Max Trailing is 5%. Your Daily drawdown level is $97,000 and your Max Trailing is $95,000. Lets say you make $5,000 profit. This puts your account at $105,000. The next day your Daily drawdown will be $105,000- $3000 = $102,000. Your Max trailing drawdown is $105,000-$5,000 = $100,000. Your new Max trailing drawdown is $100,000 because it trails from your highest recorded balance which was $105,000.
+
+Daily drawdown will reset each Day at 5PM EST. Max Trailing will always be from Highest recorded balance unless you achieve 5% from your starting balance.
+What is the maximum capital I am allowed?
+We allow up to 5k in Instant Funded Starter AccountsLeverage Offered
+Fx: 1:30
+Indices : 1:10
+Commodities : 1:10
+Crypto: 1:2Is the Drawdown Trailing?
+Yes, max drawdown for instant funding is trailingCan I hold overnight & trade over weekends?
+We have no restrictions on holding trades over night or the weekend
+Is News Trading allowed?
+Yes, news trading is allowed with Instant Funding Starter accounts.Do you allow Hedging, Martingale and No Stop Loss?
+- Hedging is allowed.
+- Martingale is allowed.
+- Stop Loss is not required.How does drawdown affect payouts?
+Example 1: You start out with a 100k account. Your Daily drawdown is 3% and your Max Trailing is 5%. Your Daily drawdown level is $97,000 and your Max trailing is $95,000. Let's say you make $8,000 profit. You request a withdrawal of $5,000. Being that your account achieved 5% your Max Drawdown is locked in at $100,000. This now leaves you with only 2% for Max drawdown.
+
+Example 2: You start out with a 100k account. Your Daily drawdown is 3% and your Max Trailing is 5%. Your Daily drawdown level is $97,000 and your Max trailing is $95,000. Let's say you make $15,000 profit. You request a withdrawal of $8,000. Being that your account achieved 5% your Max Drawdown is locked in at $100,000. You now have a buffer of $7.000 till Max drawdown at $100,000.
+
+Example 3: You start out with a 100k account. Your Daily drawdown is 3% and your Max Trailing is 5%. Your Daily drawdown level is $97,000 and your Max trailing is $95,000. Let's say you make $5,000 profit. The max you can withdraw is $4,000 because of the 1% fixed buffer. After withdrawing your balance is now $101,000 and your max drawdown is locked in at $100,000.Is the Drawdown Trailing?
+Yes, max drawdown for instant funding is trailing
+What is the profit split?
+Profit split for Instant Funded Starter is 90%.
+
+Consistency Rule
+The consistency rule applies to Blue Guardian instant funded starter challenges.
+
+Please make sure to read the below carefully before you start trading.
+
+On instant funded starter challenges a consistency rule of 15% applies, that means that one trading day can not equal or be greater than 15% of the total profits made. When the profits of one trading day equals or is greater than 15% of total profits made that payout period, you CANNOT request a payout until the highest profit trading day falls below the 15% of total profits made on that account within that particular period.
+
+What if I make more than 15% of my total PnL in one day? Will that breach my account? Your account will not be terminated if you violate the 15% rule, you must continue trading and make more profits until the highest profit trading day falls below the 15% of total profits.
+
+For example if you make $1,000 in one trading day, you will at least need to reach $6,666 in total profits within that period to be able to withdraw profits from your account.Other Rules
+Cheating Is Prohibited
+Of course, any trading styles that are deemed as "cheating" are not permitted and will result in a violation of our Terms of Service. For this reason, it is against our rules to take advantage of strategies that generate risk-free, consistent profits only on demo accounts. Our Funded Traders are expected to be trading on their accounts as if they are live accounts. Any use of a strategy that takes advantage of demo accounts will result in the closure of a Funded Trader’s account, whether in the evaluation phase or while funded.
+‍
+Example Strategies That Violate Our Rules
+- Use of platform or data freezing due to a Demo Server error.- Use of a delayed data feed- Trading on delayed charts- Tick scalping, high frequency trading, arbitrage bots– Reverse arbitrage– Latency arbitrage– Hedge arbitrage or any emulators are prohibited.
+‍
+These are the most common strategies that we have seen people use to take advantage of demo accounts, though this list does not represent all possible strategies that would go against our trading rules. If any account is seen to be using unfair strategies or an unrealistic trading style, they will not be eligible to be funded.It's imperative for traders to remain vigilant of market dynamics, particularly during news events, as fluctuations can lead to slippage and account synchronisation delays. Consequently, this may yield varied outcomes, making it impossible for us to ensure profits during such volatile periods on funded accounts.
+‍
+Changing of Password
+The exact password has to be used which was sent by us via email to access the platform. Changing passwords is not allowed.
+
+Account Inactivity
+
+We require you to place at least one trade every 30 days. If this is not done we will consider your account inactive and a breach of your account will occur.
+
+‍Gambling Rule
+‍
+We have a strict policy against trading strategies that rely on “all or nothing” or gambling-style behaviour.
+
+We classify gambling as any trading activity where margin usage exceeds 80% in any trade. Trades of this nature show a significant lack of risk management and are not aligned with the principles we uphold.
+
+Our goal is to identify disciplined, consistent traders who can manage risk effectively while generating sustainable profits. These are the traders we choose to partner with and provide simulated funded accounts of up to $400,000.
+
+Strategies that depend on excessive margin usage, single-trade outcomes, or reckless risk exposure are not permittedIs There Minimum Holding Time?
+The minimum holding time is 2 minutes. If a trade is closed in under 2 minutes, it may be flagged for tick scalping, which is against our trading rules.
