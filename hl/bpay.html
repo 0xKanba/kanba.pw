@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="theme-color" content="#080808" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#f4efe8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#07070a" media="(prefers-color-scheme:dark)">
+  <meta name="theme-color" content="#f0ece4" media="(prefers-color-scheme:light)">
   <title>مبادلة · كانبا Exchange</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -12,282 +12,326 @@
 </head>
 <body>
 
-<!-- ══ IP BLOCK OVERLAY ══════════════════════════ -->
+<!-- ══ IP BLOCK ══════════════════════════════════ -->
 <div id="ipOverlay" class="ip-overlay hidden">
   <div class="ip-card">
-    <div class="ip-icon">🇮🇶</div>
+    <div class="ip-flag">🇮🇶</div>
     <h2>الخدمة متاحة للعراق فقط</h2>
-    <p>
-      هذه الخدمة مخصصة حصراً لمستخدمي جمهورية العراق الذين لديهم
-      حساب نشط في <strong>زين كاش</strong> أو <strong>سوبر كي</strong>.
-    </p>
-    <p class="ip-en">This service is exclusively available in Iraq.<br>VPN usage is prohibited and may result in order cancellation.</p>
+    <p>هذه الخدمة مخصصة حصراً للمقيمين في العراق الذين يمتلكون حساباً في <strong>زين كاش</strong> أو <strong>سوبر كي</strong>.</p>
+    <p>This service is exclusively available in Iraq · VPN is prohibited</p>
   </div>
 </div>
 
-<!-- ══ MAIN APP ══════════════════════════════════ -->
-<div id="app" class="app">
+<!-- ══ CONFIRMATION OVERLAY (fullscreen layer) ═══ -->
+<div id="confirmOverlay" class="confirm-overlay hidden">
+  <div class="confirm-panel">
+    <div class="confirm-panel-head">
+      <span class="confirm-panel-ico" id="covIco">📋</span>
+      <div>
+        <h2 class="confirm-panel-title">تأكيد الطلب</h2>
+        <p class="confirm-panel-sub">راجع بياناتك قبل الإرسال</p>
+      </div>
+    </div>
+
+    <div class="confirm-rows" id="covRows"></div>
+
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">← تعديل</button>
+      <button class="btn btn-gold" id="covSendBtn" onclick="confirmSend()">
+        إرسال الطلب الآن ✓
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN PAGE ══════════════════════════════════ -->
+<div class="page" id="mainPage">
 
   <!-- Header -->
   <header class="header">
-    <div class="header-brand">
-      <span class="header-icon">⚡</span>
-      <span>كانبا <em>Exchange</em></span>
-    </div>
+    <div class="header-brand">⚡ كانبا <em>Exchange</em></div>
     <div class="header-rates">
-      <span class="rate-badge buy-r">شراء <b id="buyRateDisplay">1,600</b> ﷼</span>
-      <span class="rate-badge sell-r">بيع <b id="sellRateDisplay">1,500</b> ﷼</span>
+      <span class="rate-pill buy">شراء <b id="rBuy">1,600</b></span>
+      <span class="rate-pill sell">بيع <b id="rSell">1,500</b></span>
     </div>
   </header>
 
-  <!-- Mode Selector -->
-  <div class="mode-grid">
-    <button class="mode-btn" id="btnModeBuy" onclick="setMode('buy')">
-      <span class="mode-icon">💵</span>
-      <span class="mode-title">شراء دولار</span>
-      <span class="mode-sub">تدفع دينار · تستلم USDC</span>
-    </button>
-    <button class="mode-btn" id="btnModeSell" onclick="setMode('sell')">
-      <span class="mode-icon">🏦</span>
-      <span class="mode-title">بيع دولار</span>
-      <span class="mode-sub">ترسل USDC · تستلم دينار</span>
-    </button>
-  </div>
+  <main class="stage">
 
-  <!-- ══ BUY SECTION ════════════════════════════ -->
-  <div id="buySection" class="form-section hidden">
-
-    <!-- Rate + Calc -->
-    <div class="form-card">
-      <div class="form-card-title">سعر الصرف</div>
-      <div class="rate-card">
-        <span class="rate-label">1 دولار أمريكي (USDC) =</span>
-        <span class="rate-value" id="buyRateCard">1,600 د.ع</span>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">المبلغ بالدينار العراقي (IQD)</label>
-        <div class="limits-row">
-          <span class="limit-tag">الحد الأدنى: 15,000</span>
-          <span class="limit-tag">الحد الأقصى: 1,000,000</span>
-        </div>
-        <input type="number" class="field-input" id="buyAmountIQD"
-               placeholder="مثال: 50000" min="15000" max="1000000"
-               oninput="calcBuy()" inputmode="numeric">
-        <div class="calc-display">
-          <span class="calc-label">ستستلم تقريباً</span>
-          <span class="calc-value buy-color" id="buyCalcUSD">— USDC</span>
-        </div>
-        <p class="field-hint">* يشمل 1$ ETH كرسوم إيداع في Hyperliquid</p>
-      </div>
+    <!-- Hero -->
+    <div class="mode-hero">
+      <div class="mode-hero-title">صرافة رقمية آمنة 🇮🇶</div>
+      <div class="mode-hero-sub">اختر العملية التي تريد تنفيذها</div>
     </div>
 
-    <!-- Wallet + Method -->
-    <div class="form-card">
-      <div class="form-card-title">بيانات الاستلام</div>
-
-      <div class="field-group">
-        <label class="field-label">عنوان محفظتك (Arbitrum / EVM)</label>
-        <input type="text" class="field-input mono" id="buyWallet"
-               placeholder="0x..." dir="ltr" autocomplete="off" spellcheck="false">
-        <p class="field-hint">سيُرسل إليه USDC + 1$ ETH كرسوم أولى</p>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">طريقة الإرسال</label>
-        <div class="pay-methods" id="buyPayMethods">
-          <label class="pay-method" id="pm-zain" onclick="selectMethod('buy','zain')">
-            <input type="radio" name="buyMethod" value="zain">
-            <span class="pay-icon">📱</span>
-            <span class="pay-name">زين كاش</span>
-            <span class="pay-desc">ZainCash</span>
-          </label>
-          <label class="pay-method" id="pm-super" onclick="selectMethod('buy','super')">
-            <input type="radio" name="buyMethod" value="super">
-            <span class="pay-icon">💳</span>
-            <span class="pay-name">سوبر كي</span>
-            <span class="pay-desc">SuperKey</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">ملاحظة (اختياري)</label>
-        <textarea class="field-input" id="buyNote" placeholder="أي تفاصيل إضافية..." rows="2"></textarea>
-      </div>
+    <!-- Mode selector -->
+    <div class="mode-grid">
+      <button class="mode-btn" id="btnBuy" onclick="setMode('buy')">
+        <span class="mode-icon">💵</span>
+        <span class="mode-title">شراء دولار</span>
+        <span class="mode-sub">تدفع دينار · تستلم دولار</span>
+      </button>
+      <button class="mode-btn" id="btnSell" onclick="setMode('sell')">
+        <span class="mode-icon">🏦</span>
+        <span class="mode-title">بيع دولار</span>
+        <span class="mode-sub">ترسل دولار · تستلم دينار</span>
+      </button>
     </div>
 
-    <!-- Terms -->
-    <div class="terms-row" id="buyTermsRow">
-      <span class="terms-icon">📜</span>
-      <span class="terms-text">
-        يجب قراءة والموافقة على
-        <a class="terms-link" href="/hl/rules.html" target="_blank" onclick="openTerms()">الشروط والأحكام</a>
-        قبل إتمام الطلب
-      </span>
-      <span class="terms-badge pending" id="buyTermsBadge">لم يُوافَق بعد</span>
-    </div>
+    <!-- Cards column -->
+    <div class="cards-col" id="cardsCol" style="display:none">
+      <div class="connector"></div>
 
-    <button class="btn-submit buy-btn" id="buySubmit" onclick="submitBuy()" disabled>
-      إرسال طلب الشراء ←
-    </button>
+      <!-- ─── STEP 1: Form ─── -->
+      <div class="step-card" id="formCard">
+        <div class="card-head">
+          <span class="step-badge gold" id="formBadge">1</span>
+          <div>
+            <div class="card-head-title" id="formTitle">تفاصيل الطلب</div>
+            <div class="card-head-sub" id="formSub">أدخل بيانات المعاملة</div>
+          </div>
+        </div>
+        <div class="card-body">
 
-    <!-- Confirmation (hidden until submit) -->
-    <div class="confirm-card hidden" id="buyConfirm">
-      <div class="confirm-header">
-        <span class="confirm-header-icon">✅</span>
-        <div class="confirm-header-text">
-          <h3>تم استلام طلبك</h3>
-          <p>أرسل المبلغ عبر الطريقة المختارة</p>
+          <div class="rate-box">
+            <span class="rate-lbl" id="rateLbl">1 دولار أمريكي =</span>
+            <span class="rate-val" id="rateVal">—</span>
+          </div>
+
+          <!-- ══ BUY FIELDS ══ -->
+          <div id="buyFields">
+            <div class="field">
+              <label class="field-lbl">المبلغ بالدينار العراقي</label>
+              <div class="limits">
+                <span class="lim">أدنى: 15,000</span>
+                <span class="lim">أقصى: 1,000,000</span>
+              </div>
+              <input type="number" class="inp" id="buyIQD"
+                     placeholder="مثال: 80,000" inputmode="numeric"
+                     oninput="calcBuy()" min="15000" max="1000000">
+              <div class="calc">
+                <span class="calc-lbl">ستستلم تقريباً</span>
+                <span class="calc-val cv-buy" id="buyUSD">— دولار أمريكي</span>
+              </div>
+              <p class="field-hint">* يشمل مبلغ صغير ETH كرسوم إيداع أولى</p>
+            </div>
+
+            <div class="field">
+              <label class="field-lbl">عنوان محفظتك (Arbitrum)</label>
+              <input type="text" class="inp mono" id="buyWallet"
+                     placeholder="0x..." dir="ltr" autocomplete="off"
+                     oninput="validate()">
+              <p class="field-hint">سيُرسل إليه الدولار الأمريكي</p>
+            </div>
+
+            <div class="field">
+              <label class="field-lbl">طريقة إرسالك للمبلغ</label>
+              <div class="pay-grid">
+                <label class="pay-opt" id="optZainB" onclick="pickMethod('buy','zain')">
+                  <input type="radio" name="bm">
+                  <span class="pay-ico">📱</span>
+                  <span class="pay-name">زين كاش</span>
+                </label>
+                <label class="pay-opt" id="optSuperB" onclick="pickMethod('buy','super')">
+                  <input type="radio" name="bm">
+                  <span class="pay-ico">💳</span>
+                  <span class="pay-name">سوبر كي</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-lbl">ملاحظة (اختياري)</label>
+              <textarea class="inp" id="buyNote" placeholder="أي تفاصيل..." rows="2"></textarea>
+            </div>
+          </div><!-- /buyFields -->
+
+          <!-- ══ SELL FIELDS ══ -->
+          <div id="sellFields" style="display:none">
+            <div class="field">
+              <label class="field-lbl">المبلغ بالدولار الأمريكي</label>
+              <div class="limits">
+                <span class="lim" id="sellMinLbl">أدنى: 10</span>
+                <span class="lim" id="sellMaxLbl">أقصى: 666</span>
+              </div>
+              <input type="number" class="inp mono" id="sellUSDC"
+                     placeholder="مثال: 50" inputmode="decimal" dir="ltr"
+                     oninput="calcSell()" step="0.01">
+              <div class="calc">
+                <span class="calc-lbl">ستستلم تقريباً</span>
+                <span class="calc-val cv-sell" id="sellIQD">— د.ع</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-lbl">اسمك الكامل</label>
+              <input type="text" class="inp" id="sellName"
+                     placeholder="الاسم الثلاثي" oninput="validate()">
+            </div>
+
+            <div class="field">
+              <label class="field-lbl">رقم هاتفك</label>
+              <input type="tel" class="inp mono" id="sellPhone"
+                     placeholder="07XXXXXXXXX" dir="ltr" maxlength="11"
+                     inputmode="tel" oninput="validate()">
+              <p class="field-hint">سيُرسل الدينار على هذا الرقم</p>
+            </div>
+
+            <div class="field">
+              <label class="field-lbl">عنوان محفظتك (لإثبات التحويل)</label>
+              <input type="text" class="inp mono" id="sellProofWallet"
+                     placeholder="0x..." dir="ltr" autocomplete="off"
+                     oninput="validate()">
+              <p class="field-hint">يُستخدم للتحقق من التحويل على البلوكشين</p>
+            </div>
+
+            <div class="field">
+              <label class="field-lbl">طريقة استلامك للدينار</label>
+              <div class="pay-grid">
+                <label class="pay-opt" id="optZainS" onclick="pickMethod('sell','zain')">
+                  <input type="radio" name="sm">
+                  <span class="pay-ico">📱</span>
+                  <span class="pay-name">زين كاش</span>
+                </label>
+                <label class="pay-opt" id="optSuperS" onclick="pickMethod('sell','super')">
+                  <input type="radio" name="sm">
+                  <span class="pay-ico">💳</span>
+                  <span class="pay-name">سوبر كي</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-lbl">ملاحظة (اختياري)</label>
+              <textarea class="inp" id="sellNote" placeholder="أي تفاصيل..." rows="2"></textarea>
+            </div>
+          </div><!-- /sellFields -->
+
+          <!-- T&C -->
+          <div class="terms-bar">
+            <span style="font-size:18px">📜</span>
+            <span class="terms-bar-txt">
+              يجب الموافقة على
+              <a href="/hl/rules.html" target="_blank" onclick="watchTerms()">الشروط والأحكام</a>
+            </span>
+            <span class="t-badge pend" id="tBadge">غير موافَق</span>
+          </div>
+
+          <!-- BUTTON 1 — opens confirm overlay -->
+          <button class="btn btn-buy" id="btn1" onclick="openConfirm()" disabled>
+            مراجعة وتأكيد الطلب ←
+          </button>
+
+        </div>
+      </div><!-- /formCard -->
+
+      <!-- ─── STEP 2: Payment info reveal ─── -->
+      <div id="revealSection" style="display:none">
+        <div class="connector"></div>
+
+        <!-- Timer bar -->
+        <div class="timer-bar" id="timerBar">
+          <span class="timer-ico">⏱</span>
+          <span>تختفي بياناتي بعد</span>
+          <span class="timer-val" id="timerVal">30:00</span>
+        </div>
+
+        <div class="reveal-card" id="revealCard">
+          <div class="reveal-head">
+            <span class="reveal-head-ico" id="revIco">💳</span>
+            <div class="reveal-head-txt">
+              <h3 id="revTitle">أرسل المبلغ إلى</h3>
+              <p id="revSub">انسخ البيانات وأرسل</p>
+            </div>
+          </div>
+          <div class="reveal-body">
+
+            <!-- اسم المستلم -->
+            <div class="info-row">
+              <div class="info-lbl">اسم المستلم</div>
+              <div class="info-val xl" id="revName"></div>
+            </div>
+
+            <!-- الرقم / العنوان -->
+            <div class="info-row">
+              <div class="info-lbl" id="revContactLbl">رقم الاستلام</div>
+              <div class="copy-row">
+                <span class="info-val mono" id="revContact"></span>
+                <button class="btn-copy" onclick="copyEl('revContact',this)">نسخ 📋</button>
+              </div>
+            </div>
+
+            <!-- الرقم السري (شراء فقط) -->
+            <div class="info-row" id="rowSecret">
+              <div class="info-lbl">الرقم السري للتأكيد 🔐</div>
+              <div class="copy-row">
+                <span class="info-val mono" id="revSecret"></span>
+                <button class="btn-copy" onclick="copyEl('revSecret',this)">نسخ 📋</button>
+              </div>
+              <p style="font-size:11px;color:var(--text3);margin-top:5px">أذكر هذا الرقم عند التواصل للتأكيد</p>
+            </div>
+
+            <!-- شبكة (بيع) -->
+            <div class="info-row hidden" id="rowNetwork">
+              <div class="info-lbl">الشبكة — أرسل عليها فقط</div>
+              <div class="info-val" style="color:var(--sell)">⚠️ Arbitrum One (ARB20)</div>
+            </div>
+
+            <!-- المبلغ -->
+            <div class="info-row">
+              <div class="info-lbl" id="revAmountLbl">المبلغ</div>
+              <div class="info-val" id="revAmount"></div>
+            </div>
+
+            <!-- الطريقة (شراء) -->
+            <div class="info-row" id="rowMethod">
+              <div class="info-lbl">طريقة الإرسال</div>
+              <div class="info-val" id="revMethod"></div>
+            </div>
+
+            <div class="n-warn">
+              <span class="ni">⏱</span>
+              <span>سيصل خلال <strong>6 إلى 24 ساعة</strong> وبحد أقصى <strong>48 ساعة</strong> من استلام تحويلك.</span>
+            </div>
+
+            <div class="div"></div>
+
+            <!-- BUTTON 2 — تم الإرسال -->
+            <button class="btn btn-done" id="btn2" onclick="step2()">
+              ✅ تم الإرسال — أبلغ كانبا
+            </button>
+          </div>
+        </div>
+      </div><!-- /revealSection -->
+
+      <!-- ─── STEP 3: Success ─── -->
+      <div id="successSection" style="display:none">
+        <div class="connector"></div>
+        <div class="success-card">
+          <div class="success-ico">🎉</div>
+          <div class="success-title">وصلنا طلبك!</div>
+          <div class="success-txt">
+            تم إرسال تفاصيل معاملتك بنجاح.<br>
+            سنتواصل معك ونُنفّذ الطلب في أسرع وقت.<br><br>
+            <strong>شكراً لثقتك بكانبا Exchange 🇮🇶</strong>
+          </div>
         </div>
       </div>
-      <div class="confirm-body">
-        <div class="confirm-label">أرسل إلى</div>
-        <div class="confirm-value big">كانبا</div>
 
-        <div class="confirm-label">رقم الاستلام</div>
-        <div class="copy-row">
-          <span class="confirm-value mono" id="buyConfirmNumber"></span>
-          <button class="btn-copy" onclick="copyText('buyConfirmNumber')">نسخ 📋</button>
-        </div>
+    </div><!-- /cardsCol -->
+  </main>
 
-        <div class="confirm-label">المبلغ المطلوب</div>
-        <div class="confirm-value" id="buyConfirmAmount"></div>
-
-        <div class="confirm-label">الطريقة</div>
-        <div class="confirm-value" id="buyConfirmMethod"></div>
-
-        <div class="warn-note">
-          <span class="warn-note-icon">⏱</span>
-          <span>سيصل USDC إلى محفظتك خلال <strong>6 إلى 24 ساعة</strong> وبحد أقصى <strong>48 ساعة</strong> من تأكيد إرسالك.</span>
-        </div>
-        <div class="info-note">
-          <span class="info-note-icon">ℹ️</span>
-          <span>بعد إرسال الدفعة، احتفظ بلقطة شاشة كإثبات. الطلب مسجّل لدينا.</span>
-        </div>
-      </div>
-    </div>
-  </div><!-- /buySection -->
-
-  <!-- ══ SELL SECTION ═══════════════════════════ -->
-  <div id="sellSection" class="form-section hidden">
-
-    <!-- Rate + Calc -->
-    <div class="form-card">
-      <div class="form-card-title">سعر الصرف</div>
-      <div class="rate-card">
-        <span class="rate-label">1 دولار أمريكي (USDC) =</span>
-        <span class="rate-value" id="sellRateCard">1,500 د.ع</span>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">المبلغ بالدولار الأمريكي (USDC)</label>
-        <div class="limits-row">
-          <span class="limit-tag">الحد الأدنى: 10 USDC</span>
-          <span class="limit-tag">الحد الأقصى: 666 USDC</span>
-        </div>
-        <input type="number" class="field-input mono" id="sellAmountUSDC"
-               placeholder="مثال: 50" min="10" max="666" step="0.01"
-               oninput="calcSell()" inputmode="decimal" dir="ltr">
-        <div class="calc-display">
-          <span class="calc-label">ستستلم تقريباً</span>
-          <span class="calc-value sell-color" id="sellCalcIQD">— د.ع</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Phone + Wallet -->
-    <div class="form-card">
-      <div class="form-card-title">بيانات الاستلام</div>
-
-      <div class="field-group">
-        <label class="field-label">رقم هاتفك (لإرسال الدينار)</label>
-        <input type="tel" class="field-input mono" id="sellPhone"
-               placeholder="07XXXXXXXXX" dir="ltr" inputmode="tel" maxlength="11">
-        <p class="field-hint">سيُرسل الدينار عبر زين كاش أو سوبر كي على هذا الرقم</p>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">ملاحظة (اختياري)</label>
-        <textarea class="field-input" id="sellNote" placeholder="أي تفاصيل إضافية..." rows="2"></textarea>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Kanba's wallet - hidden until T&C + submit -->
-      <div id="walletTeaser">
-        <div class="info-note" style="border-radius:var(--r-sm)">
-          <span class="info-note-icon">🔒</span>
-          <span>عنوان المحفظة لإرسال USDC سيظهر <strong>بعد الموافقة على الشروط وإرسال الطلب</strong></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Terms -->
-    <div class="terms-row" id="sellTermsRow">
-      <span class="terms-icon">📜</span>
-      <span class="terms-text">
-        يجب قراءة والموافقة على
-        <a class="terms-link" href="/hl/rules.html" target="_blank" onclick="openTerms()">الشروط والأحكام</a>
-        قبل إتمام الطلب
-      </span>
-      <span class="terms-badge pending" id="sellTermsBadge">لم يُوافَق بعد</span>
-    </div>
-
-    <button class="btn-submit sell-btn" id="sellSubmit" onclick="submitSell()" disabled>
-      إرسال طلب البيع ←
-    </button>
-
-    <!-- Confirmation -->
-    <div class="confirm-card hidden" id="sellConfirm">
-      <div class="confirm-header">
-        <span class="confirm-header-icon">✅</span>
-        <div class="confirm-header-text">
-          <h3>تم استلام طلبك</h3>
-          <p>أرسل USDC إلى العنوان التالي</p>
-        </div>
-      </div>
-      <div class="confirm-body">
-        <div class="confirm-label">أرسل USDC إلى عنوان كانبا</div>
-        <div class="copy-row">
-          <span class="confirm-value mono" id="sellConfirmWallet" style="font-size:12px"></span>
-          <button class="btn-copy" onclick="copyText('sellConfirmWallet')">نسخ 📋</button>
-        </div>
-
-        <div class="confirm-label">الشبكة</div>
-        <div class="confirm-value">Arbitrum One (ARB)</div>
-
-        <div class="confirm-label">المبلغ المطلوب</div>
-        <div class="confirm-value" id="sellConfirmAmount"></div>
-
-        <div class="confirm-label">ستستلم</div>
-        <div class="confirm-value" id="sellConfirmIQD"></div>
-
-        <div class="warn-note">
-          <span class="warn-note-icon">⏱</span>
-          <span>سيصل الدينار إلى رقمك خلال <strong>6 إلى 24 ساعة</strong> وبحد أقصى <strong>48 ساعة</strong> من استلام التحويل.</span>
-        </div>
-        <div class="warn-note" style="margin-top:8px">
-          <span class="warn-note-icon">⚠️</span>
-          <span>أرسل على شبكة <strong>Arbitrum One فقط</strong>. الإرسال على شبكة خاطئة يؤدي لضياع الأموال ولا يمكن استرجاعها.</span>
-        </div>
-      </div>
-    </div>
-  </div><!-- /sellSection -->
-
-  <!-- Footer -->
   <footer class="footer">
-    <span class="footer-flag">🇮🇶</span>
-    <span>خدمة تبادل عملات P2P مخصصة للعراق</span>
+    <span>🇮🇶 خدمة P2P مخصصة للعراق</span>
     <div>
       <a href="/hl/rules.html" target="_blank">الشروط والأحكام</a>
       &nbsp;·&nbsp;
-      <a href="/hl/">العودة للتداول</a>
+      <a href="/hl/">← التداول</a>
     </div>
-    <span style="font-size:11px; color:var(--text3)">© 2025 Kanba Exchange — جميع الحقوق محفوظة</span>
+    <span style="font-size:11px">© 2025 Kanba Exchange</span>
   </footer>
 
-</div><!-- /app -->
+</div><!-- /page -->
 
 <script src="/hl/pay.js"></script>
 </body>
