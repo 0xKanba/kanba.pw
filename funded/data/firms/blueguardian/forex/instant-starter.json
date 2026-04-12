@@ -1,0 +1,61 @@
+{
+  "firm": {
+    "name": "Blue Guardian",
+    "type": "Forex",
+    "model": "Instant Starter",
+    "last_updated": "2026-04-12",
+    "sections": [
+      {
+        "id": "risk_parameters",
+        "title": "Risk Parameters",
+        "items": [
+          { "label": "Daily Loss Limit",      "value": "3% of initial balance", "detail": "At 17:00 EST, daily floor = max(balance, equity) − 3% of initial balance. Example: $5K account, equity $5,100 at reset → floor = $4,950. If balance > equity at reset, floor = balance − $150." },
+          { "label": "Max Trailing Drawdown", "value": "5% trailing HWM",       "detail": "Trails from highest closing trade balance. Locks at starting balance once 5% profit is reached. After lock, a fixed 1% buffer is added — you cannot withdraw all profit and then breach. Resets daily at 17:00 EST (daily DD only)." },
+          { "label": "Guardian Shield",       "value": "1% open loss trigger",  "detail": "Funded stage only. If total open PnL reaches −1% of initial balance, all trades are auto-closed. Soft breach: 1st = profit split drops to 50%. 2nd = account breached. Effective since 3 Mar 2025." },
+          { "label": "Consistency Rule",      "value": "≤ 15% per day",         "detail": "One trading day's profit must not equal or exceed 15% of total profits in the payout period. No account termination — must keep trading until highest day falls below 15%. Example: $1,000 best day → need ≥ $6,667 total to request payout." },
+          { "label": "Min Holding Time",      "value": "2 minutes",             "detail": "Trades closed in under 2 minutes may be flagged as tick scalping — prohibited and may result in account closure." },
+          { "label": "Margin Usage Limit",    "value": "< 80% per trade",       "detail": "Margin usage ≥ 80% on any single trade = gambling rule violation. Strategy must reflect disciplined risk management, not all-or-nothing behavior." },
+          { "label": "Inactivity Limit",      "value": "30 days",               "detail": "At least one trade must be placed every 30 calendar days. Failure = account breach." }
+        ]
+      },
+      {
+        "id": "trading_rules",
+        "title": "Trading Rules",
+        "items": [
+          { "label": "News Trading",   "value": "Allowed",          "detail": "News trading is permitted. Be aware of slippage and account sync delays during high-impact events — outcomes cannot be guaranteed." },
+          { "label": "Overnight Hold", "value": "Allowed",          "detail": "No restrictions on holding positions overnight." },
+          { "label": "Weekend Hold",   "value": "Allowed",          "detail": "No restrictions on holding positions over the weekend." },
+          { "label": "Hedging",        "value": "Allowed",          "detail": "Hedging strategies are permitted." },
+          { "label": "Martingale",     "value": "Allowed",          "detail": "Martingale strategies are permitted." },
+          { "label": "Stop Loss",      "value": "Not required",     "detail": "No mandatory stop loss. However, if most trades have no SL, the risk team may require you to implement one." },
+          { "label": "EAs / Copiers",  "value": "Allowed",          "detail": "Expert Advisors and trade copiers permitted for your own strategy. VPN/VPS allowed but must not be used to bypass copy/group/signal trading rules." },
+          { "label": "HFT / Arbitrage","value": "Prohibited",       "detail": "Tick scalping, HFT, latency arbitrage, reverse arbitrage, hedge arbitrage, delayed data feeds, platform freezing exploits — all prohibited. Account terminated without compensation." }
+        ]
+      },
+      {
+        "id": "leverage",
+        "title": "Leverage by Asset Class",
+        "table": {
+          "headers": ["Asset Class", "Leverage"],
+          "rows": [
+            ["Forex",       "1:30"],
+            ["Indices",     "1:10"],
+            ["Commodities", "1:10"],
+            ["Crypto",      "1:2"]
+          ]
+        }
+      },
+      {
+        "id": "payouts",
+        "title": "Payouts",
+        "items": [
+          { "label": "Profit Split",       "value": "90%",            "detail": "Starting split. Drops to 50% after 1st Guardian Shield breach. Account breached after 2nd." },
+          { "label": "Min Trading Days",   "value": "5 days",         "detail": "5 profitable days (≥ 0.5% each, non-consecutive) required before payout. No maximum trading days." },
+          { "label": "Payout Cap",         "value": "5% of balance",  "detail": "Single payout maximum is 5% of initial balance per cycle." },
+          { "label": "One Payout Only",    "value": "⚠️ Single use",  "detail": "Instant Starter is limited to ONE payout per account. After first payout the account is closed. One account per trader." },
+          { "label": "Max Capital",        "value": "$5,000",         "detail": "Maximum account size for Instant Funding Starter. One account per trader." }
+        ]
+      }
+    ]
+  }
+}
