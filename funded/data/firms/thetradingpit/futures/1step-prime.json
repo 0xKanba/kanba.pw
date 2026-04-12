@@ -2,171 +2,89 @@
   "firm": {
     "name": "The Trading Pit",
     "type": "Futures",
-    "model": "1-step Prime",
-    "last_updated": "2026-03-06",
+    "model": "Futures Prime — 1-Step",
+    "last_updated": "2026-04-12",
     "sections": [
-      {
-        "id": "account_tiers",
-        "title": "Account Tiers & Pricing",
-        "table": {
-          "headers": [
-            "Size",
-            "Fee",
-            "Contracts (Std/Micro)",
-            "Target",
-            "Max DD",
-            "Duration",
-            "Activation",
-            "Split",
-            "Reset",
-            "Extend",
-            "Notes"
-          ],
-          "rows": [
-            ["$50,000", "$99", "5 / 50", "$3,000", "$2,000", "30 Days", "$0", "80%", "$79", "$99", "Daily Pause: OFF"],
-            ["$100,000", "$189", "10 / 100", "$6,000", "$3,000", "30 Days", "$0", "80%", "$149", "$189", "Daily Pause: OFF | Most Popular"],
-            ["$150,000", "$289", "15 / 150", "$9,000", "$4,500", "30 Days", "$0", "80%", "$229", "$289", "Daily Pause: OFF"]
-          ]
-        }
-      },
-      {
-        "id": "temporary_restrictions",
-        "title": "Temporary Futures Restrictions & Position Limits",
-        "status": "Active until further notice",
-        "note": "Temporary measures. After the war ends, they will return to normal (بعد انتهاء الحرب سترجع للوضع طبيعي).",
-        "items": [
-          {
-            "label": "Restricted Products",
-            "value": "Prohibited",
-            "detail": "Energy: Crude Oil (CL), Natural Gas (NG), E-Mini Natural Gas (QG). Metals: Gold (GC), Silver (SI), Copper (HG), Platinum (PL)."
-          }
-        ],
-        "table": {
-          "title": "Micro Commodity Position Limits",
-          "headers": ["Account Size", "Max Open Micro Contracts"],
-          "rows": [
-            ["$50,000", "2"],
-            ["$100,000", "4"],
-            ["$150,000", "6"]
-          ],
-          "detail": "Applies to: MCL, MGC, SIL, MHG, MNG."
-        }
-      },
       {
         "id": "risk_parameters",
         "title": "Risk Parameters",
         "items": [
-          {
-            "label": "Max Drawdown",
-            "value": "Trailing EOD",
-            "detail": "Trails upward based on End-of-Day closed P&L, never intraday peaks. Never moves downward. Locks permanently upon reaching the starting balance."
-          },
-          {
-            "label": "Inactivity Limit",
-            "value": "21 consecutive days",
-            "detail": "No trading activity breaches the account. Holding overnight or unexecuted pending orders do not count. Countdown starts immediately upon purchase."
-          },
-          {
-            "label": "Consistent Trading Size",
-            "value": "Required",
-            "detail": "Lot sizes must remain consistent. Large deviations from usual behavior violate standard market risk management."
-          }
+          { "label": "Max Drawdown",       "value": "EOD Trailing",    "detail": "Trails upward based on End-of-Day balance (closed P&L only). Intraday peaks do NOT affect it. Stops trailing once it reaches starting balance. Example: $100K start → floor at $97K, rises with EOD balance, locks when EOD exceeds starting balance." },
+          { "label": "Daily Pause",        "value": "OFF",             "detail": "No daily loss limit / daily pause rule on Futures Prime accounts." },
+          { "label": "Profit Target",      "value": "Fixed per size",  "detail": "$50K → $3,000 · $100K → $6,000 · $150K → $9,000" },
+          { "label": "Min Trading Days",   "value": "3 unique days",   "detail": "Must place a trade on at least 3 separate calendar days to pass. Overnight holds do not count as a new trading day." },
+          { "label": "Consistent Size",    "value": "Required",        "detail": "Avoid large deviations in position sizes vs. your usual pattern. Example breach: 10 contracts Day 1–2, then 1 contract on Day 3 (minimum day) = violation." },
+          { "label": "Inactivity Limit",   "value": "21 days",        "detail": "21 consecutive days without placing a trade = account breached. Countdown starts immediately at purchase. Overnight holds and pending orders do not count." },
+          { "label": "Challenge Duration", "value": "30 days",        "detail": "Calendar days including weekends and holidays. Cannot be paused or stopped." }
         ]
       },
       {
-        "id": "activity_requirements",
-        "title": "Trading Activity & Setup",
-        "items": [
-          {
-            "label": "Minimum Trading Days",
-            "value": "3 unique days",
-            "detail": "Required to pass. Holding an overnight position does not count as a new trading day."
-          },
-          {
-            "label": "Challenge Duration",
-            "value": "30, 60, or 90 calendar days",
-            "detail": "Starts immediately upon purchase, includes weekends/holidays, cannot be paused."
-          },
-          {
-            "label": "Multiple Accounts",
-            "value": "Unlimited (5 copy limit)",
-            "detail": "Unlimited purchases. Copy-trading allowed on up to 5 accounts. Max 5 active Earning accounts; excess upgrades are queued."
-          },
-          {
-            "label": "IP Address",
-            "value": "Occasional changes allowed",
-            "detail": "Multiple IP changes within the same day raise suspicion of forbidden account sharing."
-          }
-        ]
+        "id": "account_sizes",
+        "title": "Challenge Plans",
+        "table": {
+          "headers": ["Account", "Price", "Contracts (Std/Micro)", "Target", "Max DD", "Reset", "Extend"],
+          "rows": [
+            ["$50,000",  "$99",  "5 / 50",   "$3,000", "$2,000", "$79",  "$99"],
+            ["$100,000", "$189", "10 / 100", "$6,000", "$3,000", "$149", "$189"],
+            ["$150,000", "$289", "15 / 150", "$9,000", "$4,500", "$229", "$289"]
+          ]
+        }
       },
       {
         "id": "trading_rules",
         "title": "Trading Rules",
         "items": [
-          {
-            "label": "Overnight & Weekend Holding",
-            "value": "Prohibited",
-            "detail": "Positions open at 14:55 CT (5 mins before close) are force-closed by Risk Managers."
-          },
-          {
-            "label": "News Trading",
-            "value": "Allowed",
-            "detail": "Permitted but carries high volatility and gap risks."
-          },
-          {
-            "label": "Micro-Scalping",
-            "value": "Prohibited",
-            "detail": "Entries/exits within 10-15 seconds. Flagged if ~40%+ of profitable trades are ultra-short. Penalties: Warning (Challenge), Profit deduction (Earning). Persistent violation leads to termination."
-          },
-          {
-            "label": "Prohibited Strategies",
-            "value": "HFT, Grid, Martingale, Gap Trading",
-            "detail": "Gap Trading: No trades within 2 hours of market close to exploit reopening gaps. HFT/Latency arbitrage results in immediate termination."
-          },
-          {
-            "label": "Standard Scalping",
-            "value": "Allowed",
-            "detail": "Permitted across all Challenges and Earning accounts."
-          },
-          {
-            "label": "Stop Loss / Take Profit",
-            "value": "Not mandatory",
-            "detail": "Strongly recommended. Risk Team may enforce SL usage if the majority of trades lack them."
-          }
+          { "label": "News Trading",     "value": "Allowed",         "detail": "News trading fully permitted on Futures Prime (challenge and earning). Be aware of heightened volatility risk." },
+          { "label": "Overnight Hold",   "value": "Prohibited",      "detail": "Positions still open at 14:55 CT are force-closed by Risk Managers. No exceptions." },
+          { "label": "Weekend Hold",     "value": "Prohibited",      "detail": "All positions must be closed before Friday market close. Weekend holding = breach." },
+          { "label": "Scalping",         "value": "Allowed",         "detail": "Scalping is permitted on all Futures Prime accounts." },
+          { "label": "Micro-Scalping",   "value": "Prohibited",      "detail": "Opening and closing within 10–15 seconds as a primary profit strategy is banned. Flagged when ≥40% of profitable trades are ultra-short-term. Challenge: warning. Earning: profit deducted." },
+          { "label": "HFT",              "value": "Prohibited",      "detail": "Any speed/latency exploitation, multiple trades per second, rapid-fire entries = account termination." },
+          { "label": "Grid / Martingale","value": "Prohibited",      "detail": "High-risk systematic strategies not allowed on any account." },
+          { "label": "Gap Trading",      "value": "Prohibited",      "detail": "No trades within 2 hours of market close when market stays closed 2+ hours. No pre-news gap positioning." },
+          { "label": "Copy Trading",     "value": "Max 5 accounts",  "detail": "Manual or auto copy allowed across up to 5 accounts. More than 5 = firm may deny upgrade on additional accounts." }
         ]
       },
       {
-        "id": "payout_conditions",
-        "title": "Rewards & Payout Policy",
+        "id": "restricted_products",
+        "title": "⚠️ Temporary Restrictions (War Period)",
         "items": [
-          {
-            "label": "Profit Split",
-            "value": "50% (Max $5,000 cap)",
-            "detail": "Whichever is lower. A 1% transaction/gas fee is deducted from the final profit share."
-          },
-          {
-            "label": "Winning Days Required",
-            "value": "5 per cycle",
-            "detail": "A Winning Day = ≥ $200 net profit. Non-consecutive. Counter resets after each payout."
-          },
-          {
-            "label": "Payout Eligibility",
-            "value": "Profitable since last reward",
-            "detail": "Account must be profitable (even by $0.01) since the last baseline to request the next payout."
-          }
+          { "label": "Restricted Instruments", "value": "Energy & Metals", "detail": "CL, NG, QG (Energy) · GC, SI, HG, PL (Metals) — All standard contracts SUSPENDED until further notice. Resumes to normal after market conditions stabilize." },
+          { "label": "Micro Commodity Limits", "value": "Temporary reduced", "detail": "MCL, MGC, SIL, MHG, MNG only. $50K → max 2 open · $100K → max 4 open · $150K → max 6 open. ⚠️ These limits are temporary. Normal limits return after restrictions are lifted." },
+          { "label": "Status",                 "value": "Until further notice", "detail": "Restrictions remain in place. Monitor official communications at support@thetradingpit.com for updates." }
         ]
       },
       {
-        "id": "payout_examples",
-        "title": "Payout Examples ($100,000 Start)",
+        "id": "payouts",
+        "title": "Reward Policy (Earning Accounts — from Mar 6, 2026)",
+        "items": [
+          { "label": "Profit Split",       "value": "80%",                    "detail": "Trader receives 80% of profits. A 1% fee deducted from payout to cover transaction/gas fees." },
+          { "label": "Payout Cap",         "value": "$5,000 or 50% of profit","detail": "Each payout = min($5,000, 50% of total realized profit). Applies to every cycle including first." },
+          { "label": "Winning Days Req.",  "value": "5 days / cycle",         "detail": "5 profitable trading days (non-consecutive), each with net profit ≥ $200. Counter resets after every payout." },
+          { "label": "Profit Since Last",  "value": "> $0 required",          "detail": "From 2nd payout onwards, must show any profit (even $0.01) above last payout baseline before requesting next." },
+          { "label": "Activation Fee",     "value": "$0 (was $129)",          "detail": "Activation fee currently waived across all account sizes." }
+        ]
+      },
+      {
+        "id": "payout_example",
+        "title": "Payout Calculation Example ($100K)",
         "table": {
-          "headers": ["Cycle", "Current Balance", "Total Profit", "Calculation", "Payout", "New Baseline"],
+          "headers": ["Scenario", "Balance", "Total Profit", "50% Profit", "Cap", "Payout"],
           "rows": [
-            ["1st Reward", "$110,000", "$10,000", "50% ($5,000) vs Cap ($5,000)", "$5,000", "$105,000"],
-            ["2nd Reward (A)", "$111,000", "$11,000", "50% ($5,500) vs Cap ($5,000)", "$5,000", "$106,000"],
-            ["2nd Reward (B)", "$106,000", "$6,000", "50% ($3,000) vs Cap ($5,000)", "$3,000", "$103,000"]
+            ["1st reward",          "$110,000", "$10,000", "$5,000", "$5,000", "$5,000"],
+            ["2nd reward (higher)",  "$111,000", "$11,000", "$5,500", "$5,000", "$5,000"],
+            ["2nd reward (lower)",   "$106,000", "$6,000",  "$3,000", "$5,000", "$3,000"]
           ]
         }
+      },
+      {
+        "id": "account_limits",
+        "title": "Account Limits",
+        "items": [
+          { "label": "Max Challenge Accounts", "value": "Unlimited",   "detail": "No cap on challenge purchases. Copy trades allowed in up to 5 accounts simultaneously." },
+          { "label": "Max Earning Accounts",   "value": "5 active",    "detail": "Max 5 active earning accounts at a time. New passes are queued until a slot opens." },
+          { "label": "Merging",                "value": "Same type only", "detail": "Futures Prime earning accounts can only be merged with other Futures Prime accounts." }
+        ]
       }
     ]
   }
