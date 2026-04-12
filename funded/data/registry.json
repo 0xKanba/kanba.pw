@@ -56,6 +56,20 @@
           ]
         }
       ]
+    },
+    {
+      "id": "blueguardian",
+      "name": "Blue Guardian",
+      "url": "https://www.blueguardian.com/",
+      "markets": [
+        {
+          "id": "forex",
+          "name": "Forex",
+          "accounts": [
+            { "id": "instant-starter", "name": "Instant Starter", "path": "data/firms/blueguardian/forex/instant-starter.json" }
+          ]
+        }
+      ]
     }
   ]
 }
