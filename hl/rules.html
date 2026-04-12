@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080808" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f4efe8" media="(prefers-color-scheme: light)">
+  <title>الشروط والأحكام · كانبا Exchange</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── Variables ── */
+    :root {
+      --bg:      #080808;
+      --card:    #141414;
+      --border:  rgba(255,255,255,0.07);
+      --text:    #f0ece4;
+      --text2:   #8a8580;
+      --text3:   #4a4540;
+      --ac:      #c9a654;
+      --ac-dim:  rgba(201,166,84,0.10);
+      --buy:     #22c55e;
+      --sell:    #ef4444;
+      --r:       18px;
+      --font:    'Cairo', sans-serif;
+      --mono:    'IBM Plex Mono', monospace;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:     #f4efe8;
+        --card:   #ffffff;
+        --border: rgba(0,0,0,0.07);
+        --text:   #1a1612;
+        --text2:  #6b6560;
+        --text3:  #a09a94;
+        --ac:     #9d7a1e;
+        --ac-dim: rgba(157,122,30,0.08);
+        --buy:    #16a34a;
+        --sell:   #dc2626;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      direction: rtl;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrapper {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 20px 80px;
+    }
+
+    /* Header */
+    .rules-header {
+      text-align: center;
+      padding: 40px 20px 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .rules-logo {
+      font-size: 48px; margin-bottom: 12px;
+    }
+    .rules-title {
+      font-size: 26px; font-weight: 900; color: var(--text);
+      margin-bottom: 6px;
+    }
+    .rules-subtitle {
+      font-size: 14px; color: var(--text2);
+    }
+    .rules-meta {
+      display: flex; gap: 12px; justify-content: center;
+      margin-top: 16px; flex-wrap: wrap;
+    }
+    .meta-tag {
+      font-size: 12px; padding: 4px 12px; border-radius: 99px;
+      border: 1px solid var(--border); color: var(--text2);
+      font-family: var(--mono);
+    }
+
+    /* Sections */
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 24px 28px;
+      margin-bottom: 16px;
+    }
+    .section-num {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      color: var(--ac); text-transform: uppercase;
+      font-family: var(--mono); margin-bottom: 6px;
+    }
+    .section-title {
+      font-size: 18px; font-weight: 700; color: var(--text);
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-body {
+      font-size: 14px; color: var(--text2); line-height: 1.9;
+    }
+    .section-body p { margin-bottom: 10px; }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body strong { color: var(--text); font-weight: 700; }
+    .section-body em { color: var(--ac); font-style: normal; font-weight: 600; }
+
+    ul.rules-list {
+      padding-right: 20px;
+      margin-top: 8px;
+    }
+    ul.rules-list li {
+      margin-bottom: 8px;
+      color: var(--text2);
+      font-size: 14px;
+    }
+    ul.rules-list li::marker { color: var(--ac); }
+
+    /* Warning box */
+    .rule-warn {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--sell);
+      line-height: 1.7;
+      margin-top: 14px;
+    }
+    .rule-info {
+      background: var(--ac-dim);
+      border: 1px solid rgba(201,166,84,0.2);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--ac);
+      line-height: 1.7;
+      margin-top: 14px;
+    }
+
+    /* Accept block */
+    .accept-block {
+      background: var(--card);
+      border: 2px solid var(--ac);
+      border-radius: var(--r);
+      padding: 28px;
+      margin-top: 24px;
+      text-align: center;
+    }
+    .accept-title {
+      font-size: 20px; font-weight: 700; margin-bottom: 12px;
+    }
+    .accept-text {
+      font-size: 14px; color: var(--text2); margin-bottom: 24px;
+      line-height: 1.7;
+    }
+    .accept-text strong { color: var(--sell); }
+
+    .btn-accept {
+      display: inline-block;
+      background: var(--buy);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 16px 48px;
+      font-family: var(--font);
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      width: 100%; max-width: 360px;
+    }
+    .btn-accept:hover { opacity: 0.9; transform: translateY(-2px); }
+    .btn-accept:active { transform: translateY(0); }
+
+    .btn-decline {
+      display: inline-block;
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 12px 32px;
+      font-family: var(--font);
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 12px;
+      width: 100%; max-width: 360px;
+      transition: opacity 0.2s;
+    }
+    .btn-decline:hover { opacity: 0.7; }
+
+    .accepted-msg {
+      display: none;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--buy);
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    /* Footer */
+    .rules-footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 12px;
+      color: var(--text3);
+      padding-bottom: 40px;
+    }
+    .rules-footer a { color: var(--ac); text-decoration: none; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .wrapper { animation: fadeUp 0.4s ease; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="rules-header">
+    <div class="rules-logo">⚖️</div>
+    <h1 class="rules-title">الشروط والأحكام</h1>
+    <p class="rules-subtitle">اتفاقية مزود خدمة تبادل العملات الرقمية — كانبا Exchange</p>
+    <div class="rules-meta">
+      <span class="meta-tag">النسخة 1.0</span>
+      <span class="meta-tag">2025-01-01</span>
+      <span class="meta-tag">🇮🇶 العراق فقط</span>
+      <span class="meta-tag">+18</span>
+    </div>
+  </div>
+
+  <!-- Preamble -->
+  <div class="section">
+    <div class="section-num">تمهيد</div>
+    <div class="section-title">مقدمة وطبيعة العلاقة التعاقدية</div>
+    <div class="section-body">
+      <p>تُحدِّد هذه الاتفاقية الشروط الكاملة التي تحكم علاقة <strong>مزود الخدمة ("كانبا"، الطرف الأول)</strong> بكل مستخدم لهذه المنصة (<strong>"المستخدم" أو "الطرف الثاني"</strong>).</p>
+      <p>هذه الخدمة عبارة عن <strong>تبادل عملات بين أفراد (P2P)</strong> بصفة شخصية خالصة، وهي <em>ليست</em> مؤسسة مالية مرخصة ولا بنكاً ولا شركة صرافة رسمية، ولا تخضع للرقابة المصرفية الصادرة عن البنك المركزي العراقي بوصفها شركة.</p>
+      <p>بالضغط على زر <strong>"أوافق على الشروط"</strong> أدناه، يُقرّ المستخدم صراحةً بأنه قرأ هذه الاتفاقية وفهمها وقبلها بالكامل وغير المشروط، وأن هذا القبول يُعادل توقيعاً ملزماً قانونياً.</p>
+    </div>
+  </div>
+
+  <!-- Article 1 -->
+  <div class="section">
+    <div class="section-num">المادة الأولى</div>
+    <div class="section-title">نطاق الخدمة والأهلية</div>
+    <div class="section-body">
+      <p><strong>1.1 — الخدمة المقدَّمة:</strong> تبادل العملة بين الدينار العراقي (IQD) والعملة الرقمية المستقرة (USDC) بسعر يحدده مزود الخدمة.</p>
+      <p><strong>1.2 — شروط الأهلية:</strong> يُشترط في المستخدم:</p>
+      <ul class="rules-list">
+        <li>أن يكون مقيماً في جمهورية العراق وأن يتعامل من داخل أراضيها.</li>
+        <li>أن يبلغ من العمر <em>ثمانية عشر (18) عاماً</em> فأكثر.</li>
+        <li>أن يمتلك حساباً نشطاً في <em>زين كاش</em> أو <em>سوبر كي</em> باسمه.</li>
+        <li>أن يكون لديه محفظة رقمية على شبكة <em>Arbitrum One</em> لاستلام USDC (في حالة الشراء).</li>
+        <li>أن يتمتع بالأهلية القانونية الكاملة لإبرام العقود وفق القانون العراقي.</li>
+      </ul>
+      <p><strong>1.3 — الحصرية الجغرافية:</strong> الخدمة مقصورة على العراق. استخدام شبكات VPN أو أي وسيلة لإخفاء الموقع الجغرافي الحقيقي يُعدّ انتهاكاً صريحاً يُبيح لمزود الخدمة إلغاء الطلب واسترداد الأموال وفق سياسة الاسترداد الواردة في المادة الخامسة.</p>
+    </div>
+  </div>
+
+  <!-- Article 2 -->
+  <div class="section">
+    <div class="section-num">المادة الثانية</div>
+    <div class="section-title">الأسعار والحدود والرسوم</div>
+    <div class="section-body">
+      <p><strong>2.1 — أسعار الصرف:</strong></p>
+      <ul class="rules-list">
+        <li><strong>سعر الشراء:</strong> 1,600 دينار عراقي لكل دولار أمريكي — يدفعه المستخدم لاستلام USDC.</li>
+        <li><strong>سعر البيع:</strong> 1,500 دينار عراقي لكل دولار أمريكي — يستلمه المستخدم مقابل إرسال USDC.</li>
+      </ul>
+      <p><strong>2.2 — الحدود المالية:</strong> الحد الأدنى للمعاملة هو <em>15,000 د.ع</em> والحد الأقصى هو <em>1,000,000 د.ع</em> لكل طلب.</p>
+      <p><strong>2.3 — تقلّب الأسعار:</strong> يحتفظ مزود الخدمة بحق تغيير الأسعار في أي وقت دون إشعار مسبق. السعر المعتمد هو السعر المعروض <em>وقت تقديم الطلب</em> لا وقت قراءة هذه الشروط.</p>
+      <p><strong>2.4 — رسوم إضافية:</strong> في حالة شراء USDC، يُرسَل ما يُعادل <em>1 دولار ETH</em> إضافياً إلى المحفظة كرسوم غاز أولية لتمكين الإيداع في Hyperliquid — وهذا ليس تكلفة إضافية على المستخدم.</p>
+      <div class="rule-info">ℹ️ السعر المعروض في المنصة هو السعر النهائي الشامل. لا توجد رسوم خفية.</div>
+    </div>
+  </div>
+
+  <!-- Article 3 -->
+  <div class="section">
+    <div class="section-num">المادة الثالثة</div>
+    <div class="section-title">آلية التنفيذ والمدة الزمنية</div>
+    <div class="section-body">
+      <p><strong>3.1 — عملية الشراء (IQD → USDC):</strong></p>
+      <ul class="rules-list">
+        <li>يُرسل المستخدم الدينار العراقي إلى مزود الخدمة عبر زين كاش أو سوبر كي.</li>
+        <li>يُرسل مزود الخدمة USDC + 1$ ETH إلى عنوان المحفظة المُدخل في الطلب.</li>
+      </ul>
+      <p><strong>3.2 — عملية البيع (USDC → IQD):</strong></p>
+      <ul class="rules-list">
+        <li>يُرسل المستخدم USDC إلى عنوان محفظة مزود الخدمة على شبكة Arbitrum One.</li>
+        <li>يُرسل مزود الخدمة الدينار العراقي إلى رقم هاتف المستخدم عبر زين كاش أو سوبر كي.</li>
+      </ul>
+      <p><strong>3.3 — المدة الزمنية:</strong> تتراوح مدة تنفيذ المعاملة بين <em>6 و24 ساعة</em> في الحالات الاعتيادية، وبحد أقصى <strong>48 ساعة</strong> من لحظة استلام التحويل وتأكيده.</p>
+      <p><strong>3.4 — ساعات العمل:</strong> الخدمة تعمل على مدار الساعة، غير أن تنفيذ المعاملات قد يتأخر في أوقات الذروة أو خارج ساعات الدوام اليومي.</p>
+      <div class="rule-warn">⚠️ المستخدم مسؤول بالكامل عن دقة عنوان المحفظة أو رقم الهاتف المُدخَل. الأموال المُرسلة إلى عنوان خاطئ لا يمكن استرجاعها وتقع المسؤولية الكاملة على المستخدم.</div>
+    </div>
+  </div>
+
+  <!-- Article 4 -->
+  <div class="section">
+    <div class="section-num">المادة الرابعة</div>
+    <div class="section-title">مسؤولية المستخدم وإقراراته</div>
+    <div class="section-body">
+      <p>بقبول هذه الشروط، يُقرّ المستخدم ويضمن صراحةً ما يلي:</p>
+      <ul class="rules-list">
+        <li>أن الأموال المُراد تبادلها <strong>ذات مصدر مشروع</strong> تماماً ومتوافقة مع القانون العراقي.</li>
+        <li>أنه يتحمل مسؤولية الإفصاح الضريبي عن معاملاته أمام الجهات العراقية المختصة.</li>
+        <li>أن البيانات المُدخلة (عنوان المحفظة، رقم الهاتف، المبلغ) صحيحة ودقيقة، وأي خطأ فيها يقع عليه وحده.</li>
+        <li>أنه يتعامل بصفته الشخصية لا بصفته وسيطاً أو وكيلاً لطرف ثالث.</li>
+        <li>أن هذه الخدمة ليست استثماراً ولا ضماناً بأي ربح.</li>
+        <li>أنه أتم الثامنة عشرة من عمره وأنه يقيم داخل العراق.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Article 5 -->
+  <div class="section">
+    <div class="section-num">المادة الخامسة</div>
+    <div class="section-title">سياسة الاسترداد والإلغاء</div>
+    <div class="section-body">
+      <p><strong>5.1 — اللارجعة في المعاملات:</strong> بمجرد إرسال المستخدم أمواله (دينار أو USDC) وتأكيد استلامها، <em>لا يمكن إلغاء المعاملة أو استرداد الأموال</em> إلا في الحالات المحددة أدناه.</p>
+      <p><strong>5.2 — حالات الاسترداد المقبولة:</strong></p>
+      <ul class="rules-list">
+        <li>إذا أرسل المستخدم الأموال وانقضت <strong>48 ساعة</strong> دون أن يُنفِّذ مزود الخدمة المعاملة.</li>
+        <li>إذا حدث خطأ تقني موثق من جانب مزود الخدمة.</li>
+      </ul>
+      <p><strong>5.3 — رسوم الاسترداد:</strong> في حالة الاسترداد المقبول، <em>يُخصم 1 USDC</em> من قيمة المبلغ المُسترد كرسوم معالجة، ويُرسل الباقي إلى نفس الحساب/العنوان الذي أرسل منه المستخدم.</p>
+      <p><strong>5.4 — حالات غير قابلة للاسترداد:</strong> خطأ المستخدم في عنوان المحفظة أو رقم الهاتف، استخدام VPN، أو أي انتهاك لهذه الشروط.</p>
+      <div class="rule-warn">⚠️ لا يقبل أي طلب استرداد بعد مرور 72 ساعة على إرسال الأموال مهما كانت الأسباب.</div>
+    </div>
+  </div>
+
+  <!-- Article 6 -->
+  <div class="section">
+    <div class="section-num">المادة السادسة</div>
+    <div class="section-title">إخلاء مسؤولية مزود الخدمة</div>
+    <div class="section-body">
+      <p>لا يتحمل مزود الخدمة المسؤولية في الحالات التالية:</p>
+      <ul class="rules-list">
+        <li>تأخير التحويل بسبب <strong>انقطاع الإنترنت</strong> أو أعطال شبكة Arbitrum أو بطء شبكات الدفع المحلية.</li>
+        <li>فقدان أموال بسبب <strong>خطأ في البيانات</strong> المُدخلة من قِبل المستخدم.</li>
+        <li>أي خسائر ناجمة عن <strong>تقلبات سعر الصرف</strong> بين وقت الطلب ووقت التنفيذ.</li>
+        <li>أي ظروف خارجة عن إرادة مزود الخدمة (قوة قاهرة): حظر حكومي، كوارث، توقف منصة Hyperliquid، إلخ.</li>
+        <li>أي استخدام غير مشروع أو احتيالي من قِبل المستخدم.</li>
+      </ul>
+      <p>الحد الأقصى لمسؤولية مزود الخدمة في أي حال من الأحوال هو <strong>إعادة المبلغ الأصلي المُستلم</strong> مطروحاً منه رسوم الاسترداد المشار إليها.</p>
+    </div>
+  </div>
+
+  <!-- Article 7 -->
+  <div class="section">
+    <div class="section-num">المادة السابعة</div>
+    <div class="section-title">المحظورات المطلقة</div>
+    <div class="section-body">
+      <p>يُحظر حظراً قاطعاً استخدام هذه الخدمة في:</p>
+      <ul class="rules-list">
+        <li>غسيل الأموال أو إخفاء مصادرها بأي شكل.</li>
+        <li>تمويل الإرهاب أو الجماعات المسلحة غير القانونية.</li>
+        <li>التهرب الضريبي أو الجمركي.</li>
+        <li>التحايل على العقوبات الدولية أو القيود المفروضة.</li>
+        <li>أي نشاط مخالف للقانون العراقي النافذ.</li>
+      </ul>
+      <p>أي انتهاك لهذه المادة يُلزم مزود الخدمة بالإبلاغ الفوري عن المعاملة للجهات المختصة وتجميد المبلغ.</p>
+      <div class="rule-warn">🔴 انتهاك هذه المادة يُعرّض المستخدم للملاحقة القانونية وفق قانون مكافحة غسيل الأموال العراقي رقم 39 لسنة 2015.</div>
+    </div>
+  </div>
+
+  <!-- Article 8 -->
+  <div class="section">
+    <div class="section-num">المادة الثامنة</div>
+    <div class="section-title">حماية البيانات الشخصية</div>
+    <div class="section-body">
+      <p><strong>8.1 — البيانات المُجمَّعة:</strong> تُحفظ بيانات الطلب (رقم الهاتف، عنوان المحفظة، المبلغ) لأغراض تنفيذ المعاملة وفض النزاعات فحسب.</p>
+      <p><strong>8.2 — عدم المشاركة:</strong> لا تُشارك هذه البيانات مع أي طرف ثالث لأغراض تجارية.</p>
+      <p><strong>8.3 — الإفصاح الإلزامي:</strong> يحتفظ مزود الخدمة بحق الإفصاح عن بيانات المعاملة إذا صدر أمر قضائي أو طلب رسمي من جهة حكومية عراقية مختصة.</p>
+      <p><strong>8.4 — المدة:</strong> تُحتفظ بسجلات المعاملات لمدة <em>خمس (5) سنوات</em> من تاريخ المعاملة.</p>
+    </div>
+  </div>
+
+  <!-- Article 9 -->
+  <div class="section">
+    <div class="section-num">المادة التاسعة</div>
+    <div class="section-title">تسوية النزاعات والاختصاص القضائي</div>
+    <div class="section-body">
+      <p><strong>9.1 — التسوية الودية:</strong> يلتزم الطرفان بالسعي إلى تسوية أي نزاع ودياً خلال مدة أقصاها <em>سبعة (7) أيام</em> من تاريخ نشوء النزاع.</p>
+      <p><strong>9.2 — الاختصاص القضائي:</strong> في حالة تعذّر التسوية الودية، تختص <em>محاكم بغداد العراقية</em> بالنظر في أي نزاع ينشأ عن هذه الاتفاقية أو يتعلق بها.</p>
+      <p><strong>9.3 — القانون المنطبق:</strong> تخضع هذه الاتفاقية للقانون العراقي النافذ، وتُفسَّر وفق أحكامه.</p>
+      <p><strong>9.4 — اللغة المرجعية:</strong> اللغة العربية هي اللغة الرسمية لهذه الاتفاقية، وفي حالة أي تعارض بين النسخة العربية وأي ترجمة، تُعتمد النسخة العربية.</p>
+      <p><strong>9.5 — التنازل عن المطالبة الجماعية:</strong> يوافق المستخدم على النظر في أي نزاع بصفة فردية فحسب، ويتنازل صراحةً عن حق المشاركة في أي دعوى جماعية ضد مزود الخدمة.</p>
+    </div>
+  </div>
+
+  <!-- Article 10 -->
+  <div class="section">
+    <div class="section-num">المادة العاشرة</div>
+    <div class="section-title">الأحكام الختامية</div>
+    <div class="section-body">
+      <p><strong>10.1 — التعديلات:</strong> يحتفظ مزود الخدمة بحق تعديل هذه الشروط في أي وقت. يُعدّ استمرار المستخدم في استخدام الخدمة بعد نشر التعديلات قبولاً ضمنياً لها.</p>
+      <p><strong>10.2 — قابلية الفصل:</strong> إذا تبيّن أن أي بند من بنود هذه الاتفاقية غير قانوني أو غير قابل للتنفيذ، يُعامَل ذلك البند منفصلاً ولا يؤثر على صحة باقي البنود.</p>
+      <p><strong>10.3 — الاتفاقية الكاملة:</strong> تمثّل هذه الوثيقة الاتفاقية الكاملة بين الطرفين وتحلّ محل أي اتفاقيات أو تفاهمات سابقة تتعلق بالموضوع ذاته.</p>
+      <p><strong>10.4 — عدم التنازل:</strong> تنازل مزود الخدمة عن حق ما في حالة معينة لا يُعدّ تنازلاً دائماً عن ذلك الحق.</p>
+      <div class="rule-info">✅ هذه الاتفاقية سارية المفعول من تاريخ قبولها إلكترونياً وملزمة لكلا الطرفين بالكامل.</div>
+    </div>
+  </div>
+
+  <!-- Accept Block -->
+  <div class="accept-block" id="acceptBlock">
+    <div class="accept-title">📋 قرار الموافقة</div>
+    <p class="accept-text">
+      بالضغط على <strong>"أوافق وأتابع"</strong> أدناه، أُقرّ بأنني قرأت هذه الشروط بالكامل وفهمتها وأوافق عليها بإرادتي الحرة.
+      أُقرّ كذلك بأنني بلغت 18 عاماً، ومقيم في العراق، وأن أموالي ذات مصدر مشروع.
+      <br><br>
+      <strong>هذا القبول الإلكتروني ملزم قانونياً بموجب القانون العراقي.</strong>
+    </p>
+    <button class="btn-accept" onclick="acceptTerms()">✅ أوافق وأتابع ←</button>
+    <br>
+    <button class="btn-decline" onclick="declineTerms()">❌ لا أوافق — عودة</button>
+    <div class="accepted-msg" id="acceptedMsg">
+      ✅ تمت الموافقة على الشروط. سيتم إغلاق هذه الصفحة أو يمكنك العودة يدوياً.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="rules-footer">
+    <p>© 2025 Kanba Exchange — جميع الحقوق محفوظة</p>
+    <p style="margin-top:6px"><a href="/hl/pay.html">← العودة إلى صفحة المبادلة</a></p>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+  const TERMS_KEY = 'kanba_terms_v1';
+
+  // إذا وافق مسبقاً، نظهر ذلك
+  if (localStorage.getItem(TERMS_KEY)) {
+    document.getElementById('acceptBlock').style.borderColor = 'var(--buy)';
+    document.getElementById('acceptedMsg').style.display = 'block';
+    document.querySelector('.btn-accept').textContent = '✅ وافقتَ بالفعل — العودة';
+    document.querySelector('.btn-accept').onclick = () => window.close() || history.back();
+  }
+
+  function acceptTerms() {
+    localStorage.setItem(TERMS_KEY, Date.now().toString());
+    document.getElementById('acceptedMsg').style.display = 'block';
+    document.getElementById('acceptBlock').style.borderColor = 'var(--buy)';
+    document.querySelector('.btn-accept').textContent = '✅ تمت الموافقة — جاري الإغلاق…';
+
+    // نحاول إغلاق التبويب أو الرجوع
+    setTimeout(() => {
+      try { window.close(); } catch {}
+      try { history.back(); } catch {}
+    }, 1200);
+  }
+
+  function declineTerms() {
+    try { window.close(); } catch {}
+    try { history.back(); } catch {}
+    window.location.href = '/hl/pay.html';
+  }
+</script>
+</body>
+</html>
