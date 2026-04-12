@@ -9,41 +9,55 @@
         "id": "risk_parameters",
         "title": "Risk Parameters",
         "items": [
-          { "label": "Daily Drawdown Limit",   "value": "3%",        "detail": "Of previous day's closing balance. Resets daily at 17:00 NY Time." },
-          { "label": "Max Overall Drawdown",   "value": "6%",        "detail": "Of initial balance. Static for lifetime of account. Hard breach on violation." },
-          { "label": "Floating DD Warning",    "value": "1.0%",      "detail": "Early warning notification at 1.0% floating loss per symbol. No consequence." },
-          { "label": "Floating DD Breach",     "value": "1.5%",      "detail": "First breach = formal warning (no strike). Second breach onwards = Soft Breach (strike). Per symbol, net combined open positions." },
-          { "label": "Profit Target",          "value": "None",      "detail": "Instant funding — no evaluation, no profit target." },
-          { "label": "Consistency Rule",       "value": "None",      "detail": "No consistency requirement for this account type." },
-          { "label": "Notional Volume",        "value": "1,250–5,000%", "detail": "Limit varies by account size. Breach = Soft Breach (strike)." },
-          { "label": "Leverage",               "value": "Up to 1:25", "detail": "" }
+          { "label": "Daily Drawdown",        "value": "3%",   "detail": "Equity must not fall below 3% of previous day's closing balance at any point. Resets daily at 17:00 NY Time. Hard breach = immediate closure without refund." },
+          { "label": "Max Overall Drawdown",  "value": "6%",   "detail": "Equity must not fall below 6% of initial balance. Static for account lifetime. Hard breach = immediate closure without refund." },
+          { "label": "Floating DD — Warning", "value": "1.0%", "detail": "Warning notification issued when combined unrealised loss on any single symbol reaches 1.0% of initial balance. No strike applied. Example: $50K account → warning at −$500 on any one symbol." },
+          { "label": "Floating DD — Breach",  "value": "1.5%", "detail": "First breach = formal warning, no strike. Second breach onwards = 1 soft breach strike each time. Measured per symbol, net of all open positions on that symbol. Always vs initial balance (not current equity)." },
+          { "label": "Profit Target",         "value": "None", "detail": "Instant funding — no evaluation, no profit target required." },
+          { "label": "Min Profitable Days",   "value": "5 days / cycle", "detail": "5 profitable days required per 14-day payout cycle before each payout. Profitable day = balance at 23:00 CET ≥ 0.5% higher than previous day. Cannot request payout or scale until MPD is met." },
+          { "label": "Consistency Rule",      "value": "None", "detail": "No consistency requirement for this account type." }
         ]
+      },
+      {
+        "id": "exposure_limits",
+        "title": "Notional Volume Limits",
+        "table": {
+          "headers": ["Account Size", "Notional Limit", "Max Exposure", "Leverage"],
+          "rows": [
+            ["$2,500",   "5,000%", "$125,000",   "33:1"],
+            ["$5,000",   "4,000%", "$200,000",   "33:1"],
+            ["$10,000",  "3,000%", "$300,000",   "33:1"],
+            ["$25,000",  "2,500%", "$625,000",   "33:1"],
+            ["$50,000",  "2,000%", "$1,000,000", "33:1"],
+            ["$100,000", "1,250%", "$1,250,000", "33:1"]
+          ]
+        }
       },
       {
         "id": "trading_rules",
         "title": "Trading Rules",
         "items": [
-          { "label": "Weekend Hold",   "value": "Soft breach (without add-on)", "detail": "Weekend holding requires purchasing the Weekend Holding Add-On. Without it = strike." },
-          { "label": "Overnight Hold", "value": "Allowed",                      "detail": "No restriction on overnight positions." }
+          { "label": "Weekend Hold",   "value": "Add-On required",  "detail": "Weekend holding only permitted via Weekend Holding Add-On. Without it, all positions must be flat before 17:00 NY Time Friday. Any position remaining open = soft breach strike." },
+          { "label": "Overnight Hold", "value": "Allowed",          "detail": "No restriction on overnight positions." }
         ]
       },
       {
         "id": "breach_rules",
-        "title": "Strike / Soft Breach System",
+        "title": "Soft Breach Framework (Cumulative)",
         "items": [
-          { "label": "Strike Sources", "value": "Notional volume, weekend hold, floating DD", "detail": "Strikes cumulative across all rules. Example: 1 from each = 3 total strikes." },
-          { "label": "Per Strike",     "value": "−10% next payout", "detail": "Each strike reduces next payout cycle by 10%." },
-          { "label": "5th Strike",     "value": "Account closure",  "detail": "5 cumulative strikes = permanent account closure." },
-          { "label": "Hard Breach",    "value": "Immediate closure", "detail": "Daily or max drawdown violation = instant termination." }
+          { "label": "Strike Sources",   "value": "3 rules",           "detail": "Strikes are cumulative across all rules: Notional Volume + Weekend Hold + Floating DD. Example: 1 strike from each = 3 total strikes on the account." },
+          { "label": "Per Strike",       "value": "−10% next payout",  "detail": "Each cumulative strike reduces the next payout cycle by 10%." },
+          { "label": "5th Strike",       "value": "Account closure",    "detail": "5 total cumulative strikes = permanent account closure." },
+          { "label": "Hard Breach",      "value": "Immediate closure",  "detail": "Daily or max drawdown violation = instant permanent termination. No recovery, no refund." }
         ]
       },
       {
         "id": "payouts",
         "title": "Payouts",
         "items": [
-          { "label": "Profit Split",      "value": "70%",           "detail": "Starting split for funded traders." },
-          { "label": "Payout Cycle",      "value": "On-demand → Bi-weekly", "detail": "On-demand after 5 minimum profitable days are completed, then every 14 days." },
-          { "label": "Min Profitable Days","value": "5 days / cycle", "detail": "Must complete 5 profitable days per 14-day cycle before each payout." }
+          { "label": "Profit Split",       "value": "70%",                   "detail": "Starting split for all Lite funded accounts." },
+          { "label": "Payout Cycle",       "value": "On-demand → Bi-weekly", "detail": "First payout on-demand after 5 minimum profitable days met. Subsequent payouts every 14 days." },
+          { "label": "Min Profitable Days","value": "5 days / cycle",        "detail": "Must complete 5 profitable days (≥ 0.5% each) per 14-day cycle before each payout. Counter resets after every payout." }
         ]
       }
     ]

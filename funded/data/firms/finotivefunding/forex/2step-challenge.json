@@ -9,39 +9,54 @@
         "id": "risk_parameters",
         "title": "Risk Parameters",
         "items": [
-          { "label": "Daily Drawdown Limit",  "value": "4.5%",   "detail": "Of previous day's closing balance. Resets daily at 17:00 NY Time. Static — does not trail." },
-          { "label": "Max Overall Drawdown",  "value": "9%",     "detail": "Of initial balance. Static for account lifetime. Breach = immediate closure." },
-          { "label": "Profit Target P1",      "value": "7.5%",   "detail": "Phase 1 target. Example: 8% for $50K account (may vary by size)." },
-          { "label": "Profit Target P2",      "value": "5%",     "detail": "Verification phase target." },
-          { "label": "Min Profitable Days",   "value": "2 days", "detail": "Minimum 2 profitable days (≥ 0.5% profit each) required per phase." },
-          { "label": "Notional Volume Limit", "value": "1,000–5,000%", "detail": "Limit varies by account size. Breach = Soft Breach (strike)." }
+          { "label": "Daily Drawdown",      "value": "4.5%",     "detail": "Equity must not fall below 4.5% of previous day's closing balance at any point. Resets daily at 17:00 NY Time. Static — does not trail. Hard breach = immediate closure without refund." },
+          { "label": "Max Overall Drawdown","value": "9%",       "detail": "Equity must not fall below 9% of initial balance. Static for account lifetime. Example: $100K account → equity must never drop below $91,000." },
+          { "label": "Profit Target P1",    "value": "7.5%",     "detail": "Phase 1 target of initial balance." },
+          { "label": "Profit Target P2",    "value": "5%",       "detail": "Verification phase target." },
+          { "label": "Min Profitable Days", "value": "2 days / phase", "detail": "2 profitable days per phase AND before each payout. Profitable day = balance at 23:00 CET is ≥ 0.5% higher than previous day. Final day can be fast-tracked if target is reached and trades are closed." }
         ]
       },
       {
         "id": "trading_rules",
         "title": "Trading Rules",
         "items": [
-          { "label": "News Trading",   "value": "Allowed (balanced)", "detail": "Trading permitted at all times. Unbalanced exploitation of high-impact news events not permitted." },
-          { "label": "Weekend Hold",   "value": "Not mentioned",      "detail": "Subject to general platform terms." },
-          { "label": "Overnight Hold", "value": "Allowed",            "detail": "No restriction on overnight positions." }
+          { "label": "News Trading",   "value": "Allowed (balanced)", "detail": "Trading permitted at all times. Unbalanced exploitation of high-impact news events is not permitted." },
+          { "label": "Weekend Hold",   "value": "Platform terms apply", "detail": "No specific weekend hold rule stated for 2-Step accounts. Subject to general platform terms." },
+          { "label": "Overnight Hold", "value": "Allowed",             "detail": "No restriction on overnight positions." }
         ]
+      },
+      {
+        "id": "exposure_limits",
+        "title": "Notional Volume Limits",
+        "table": {
+          "headers": ["Account Size", "Notional Limit", "Max Exposure", "Leverage"],
+          "rows": [
+            ["$2,500",   "5,000%", "$125,000",    "100:1"],
+            ["$5,000",   "4,000%", "$200,000",    "100:1"],
+            ["$10,000",  "3,000%", "$300,000",    "100:1"],
+            ["$25,000",  "2,500%", "$625,000",    "100:1"],
+            ["$50,000",  "2,000%", "$1,000,000",  "100:1"],
+            ["$100,000", "1,250%", "$1,250,000",  "100:1"],
+            ["$200,000", "1,000%", "$2,000,000",  "100:1"]
+          ]
+        }
       },
       {
         "id": "breach_rules",
         "title": "Breach System",
         "items": [
-          { "label": "Hard Breach",           "value": "Immediate closure",   "detail": "Triggered by daily or max drawdown violation. No recovery." },
-          { "label": "Soft Breach – Challenge","value": "Strike + conditions", "detail": "Must return to positive balance before reset is permitted. 5 soft breaches during challenge = account closure. All breaches cleared upon reaching funded status." },
-          { "label": "Soft Breach – Funded",  "value": "−10% payout/cycle",  "detail": "Each breach reduces next payout by 10%. 5 soft breaches during funded = account closure." }
+          { "label": "Hard Breach",              "value": "Immediate closure",    "detail": "Triggered by daily or max drawdown violation. Account closed without refund. No recovery." },
+          { "label": "Soft Breach — Notional",   "value": "Strike issued",        "detail": "Each breach of Notional Volume Limit = 1 strike. Challenge: must return to positive balance before reset allowed. 5 strikes = account closure. All strikes cleared upon reaching Funded Status." },
+          { "label": "Soft Breach — Funded",     "value": "−10% payout / cycle", "detail": "Each strike reduces next payout cycle by 10%. 5 cumulative strikes = permanent account closure." }
         ]
       },
       {
         "id": "payouts",
         "title": "Payouts",
         "items": [
-          { "label": "Profit Split",    "value": "80%",         "detail": "Starting split. On-demand after completing 2 minimum profitable days." },
-          { "label": "Payout Cycle",    "value": "Weekly",      "detail": "After initial on-demand, payouts available weekly." },
-          { "label": "Fee Refund",      "value": "30th funded day", "detail": "Challenge fee refunded on the 30th funded day if account is in profit." }
+          { "label": "Profit Split",  "value": "80%",              "detail": "Starting split on funded account. On-demand after completing 2 minimum profitable days." },
+          { "label": "Payout Cycle",  "value": "On-demand → Weekly","detail": "First payout on-demand after MPD met. Subsequent payouts available weekly." },
+          { "label": "Fee Refund",    "value": "30th funded day",   "detail": "100% challenge fee refunded on the 30th funded day if account is in profit." }
         ]
       }
     ]
