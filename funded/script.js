@@ -1,19 +1,20 @@
-/* ╔══════════════════════════════════════════════════╗
-   ║  PropRules · script.js                          ║
-   ║  Clean state tree — no globals except `App`     ║
-   ╚══════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  PropRules · script.js                                      ║
+   ║  Deep linking: /funded/?firm=X&market=Y&account=Z           ║
+   ║  URL syncs on every pill click — shareable at any state     ║
+   ╚══════════════════════════════════════════════════════════════╝ */
 
 const App = (() => {
 
-  /* ── State ──────────────────────────────────────── */
+  /* ── State ─────────────────────────────────────────────────── */
   const state = {
-    registry: null,
-    firm:     null,
-    market:   null,
-    account:  null,
+    registry: null,   // full registry.json
+    firm:     null,   // active firm object
+    market:   null,   // active market object
+    account:  null,   // active account object
   };
 
-  /* ── DOM ────────────────────────────────────────── */
+  /* ── DOM refs ───────────────────────────────────────────────── */
   const dom = {
     loading:     document.getElementById('loading'),
     content:     document.getElementById('content'),
@@ -27,10 +28,158 @@ const App = (() => {
     leftCol:     document.getElementById('left-col'),
     rightCol:    document.getElementById('right-col'),
     footerPath:  document.getElementById('footer-path'),
-    mainSection: document.getElementById('account-header'),
+    dashboard:   document.getElementById('dashboard'),
   };
 
-  /* ── Icons ──────────────────────────────────────── */
+  /* ── URL helpers ────────────────────────────────────────────── */
+
+  /** Read the 3 params from current URL */
+  function readURL() {
+    const p = new URLSearchParams(window.location.search);
+    return {
+      firm:    p.get('firm')    || null,
+      market:  p.get('market')  || null,
+      account: p.get('account') || null,
+    };
+  }
+
+  /** Push new URL without reloading — keeps browser history */
+  function writeURL(firmId, marketId, accountId) {
+    const p = new URLSearchParams();
+    if (firmId)    p.set('firm',    firmId);
+    if (marketId)  p.set('market',  marketId);
+    if (accountId) p.set('account', accountId);
+
+    const base = window.location.pathname;           // e.g. /funded/
+    const next = `${base}?${p.toString()}`;
+    if (window.location.href !== window.location.origin + next) {
+      history.pushState({ firmId, marketId, accountId }, '', next);
+    }
+  }
+
+  /* ── Resolve state from URL params or defaults ───────────────── */
+
+  /**
+   * Given optional ids, resolve to valid firm/market/account objects.
+   * Falls back gracefully to first available if ids are missing or invalid.
+   */
+  function resolveState({ firm: firmId, market: marketId, account: accountId }) {
+    // Firm
+    const firm = (firmId && state.registry.firms.find(f => f.id === firmId))
+      || state.registry.firms[0];
+
+    // Market
+    const market = (marketId && firm.markets.find(m => m.id === marketId))
+      || firm.markets[0];
+
+    // Account
+    const account = (accountId && market.accounts.find(a => a.id === accountId))
+      || market.accounts[0];
+
+    return { firm, market, account };
+  }
+
+  /* ── Pill builders ──────────────────────────────────────────── */
+
+  function buildPills(container, items, activeId, onClickId) {
+    container.innerHTML = '';
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'pill' + (item.id === activeId ? ' active' : '');
+      btn.textContent = item.name;
+      btn.dataset.id  = item.id;
+      btn.setAttribute('aria-pressed', item.id === activeId ? 'true' : 'false');
+      btn.addEventListener('click', () => onClickId(item.id));
+      container.appendChild(btn);
+    });
+  }
+
+  function activatePill(container, id) {
+    container.querySelectorAll('.pill').forEach(b => {
+      const on = b.dataset.id === id;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  /* ── Pill click handlers ────────────────────────────────────── */
+
+  function onFirmClick(firmId) {
+    const { firm, market, account } = resolveState({ firm: firmId });
+    applyState(firm, market, account, true);
+  }
+
+  function onMarketClick(marketId) {
+    const { market, account } = resolveState({
+      firm:    state.firm.id,
+      market:  marketId,
+    });
+    applyState(state.firm, market, account, true);
+  }
+
+  function onAccountClick(accountId) {
+    const { account } = resolveState({
+      firm:    state.firm.id,
+      market:  state.market.id,
+      account: accountId,
+    });
+    applyState(state.firm, state.market, account, true);
+  }
+
+  /* ── Apply state ────────────────────────────────────────────── */
+
+  /**
+   * Central state setter.
+   * @param {object}  firm
+   * @param {object}  market
+   * @param {object}  account
+   * @param {boolean} pushHistory — true when user clicks a pill
+   */
+  function applyState(firm, market, account, pushHistory = false) {
+    state.firm    = firm;
+    state.market  = market;
+    state.account = account;
+
+    /* sync pills */
+    activatePill(dom.firmPills, firm.id);
+
+    buildPills(dom.marketPills, firm.markets, market.id, onMarketClick);
+
+    buildPills(dom.accountPills, market.accounts, account.id, onAccountClick);
+
+    /* sync URL */
+    if (pushHistory) {
+      writeURL(firm.id, market.id, account.id);
+    }
+
+    /* render */
+    loadAndRender();
+  }
+
+  /* ── Load JSON + render ─────────────────────────────────────── */
+
+  async function loadAndRender() {
+    if (!state.account) return;
+    try {
+      const res = await fetch(state.account.path);
+      if (!res.ok) throw new Error(`HTTP ${res.status} — ${state.account.path}`);
+      const data = await res.json();
+      render(data.firm);
+    } catch (err) {
+      console.error('[PropRules] Failed to load account JSON:', err);
+      dom.leftCol.innerHTML = `
+        <div class="s-card">
+          <p class="item-detail" style="color:var(--c-text)">
+            ⚠ Could not load data for <strong>${state.account.id}</strong>.<br>
+            Check that the file exists at: <code>${state.account.path}</code>
+          </p>
+        </div>`;
+      dom.rightCol.innerHTML = '';
+    }
+  }
+
+  /* ── Icons ──────────────────────────────────────────────────── */
+
   const ICONS = {
     risk_parameters:      ['circle cx="12" cy="12" r="10"','line x1="12" y1="8" x2="12" y2="12"','line x1="12" y1="16" x2="12.01" y2="16"'],
     trading_rules:        ['circle cx="12" cy="12" r="10"','polyline points="12 6 12 12 16 14"'],
@@ -58,94 +207,33 @@ const App = (() => {
 
   function icon(id) {
     const parts = ICONS[id] || ICONS.default;
-    const paths = parts.map(p => `<${p}/>`).join('');
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      ${parts.map(p => `<${p}/>`).join('')}</svg>`;
   }
 
-  /* ── Pill builder ───────────────────────────────── */
-  function buildPills(container, items, activeId, onClick) {
-    container.innerHTML = '';
-    items.forEach(item => {
-      const btn = document.createElement('button');
-      btn.className = 'pill' + (item.id === activeId ? ' active' : '');
-      btn.textContent = item.name;
-      btn.dataset.id = item.id;
-      btn.setAttribute('aria-pressed', item.id === activeId ? 'true' : 'false');
-      btn.addEventListener('click', () => onClick(item.id));
-      container.appendChild(btn);
-    });
-  }
+  /* ── Render dashboard ───────────────────────────────────────── */
 
-  function setActive(container, id) {
-    container.querySelectorAll('.pill').forEach(b => {
-      const active = b.dataset.id === id;
-      b.classList.toggle('active', active);
-      b.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
-  }
-
-  /* ── Selection handlers ─────────────────────────── */
-  function selectFirm(id) {
-    state.firm   = state.registry.firms.find(f => f.id === id);
-    state.market = state.firm.markets[0];
-    state.account = state.market.accounts[0];
-    setActive(dom.firmPills, id);
-    buildPills(dom.marketPills, state.firm.markets, state.market.id, selectMarket);
-    buildPills(dom.accountPills, state.market.accounts, state.account.id, selectAccount);
-    loadAndRender();
-  }
-
-  function selectMarket(id) {
-    state.market  = state.firm.markets.find(m => m.id === id);
-    state.account = state.market.accounts[0];
-    setActive(dom.marketPills, id);
-    buildPills(dom.accountPills, state.market.accounts, state.account.id, selectAccount);
-    loadAndRender();
-  }
-
-  function selectAccount(id) {
-    state.account = state.market.accounts.find(a => a.id === id);
-    setActive(dom.accountPills, id);
-    loadAndRender();
-  }
-
-  /* ── Fetch + render ─────────────────────────────── */
-  async function loadAndRender() {
-    if (!state.account) return;
-    try {
-      const res  = await fetch(state.account.path);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      render(data.firm);
-    } catch (err) {
-      console.error('[PropRules] Failed to load:', state.account.path, err);
-      dom.leftCol.innerHTML  = `<div class="s-card"><p class="item-detail">Failed to load data. Check console.</p></div>`;
-      dom.rightCol.innerHTML = '';
-    }
-  }
-
-  /* ── Render dashboard ───────────────────────────── */
   function render(d) {
-    /* fade-in animation */
-    const wrap = document.getElementById('dashboard');
-    wrap.classList.remove('anim');
-    void wrap.offsetWidth;
-    wrap.classList.add('anim');
+    /* animation */
+    dom.dashboard.classList.remove('anim');
+    void dom.dashboard.offsetWidth;
+    dom.dashboard.classList.add('anim');
 
     /* header */
-    dom.firmLink.textContent = d.name.toUpperCase();
-    dom.firmLink.href        = state.firm.url || '#';
-    dom.firmSub.textContent  = `${d.type}  ·  ${d.model}`;
+    dom.firmLink.textContent    = d.name.toUpperCase();
+    dom.firmLink.href           = state.firm.url || '#';
+    dom.firmSub.textContent     = `${d.type}  ·  ${d.model}`;
     dom.lastUpdated.textContent = `Updated ${d.last_updated}`;
     dom.protoId.textContent     = `${state.account.id}.json`;
-    dom.footerPath.textContent  = `kanba.pw/funded/${state.firm.id}/${state.market.id}/${state.account.id}`;
+    dom.footerPath.textContent  =
+      `kanba.pw/funded/?firm=${state.firm.id}&market=${state.market.id}&account=${state.account.id}`;
 
-    /* split sections */
-    const itemSections  = d.sections.filter(s => s.items);
-    const tableSections = d.sections.filter(s => s.table);
+    const itemSecs  = d.sections.filter(s => s.items);
+    const tableSecs = d.sections.filter(s => s.table);
 
     /* left — item cards */
-    dom.leftCol.innerHTML = itemSections.map(sec => `
+    dom.leftCol.innerHTML = itemSecs.map(sec => `
       <div class="s-card">
         <div class="s-head">${icon(sec.id)}<h2>${sec.title}</h2></div>
         <div class="items">
@@ -162,8 +250,8 @@ const App = (() => {
       </div>
     `).join('');
 
-    /* right — tables + note */
-    dom.rightCol.innerHTML = tableSections.map(sec => `
+    /* right — table sections + note */
+    dom.rightCol.innerHTML = tableSecs.map(sec => `
       <div class="t-section">
         <div class="t-head">${icon(sec.id)}<h2>${sec.title}</h2></div>
         <div class="tbl-wrap">
@@ -177,42 +265,76 @@ const App = (() => {
       </div>
     `).join('') + `
       <div class="r-note">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
-        <p>Reference data for <strong>${d.name}</strong> ${d.type} — ${d.model}.<br>
+        <p>Reference for <strong>${d.name}</strong> ${d.type} — ${d.model}.<br>
         Always verify against official documentation before trading.</p>
-      </div>
-    `;
+      </div>`;
   }
 
-  /* ── Init ───────────────────────────────────────── */
+  /* ── Browser back/forward support ───────────────────────────── */
+
+  window.addEventListener('popstate', (e) => {
+    const ids = e.state || readURL();
+    const { firm, market, account } = resolveState(ids);
+    // apply without pushing to history (we're navigating existing history)
+    state.firm    = firm;
+    state.market  = market;
+    state.account = account;
+    activatePill(dom.firmPills, firm.id);
+    buildPills(dom.marketPills, firm.markets, market.id, onMarketClick);
+    buildPills(dom.accountPills, market.accounts, account.id, onAccountClick);
+    loadAndRender();
+  });
+
+  /* ── Init ───────────────────────────────────────────────────── */
+
   async function init() {
     try {
       const res = await fetch('data/registry.json');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       state.registry = await res.json();
 
-      const firms = state.registry.firms;
-      state.firm    = firms[0];
-      state.market  = state.firm.markets[0];
-      state.account = state.market.accounts[0];
+      /* build firm pills first (always all firms) */
+      buildPills(dom.firmPills, state.registry.firms, null, onFirmClick);
 
-      buildPills(dom.firmPills,    firms,                state.firm.id,    selectFirm);
-      buildPills(dom.marketPills,  state.firm.markets,   state.market.id,  selectMarket);
-      buildPills(dom.accountPills, state.market.accounts,state.account.id, selectAccount);
+      /* resolve initial state from URL or defaults */
+      const urlIds = readURL();
+      const { firm, market, account } = resolveState(urlIds);
+
+      /* write clean URL if params were missing/partial */
+      const hasAllParams = urlIds.firm && urlIds.market && urlIds.account;
+      if (!hasAllParams) {
+        writeURL(firm.id, market.id, account.id);
+      }
+
+      /* apply (without pushing history — page just loaded) */
+      state.firm    = firm;
+      state.market  = market;
+      state.account = account;
+
+      activatePill(dom.firmPills, firm.id);
+      buildPills(dom.marketPills, firm.markets, market.id, onMarketClick);
+      buildPills(dom.accountPills, market.accounts, account.id, onAccountClick);
 
       await loadAndRender();
 
       dom.loading.classList.add('hidden');
       dom.content.classList.remove('hidden');
+
     } catch (err) {
       console.error('[PropRules] Init failed:', err);
-      dom.loading.innerHTML = '<p style="font-family:monospace;font-size:12px;color:#888">Error loading data — check console.</p>';
+      dom.loading.innerHTML =
+        `<p style="font-family:monospace;font-size:12px;opacity:.6">
+          Error loading registry.json — check console.
+        </p>`;
     }
   }
 
   return { init };
+
 })();
 
 document.addEventListener('DOMContentLoaded', App.init);
