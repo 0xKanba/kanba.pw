@@ -33,7 +33,7 @@ const CFG = {
   // EmailJS — اتبع التعليمات أدناه لملء هذه
   EJ_PUBLIC_KEY:  '4S3_tB22wJ4sCknGK',
   EJ_SERVICE_ID:  'service_2hy65tv',
-  EJ_TEMPLATE_ID: 'tamplate_xyz987',
+  EJ_TEMPLATE_ID: 'template_xyz999',
   EMAIL_TO:       'me@kanba.pw',
 
   // T&C
@@ -58,7 +58,10 @@ const $  = id => document.getElementById(id);
 const sh = (id, d='')    => { const e=$(id); if(e) e.style.display = d||''; };
 const hi = id            => { const e=$(id); if(e) e.style.display = 'none'; };
 const cls = (id, add, ...c) => $(id)?.classList[add?'add':'remove'](...c);
-const fmtIQD = n  => Number(n).toLocaleString('ar-IQ') + ' د.ع';
+const fmtIQD = n => Number(n).toLocaleString('ar-IQ') + ' د.ع';
+const enIQD  = n => Number(n).toLocaleString('en-US') + ' IQD';
+const enUSD  = n => (+n).toFixed(2) + ' USD';
+const enTime = () => new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Baghdad' }) + ' (Baghdad)';
 const fmtUSD = n  => (+n).toFixed(2) + ' دولار أمريكي';
 
 /* ══════════════════════════════════════════════════════════
@@ -261,23 +264,24 @@ async function confirmSend() {
   btn.disabled  = true;
   btn.innerHTML = 'جاري الإرسال… <span class="spin"></span>';
 
-  // جمع البيانات للبريد
-  const now  = new Date().toLocaleString('ar-IQ', { dateStyle:'short', timeStyle:'short', timeZone:'Asia/Baghdad' });
+  // جمع البيانات للبريد — أرقام إنجليزية
+  const now  = enTime();
   const note = S.mode==='buy' ? ($('buyNote').value.trim()||'—') : ($('sellNote').value.trim()||'—');
   let params = { time: now, note, type: '' };
 
   if (S.mode === 'buy') {
     const iqd    = parseFloat($('buyIQD').value);
-    const usd    = (iqd / CFG.BUY_RATE).toFixed(2);
+    const usd    = parseFloat((iqd / CFG.BUY_RATE).toFixed(2));
     const wallet = $('buyWallet').value.trim();
-    const method = S.method==='zain' ? 'زين كاش' : 'سوبر كي';
+    const method = S.method==='zain' ? 'ZainCash' : 'SuperKey';
     params = { ...params,
-      type:       '🟢 شراء دولار أمريكي',
-      amount_iqd: `${Number(iqd).toLocaleString('en')} د.ع`,
-      amount_usd: `${usd} دولار أمريكي`,
+      type:        'BUY — شراء دولار',
+      amount_iqd:  enIQD(iqd),
+      amount_usd:  enUSD(usd),
+      rate:        CFG.BUY_RATE.toLocaleString('en-US') + ' IQD/USD',
       wallet,
-      phone:      '—',
-      sell_name:  '—',
+      phone:       '—',
+      sell_name:   '—',
       proof_wallet:'—',
       method,
     };
@@ -287,11 +291,12 @@ async function confirmSend() {
     const name  = $('sellName').value.trim();
     const phone = $('sellPhone').value.trim();
     const proof = $('sellProofWallet').value.trim();
-    const method= S.method==='zain' ? 'زين كاش' : 'سوبر كي';
+    const method= S.method==='zain' ? 'ZainCash' : 'SuperKey';
     params = { ...params,
-      type:        '🔴 بيع دولار أمريكي',
-      amount_iqd:  `${Number(iqd).toLocaleString('en')} د.ع`,
-      amount_usd:  `${usd} دولار أمريكي`,
+      type:        'SELL — بيع دولار',
+      amount_iqd:  enIQD(iqd),
+      amount_usd:  enUSD(usd),
+      rate:        CFG.SELL_RATE.toLocaleString('en-US') + ' IQD/USD',
       wallet:      CFG.KANBA_WALLET,
       phone,
       sell_name:   name,
