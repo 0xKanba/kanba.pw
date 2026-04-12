@@ -9,8 +9,8 @@
         "id": "risk_parameters",
         "title": "Risk Parameters",
         "items": [
-          { "label": "Daily Drawdown Limit", "value": "4%",   "detail": "Of previous day's closing balance. Resets daily at 17:00 NY Time. Static." },
-          { "label": "Max Overall Drawdown", "value": "8%",   "detail": "Of initial balance. Static for account lifetime. Breach = immediate closure." },
+          { "label": "Daily Drawdown Limit", "value": "5%",   "detail": "Of previous day's closing balance. Resets daily at 17:00 NY Time. Static." },
+          { "label": "Max Overall Drawdown", "value": "10%",   "detail": "Of initial balance. Static for account lifetime. Breach = immediate closure." },
           { "label": "Profit Target P1",     "value": "7.5%", "detail": "Phase 1 target." },
           { "label": "Profit Target P2",     "value": "5%",   "detail": "Verification phase target." },
           { "label": "Min Profitable Days",  "value": "2 days", "detail": "Minimum 2 profitable days (≥ 0.5% each) required per phase." },
