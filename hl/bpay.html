@@ -254,6 +254,18 @@
                 <button class="btn-copy" onclick="copyEl('revContact',this)">نسخ 📋</button>
               </div>
             </div>
+            <!-- QR code — SuperKey only -->
+            <div class="info-row" id="rowQR" style="display:none">
+              <div class="info-lbl">رمز QR — سوبر كي 💳</div>
+              <div class="qr-block">
+                <img src="/hl/qr.png" alt="SuperKey QR" class="qr-img" id="qrImg">
+                <a href="/hl/qr.png" download="kanba-superkey-qr.png" class="btn-dl" id="qrDl">
+                  ⬇️ تنزيل صورة QR
+                </a>
+              </div>
+              <p class="field-hint" style="margin-top:8px">افتح تطبيق سوبر كي → مسح رمز QR → أرسل المبلغ</p>
+            </div>
+
             <div class="info-row" id="rowSecret" style="display:none">
               <div class="info-lbl">الرقم السري للتأكيد 🔐</div>
               <div class="copy-row">
