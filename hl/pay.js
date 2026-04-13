@@ -458,6 +458,7 @@ function revealPaymentInfo() {
     setT('revAmount',     arIQD(iqd));
     setT('revMethod',     method);
     show('rowSecret'); show('rowMethod'); hide('rowNetwork');
+    S.method === 'super' ? show('rowQR') : hide('rowQR');
   } else {
     const usd = parseFloat($('sellUSDC').value);
     setT('revIco',        '🔐');
@@ -467,7 +468,7 @@ function revealPaymentInfo() {
     setT('revContact',    CFG.KANBA_WALLET);
     setT('revAmountLbl',  'المبلغ المطلوب');
     setT('revAmount',     usd + ' دولار أمريكي');
-    hide('rowSecret'); hide('rowMethod'); show('rowNetwork');
+    hide('rowSecret'); hide('rowMethod'); show('rowNetwork'); hide('rowQR');
   }
 
   show('revealSection');
