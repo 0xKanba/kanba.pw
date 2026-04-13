@@ -1,9 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════
-   HL Trade · chart.js v4.0 — Final
-   ✅ Centered Qty field
-   ✅ Date/Time on the left
-   ✅ Manual Fullscreen button
-   ✅ Improved Layout & Touch support
+   HL Trade · chart.js v5.0 — TradingView Mobile
+   ✅ UTC+3 محور الزمن مع AM/PM
+   ✅ شموع مثالية للموبايل — barSpacing ديناميكي
+   ✅ تصميم TradingView: ألوان + عرض + حجم
+   ✅ Volume bars شفاف
+   ✅ crosshair دقيق
+   ✅ scrollToRealTime بعد التحميل
 ═══════════════════════════════════════════════════════════════ */
 
 const ChartModule = (function () {
@@ -11,17 +13,22 @@ const ChartModule = (function () {
   const HL_API = 'https://api.hyperliquid.xyz';
   const HL_WS  = 'wss://api.hyperliquid.xyz/ws';
 
+  // candles visible ≈ 90 per screen — fetch ~2× for scroll history
   const RANGES = {
-    '1m':  12   * 3600000,
-    '5m':  24  * 3600000,
-    '15m': 36  * 3600000,
-    '1h':  120 * 3600000,
-    '4h':  480 * 3600000,
-    '1d':  2400* 3600000,
+    '1m':  3  * 3600000,     // 3h  = 180 شمعة
+    '5m':  12 * 3600000,     // 12h = 144 شمعة
+    '15m': 36 * 3600000,     // 36h = 144 شمعة
+    '1h':  120* 3600000,     // 5d  = 120 شمعة
+    '4h':  480* 3600000,     // 20d = 120 شمعة
+    '1d':  2400*3600000,     // 100 يوم
   };
+
+  // barSpacing مثالي لكل فترة على الموبايل
+  const IV_SPACING = { '1m':4, '5m':5, '15m':6, '1h':7, '4h':9, '1d':13 };
 
   let _chart        = null;
   let _series       = null;
+  let _volSeries    = null;
   let _entryLines   = [];
   let _tpLine       = null;
   let _slLine       = null;
@@ -463,73 +470,149 @@ const ChartModule = (function () {
      بناء الرسم
   ════════════ */
   function buildChart(container) {
-    if (_chart) { try{_chart.remove();}catch{} _chart=null; _series=null; }
+    if (_chart) { try{_chart.remove();}catch{} _chart=null; _series=null; _volSeries=null; }
     if (_resizeObs) { try{_resizeObs.disconnect();}catch{} }
     const dark=isDark();
-    const BG=dark?'#1a1916':'#f5f0eb', TXT=dark?'#9b9287':'#6b6460';
-    const GRID=dark?'#252320':'#ebe6e0', BDR=dark?'#3d3a34':'#c0b9b1';
+
+    // ألوان TradingView الداكن / الفاتح
+    const BG   = dark ? '#131722' : '#ffffff';
+    const TXT  = dark ? '#b2b5be' : '#131722';
+    const GRID = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)';
+    const BDR  = dark ? '#2a2e39' : '#e0e3eb';
+
+    // UTC+3 offset ثابت — مصدر الحقيقة لمحور الزمن
+    const UTC3 = 3 * 3600; // ثواني
 
     _chart = LightweightCharts.createChart(container, {
-      width: container.clientWidth, height: container.clientHeight,
-      layout: { background: { type: 'solid', color: BG }, textColor: TXT, fontSize: 13, fontFamily: "'IBM Plex Mono',monospace" },
-      grid: { vertLines: { color: GRID, style: LightweightCharts.LineStyle.Dotted }, horzLines: { color: GRID, style: LightweightCharts.LineStyle.Dotted } },
+      width:  container.clientWidth,
+      height: container.clientHeight,
+      layout: {
+        background: { type: 'solid', color: BG },
+        textColor: TXT,
+        fontSize: 11,
+        fontFamily: "'IBM Plex Mono',monospace",
+      },
+      grid: {
+        vertLines: { color: GRID, style: LightweightCharts.LineStyle.Solid },
+        horzLines: { color: GRID, style: LightweightCharts.LineStyle.Solid },
+      },
       crosshair: {
         mode: LightweightCharts.CrosshairMode.Normal,
-        vertLine: { width: 1, color: dark ? '#5a534a' : '#b0a898', style: LightweightCharts.LineStyle.Dashed, labelBackgroundColor: dark ? '#3d3a34' : '#c0b9b1' },
-        horzLine: { width: 1, color: dark ? '#5a534a' : '#b0a898', style: LightweightCharts.LineStyle.Dashed, labelBackgroundColor: dark ? '#3d3a34' : '#c0b9b1' },
+        vertLine: {
+          width: 1,
+          color: dark ? 'rgba(197,200,207,0.5)' : 'rgba(19,23,34,0.4)',
+          style: LightweightCharts.LineStyle.Dashed,
+          labelBackgroundColor: dark ? '#363a45' : '#9598a1',
+        },
+        horzLine: {
+          width: 1,
+          color: dark ? 'rgba(197,200,207,0.5)' : 'rgba(19,23,34,0.4)',
+          style: LightweightCharts.LineStyle.Dashed,
+          labelBackgroundColor: dark ? '#363a45' : '#9598a1',
+        },
       },
-      rightPriceScale: { 
-        borderColor: BDR, 
-        scaleMargins: { top: 0.06, bottom: 0.06 }, 
-        minimumWidth: 85,
+      rightPriceScale: {
+        borderColor: BDR,
+        scaleMargins: { top: 0.07, bottom: 0.22 }, // مساحة للـ volume
+        minimumWidth: 80,
+        borderVisible: true,
       },
-      timeScale: { 
-        borderColor: BDR, 
-        timeVisible: true, 
-        secondsVisible: false, 
-        rightOffset: 12, 
-        barSpacing: 12, 
-        lockVisibleTimeRangeOnResize: true, 
-        fixLeftEdge: true 
+      timeScale: {
+        borderColor: BDR,
+        timeVisible: true,
+        secondsVisible: false,
+        rightOffset: 8,
+        barSpacing: IV_SPACING[_interval] || 7,
+        minBarSpacing: 2,
+        lockVisibleTimeRangeOnResize: false,
+        fixLeftEdge: true,
+        borderVisible: true,
       },
-      handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
-      handleScale: { mouseWheel: true, pinch: true, axisPressedMouseMove: { time: true, price: false } },
-      localization: { 
-        locale: 'en-US', 
-        priceFormatter: p => p.toLocaleString('en-US', { minimumFractionDigits: ai(_sym).pxDp, maximumFractionDigits: ai(_sym).pxDp }),
-        // Ensure 12h format on the axis
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: false,
+      },
+      handleScale: {
+        mouseWheel: true,
+        pinch: true,
+        axisPressedMouseMove: { time: true, price: false },
+      },
+      localization: {
+        locale: 'en-US',
+        priceFormatter: p => p.toLocaleString('en-US', {
+          minimumFractionDigits: ai(_sym).pxDp,
+          maximumFractionDigits: ai(_sym).pxDp,
+        }),
+        // UTC+3 — نضيف الـ offset على الـ timestamp ثم نقرأ كـ UTC
         timeFormatter: (tick) => {
-          const d = new Date(tick * 1000);
-          return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-        }
+          const d = new Date((tick + UTC3) * 1000);
+          const h = d.getUTCHours(), m = d.getUTCMinutes();
+          const ampm = h >= 12 ? 'PM' : 'AM';
+          const h12  = h % 12 || 12;
+          return `${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
+        },
+        dateFormatter: (tick) => {
+          const d = new Date((tick + UTC3) * 1000);
+          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          return `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
+        },
       },
       attributionLogo: false,
     });
 
+    // Candlestick series — TradingView style
     _series = _chart.addCandlestickSeries({
-      upColor:'#2da44e',downColor:'#e5534b',
-      borderUpColor:'#2da44e',borderDownColor:'#e5534b',
-      wickUpColor:'#2da44e',wickDownColor:'#e5534b',
+      upColor:          '#26a69a',
+      downColor:        '#ef5350',
+      borderUpColor:    '#26a69a',
+      borderDownColor:  '#ef5350',
+      wickUpColor:      '#26a69a',
+      wickDownColor:    '#ef5350',
+      borderVisible:    true,
+      wickVisible:      true,
+    });
+
+    // Volume series — سفلي شفاف
+    _volSeries = _chart.addHistogramSeries({
+      priceFormat:    { type: 'volume' },
+      priceScaleId:  'vol',
+      color:         'rgba(38,166,154,0.25)',
+    });
+    _volSeries.priceScale().applyOptions({
+      scaleMargins: { top: 0.80, bottom: 0 },
     });
 
     _chart.subscribeCrosshairMove(param => {
-      const el=document.getElementById('_cLegend');
-      if(!el) return;
-      if(!param.time||!param.seriesData?.size){el.innerHTML='';return;}
-      const bar=param.seriesData.get(_series);
-      if(!bar) return;
-      const dp=ai(_sym).pxDp, cl=bar.close>=bar.open?'#2da44e':'#e5534b';
-      const chg=(((bar.close-bar.open)/bar.open)*100).toFixed(2);
+      const el = document.getElementById('_cLegend');
+      if (!el) return;
+      if (!param.time || !param.seriesData?.size) { el.innerHTML = ''; return; }
+      const bar = param.seriesData.get(_series);
+      if (!bar) return;
+      const dp  = ai(_sym).pxDp;
+      const up  = bar.close >= bar.open;
+      const cl  = up ? '#26a69a' : '#ef5350';
+      const chg = (((bar.close - bar.open) / bar.open) * 100).toFixed(2);
+      // UTC+3 timestamp للـ crosshair
+      const d   = new Date((param.time + UTC3) * 1000);
+      const hh  = d.getUTCHours(), mm = d.getUTCMinutes();
+      const ap  = hh >= 12 ? 'PM' : 'AM';
+      const h12 = hh % 12 || 12;
+      const timeLabel = `${String(h12).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${ap}`;
       el.innerHTML =
-        `<span style="color:${cl};font-weight:900">O&nbsp;${bar.open.toFixed(dp)}</span>`+
-        `<span style="color:${cl}">H&nbsp;${bar.high.toFixed(dp)}</span>`+
-        `<span style="color:${cl}">L&nbsp;${bar.low.toFixed(dp)}</span>`+
-        `<span style="color:${cl}">C&nbsp;${bar.close.toFixed(dp)}</span>`+
-        `<span style="color:${cl}">${chg>0?'+':''}${chg}%</span>`;
+        `<span style="color:var(--text-muted);font-size:9px;">${timeLabel} UTC+3</span>` +
+        `<span style="color:${cl};font-weight:900">O&nbsp;${bar.open.toFixed(dp)}</span>` +
+        `<span style="color:${cl}">H&nbsp;${bar.high.toFixed(dp)}</span>` +
+        `<span style="color:${cl}">L&nbsp;${bar.low.toFixed(dp)}</span>` +
+        `<span style="color:${cl}">C&nbsp;${bar.close.toFixed(dp)}</span>` +
+        `<span style="color:${cl}">${chg > 0 ? '+' : ''}${chg}%</span>`;
     });
 
     _resizeObs = new ResizeObserver(() => {
-      if (_chart&&container) _chart.applyOptions({width:container.clientWidth,height:container.clientHeight});
+      if (_chart && container) {
+        _chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+      }
     });
     _resizeObs.observe(container);
   }
@@ -541,7 +624,11 @@ const ChartModule = (function () {
         body:JSON.stringify({type:'candleSnapshot',req:{coin:coin(sym),interval:iv,startTime:start,endTime:now}})});
       const raw=await r.json();
       if(!Array.isArray(raw)||!raw.length) return [];
-      return raw.map(c=>({time:Math.floor(c.t/1000),open:+c.o,high:+c.h,low:+c.l,close:+c.c})).sort((a,b)=>a.time-b.time);
+      return raw.map(c=>({
+        time:  Math.floor(c.t/1000),
+        open:  +c.o, high: +c.h, low: +c.l, close: +c.c,
+        volume: +c.v,
+      })).sort((a,b)=>a.time-b.time);
     } catch(e){console.warn('[Chart]',e.message);return [];}
   }
 
@@ -597,7 +684,12 @@ const ChartModule = (function () {
           const msg=JSON.parse(e.data);
           if(msg.channel!=='candle'||!msg.data||!_series) return;
           const c=msg.data;
-          _series.update({time:Math.floor(c.t/1000),open:+c.o,high:+c.h,low:+c.l,close:+c.c});
+          const bar = {time:Math.floor(c.t/1000),open:+c.o,high:+c.h,low:+c.l,close:+c.c};
+          _series.update(bar);
+          if (_volSeries) _volSeries.update({
+            time: bar.time, value: +c.v,
+            color: bar.close >= bar.open ? 'rgba(38,166,154,0.3)' : 'rgba(239,83,80,0.3)',
+          });
           setPrice(+c.c); drawLines();
         }catch{}
       };
@@ -613,8 +705,23 @@ const ChartModule = (function () {
     const px=document.getElementById('_cPrice'); if(px) px.textContent='—';
     const candles=await fetchCandles(sym,iv);
     if(!candles.length){setStatus('❌');return;}
+
+    // بيانات الشموع
     _series.setData(candles);
-    _chart.timeScale().fitContent();
+
+    // بيانات الحجم مع تلوين حسب الاتجاه
+    if (_volSeries) {
+      _volSeries.setData(candles.map(c => ({
+        time:  c.time,
+        value: c.volume,
+        color: c.close >= c.open ? 'rgba(38,166,154,0.3)' : 'rgba(239,83,80,0.3)',
+      })));
+    }
+
+    // barSpacing ديناميكي للموبايل + scroll للنهاية
+    _chart.timeScale().applyOptions({ barSpacing: IV_SPACING[iv] || 7 });
+    _chart.timeScale().scrollToRealTime();
+
     _lastClose=candles[candles.length-1].close;
     setPrice(_lastClose); drawLines();
     setStatus('🟡'); wsConnect();
