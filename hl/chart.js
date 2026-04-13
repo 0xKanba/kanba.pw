@@ -1,26 +1,26 @@
 /* ═══════════════════════════════════════════════════════════════
-   HL Trade · chart.js v5.0 — TradingView Mobile
-   ✅ UTC+3 محور الزمن مع AM/PM
-   ✅ شموع مثالية للموبايل — barSpacing ديناميكي
-   ✅ تصميم TradingView: ألوان + عرض + حجم
-   ✅ Volume bars شفاف
-   ✅ crosshair دقيق
-   ✅ scrollToRealTime بعد التحميل
+   HL Trade · chart.js v6.0 — TradingView Mobile Pro
+   ✅ UTC+3 محور الأسفل (tickMarkFormatter) + AM/PM
+   ✅ RANGES ×30 — تاريخ أعمق بكثير
+   ✅ لا Volume — تركيز كامل على الشموع
+   ✅ خط أعلى/أدنى سعر اليوم من 1 AM UTC+3
+   ✅ نسبة تغيير السعر منذ افتتاح الجلسة
 ═══════════════════════════════════════════════════════════════ */
 
 const ChartModule = (function () {
 
   const HL_API = 'https://api.hyperliquid.xyz';
   const HL_WS  = 'wss://api.hyperliquid.xyz/ws';
+  const UTC3   = 3 * 3600; // ثواني — offset ثابت
 
-  // candles visible ≈ 90 per screen — fetch ~2× for scroll history
+  // ×30 من السابق — تاريخ عميق مع مرونة كاملة للتمرير
   const RANGES = {
-    '1m':  3  * 3600000,     // 3h  = 180 شمعة
-    '5m':  12 * 3600000,     // 12h = 144 شمعة
-    '15m': 36 * 3600000,     // 36h = 144 شمعة
-    '1h':  120* 3600000,     // 5d  = 120 شمعة
-    '4h':  480* 3600000,     // 20d = 120 شمعة
-    '1d':  2400*3600000,     // 100 يوم
+    '1m':  90  * 3600000,    // 90h   = 5400 شمعة
+    '5m':  360 * 3600000,    // 360h  = 4320 شمعة
+    '15m': 900 * 3600000,    // 900h  = 3600 شمعة (37.5 يوم)
+    '1h':  3600* 3600000,    // 3600h = 3600 شمعة (150 يوم)
+    '4h':  14400*3600000,    // 600 يوم
+    '1d':  43200*3600000,    // 4.9 سنة
   };
 
   // barSpacing مثالي لكل فترة على الموبايل
@@ -28,10 +28,12 @@ const ChartModule = (function () {
 
   let _chart        = null;
   let _series       = null;
-  let _volSeries    = null;
   let _entryLines   = [];
   let _tpLine       = null;
   let _slLine       = null;
+  let _dayHiLine    = null;
+  let _dayLoLine    = null;
+  let _candles      = [];   // cache للـ day stats
   let _ws           = null;
   let _wsTimer      = null;
   let _visible      = false;
@@ -467,29 +469,97 @@ const ChartModule = (function () {
   }
 
   /* ════════════
+     يوم السوق — افتتاح 1 AM UTC+3 يومياً
+  ════════════ */
+  function getSessionStartSec() {
+    // 1 AM UTC+3 = 22:00 UTC اليوم السابق في التقويم الميلادي
+    const nowUTC3ms = Date.now() + UTC3 * 1000;
+    const d = new Date(nowUTC3ms);
+    // منتصف الليل UTC+3 اليوم + 1 ساعة = 1 AM UTC+3
+    const midnightUTC3 = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    return Math.floor((midnightUTC3 + 3600_000) / 1000) - UTC3; // نحوّل لـ UTC ثانية
+  }
+
+  function computeDayStats() {
+    const start = getSessionStartSec();
+    const sc = _candles.filter(c => c.time >= start);
+    if (!sc.length) return null;
+    const open = sc[0].open;
+    const high = Math.max(...sc.map(c => c.high));
+    const low  = Math.min(...sc.map(c => c.low));
+    const cur  = _lastClose || sc[sc.length - 1].close;
+    const pct  = ((cur - open) / open * 100);
+    return { open, high, low, cur, pct };
+  }
+
+  function drawDayStats() {
+    if (!_series) return;
+    // مسح الخطوط القديمة
+    if (_dayHiLine) { try { _series.removePriceLine(_dayHiLine); } catch {} _dayHiLine = null; }
+    if (_dayLoLine) { try { _series.removePriceLine(_dayLoLine); } catch {} _dayLoLine = null; }
+
+    const st = computeDayStats();
+    const el = document.getElementById('_cDayStat');
+    if (!st) { if (el) el.textContent = ''; return; }
+
+    const dp  = ai(_sym).pxDp;
+    const pct = st.pct.toFixed(2);
+    const up  = st.pct >= 0;
+
+    _dayHiLine = _series.createPriceLine({
+      price: st.high, lineWidth: 1,
+      lineStyle: LightweightCharts.LineStyle.Dashed,
+      color: '#26a69a', axisLabelVisible: true,
+      title: `H ${st.high.toFixed(dp)}`,
+    });
+    _dayLoLine = _series.createPriceLine({
+      price: st.low, lineWidth: 1,
+      lineStyle: LightweightCharts.LineStyle.Dashed,
+      color: '#ef5350', axisLabelVisible: true,
+      title: `L ${st.low.toFixed(dp)}`,
+    });
+
+    if (el) {
+      el.innerHTML =
+        `<span style="color:#b2b5be;font-size:9px;">1AM+3</span>` +
+        `<span style="color:#26a69a;font-size:10px;font-weight:700;">H&nbsp;${st.high.toFixed(dp)}</span>` +
+        `<span style="color:#ef5350;font-size:10px;font-weight:700;">L&nbsp;${st.low.toFixed(dp)}</span>` +
+        `<span style="color:${up?'#26a69a':'#ef5350'};font-size:11px;font-weight:900;">${up?'+':''}${pct}%</span>`;
+    }
+  }
+
+  /* ════════════
      بناء الرسم
   ════════════ */
   function buildChart(container) {
-    if (_chart) { try{_chart.remove();}catch{} _chart=null; _series=null; _volSeries=null; }
+    if (_chart) { try{_chart.remove();}catch{} _chart=null; _series=null; }
     if (_resizeObs) { try{_resizeObs.disconnect();}catch{} }
-    const dark=isDark();
+    const dark = isDark();
 
-    // ألوان TradingView الداكن / الفاتح
     const BG   = dark ? '#131722' : '#ffffff';
     const TXT  = dark ? '#b2b5be' : '#131722';
     const GRID = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)';
     const BDR  = dark ? '#2a2e39' : '#e0e3eb';
 
-    // UTC+3 offset ثابت — مصدر الحقيقة لمحور الزمن
-    const UTC3 = 3 * 3600; // ثواني
+    // مساعد UTC+3 للمحور
+    const fmt3 = (tick, showDate) => {
+      const d = new Date((tick + UTC3) * 1000);
+      if (showDate) {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
+      }
+      const hh = d.getUTCHours(), mm = d.getUTCMinutes();
+      const ap = hh >= 12 ? 'PM' : 'AM';
+      const h12 = hh % 12 || 12;
+      return `${String(h12).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${ap}`;
+    };
 
     _chart = LightweightCharts.createChart(container, {
       width:  container.clientWidth,
       height: container.clientHeight,
       layout: {
         background: { type: 'solid', color: BG },
-        textColor: TXT,
-        fontSize: 11,
+        textColor: TXT, fontSize: 11,
         fontFamily: "'IBM Plex Mono',monospace",
       },
       grid: {
@@ -513,7 +583,7 @@ const ChartModule = (function () {
       },
       rightPriceScale: {
         borderColor: BDR,
-        scaleMargins: { top: 0.07, bottom: 0.22 }, // مساحة للـ volume
+        scaleMargins: { top: 0.06, bottom: 0.06 }, // بلا حجم — شموع تملأ الشاشة
         minimumWidth: 80,
         borderVisible: true,
       },
@@ -527,16 +597,24 @@ const ChartModule = (function () {
         lockVisibleTimeRangeOnResize: false,
         fixLeftEdge: true,
         borderVisible: true,
+        // ✅ هذا هو الإصلاح الحقيقي لمحور الأسفل — tickMarkFormatter
+        tickMarkFormatter: (tick, type) => {
+          // type: 0=Year 1=Month 2=Day 3=Time 4=TimeWithSeconds
+          if (type >= 3) return fmt3(tick, false);          // وقت AM/PM UTC+3
+          if (type === 2) return fmt3(tick, true);           // يوم+شهر
+          if (type === 1) {
+            const d = new Date((tick + UTC3) * 1000);
+            return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
+          }
+          return new Date((tick + UTC3) * 1000).getUTCFullYear().toString();
+        },
       },
       handleScroll: {
-        mouseWheel: true,
-        pressedMouseMove: true,
-        horzTouchDrag: true,
-        vertTouchDrag: false,
+        mouseWheel: true, pressedMouseMove: true,
+        horzTouchDrag: true, vertTouchDrag: false,
       },
       handleScale: {
-        mouseWheel: true,
-        pinch: true,
+        mouseWheel: true, pinch: true,
         axisPressedMouseMove: { time: true, price: false },
       },
       localization: {
@@ -545,43 +623,22 @@ const ChartModule = (function () {
           minimumFractionDigits: ai(_sym).pxDp,
           maximumFractionDigits: ai(_sym).pxDp,
         }),
-        // UTC+3 — نضيف الـ offset على الـ timestamp ثم نقرأ كـ UTC
-        timeFormatter: (tick) => {
-          const d = new Date((tick + UTC3) * 1000);
-          const h = d.getUTCHours(), m = d.getUTCMinutes();
-          const ampm = h >= 12 ? 'PM' : 'AM';
-          const h12  = h % 12 || 12;
-          return `${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
-        },
-        dateFormatter: (tick) => {
-          const d = new Date((tick + UTC3) * 1000);
-          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-          return `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
-        },
+        // crosshair label UTC+3
+        timeFormatter: (tick) => fmt3(tick, false),
       },
       attributionLogo: false,
     });
 
-    // Candlestick series — TradingView style
+    // Candlestick — TradingView classic
     _series = _chart.addCandlestickSeries({
-      upColor:          '#26a69a',
-      downColor:        '#ef5350',
-      borderUpColor:    '#26a69a',
-      borderDownColor:  '#ef5350',
-      wickUpColor:      '#26a69a',
-      wickDownColor:    '#ef5350',
-      borderVisible:    true,
-      wickVisible:      true,
-    });
-
-    // Volume series — سفلي شفاف
-    _volSeries = _chart.addHistogramSeries({
-      priceFormat:    { type: 'volume' },
-      priceScaleId:  'vol',
-      color:         'rgba(38,166,154,0.25)',
-    });
-    _volSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.80, bottom: 0 },
+      upColor:         '#26a69a',
+      downColor:       '#ef5350',
+      borderUpColor:   '#26a69a',
+      borderDownColor: '#ef5350',
+      wickUpColor:     '#26a69a',
+      wickDownColor:   '#ef5350',
+      borderVisible:   true,
+      wickVisible:     true,
     });
 
     _chart.subscribeCrosshairMove(param => {
@@ -594,14 +651,8 @@ const ChartModule = (function () {
       const up  = bar.close >= bar.open;
       const cl  = up ? '#26a69a' : '#ef5350';
       const chg = (((bar.close - bar.open) / bar.open) * 100).toFixed(2);
-      // UTC+3 timestamp للـ crosshair
-      const d   = new Date((param.time + UTC3) * 1000);
-      const hh  = d.getUTCHours(), mm = d.getUTCMinutes();
-      const ap  = hh >= 12 ? 'PM' : 'AM';
-      const h12 = hh % 12 || 12;
-      const timeLabel = `${String(h12).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${ap}`;
       el.innerHTML =
-        `<span style="color:var(--text-muted);font-size:9px;">${timeLabel} UTC+3</span>` +
+        `<span style="color:var(--text-muted);font-size:9px;">${fmt3(param.time,false)} +3</span>` +
         `<span style="color:${cl};font-weight:900">O&nbsp;${bar.open.toFixed(dp)}</span>` +
         `<span style="color:${cl}">H&nbsp;${bar.high.toFixed(dp)}</span>` +
         `<span style="color:${cl}">L&nbsp;${bar.low.toFixed(dp)}</span>` +
@@ -610,9 +661,8 @@ const ChartModule = (function () {
     });
 
     _resizeObs = new ResizeObserver(() => {
-      if (_chart && container) {
+      if (_chart && container)
         _chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
-      }
     });
     _resizeObs.observe(container);
   }
@@ -625,9 +675,8 @@ const ChartModule = (function () {
       const raw=await r.json();
       if(!Array.isArray(raw)||!raw.length) return [];
       return raw.map(c=>({
-        time:  Math.floor(c.t/1000),
-        open:  +c.o, high: +c.h, low: +c.l, close: +c.c,
-        volume: +c.v,
+        time: Math.floor(c.t/1000),
+        open: +c.o, high: +c.h, low: +c.l, close: +c.c,
       })).sort((a,b)=>a.time-b.time);
     } catch(e){console.warn('[Chart]',e.message);return [];}
   }
@@ -684,13 +733,17 @@ const ChartModule = (function () {
           const msg=JSON.parse(e.data);
           if(msg.channel!=='candle'||!msg.data||!_series) return;
           const c=msg.data;
-          const bar = {time:Math.floor(c.t/1000),open:+c.o,high:+c.h,low:+c.l,close:+c.c};
+          const bar={time:Math.floor(c.t/1000),open:+c.o,high:+c.h,low:+c.l,close:+c.c};
           _series.update(bar);
-          if (_volSeries) _volSeries.update({
-            time: bar.time, value: +c.v,
-            color: bar.close >= bar.open ? 'rgba(38,166,154,0.3)' : 'rgba(239,83,80,0.3)',
-          });
-          setPrice(+c.c); drawLines();
+          // تحديث آخر شمعة في الـ cache
+          if (_candles.length && _candles[_candles.length-1].time === bar.time) {
+            _candles[_candles.length-1] = bar;
+          } else if (_candles.length && bar.time > _candles[_candles.length-1].time) {
+            _candles.push(bar);
+          }
+          setPrice(+c.c);
+          drawLines();
+          drawDayStats();
         }catch{}
       };
       _ws.onerror=()=>setStatus('🔴');
@@ -706,25 +759,19 @@ const ChartModule = (function () {
     const candles=await fetchCandles(sym,iv);
     if(!candles.length){setStatus('❌');return;}
 
-    // بيانات الشموع
+    _candles = candles; // cache للـ day stats
     _series.setData(candles);
 
-    // بيانات الحجم مع تلوين حسب الاتجاه
-    if (_volSeries) {
-      _volSeries.setData(candles.map(c => ({
-        time:  c.time,
-        value: c.volume,
-        color: c.close >= c.open ? 'rgba(38,166,154,0.3)' : 'rgba(239,83,80,0.3)',
-      })));
-    }
-
-    // barSpacing ديناميكي للموبايل + scroll للنهاية
+    // barSpacing ديناميكي + scroll للنهاية
     _chart.timeScale().applyOptions({ barSpacing: IV_SPACING[iv] || 7 });
     _chart.timeScale().scrollToRealTime();
 
     _lastClose=candles[candles.length-1].close;
-    setPrice(_lastClose); drawLines();
-    setStatus('🟡'); wsConnect();
+    setPrice(_lastClose);
+    drawLines();
+    drawDayStats();
+    setStatus('🟡');
+    wsConnect();
   }
 
   function ensureScreen(){
@@ -765,6 +812,12 @@ const ChartModule = (function () {
       </div>
       <div class="c-wrap" id="_cWrap">
         <div class="c-inner" id="_cInner"></div>
+        <div id="_cDayStat" style="
+          display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+          padding:3px 10px; background:var(--bg-card);
+          border-top:1px solid var(--border); flex-shrink:0;
+          font-family:'IBM Plex Mono',monospace;
+        "></div>
         <div class="c-legend" id="_cLegend"></div>
       </div>`;
     document.getElementById('_cBack').onclick=()=>ChartModule.close();
@@ -808,6 +861,8 @@ const ChartModule = (function () {
     if (document.fullscreenElement) document.exitFullscreen?.();
     document.getElementById('chartScreen')?.classList.add('hidden');
     const lg=document.getElementById('_cLegend'); if(lg) lg.innerHTML='';
+    const ds=document.getElementById('_cDayStat'); if(ds) ds.innerHTML='';
+    _dayHiLine=null; _dayLoLine=null; _candles=[];
   }
 
   function switchInterval(iv){
