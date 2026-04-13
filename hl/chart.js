@@ -286,45 +286,43 @@ const ChartModule = (function () {
     return 60 * 1000;
   }
 
+  let _dayTimer = null; // تحديث H/L/% كل 5 ثوانٍ
+
   function startClock() {
     stopClock();
     const tick = () => {
       // UTC + 3 hours
       const now = new Date(Date.now() + 3 * 3600 * 1000);
-      
-      // 12-hour format, English digits
-      const timeStr = now.toLocaleTimeString('en-US', { 
-        hour12: true, 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit',
-        timeZone: 'UTC'
+      const timeStr = now.toLocaleTimeString('en-US', {
+        hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'UTC'
       });
-      
       const t = document.getElementById('_cClockT');
       if (t) t.textContent = timeStr;
 
-      // Countdown logic
+      // Countdown
       const ivMs = getIvMs(_interval);
       const nowMs = Date.now();
-      const nextBarMs = Math.ceil(nowMs / ivMs) * ivMs;
-      const diff = nextBarMs - nowMs;
-      
+      const diff = Math.ceil(nowMs / ivMs) * ivMs - nowMs;
       const cdH = Math.floor(diff / 3600000);
       const cdM = Math.floor((diff % 3600000) / 60000);
       const cdS = Math.floor((diff % 60000) / 1000);
-      
-      let cdStr = "";
-      if (cdH > 0) cdStr += `${cdH}:`;
-      cdStr += `${String(cdM).padStart(2, '0')}:${String(cdS).padStart(2, '0')}`;
-      
+      let cdStr = cdH > 0 ? `${cdH}:` : '';
+      cdStr += `${String(cdM).padStart(2,'0')}:${String(cdS).padStart(2,'0')}`;
       const cdEl = document.getElementById('_cCountdown');
       if (cdEl) cdEl.textContent = cdStr;
     };
     tick();
     _clockTimer = setInterval(tick, 1000);
+
+    // تحديث H/L/% كل 5 ثوانٍ تلقائياً
+    if (_dayTimer) clearInterval(_dayTimer);
+    _dayTimer = setInterval(() => { drawDayStats(); }, 5000);
   }
-  function stopClock() { clearInterval(_clockTimer); _clockTimer=null; }
+
+  function stopClock() {
+    clearInterval(_clockTimer); _clockTimer = null;
+    clearInterval(_dayTimer);   _dayTimer   = null;
+  }
 
   function blockGestures(el) {
     if (_gestInit) return; _gestInit = true;
