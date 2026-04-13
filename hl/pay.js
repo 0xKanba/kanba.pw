@@ -1,98 +1,111 @@
 /* ═══════════════════════════════════════════════════════════
-   pay.js v4 — Kanba Exchange — FINAL
-   ✅ FormSubmit → me@kanba.pw  (مجاني 100% بلا حساب)
-   ✅ أرقام إنجليزية في كل مكان
-   ✅ Overlay تأكيد fullscreen
-   ✅ كشف بيانات مؤقت (30 دقيقة)
-   ✅ Buy / Sell flow كامل ومصحح
-   ✅ تحقق صارم من الحقول
+   pay.js v5 — Kanba Exchange — FINAL CLEAN
+   ✅ FormSubmit → me@kanba.pw  (100% مجاني، بلا حساب)
+   ✅ Mode buttons NEVER disabled — always switchable
+   ✅ Phone: 07XXXXXXXXX OR 7XXXXXXXXX (both accepted)
+   ✅ Full name in BOTH buy & sell
+   ✅ All EN numerals in email
+   ✅ Fullscreen stacked confirm overlay
+   ✅ Timed data reveal (30 min countdown)
+   ✅ Desktop two-column aware
 ═══════════════════════════════════════════════════════════ */
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  ⚙️  CONFIG — عدّل هذه القيم فقط                        ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  ⚙️  CONFIG                              ║
+   ╚══════════════════════════════════════════╝ */
 const CFG = {
-  BUY_RATE:     1600,          // IQD لكل دولار عند الشراء
-  SELL_RATE:    1500,          // IQD لكل دولار عند البيع
+  BUY_RATE:     1600,
+  SELL_RATE:    1500,
   MIN_IQD:      15_000,
   MAX_IQD:      1_000_000,
 
   KANBA_NAME:   'حيدر كاظم',
-  KANBA_PHONE:  '7847859054',
-  KANBA_SECRET: '3987',        // رقم سري للتأكيد — يُذكر عند التواصل
+  KANBA_PHONE:  '07877382834',
+  KANBA_SECRET: '4721',
   KANBA_WALLET: '0x121B845Cb550dD5B01B9eAc5BD65f79d84c6Ee99',
 
-  REVEAL_SECS:  30 * 60,       // ثواني قبل مسح بياناتك
+  REVEAL_SECS:  30 * 60,   // 30 minutes countdown
 
-  // FormSubmit — لا يحتاج حساباً
-  // أول إرسال سيصلك تأكيد على me@kanba.pw — اقبله مرة واحدة فقط
+  // FormSubmit — no account needed. First submission triggers
+  // a one-time confirmation email to activate. Accept it once.
   EMAIL: 'me@kanba.pw',
 
   TERMS_KEY: 'kanba_terms_v1',
 };
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  State                                                   ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  State                                   ║
+   ╚══════════════════════════════════════════╝ */
 const S = {
-  mode:        null,   // 'buy' | 'sell'
-  method:      null,   // 'zain' | 'super'
+  mode:        null,
+  method:      null,
   revealTimer: null,
   revealStart: null,
   sending:     false,
 };
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  DOM Helpers                                             ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  DOM Helpers                             ║
+   ╚══════════════════════════════════════════╝ */
 const $    = id => document.getElementById(id);
-const show = id => { const e=$(id); if(e) e.style.display=''; };
-const hide = id => { const e=$(id); if(e) e.style.display='none'; };
-const cls  = (id, add, ...c) => $(id)?.classList[add?'add':'remove'](...c);
+const show = id => { const e = $(id); if (e) e.style.display = ''; };
+const hide = id => { const e = $(id); if (e) e.style.display = 'none'; };
+const addC = (id, ...c) => $(id)?.classList.add(...c);
+const remC = (id, ...c) => $(id)?.classList.remove(...c);
+const setT = (id, t)   => { const e = $(id); if (e) e.textContent = t; };
+const togC = (id, add, ...c) => $(id)?.classList[add ? 'add' : 'remove'](...c);
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Formatters — English numerals only                      ║
-   ╚══════════════════════════════════════════════════════════╝ */
-const enN   = n => Number(n).toLocaleString('en-US');          // 30,000
-const enIQD = n => enN(n) + ' IQD';                            // 30,000 IQD
-const enUSD = n => (+n).toFixed(2) + ' USD';                   // 20.00 USD
-const arIQD = n => Number(n).toLocaleString('ar-IQ') + ' د.ع';// للعرض فقط
-const arUSD = n => (+n).toFixed(2) + ' دولار أمريكي';
+/* ╔══════════════════════════════════════════╗
+   ║  Formatters — EN numerals only           ║
+   ╚══════════════════════════════════════════╝ */
+const enN   = n  => Number(n).toLocaleString('en-US');
+const enIQD = n  => enN(n) + ' IQD';
+const enUSD = n  => (+n).toFixed(2) + ' USD';
+const arIQD = n  => Number(n).toLocaleString('ar-IQ') + ' د.ع';
+const arUSD = n  => (+n).toFixed(2) + ' دولار أمريكي';
 
-const enTime = () => {
-  const d = new Date();
-  return d.toLocaleString('en-GB', {
-    day:'2-digit', month:'short', year:'numeric',
-    hour:'2-digit', minute:'2-digit', second:'2-digit',
-    hour12: true, timeZone: 'Asia/Baghdad',
-  }) + ' (Iraq/Baghdad)';
+const enTime = () => new Date().toLocaleString('en-GB', {
+  day: '2-digit', month: 'short', year: 'numeric',
+  hour: '2-digit', minute: '2-digit', second: '2-digit',
+  hour12: true, timeZone: 'Asia/Baghdad',
+}) + ' (Iraq/Baghdad)';
+
+/* ╔══════════════════════════════════════════╗
+   ║  Phone validation                        ║
+   ║  Accept: 07XXXXXXXXX (11) or             ║
+   ║          7XXXXXXXXX  (10)                ║
+   ╚══════════════════════════════════════════╝ */
+const validPhone = p => /^(07\d{9}|7\d{9})$/.test(p.trim());
+
+/* normalize to 07XXXXXXXXX for email */
+const normPhone = p => {
+  const t = p.trim();
+  return t.startsWith('7') && t.length === 10 ? '0' + t : t;
 };
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  IP Check — Iraq only                                    ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  IP Check — Iraq only                    ║
+   ╚══════════════════════════════════════════╝ */
 async function checkIP() {
   try {
     let country = null;
     try {
       const ctl = typeof AbortSignal.timeout === 'function'
         ? AbortSignal.timeout(5000) : undefined;
-      const r   = await fetch('https://api.country.is/', { signal: ctl });
-      country   = (await r.json()).country;
+      country = (await (await fetch('https://api.country.is/', { signal: ctl })).json()).country;
     } catch {
-      const r2 = await fetch('https://ipapi.co/country/');
-      country   = (await r2.text()).trim();
+      country = (await (await fetch('https://ipapi.co/country/')).text()).trim();
     }
     if (country && country !== 'IQ') {
-      cls('ipOverlay', false, 'hidden');
-      cls('mainPage',  true,  'hidden');
+      remC('ipOverlay', 'hidden');
+      addC('mainPage', 'hidden');
     }
-  } catch { /* network error → proceed */ }
+  } catch { /* network fail → allow */ }
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Terms & Conditions                                      ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Terms                                   ║
+   ╚══════════════════════════════════════════╝ */
 const isTermsOk = () => !!localStorage.getItem(CFG.TERMS_KEY);
 
 function updateTermsBadge() {
@@ -105,187 +118,191 @@ function updateTermsBadge() {
 }
 
 function watchTerms() {
-  const cb = () => {
-    updateTermsBadge();
-    window.removeEventListener('focus', cb);
-  };
+  const cb = () => { updateTermsBadge(); window.removeEventListener('focus', cb); };
   window.addEventListener('focus', cb);
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Mode Selection                                          ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Mode Selection                          ║
+   ║  ── Mode buttons are NEVER disabled ──   ║
+   ╚══════════════════════════════════════════╝ */
 function setMode(mode) {
   S.mode   = mode;
   S.method = null;
 
-  // mode buttons
-  $('btnBuy').className  = 'mode-btn' + (mode==='buy'  ? ' buy-active'  : ' dimmed');
-  $('btnSell').className = 'mode-btn' + (mode==='sell' ? ' sell-active' : ' dimmed');
+  /* Mode button styles — both always clickable */
+  $('btnBuy').className  = 'mode-btn' + (mode === 'buy'  ? ' buy-active'  : '');
+  $('btnSell').className = 'mode-btn' + (mode === 'sell' ? ' sell-active' : '');
 
-  // show/hide field groups
-  mode==='buy' ? show('buyFields') : hide('buyFields');
-  mode==='sell'? show('sellFields'): hide('sellFields');
+  /* Show correct field group */
+  mode === 'buy'  ? show('buyFields')  : hide('buyFields');
+  mode === 'sell' ? show('sellFields') : hide('sellFields');
 
-  // rate display
-  const rate = mode==='buy' ? CFG.BUY_RATE : CFG.SELL_RATE;
-  $('rateLbl').textContent = '1 دولار أمريكي =';
-  $('rateVal').textContent = enN(rate) + ' د.ع';
+  /* Rate display */
+  const rate = mode === 'buy' ? CFG.BUY_RATE : CFG.SELL_RATE;
+  setT('rateLbl', '1 دولار أمريكي =');
+  setT('rateVal', enN(rate) + ' د.ع');
 
-  // btn1
+  /* btn1 style */
   const b1 = $('btn1');
-  b1.className   = 'btn ' + (mode==='buy' ? 'btn-buy' : 'btn-sell');
+  b1.className   = 'btn ' + (mode === 'buy' ? 'btn-buy' : 'btn-sell');
   b1.textContent = 'مراجعة وتأكيد الطلب ←';
   b1.disabled    = true;
 
-  // payment method badges reset
-  ['optZainB','optSuperB','optZainS','optSuperS'].forEach(id => cls(id, false, 'sel'));
+  /* Reset method badges */
+  ['optZainB','optSuperB','optZainS','optSuperS'].forEach(id => remC(id, 'sel'));
 
-  // reset later steps
+  /* Reset later steps */
   hide('revealSection');
   hide('successSection');
-  cls('formCard', false, 'dimmed');
+  remC('formCard', 'dimmed');
   const fb = $('formBadge');
-  if (fb) { fb.textContent='1'; fb.className='step-badge gold'; }
+  if (fb) { fb.textContent = '1'; fb.className = 'step-badge gold'; }
 
-  const cc = $('cardsCol');
-  if (cc) { cc.style.display='flex'; cc.style.flexDirection='column'; }
+  /* Show content columns */
+  show('contentLeft');
+  show('contentRight');
+
+  /* Reset calc displays */
+  setT('buyUSD', '— دولار أمريكي');
+  setT('sellIQD', '— د.ع');
 
   updateTermsBadge();
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Payment Method Picker                                   ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Payment Method                          ║
+   ╚══════════════════════════════════════════╝ */
 function pickMethod(mode, m) {
   if (S.mode !== mode) return;
   S.method = m;
   if (mode === 'buy') {
-    cls('optZainB',  m==='zain',  'sel');
-    cls('optSuperB', m==='super', 'sel');
+    togC('optZainB',  m === 'zain',  'sel');
+    togC('optSuperB', m === 'super', 'sel');
   } else {
-    cls('optZainS',  m==='zain',  'sel');
-    cls('optSuperS', m==='super', 'sel');
+    togC('optZainS',  m === 'zain',  'sel');
+    togC('optSuperS', m === 'super', 'sel');
   }
   validate();
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Live Calculators                                        ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Live Calculators                        ║
+   ╚══════════════════════════════════════════╝ */
 function calcBuy() {
-  const iqd  = parseFloat($('buyIQD').value) || 0;
-  const disp = iqd > 0 ? arUSD(iqd / CFG.BUY_RATE) : '— دولار أمريكي';
-  $('buyUSD').textContent = disp;
+  const iqd = parseFloat($('buyIQD')?.value) || 0;
+  setT('buyUSD', iqd > 0 ? arUSD(iqd / CFG.BUY_RATE) : '— دولار أمريكي');
   validate();
 }
 
 function calcSell() {
-  const usd  = parseFloat($('sellUSDC').value) || 0;
-  const disp = usd > 0 ? arIQD(Math.floor(usd * CFG.SELL_RATE)) : '— د.ع';
-  $('sellIQD').textContent = disp;
+  const usd = parseFloat($('sellUSDC')?.value) || 0;
+  setT('sellIQD', usd > 0 ? arIQD(Math.floor(usd * CFG.SELL_RATE)) : '— د.ع');
   validate();
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Validation                                              ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Validation                              ║
+   ╚══════════════════════════════════════════╝ */
 function validate() {
   const btn = $('btn1');
   if (!btn || !S.mode) return;
-
   if (!isTermsOk()) { btn.disabled = true; return; }
 
   let ok = false;
-
   if (S.mode === 'buy') {
-    const iqd    = parseFloat($('buyIQD')?.value)  || 0;
+    const name   = ($('buyName')?.value   || '').trim();
+    const phone  = ($('buyPhone')?.value  || '').trim();
+    const iqd    = parseFloat($('buyIQD')?.value) || 0;
     const wallet = ($('buyWallet')?.value || '').trim();
-    ok = iqd >= CFG.MIN_IQD
-      && iqd <= CFG.MAX_IQD
+    ok = name.length >= 3
+      && validPhone(phone)
+      && iqd >= CFG.MIN_IQD && iqd <= CFG.MAX_IQD
       && /^0x[0-9a-fA-F]{40,}$/.test(wallet)
       && S.method !== null;
   } else {
+    const name  = ($('sellName')?.value         || '').trim();
+    const phone = ($('sellPhone')?.value        || '').trim();
+    const usd   = parseFloat($('sellUSDC')?.value) || 0;
+    const proof = ($('sellProofWallet')?.value  || '').trim();
     const minU  = CFG.MIN_IQD / CFG.SELL_RATE;
     const maxU  = CFG.MAX_IQD / CFG.SELL_RATE;
-    const usd   = parseFloat($('sellUSDC')?.value) || 0;
-    const name  = ($('sellName')?.value   || '').trim();
-    const phone = ($('sellPhone')?.value  || '').trim();
-    const proof = ($('sellProofWallet')?.value || '').trim();
-    ok = usd >= minU
-      && usd <= maxU
-      && name.length >= 3
-      && /^07\d{9}$/.test(phone)
+    ok = name.length >= 3
+      && validPhone(phone)
+      && usd >= minU && usd <= maxU
       && /^0x[0-9a-fA-F]{40,}$/.test(proof)
       && S.method !== null;
   }
-
   btn.disabled = !ok;
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Confirmation Overlay — Button 1                         ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Confirmation Overlay — Button 1         ║
+   ╚══════════════════════════════════════════╝ */
 function openConfirm() {
   const rows = $('covRows');
   if (!rows) return;
   rows.innerHTML = '';
 
-  const row = (lbl, val, mono=false) => {
+  const row = (lbl, val, mono = false) => {
     const d = document.createElement('div');
     d.className = 'cov-row';
-    d.innerHTML = `<div class="cov-lbl">${lbl}</div>
-                   <div class="cov-val${mono?' mono':''}">${escHtml(String(val))}</div>`;
+    d.innerHTML = `<div class="cov-lbl">${esc(lbl)}</div>
+                   <div class="cov-val${mono ? ' mono' : ''}">${esc(String(val))}</div>`;
     rows.appendChild(d);
   };
 
   if (S.mode === 'buy') {
+    const name   = $('buyName').value.trim();
+    const phone  = normPhone($('buyPhone').value);
     const iqd    = parseFloat($('buyIQD').value);
     const usd    = (iqd / CFG.BUY_RATE).toFixed(2);
     const wallet = $('buyWallet').value.trim();
-    const method = S.method==='zain' ? 'زين كاش 📱' : 'سوبر كي 💳';
+    const method = S.method === 'zain' ? 'زين كاش 📱' : 'سوبر كي 💳';
     const note   = $('buyNote').value.trim() || '—';
-    $('covIco').textContent = '💵';
-    row('نوع العملية',    '🟢 شراء دولار أمريكي');
+    setT('covIco', '💵');
+    row('نوع العملية',     '🟢 شراء دولار أمريكي');
+    row('الاسم الكامل',    name);
+    row('رقم الهاتف',      phone,  true);
     row('المبلغ بالدينار', arIQD(iqd));
-    row('ستستلم تقريباً', usd + ' دولار أمريكي');
-    row('عنوان محفظتك',  wallet, true);
-    row('طريقة الإرسال', method);
+    row('ستستلم تقريباً',  usd + ' دولار أمريكي');
+    row('عنوان المحفظة',   wallet, true);
+    row('طريقة الإرسال',   method);
     if (note !== '—') row('ملاحظة', note);
   } else {
+    const name  = $('sellName').value.trim();
+    const phone = normPhone($('sellPhone').value);
     const usd   = parseFloat($('sellUSDC').value);
     const iqd   = Math.floor(usd * CFG.SELL_RATE);
-    const name  = $('sellName').value.trim();
-    const phone = $('sellPhone').value.trim();
     const proof = $('sellProofWallet').value.trim();
-    const method= S.method==='zain' ? 'زين كاش 📱' : 'سوبر كي 💳';
+    const method= S.method === 'zain' ? 'زين كاش 📱' : 'سوبر كي 💳';
     const note  = $('sellNote').value.trim() || '—';
-    $('covIco').textContent = '🏦';
-    row('نوع العملية',    '🔴 بيع دولار أمريكي');
-    row('المبلغ بالدولار', usd + ' دولار أمريكي');
-    row('ستستلم تقريباً', arIQD(iqd));
-    row('اسمك الكامل',   name);
-    row('رقم هاتفك',     phone, true);
-    row('محفظة الإثبات', proof, true);
-    row('طريقة الاستلام',method);
+    setT('covIco', '🏦');
+    row('نوع العملية',      '🔴 بيع دولار أمريكي');
+    row('الاسم الكامل',     name);
+    row('رقم الهاتف',       phone,  true);
+    row('المبلغ بالدولار',  usd + ' دولار أمريكي');
+    row('ستستلم تقريباً',   arIQD(iqd));
+    row('محفظة الإثبات',    proof,  true);
+    row('طريقة الاستلام',   method);
     if (note !== '—') row('ملاحظة', note);
   }
 
-  cls('confirmOverlay', false, 'hidden');
+  remC('confirmOverlay', 'hidden');
   document.body.style.overflow = 'hidden';
+  // Reset send button in case of retry
+  const sb = $('covSendBtn');
+  if (sb) { sb.disabled = false; sb.textContent = 'إرسال الطلب ✓'; }
 }
 
 function closeConfirm() {
-  cls('confirmOverlay', true, 'hidden');
+  addC('confirmOverlay', 'hidden');
   document.body.style.overflow = '';
-  // reset send button
-  const b = $('covSendBtn');
-  if (b) { b.disabled=false; b.textContent='إرسال الطلب الآن ✓'; }
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Confirm → Send Email → Reveal                           ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Confirm → Send → Reveal                 ║
+   ╚══════════════════════════════════════════╝ */
 async function confirmSend() {
   if (S.sending) return;
   S.sending = true;
@@ -294,178 +311,175 @@ async function confirmSend() {
   btn.disabled  = true;
   btn.innerHTML = 'جاري الإرسال… <span class="spin"></span>';
 
-  // ── Build email body ──────────────────────────────────
-  let subject, body;
   const time = enTime();
+  let subject, body;
 
   if (S.mode === 'buy') {
+    const name   = $('buyName').value.trim();
+    const phone  = normPhone($('buyPhone').value);
     const iqd    = parseFloat($('buyIQD').value);
     const usd    = parseFloat((iqd / CFG.BUY_RATE).toFixed(2));
     const wallet = $('buyWallet').value.trim();
-    const method = S.method==='zain' ? 'ZainCash' : 'SuperKey';
+    const method = S.method === 'zain' ? 'ZainCash' : 'SuperKey';
     const note   = $('buyNote').value.trim() || 'None';
 
-    subject = `[Kanba BUY] ${enUSD(usd)} — ${enIQD(iqd)}`;
-    body    = buildEmailBody({
-      type:    'BUY — شراء دولار أمريكي 🟢',
-      iqd:     enIQD(iqd),
-      usd:     enUSD(usd),
-      rate:    enN(CFG.BUY_RATE) + ' IQD/USD',
-      method,
-      wallet,
-      phone:   '—',
-      name:    '—',
-      proof:   '—',
-      note,
-      time,
+    subject = `[Kanba BUY] ${enUSD(usd)} | ${enIQD(iqd)} | ${name}`;
+    body = buildBody({
+      type: 'BUY — شراء دولار أمريكي 🟢',
+      name, phone,
+      iqd: enIQD(iqd),
+      usd: enUSD(usd),
+      rate: enN(CFG.BUY_RATE) + ' IQD/USD',
+      method, wallet,
+      phone2: '—', proof: '—',
+      note, time,
     });
   } else {
+    const name  = $('sellName').value.trim();
+    const phone = normPhone($('sellPhone').value);
     const usd   = parseFloat($('sellUSDC').value);
     const iqd   = Math.floor(usd * CFG.SELL_RATE);
-    const name  = $('sellName').value.trim();
-    const phone = $('sellPhone').value.trim();
     const proof = $('sellProofWallet').value.trim();
-    const method= S.method==='zain' ? 'ZainCash' : 'SuperKey';
+    const method= S.method === 'zain' ? 'ZainCash' : 'SuperKey';
     const note  = $('sellNote').value.trim() || 'None';
 
-    subject = `[Kanba SELL] ${enUSD(usd)} — ${enIQD(iqd)}`;
-    body    = buildEmailBody({
-      type:   'SELL — بيع دولار أمريكي 🔴',
-      iqd:    enIQD(iqd),
-      usd:    enUSD(usd),
-      rate:   enN(CFG.SELL_RATE) + ' IQD/USD',
+    subject = `[Kanba SELL] ${enUSD(usd)} | ${enIQD(iqd)} | ${name}`;
+    body = buildBody({
+      type: 'SELL — بيع دولار أمريكي 🔴',
+      name, phone,
+      iqd: enIQD(iqd),
+      usd: enUSD(usd),
+      rate: enN(CFG.SELL_RATE) + ' IQD/USD',
       method,
       wallet: CFG.KANBA_WALLET,
-      phone,
-      name,
       proof,
-      note,
-      time,
+      note, time,
     });
   }
 
-  const ok = await sendViaFormSubmit(subject, body);
+  const ok = await sendFormSubmit(subject, body);
   S.sending = false;
   closeConfirm();
 
   if (ok) {
     revealPaymentInfo();
   } else {
-    // خطأ → أعد الزر
-    btn.disabled  = false;
-    btn.textContent = '⚠️ فشل الإرسال — حاول مجدداً';
-    cls('confirmOverlay', false, 'hidden'); // أبقِ الـ overlay مفتوحاً
+    /* Retry — reopen overlay with error message */
+    const sb = $('covSendBtn');
+    if (sb) {
+      sb.disabled = false;
+      sb.textContent = '⚠️ فشل — حاول مجدداً';
+    }
+    remC('confirmOverlay', 'hidden');
     document.body.style.overflow = 'hidden';
-    S.sending = false;
   }
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  FormSubmit Sender — Zero config, 100% Free              ║
-   ╚══════════════════════════════════════════════════════════╝ */
-async function sendViaFormSubmit(subject, message) {
+/* ╔══════════════════════════════════════════╗
+   ║  FormSubmit — zero-config, 100% free     ║
+   ║  First send: confirm email arrives once  ║
+   ╚══════════════════════════════════════════╝ */
+async function sendFormSubmit(subject, message) {
   try {
     const fd = new FormData();
-    fd.append('_subject',      subject);
-    fd.append('_captcha',      'false');
-    fd.append('_template',     'table');
-    fd.append('_replyto',      'no-reply@kanba.pw');
-    fd.append('message',       message);
+    fd.append('_subject',  subject);
+    fd.append('_captcha',  'false');
+    fd.append('_template', 'table');
+    fd.append('message',   message);
 
     const res = await fetch(`https://formsubmit.co/${CFG.EMAIL}`, {
       method: 'POST',
       body:   fd,
     });
-
-    // FormSubmit يعيد HTML في أول طلب — نعتبره نجاحاً
-    return res.ok || res.status === 200;
+    // FormSubmit returns 200 even on first-time activation email
+    return res.status === 200 || res.ok;
   } catch (err) {
     console.error('[Kanba] FormSubmit error:', err);
     return false;
   }
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Email Body Builder — plain text, clean                  ║
-   ╚══════════════════════════════════════════════════════════╝ */
-function buildEmailBody({ type, iqd, usd, rate, method, wallet, phone, name, proof, note, time }) {
+/* ╔══════════════════════════════════════════╗
+   ║  Email Body — clean table text           ║
+   ╚══════════════════════════════════════════╝ */
+function buildBody({ type, name, phone, iqd, usd, rate, method, wallet, proof, note, time }) {
   return [
-    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
     'KANBA EXCHANGE — New Order',
-    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
     '',
     `Type          : ${type}`,
     `Time          : ${time}`,
     '',
-    '── AMOUNTS ─────────────────────────',
+    '── CLIENT ───────────────────────',
+    `Full Name     : ${name}`,
+    `Phone         : ${phone}`,
+    '',
+    '── AMOUNTS ──────────────────────',
     `Iraqi Dinar   : ${iqd}`,
     `US Dollar     : ${usd}`,
     `Exchange Rate : ${rate}`,
     '',
-    '── PAYMENT ─────────────────────────',
+    '── PAYMENT ──────────────────────',
     `Method        : ${method}`,
     `Wallet        : ${wallet}`,
-    `Phone         : ${phone}`,
-    `Full Name     : ${name}`,
-    `Proof Wallet  : ${proof}`,
+    `Proof Wallet  : ${proof || '—'}`,
     '',
-    '── NOTE ────────────────────────────',
+    '── NOTE ─────────────────────────',
     `Note          : ${note}`,
     '',
-    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
     'kanba.pw — Iraq P2P Exchange',
-    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
   ].join('\n');
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Reveal Payment Info + Timer                             ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Reveal Payment Info + Timer             ║
+   ╚══════════════════════════════════════════╝ */
 function revealPaymentInfo() {
-  // تعتيم فورم
-  cls('formCard', true, 'dimmed');
+  /* Dim form */
+  addC('formCard', 'dimmed');
   const fb = $('formBadge');
-  if (fb) { fb.textContent='✓'; fb.className='step-badge done'; }
+  if (fb) { fb.textContent = '✓'; fb.className = 'step-badge done'; }
 
-  // ملء البيانات
-  if ($('revName')) $('revName').textContent = CFG.KANBA_NAME;
+  setT('revName', CFG.KANBA_NAME);
 
   if (S.mode === 'buy') {
     const iqd    = parseFloat($('buyIQD').value);
-    const method = S.method==='zain' ? 'زين كاش 📱' : 'سوبر كي 💳';
-    set('revIco',        '💵');
-    set('revTitle',      'أرسل الدينار إلى');
-    set('revSub',        'انسخ الرقم وأرسل المبلغ عبر الطريقة المختارة');
-    set('revContactLbl', 'رقم استلام الدينار');
-    set('revContact',    CFG.KANBA_PHONE);
-    set('revSecret',     CFG.KANBA_SECRET);
-    set('revAmountLbl',  'المبلغ المطلوب');
-    set('revAmount',     arIQD(iqd));
-    set('revMethod',     method);
+    const method = S.method === 'zain' ? 'زين كاش 📱' : 'سوبر كي 💳';
+    setT('revIco',        '💵');
+    setT('revTitle',      'أرسل الدينار إلى');
+    setT('revSub',        'انسخ الرقم وأرسل عبر الطريقة المختارة');
+    setT('revContactLbl', 'رقم الاستلام');
+    setT('revContact',    CFG.KANBA_PHONE);
+    setT('revSecret',     CFG.KANBA_SECRET);
+    setT('revAmountLbl',  'المبلغ المطلوب');
+    setT('revAmount',     arIQD(iqd));
+    setT('revMethod',     method);
     show('rowSecret'); show('rowMethod'); hide('rowNetwork');
   } else {
     const usd = parseFloat($('sellUSDC').value);
-    set('revIco',        '🔐');
-    set('revTitle',      'أرسل الدولار إلى محفظة كانبا');
-    set('revSub',        '⚠️ على شبكة Arbitrum One فقط');
-    set('revContactLbl', 'عنوان المحفظة');
-    set('revContact',    CFG.KANBA_WALLET);
-    set('revAmountLbl',  'المبلغ المطلوب');
-    set('revAmount',     usd + ' دولار أمريكي');
+    setT('revIco',        '🔐');
+    setT('revTitle',      'أرسل الدولار إلى محفظة كانبا');
+    setT('revSub',        '⚠️ Arbitrum One فقط');
+    setT('revContactLbl', 'عنوان المحفظة');
+    setT('revContact',    CFG.KANBA_WALLET);
+    setT('revAmountLbl',  'المبلغ المطلوب');
+    setT('revAmount',     usd + ' دولار أمريكي');
     hide('rowSecret'); hide('rowMethod'); show('rowNetwork');
   }
 
   show('revealSection');
-  setTimeout(() => $('revealCard')?.scrollIntoView({ behavior:'smooth', block:'center' }), 150);
-
+  setTimeout(() =>
+    $('revealCard')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150
+  );
   startRevealTimer();
 }
 
-const set = (id, txt) => { const e=$(id); if(e) e.textContent=txt; };
-
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Countdown Timer                                         ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Countdown Timer                         ║
+   ╚══════════════════════════════════════════╝ */
 function startRevealTimer() {
   if (S.revealTimer) clearInterval(S.revealTimer);
   S.revealStart = Date.now();
@@ -473,11 +487,9 @@ function startRevealTimer() {
   const tick = () => {
     const left = CFG.REVEAL_SECS - Math.floor((Date.now() - S.revealStart) / 1000);
     if (left <= 0) { clearInterval(S.revealTimer); wipeReveal(); return; }
-
-    const mm  = String(Math.floor(left / 60)).padStart(2, '0');
-    const ss  = String(left % 60).padStart(2, '0');
-    const tv  = $('timerVal');
-    const tb  = $('timerBar');
+    const mm = String(Math.floor(left / 60)).padStart(2, '0');
+    const ss = String(left % 60).padStart(2, '0');
+    const tv = $('timerVal'), tb = $('timerBar');
     const red = left <= 60;
     if (tv) { tv.textContent = `${mm}:${ss}`; tv.style.color = red ? 'var(--sell)' : ''; }
     if (tb) tb.style.borderColor = red ? 'var(--sell-brd)' : '';
@@ -489,103 +501,99 @@ function startRevealTimer() {
 
 function wipeReveal() {
   clearInterval(S.revealTimer);
-  ['revName','revContact','revSecret'].forEach(id => set(id, '🔒 انتهت مدة العرض'));
+  ['revName','revContact','revSecret'].forEach(id => setT(id, '🔒 انتهت مدة العرض'));
   const tb = $('timerBar');
   if (tb) {
     tb.style.cssText = 'border-color:var(--sell-brd);color:var(--sell)';
-    tb.innerHTML = '<span>🔒 انتهت صلاحية عرض البيانات — تواصل معنا مباشرة</span>';
+    tb.innerHTML = '<span style="font-weight:900">🔒 انتهت صلاحية البيانات — تواصل مباشرة</span>';
   }
   document.querySelectorAll('.btn-copy').forEach(b => b.disabled = true);
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Button 2 — Done                                         ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Button 2 — Done                         ║
+   ╚══════════════════════════════════════════╝ */
 function step2() {
   wipeReveal();
-  cls('revealCard', true, 'dimmed');
+  addC('revealCard', 'dimmed');
   show('successSection');
-  setTimeout(() => $('successSection')?.scrollIntoView({ behavior:'smooth', block:'center' }), 120);
+  setTimeout(() =>
+    $('successSection')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120
+  );
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Copy to Clipboard                                       ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Copy to Clipboard                       ║
+   ╚══════════════════════════════════════════╝ */
 function copyEl(id, btn) {
   const text = $(id)?.textContent?.trim() || '';
   if (!text || text.includes('🔒')) return;
-
   const done = () => {
-    const orig = btn.textContent;
-    btn.textContent = '✅ تم النسخ';
+    const o = btn.textContent;
+    btn.textContent = '✅ تم';
     btn.classList.add('ok');
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove('ok'); }, 2000);
+    setTimeout(() => { btn.textContent = o; btn.classList.remove('ok'); }, 2000);
   };
-
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
-  } else {
-    fallbackCopy(text, done);
-  }
+    navigator.clipboard.writeText(text).then(done).catch(() => fbCopy(text, done));
+  } else fbCopy(text, done);
 }
-
-function fallbackCopy(text, cb) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  Object.assign(ta.style, { position:'fixed', top:'0', left:'0', opacity:'0' });
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
+function fbCopy(text, cb) {
+  const ta = Object.assign(document.createElement('textarea'),
+    { value: text, style: 'position:fixed;top:0;left:0;opacity:0' });
+  document.body.appendChild(ta); ta.focus(); ta.select();
   try { document.execCommand('copy'); cb(); } catch {}
-  document.body.removeChild(ta);
+  ta.remove();
 }
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Escape HTML                                             ║
-   ╚══════════════════════════════════════════════════════════╝ */
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
+/* ╔══════════════════════════════════════════╗
+   ║  Escape HTML                             ║
+   ╚══════════════════════════════════════════╝ */
+const esc = s => String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-/* ╔══════════════════════════════════════════════════════════╗
-   ║  Init                                                    ║
-   ╚══════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════╗
+   ║  Init                                    ║
+   ╚══════════════════════════════════════════╝ */
 document.addEventListener('DOMContentLoaded', () => {
+  /* Header rates */
+  setT('rBuy',  enN(CFG.BUY_RATE));
+  setT('rSell', enN(CFG.SELL_RATE));
 
-  // أسعار الهيدر
-  set('rBuy',  enN(CFG.BUY_RATE));
-  set('rSell', enN(CFG.SELL_RATE));
+  /* Dynamic sell limits */
+  setT('sellMinLbl', `أدنى: ${enN(Math.ceil(CFG.MIN_IQD / CFG.SELL_RATE))} دولار`);
+  setT('sellMaxLbl', `أقصى: ${enN(Math.floor(CFG.MAX_IQD / CFG.SELL_RATE))} دولار`);
 
-  // حدود البيع ديناميكية
-  const minU = Math.ceil(CFG.MIN_IQD / CFG.SELL_RATE);
-  const maxU = Math.floor(CFG.MAX_IQD / CFG.SELL_RATE);
-  set('sellMinLbl', `أدنى: ${enN(minU)} دولار`);
-  set('sellMaxLbl', `أقصى: ${enN(maxU)} دولار`);
+  /* Input listeners */
+  const wire = (id, fn) => $(id)?.addEventListener('input', fn);
+  wire('buyName',         validate);
+  wire('buyPhone',        validate);
+  wire('buyIQD',          calcBuy);
+  wire('buyWallet',       validate);
+  wire('sellName',        validate);
+  wire('sellPhone',       validate);
+  wire('sellUSDC',        calcSell);
+  wire('sellProofWallet', validate);
 
-  // input listeners
-  $('buyIQD')?.addEventListener('input', calcBuy);
-  $('buyWallet')?.addEventListener('input', validate);
-  $('sellUSDC')?.addEventListener('input', calcSell);
-  $('sellName')?.addEventListener('input', validate);
-  $('sellPhone')?.addEventListener('input', validate);
-  $('sellProofWallet')?.addEventListener('input', validate);
-
-  // IP + T&C
+  /* IP check */
   checkIP();
-  updateTermsBadge();
 
+  /* T&C re-check on tab return */
   window.addEventListener('focus', updateTermsBadge);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') updateTermsBadge();
   });
 
-  // ESC يغلق الـ overlay
+  /* ESC closes overlay */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeConfirm();
   });
 
-  // النقر خارج panel يغلقه
+  /* Click outside panel closes overlay */
   $('confirmOverlay')?.addEventListener('click', e => {
     if (e.target === $('confirmOverlay')) closeConfirm();
   });
+
+  updateTermsBadge();
 });
