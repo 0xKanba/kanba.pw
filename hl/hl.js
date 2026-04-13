@@ -58,15 +58,27 @@ function resetInactivityTimer() {
   _stampActivity();
 }
 
-// Heartbeat: يعمل حتى لو throttled → يفحص الـ timestamp الحقيقي
-let _heartbeat = null;
+// Heartbeat عبر requestAnimationFrame — مضمون ضد Brave/Firefox throttling
+// rAF: يعمل بـ 60fps حين التبويب مرئي، يتوقف تلقائياً حين مخفي
+// عند عودة التبويب: يستأنف فوراً ويفحص الـ timestamp
+let _rafId       = null;
+let _lastRafMs   = 0;
+const RAF_CHECK  = 10_000; // فحص كل 10 ثوانٍ من وقت rAF الحقيقي
+
+function _rafHeartbeat(ts) {
+  if (ts - _lastRafMs >= RAF_CHECK) {
+    _lastRafMs = ts;
+    if (localStorage.getItem(PIN_KEY) && !State.isLocked) {
+      if (_isActivityExpired()) { lockApp(); return; } // لا تستمر بعد القفل
+    }
+  }
+  _rafId = requestAnimationFrame(_rafHeartbeat);
+}
+
 function startHeartbeat() {
-  if (_heartbeat) clearInterval(_heartbeat);
-  _heartbeat = setInterval(() => {
-    if (!localStorage.getItem(PIN_KEY)) return;
-    if (State.isLocked) return;
-    if (_isActivityExpired()) lockApp();
-  }, 30_000); // 30 ثانية — حتى لو throttled لدقيقة فالـ visibilitychange يكفي
+  if (_rafId) cancelAnimationFrame(_rafId);
+  _lastRafMs = performance.now();
+  _rafId = requestAnimationFrame(_rafHeartbeat);
 }
 
 // فحص فوري عند العودة للتبويب — هذا السطر يكسر أي throttling
@@ -1125,7 +1137,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('btnHistory').onclick =()=>State.wallet&&showHistory();
   $('btnDeposit').onclick =()=>State.wallet&&openModal('modalDeposit');
   $('btnWithdraw').onclick=()=>State.wallet&&openModal('modalWithdraw');
-  $('btnSwap').onclick    =()=>window.open('/hl/pay.html','_blank','noopener,noreferrer');
   $('btnLogout').onclick  =()=>State.wallet&&openModal('modalLogout');
   $('btnCloseAll').onclick=askCloseAll;
 
