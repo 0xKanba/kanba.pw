@@ -245,6 +245,25 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .price-delta.up { color:var(--up); }
 .price-delta.dn { color:var(--dn); }
 .price-delta.n  { color:var(--text-muted); }
+
+/* صف الجلسة: نسبة + أعلى/أدنى سعر */
+.price-session {
+  display:flex; align-items:center; justify-content:center;
+  gap:6px; width:100%; flex-wrap:nowrap;
+  background:var(--bg-input); border-radius:10px;
+  padding:5px 10px; margin-top:2px;
+}
+.price-session.hidden { display:none !important; }
+.ps-chg {
+  font-family:var(--font-mono); font-size:13px; font-weight:900;
+  min-width:52px; text-align:center;
+}
+.ps-chg.up { color:var(--up); }
+.ps-chg.dn { color:var(--dn); }
+.ps-chg.n  { color:var(--text-muted); }
+.ps-h { font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--up); }
+.ps-l { font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--dn); }
+.ps-divider { color:var(--border-strong); font-size:11px; }
 .price-meta-row { display:flex; align-items:center; justify-content:space-between; width:100%; gap:6px; }
 .price-bid-ask { font-family:var(--font-mono); font-size:10px; color:var(--text-muted); }
 .price-timer { font-size:9px; color:var(--text-muted); font-family:var(--font-mono); }
