@@ -162,8 +162,8 @@
 <!-- ══════════════════════════════
      MODALS
 ══════════════════════════════ -->
-<div class="modal-overlay" id="modalConfirm">
-  <div class="modal">
+<div class="modal-overlay overlay-fs" id="modalConfirm">
+  <div class="modal modal-fs">
     <div class="modal-handle"></div>
     <h3 class="modal-title" id="confirmTitle">تأكيد الصفقة</h3>
     <p class="modal-subtitle" id="confirmSubtitle"></p>
@@ -175,8 +175,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modalClose">
-  <div class="modal">
+<div class="modal-overlay overlay-fs" id="modalClose">
+  <div class="modal modal-fs">
     <div class="modal-handle"></div>
     <h3 class="modal-title" id="closeTitle">إغلاق الصفقة</h3>
     <p class="modal-subtitle">سيتم الإغلاق فوراً بالسعر الحالي</p>
@@ -188,8 +188,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modalCloseAll">
-  <div class="modal">
+<div class="modal-overlay overlay-fs" id="modalCloseAll">
+  <div class="modal modal-fs">
     <div class="modal-handle"></div>
     <h3 class="modal-title">⚠️ إغلاق جميع الصفقات</h3>
     <p class="modal-subtitle">سيتم إغلاق كل المراكز المفتوحة فوراً</p>
@@ -201,42 +201,90 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modalTP">
-  <div class="modal">
+<!-- ═══ TP Modal — Full Screen ═══ -->
+<div class="modal-overlay overlay-fs" id="modalTP">
+  <div class="modal modal-fs fs-tpsl">
     <div class="modal-handle"></div>
-    <h3 class="modal-title" id="tpTitle">🎯 تحديد حجم الربح</h3>
-    <p class="modal-subtitle" id="tpSubtitle"></p>
-    <div class="confirm-details" id="tpCurrentDetails"></div>
-    <div class="form-group">
-      <label>الربح المستهدف بالدولار ($)</label>
-      <input type="number" class="form-input" id="tpAmount" placeholder="مثال: 10" min="0.1" step="any">
-      <div class="calc-preview" id="tpPreview">سعر التفعيل: —</div>
+    <div class="fs-tpsl-header">
+      <div class="fs-tpsl-icon tp-icon">🎯</div>
+      <div>
+        <div class="fs-tpsl-title">تحديد هدف الربح</div>
+        <div class="fs-tpsl-sub">Take Profit</div>
+      </div>
+      <button class="fs-close-btn" id="tpCancel">✕</button>
     </div>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-cancel" id="tpCancel">إلغاء</button>
-      <button class="btn-modal btn-confirm btn-success" id="tpExecute">تعيين الربح ✓</button>
+    <!-- معلومات المركز -->
+    <div class="fspi-wrap" id="tpPosInfo"></div>
+    <!-- الوضع الحالي -->
+    <div class="fs-current-badge tp-badge" id="tpCurrentDetails"></div>
+    <!-- Presets -->
+    <div class="fs-presets-row" id="tpPresets">
+      <button class="fs-preset" data-v="5">+$5</button>
+      <button class="fs-preset" data-v="10">+$10</button>
+      <button class="fs-preset" data-v="20">+$20</button>
+      <button class="fs-preset" data-v="50">+$50</button>
+      <button class="fs-preset" data-v="100">+$100</button>
     </div>
+    <!-- Mode Tabs -->
+    <div class="fs-mode-tabs">
+      <button class="fs-mode-tab active" id="tpTabAmount" data-mode="amount" onclick="tpSetMode('amount')">بالدولار $</button>
+      <button class="fs-mode-tab" id="tpTabPrice" data-mode="price" onclick="tpSetMode('price')">بالسعر</button>
+    </div>
+    <!-- Amount Mode -->
+    <div id="tpModeAmountPanel">
+      <div class="fs-field-label">الربح المستهدف (USD)</div>
+      <input type="number" class="fs-input" id="tpAmount" placeholder="0.00" min="0.01" step="any" inputmode="decimal">
+    </div>
+    <!-- Price Mode -->
+    <div id="tpModePricePanel" style="display:none">
+      <div class="fs-field-label">سعر التفعيل المباشر ($)</div>
+      <input type="number" class="fs-input" id="tpDirectPrice" placeholder="0.00" step="any" inputmode="decimal">
+    </div>
+    <!-- Preview -->
+    <div class="fs-preview" id="tpPreview"><span class="fspr-hint">حدد المبلغ لرؤية التفاصيل</span></div>
+    <!-- Buttons -->
+    <button class="fs-exec-btn tp-exec" id="tpExecute">✅ تأكيد هدف الربح</button>
     <div id="tpDeleteRow" class="delete-row hidden">
       <button class="btn-delete-tpsl" id="tpDelete">🗑 إلغاء هدف الربح الحالي</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modalSL">
-  <div class="modal">
+<!-- ═══ SL Modal — Full Screen ═══ -->
+<div class="modal-overlay overlay-fs" id="modalSL">
+  <div class="modal modal-fs fs-tpsl">
     <div class="modal-handle"></div>
-    <h3 class="modal-title" id="slTitle">🛡 تحديد حجم الخسارة</h3>
-    <p class="modal-subtitle" id="slSubtitle"></p>
-    <div class="confirm-details" id="slCurrentDetails"></div>
-    <div class="form-group">
-      <label>الخسارة المسموح بها بالدولار ($)</label>
-      <input type="number" class="form-input" id="slAmount" placeholder="مثال: 5" min="0.1" step="any">
-      <div class="calc-preview" id="slPreview">سعر التفعيل: —</div>
+    <div class="fs-tpsl-header">
+      <div class="fs-tpsl-icon sl-icon">🛡</div>
+      <div>
+        <div class="fs-tpsl-title">تحديد وقف الخسارة</div>
+        <div class="fs-tpsl-sub">Stop Loss</div>
+      </div>
+      <button class="fs-close-btn" id="slCancel">✕</button>
     </div>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-cancel" id="slCancel">إلغاء</button>
-      <button class="btn-modal btn-confirm btn-danger" id="slExecute">تعيين الخسارة ✓</button>
+    <div class="fspi-wrap" id="slPosInfo"></div>
+    <div class="fs-current-badge sl-badge" id="slCurrentDetails"></div>
+    <div class="fs-presets-row" id="slPresets">
+      <button class="fs-preset" data-v="3">-$3</button>
+      <button class="fs-preset" data-v="5">-$5</button>
+      <button class="fs-preset" data-v="10">-$10</button>
+      <button class="fs-preset" data-v="20">-$20</button>
+      <button class="fs-preset" data-v="50">-$50</button>
     </div>
+    <div class="fs-mode-tabs">
+      <button class="fs-mode-tab active" id="slTabAmount" data-mode="amount" onclick="slSetMode('amount')">بالدولار $</button>
+      <button class="fs-mode-tab" id="slTabPrice" data-mode="price" onclick="slSetMode('price')">بالسعر</button>
+    </div>
+    <div id="slModeAmountPanel">
+      <div class="fs-field-label">الخسارة المسموح بها (USD)</div>
+      <input type="number" class="fs-input" id="slAmount" placeholder="0.00" min="0.01" step="any" inputmode="decimal">
+    </div>
+    <div id="slModePricePanel" style="display:none">
+      <div class="fs-field-label">سعر الوقف المباشر ($)</div>
+      <input type="number" class="fs-input" id="slDirectPrice" placeholder="0.00" step="any" inputmode="decimal">
+    </div>
+    <div class="fs-preview" id="slPreview"><span class="fspr-hint">حدد المبلغ لرؤية التفاصيل</span></div>
+    <button class="fs-exec-btn sl-exec" id="slExecute">⛔ تأكيد وقف الخسارة</button>
     <div id="slDeleteRow" class="delete-row hidden">
       <button class="btn-delete-tpsl" id="slDelete">🗑 إلغاء وقف الخسارة الحالي</button>
     </div>
