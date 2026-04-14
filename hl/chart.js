@@ -504,25 +504,13 @@ const ChartModule = (function () {
     const pct = st.pct.toFixed(2);
     const up  = st.pct >= 0;
 
-    _dayHiLine = _series.createPriceLine({
-      price: st.high, lineWidth: 1,
-      lineStyle: LightweightCharts.LineStyle.Dashed,
-      color: '#26a69a', axisLabelVisible: true,
-      title: `H ${st.high.toFixed(dp)}`,
-    });
-    _dayLoLine = _series.createPriceLine({
-      price: st.low, lineWidth: 1,
-      lineStyle: LightweightCharts.LineStyle.Dashed,
-      color: '#ef5350', axisLabelVisible: true,
-      title: `L ${st.low.toFixed(dp)}`,
-    });
-
+    // لا خطوط على الرسم — فقط علامات نصية في الشريط السفلي
     if (el) {
       el.innerHTML =
-        `<span style="color:#b2b5be;font-size:9px;">1AM+3</span>` +
-        `<span style="color:#26a69a;font-size:10px;font-weight:700;">H&nbsp;${st.high.toFixed(dp)}</span>` +
-        `<span style="color:#ef5350;font-size:10px;font-weight:700;">L&nbsp;${st.low.toFixed(dp)}</span>` +
-        `<span style="color:${up?'#26a69a':'#ef5350'};font-size:11px;font-weight:900;">${up?'+':''}${pct}%</span>`;
+        `<span style="color:var(--text-muted);font-size:9px;font-family:monospace;">12AM+3</span>` +
+        `<span style="color:#26a69a;font-size:11px;font-weight:700;font-family:monospace;">▲ ${st.high.toFixed(dp)}</span>` +
+        `<span style="color:#ef5350;font-size:11px;font-weight:700;font-family:monospace;">▼ ${st.low.toFixed(dp)}</span>` +
+        `<span style="color:${up?'#26a69a':'#ef5350'};font-size:13px;font-weight:900;font-family:monospace;">${up?'+':''}${pct}%</span>`;
     }
   }
 
