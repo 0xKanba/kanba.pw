@@ -18,7 +18,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="HLTrade">
     <!-- أيقونة iOS (اصنعها 180×180 وضعها في /hl/icon-180.png) -->
-    <link rel="apple-touch-icon" href="/hl/icon-192.png">
+    <link rel="apple-touch-icon" href="/hl/icon-512.png">
 
 </head>
 <body>
@@ -97,6 +97,13 @@
         <div class="price-asset" id="priceAssetName">نفط خام</div>
         <div class="price-value" id="priceValue">—</div>
         <div class="price-delta" id="priceDelta"></div>
+        <div class="price-session hidden" id="priceSession">
+          <span class="ps-chg" id="psChg"></span>
+          <span class="ps-divider">|</span>
+          <span class="ps-h" id="psH"></span>
+          <span class="ps-divider">|</span>
+          <span class="ps-l" id="psL"></span>
+        </div>
         <div class="price-meta-row">
           <span class="price-bid-ask" id="priceBidAsk"></span>
           <span class="price-timer" id="priceTimer">↻ —</span>
