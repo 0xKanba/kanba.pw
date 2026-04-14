@@ -34,7 +34,9 @@ const State = {
   balance: null, priceTimer: null, _balTimer: null, _clockTimer: null,
   lastPinTime: 0, pinCallback: null,
   isLocked: false, inactivityTimer: null,
-  currentPinInput: '', currentSetPinInput: '', referrerSet: false
+  currentPinInput: '', currentSetPinInput: '', referrerSet: false,
+  sessionStats: { GOLD: null, SILVER: null, CL: null },
+  _sessionTimer: null
 };
 
 /* ─── قفل النشاط — مضمون 100% حتى مع Brave/Firefox throttling ───────────────
@@ -379,8 +381,64 @@ function tradeErr(msg){
 }
 
 // ════════════════════════════════════════
-// تحديث الأسعار
+// إحصائيات جلسة اليوم (1 AM UTC+3 → الآن)
 // ════════════════════════════════════════
+
+function getSessionStartMs() {
+  // 1 AM UTC+3 = UTC 22:00 اليوم السابق في التقويم UTC+3
+  const utc3Now = new Date(Date.now() + 3 * 3600_000);
+  const y = utc3Now.getUTCFullYear();
+  const m = utc3Now.getUTCMonth();
+  const d = utc3Now.getUTCDate();
+  // 1:00 AM UTC+3 ← نحوّل لـ UTC: نطرح 3 ساعات
+  return Date.UTC(y, m, d, 1, 0, 0) - 3 * 3600_000;
+}
+
+async function fetchSessionStats(sym) {
+  try {
+    const a = ASSETS[sym];
+    const start = getSessionStartMs();
+    const raw = await hlInfo({
+      type: 'candleSnapshot',
+      req: { coin: a.coin, interval: '1h', startTime: start, endTime: Date.now() }
+    });
+    if (!Array.isArray(raw) || !raw.length) return;
+    const open = parseFloat(raw[0].o);
+    const high = Math.max(...raw.map(c => parseFloat(c.h)));
+    const low  = Math.min(...raw.map(c => parseFloat(c.l)));
+    State.sessionStats[sym] = { open, high, low };
+    updateSessionUI();
+  } catch(e) { console.warn('[Session]', e.message); }
+}
+
+function updateSessionUI() {
+  const sym = State.asset;
+  const st  = State.sessionStats[sym];
+  const p   = State.prices[sym];
+  const a   = ASSETS[sym];
+  const el  = $('priceSession');
+  if (!st || !p?.mid || !el) return;
+
+  const pct = ((p.mid - st.open) / st.open) * 100;
+  const up  = pct >= 0;
+  const sign = up ? '+' : '';
+  const cls  = up ? 'up' : 'dn';
+
+  el.classList.remove('hidden');
+  const chgEl = $('psChg');
+  if (chgEl) { chgEl.textContent = `${sign}${pct.toFixed(2)}%`; chgEl.className = `ps-chg ${cls}`; }
+  const hEl = $('psH'); if (hEl) hEl.textContent = `H ${fmt(st.high, a.pxDp)}`;
+  const lEl = $('psL'); if (lEl) lEl.textContent = `L ${fmt(st.low,  a.pxDp)}`;
+}
+
+function startSessionPolling() {
+  if (State._sessionTimer) clearInterval(State._sessionTimer);
+  // جلب فوري للأصل الحالي
+  fetchSessionStats(State.asset);
+  // تحديث كل 5 دقائق للبيانات التاريخية (H/L لا تتغير كثيراً)
+  State._sessionTimer = setInterval(() => fetchSessionStats(State.asset), 5 * 60_000);
+}
+
 let _ctxCounter = 0;
 async function pollPrices(){
   if (_ctxCounter % 30 === 0) {
@@ -444,6 +502,8 @@ function updatePriceUI(){
   }
   if(p.bid&&p.ask) setTxt('priceBidAsk',`شراء ${fmt(p.bid,a.pxDp)} · بيع ${fmt(p.ask,a.pxDp)}`);
   State.prevMid[State.asset]=p.mid;
+  // تحديث نسبة الجلسة لحظياً مع كل سعر جديد
+  updateSessionUI();
   let s=1; clearInterval(State.priceTimer);
   setTxt('priceTimer',`↻ ${s}s`);
   State.priceTimer=setInterval(()=>{ s++; setTxt('priceTimer',`↻ ${s}s`); },1000);
@@ -570,6 +630,8 @@ function switchAsset(sym){
   const a=ASSETS[sym];
   setTxt('priceAssetName',a.name); setTxt('tradeAssetName',a.name); setTxt('qtyUnit',a.unit);
   renderPresets(a.presets); State.prevMid[sym]=0; updatePriceUI();
+  $('priceSession')?.classList.add('hidden'); // إخفاء حتى تُحمَّل بيانات الأصل الجديد
+  fetchSessionStats(sym);
   if(typeof ChartModule!=='undefined') ChartModule.switchAssetChart(sym);
 }
 function renderPresets(arr){
@@ -1055,6 +1117,7 @@ async function login(){
     toast('مرحباً 🤝','ok');
     State.timers.push(setInterval(pollPrices,1000),setInterval(pollAccount,8000));
     startMainClock();
+    startSessionPolling(); // جلسة اليوم H/L/%
   } catch(e){
     hideLoader(); State.wallet=null;
     toast('خطأ: '+e.message.slice(0,80),'err');
