@@ -233,8 +233,13 @@ function handleVerifyPin() {
 );
 
 // فحص فوري عند العودة للتبويب (يكسر أي throttling من Brave/Firefox)
+// إخفاء/إغلاق التبويب → قفل فوري عند العودة
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') _checkOnFocus();
+  if (document.visibilityState === 'hidden') {
+    if (localStorage.getItem(PIN_KEY)) localStorage.setItem(LOCKED_KEY, 'true');
+  } else {
+    _checkOnFocus();
+  }
 });
 window.addEventListener('focus', _checkOnFocus);
 window.addEventListener('pageshow', _checkOnFocus); // Back/Forward cache
@@ -385,13 +390,13 @@ function tradeErr(msg){
 // ════════════════════════════════════════
 
 function getSessionStartMs() {
-  // 1 AM UTC+3 = UTC 22:00 اليوم السابق في التقويم UTC+3
+  // 12 AM (منتصف الليل) UTC+3 = UTC 21:00 اليوم السابق
   const utc3Now = new Date(Date.now() + 3 * 3600_000);
   const y = utc3Now.getUTCFullYear();
   const m = utc3Now.getUTCMonth();
   const d = utc3Now.getUTCDate();
-  // 1:00 AM UTC+3 ← نحوّل لـ UTC: نطرح 3 ساعات
-  return Date.UTC(y, m, d, 1, 0, 0) - 3 * 3600_000;
+  // منتصف الليل UTC+3 → نحوّل لـ UTC بطرح 3 ساعات
+  return Date.UTC(y, m, d, 0, 0, 0) - 3 * 3600_000;
 }
 
 async function fetchSessionStats(sym) {
@@ -439,6 +444,89 @@ function startSessionPolling() {
   State._sessionTimer = setInterval(() => fetchSessionStats(State.asset), 5 * 60_000);
 }
 
+// ════════════════════════════════════════
+// WebSocket Manager — تحديث لحظي ~1 ثانية
+// وثائق: clearinghouseState + openOrders + bbo
+// ════════════════════════════════════════
+let _mainWs = null;
+let _mainWsReconTimer = null;
+
+function startMainWs() {
+  wsMainClose();
+  try {
+    _mainWs = new WebSocket('wss://api.hyperliquid.xyz/ws');
+    _mainWs.onopen = () => {
+      const addr = State.wallet?.address;
+      if (!addr || !_mainWs) return;
+      // BBO لكل أصل — bid/ask/mid لحظي
+      Object.values(ASSETS).forEach(a =>
+        _mainWs.send(JSON.stringify({method:'subscribe',subscription:{type:'bbo',coin:a.coin}}))
+      );
+      // مراكز المستخدم لحظياً (xyz DEX)
+      _mainWs.send(JSON.stringify({method:'subscribe',subscription:{type:'clearinghouseState',user:addr,dex:'xyz'}}));
+      // أوامر TP/SL لحظياً
+      _mainWs.send(JSON.stringify({method:'subscribe',subscription:{type:'openOrders',user:addr,dex:'xyz'}}));
+    };
+    _mainWs.onmessage = e => {
+      try {
+        const msg = JSON.parse(e.data);
+        const {channel, data} = msg;
+        if (!data || channel === 'subscriptionResponse') return;
+        if (channel === 'bbo')                _onWsBbo(data);
+        else if (channel === 'clearinghouseState') _onWsClearinghouse(data);
+        else if (channel === 'openOrders')    _onWsOpenOrders(data);
+      } catch {}
+    };
+    _mainWs.onerror = () => {};
+    _mainWs.onclose = () => {
+      if (State.wallet) _mainWsReconTimer = setTimeout(startMainWs, 3000);
+    };
+  } catch(e) { console.warn('[MainWS]', e.message); }
+}
+
+function wsMainClose() {
+  clearTimeout(_mainWsReconTimer);
+  if (_mainWs) { try { _mainWs.close(); } catch {} _mainWs = null; }
+}
+
+function _onWsBbo(data) {
+  const coin = data.coin || '';
+  const sym  = coin.includes(':') ? coin.split(':')[1] : coin;
+  if (!ASSETS[sym]) return;
+  const bid = parseFloat(data.bbo?.[0]?.px || 0);
+  const ask = parseFloat(data.bbo?.[1]?.px || 0);
+  const mid = (bid && ask) ? (bid + ask) / 2 : (bid || ask);
+  if (!mid) return;
+  State.prices[sym] = {bid, ask, mid};
+  const el = $(`price${sym}`);
+  if (el) {
+    const dir = mid > State.prevMid[sym] ? 'up' : mid < State.prevMid[sym] ? 'dn' : '';
+    el.textContent = fmt(mid, ASSETS[sym].pxDp);
+    el.className = `tab-price${dir ? ' ' + dir : ''}`;
+    if (dir) setTimeout(() => el.className = 'tab-price', 800);
+  }
+  if (sym === State.asset) updatePriceUI();
+}
+
+function _onWsClearinghouse(data) {
+  if (!data) return;
+  const marginUsed = parseFloat(data?.marginSummary?.totalMarginUsed || 0);
+  const floatPnl = (data?.assetPositions || []).reduce(
+    (s,p) => s + parseFloat(p.position?.unrealizedPnl || 0), 0
+  );
+  if (State.balance) { State.balance.margin = marginUsed; State.balance.floatPnl = floatPnl; }
+  const rawPos = (data?.assetPositions || []).filter(p => parseFloat(p.position?.szi || 0) !== 0);
+  State.positions = rawPos.map(p => ({...p, tpsl: parseTpslFromOrders(State.openOrders, p.position.coin)}));
+  renderPositions();
+}
+
+function _onWsOpenOrders(data) {
+  if (!Array.isArray(data)) return;
+  State.openOrders = data;
+  State.positions  = State.positions.map(p => ({...p, tpsl: parseTpslFromOrders(data, p.position.coin)}));
+  renderPositions();
+}
+
 let _ctxCounter = 0;
 async function pollPrices(){
   if (_ctxCounter % 30 === 0) {
@@ -462,6 +550,9 @@ async function pollPrices(){
     } catch(e){ console.warn('[24h Context]', e.message); }
   }
   _ctxCounter++;
+
+  // WS نشط → BBO يُحدَّث تلقائياً، لا داعي لـ l2Book polling
+  if (_mainWs && _mainWs.readyState === WebSocket.OPEN) return;
 
   await Promise.all(Object.keys(ASSETS).map(async sym=>{
     try {
@@ -555,6 +646,23 @@ function parseTpslFromOrders(orders,coin){
 }
 function calcTpPrice(entryPx,szi,pnlTarget){ const sz=parseFloat(szi),ep=parseFloat(entryPx); return sz>0?ep+pnlTarget/sz:ep-pnlTarget/Math.abs(sz); }
 function calcSlPrice(entryPx,szi,slAmount){  const sz=parseFloat(szi),ep=parseFloat(entryPx); return sz>0?ep-slAmount/sz:ep+slAmount/Math.abs(sz); }
+
+// وضع إدخال TP/SL — 'amount'(بالدولار) أو 'price'(سعر مباشر)
+let _tpMode = 'amount', _slMode = 'amount';
+window.tpSetMode = function(m){
+  _tpMode = m;
+  $('tpModeAmountPanel').style.display = m==='amount' ? '' : 'none';
+  $('tpModePricePanel').style.display  = m==='price'  ? '' : 'none';
+  [$('tpTabAmount'), $('tpTabPrice')].forEach(b=>b?.classList.toggle('active', b.dataset.mode===m));
+  recalcTpPreview();
+};
+window.slSetMode = function(m){
+  _slMode = m;
+  $('slModeAmountPanel').style.display = m==='amount' ? '' : 'none';
+  $('slModePricePanel').style.display  = m==='price'  ? '' : 'none';
+  [$('slTabAmount'), $('slTabPrice')].forEach(b=>b?.classList.toggle('active', b.dataset.mode===m));
+  recalcSlPreview();
+};
 
 function renderPositions(){
   const count=State.positions.length;
@@ -766,11 +874,27 @@ async function execCloseAll(){
 window.openTP=async function(i){
   const p=State.positions[i]; if(!p)return;
   const pos=p.position, coin=shortCoin(pos.coin);
-  const a=ASSETS[coin]||{name:coin,pxDp:2};
-  const isLong=parseFloat(pos.szi)>0;
+  const a=ASSETS[coin]||{name:coin,pxDp:2,szDp:2,unit:'',icon:'📊'};
+  const szi=parseFloat(pos.szi), isLong=szi>0;
+  const entry=parseFloat(pos.entryPx||0), curPx=State.prices[coin]?.mid||entry;
 
-  setTxt('tpTitle',`🎯 تحديد حجم الربح — ${a.icon||''} ${a.name}`);
-  setTxt('tpSubtitle',`${isLong?'▲ شراء':'▼ بيع'} | دخول: $${fmt(pos.entryPx||0,a.pxDp)}`);
+  // معلومات المركز
+  const runPnl=(curPx-entry)*szi, pct=((curPx-entry)/entry*100).toFixed(2);
+  const ps=runPnl>=0?'+':'';
+  $('tpPosInfo').innerHTML=`
+    <div class="fspi-row">
+      <div class="fspi-item"><span>الأصل</span><b>${a.icon} ${a.name}</b></div>
+      <div class="fspi-item"><span>الاتجاه</span><b class="${isLong?'g':'r'}">${isLong?'▲ شراء':'▼ بيع'}</b></div>
+      <div class="fspi-item"><span>سعر الدخول</span><b>${fmt(entry,a.pxDp)} $</b></div>
+      <div class="fspi-item"><span>P&L الآن</span><b class="${runPnl>=0?'g':'r'}">${ps}$${fmt(runPnl,2)} (${ps}${pct}%)</b></div>
+    </div>`;
+
+  // إعادة ضبط الوضع
+  _tpMode = 'amount';
+  tpSetMode('amount');
+  $('tpAmount').value='';
+  $('tpDirectPrice').value='';
+  $('tpPreview').innerHTML='<span class="fspr-hint">حدد المبلغ لرؤية التفاصيل</span>';
 
   showLoader('جلب الأوامر...');
   let freshTpsl={tp:null,sl:null,tpOid:null,slOid:null};
@@ -782,30 +906,50 @@ window.openTP=async function(i){
   hideLoader();
 
   $('tpCurrentDetails').innerHTML=freshTpsl.tp
-    ?`<div class="confirm-row"><span class="confirm-key">الربح المعين حالياً</span><span class="confirm-val tp">$${fmt(freshTpsl.tp,a.pxDp)}</span></div>`
-    :`<div class="confirm-row"><span class="confirm-key">الربح المعين</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
-
+    ?`<span>✅ هدف الربح الحالي: <b>${fmt(freshTpsl.tp,a.pxDp)} $</b></span>`
+    :`<span style="color:var(--text-muted)">لا يوجد هدف ربح مُعيَّن حالياً</span>`;
   $('tpDeleteRow').classList.toggle('hidden',!freshTpsl.tpOid);
-  $('tpAmount').value='';
-  setTxt('tpPreview','سعر التفعيل: —');
   State.pendingTP={index:i,coin:pos.coin,szi:pos.szi,entryPx:pos.entryPx,sym:coin,tpsl:freshTpsl};
   openModal('modalTP');
 };
 
 function recalcTpPreview(){
   const tp=State.pendingTP; if(!tp)return;
-  const val=parseFloat($('tpAmount')?.value||0);
-  if(!val||val<=0){setTxt('tpPreview','سعر التفعيل: —');return;}
   const a=ASSETS[tp.sym]||{pxDp:2};
-  setTxt('tpPreview',`سعر التفعيل: $${fmt(calcTpPrice(tp.entryPx,tp.szi,val),a.pxDp)}`);
+  const el=$('tpPreview'); if(!el)return;
+  let tpPx, pnl;
+  if (_tpMode==='price') {
+    tpPx=parseFloat($('tpDirectPrice')?.value||0);
+    if(!tpPx){el.innerHTML='<span class="fspr-hint">أدخل السعر المستهدف</span>';return;}
+    pnl=(tpPx-parseFloat(tp.entryPx))*parseFloat(tp.szi);
+  } else {
+    const val=parseFloat($('tpAmount')?.value||0);
+    if(!val||val<=0){el.innerHTML='<span class="fspr-hint">أدخل الربح المستهدف بالدولار</span>';return;}
+    tpPx=calcTpPrice(tp.entryPx,tp.szi,val); pnl=val;
+  }
+  const pct=((tpPx-parseFloat(tp.entryPx))/parseFloat(tp.entryPx)*100).toFixed(2);
+  const up=pnl>=0, cl=up?'g':'r', s=up?'+':'';
+  el.innerHTML=`
+    <div class="fsp-row"><span>سعر التفعيل</span><span class="mono">${fmt(tpPx,a.pxDp)} $</span></div>
+    <div class="fsp-row"><span>الربح المتوقع</span><span class="mono ${cl}">${s}$${Math.abs(pnl).toFixed(2)}</span></div>
+    <div class="fsp-row last"><span>نسبة التغيير</span><span class="mono ${cl}">${s}${pct}%</span></div>`;
 }
 
 async function execTP(){
   const tp=State.pendingTP; if(!tp)return closeModal('modalTP');
-  const val=parseFloat($('tpAmount').value||0);
-  if(!val||val<=0) return toast('أدخل مبلغ الربح المستهدف بالدولار','err');
   const a=ASSETS[tp.sym]; if(!a)return;
-  const tpPx=calcTpPrice(tp.entryPx,tp.szi,val);
+  let tpPx;
+  if (_tpMode==='price'){
+    tpPx=parseFloat($('tpDirectPrice')?.value||0);
+    if(!tpPx||tpPx<=0) return toast('أدخل سعر التفعيل','err');
+  } else {
+    const val=parseFloat($('tpAmount')?.value||0);
+    if(!val||val<=0) return toast('أدخل مبلغ الربح بالدولار','err');
+    tpPx=calcTpPrice(tp.entryPx,tp.szi,val);
+  }
+  const isLong=parseFloat(tp.szi)>0;
+  if(isLong  && tpPx<=parseFloat(tp.entryPx)) return toast('⚠️ TP يجب أن يكون فوق سعر الدخول','err');
+  if(!isLong && tpPx>=parseFloat(tp.entryPx)) return toast('⚠️ TP يجب أن يكون تحت سعر الدخول','err');
   setBtnLoading('tpExecute','⏳');
   showLoader(`${a.icon} تعيين هدف الربح...`);
   try {
@@ -843,11 +987,21 @@ async function deleteTP(){
 window.openSL=async function(i){
   const p=State.positions[i]; if(!p)return;
   const pos=p.position, coin=shortCoin(pos.coin);
-  const a=ASSETS[coin]||{name:coin,pxDp:2};
-  const isLong=parseFloat(pos.szi)>0;
-
-  setTxt('slTitle',`🛡 تحديد حجم الخسارة — ${a.icon||''} ${a.name}`);
-  setTxt('slSubtitle',`${isLong?'▲ شراء':'▼ بيع'} | دخول: $${fmt(pos.entryPx||0,a.pxDp)}`);
+  const a=ASSETS[coin]||{name:coin,pxDp:2,szDp:2,unit:'',icon:'📊'};
+  const szi=parseFloat(pos.szi), isLong=szi>0;
+  const entry=parseFloat(pos.entryPx||0), curPx=State.prices[coin]?.mid||entry;
+  const runPnl=(curPx-entry)*szi, pct=((curPx-entry)/entry*100).toFixed(2);
+  const ps=runPnl>=0?'+':'';
+  $('slPosInfo').innerHTML=`
+    <div class="fspi-row">
+      <div class="fspi-item"><span>الأصل</span><b>${a.icon} ${a.name}</b></div>
+      <div class="fspi-item"><span>الاتجاه</span><b class="${isLong?'g':'r'}">${isLong?'▲ شراء':'▼ بيع'}</b></div>
+      <div class="fspi-item"><span>سعر الدخول</span><b>${fmt(entry,a.pxDp)} $</b></div>
+      <div class="fspi-item"><span>P&L الآن</span><b class="${runPnl>=0?'g':'r'}">${ps}$${fmt(runPnl,2)} (${ps}${pct}%)</b></div>
+    </div>`;
+  _slMode='amount'; slSetMode('amount');
+  $('slAmount').value=''; $('slDirectPrice').value='';
+  $('slPreview').innerHTML='<span class="fspr-hint">حدد المبلغ لرؤية التفاصيل</span>';
 
   showLoader('جلب الأوامر...');
   let freshTpsl={tp:null,sl:null,tpOid:null,slOid:null};
@@ -857,32 +1011,51 @@ window.openSL=async function(i){
     if(State.positions[i]) State.positions[i].tpsl=freshTpsl;
   } catch{}
   hideLoader();
-
   $('slCurrentDetails').innerHTML=freshTpsl.sl
-    ?`<div class="confirm-row"><span class="confirm-key">الخسارة المعينة حالياً</span><span class="confirm-val sl">$${fmt(freshTpsl.sl,a.pxDp)}</span></div>`
-    :`<div class="confirm-row"><span class="confirm-key">وقف الخسارة</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
-
+    ?`<span>✅ وقف الخسارة الحالي: <b>${fmt(freshTpsl.sl,a.pxDp)} $</b></span>`
+    :`<span style="color:var(--text-muted)">لا يوجد وقف خسارة مُعيَّن حالياً</span>`;
   $('slDeleteRow').classList.toggle('hidden',!freshTpsl.slOid);
-  $('slAmount').value='';
-  setTxt('slPreview','سعر التفعيل: —');
   State.pendingSL={index:i,coin:pos.coin,szi:pos.szi,entryPx:pos.entryPx,sym:coin,tpsl:freshTpsl};
   openModal('modalSL');
 };
 
 function recalcSlPreview(){
   const sl=State.pendingSL; if(!sl)return;
-  const val=parseFloat($('slAmount')?.value||0);
-  if(!val||val<=0){setTxt('slPreview','سعر التفعيل: —');return;}
   const a=ASSETS[sl.sym]||{pxDp:2};
-  setTxt('slPreview',`سعر التفعيل: $${fmt(calcSlPrice(sl.entryPx,sl.szi,val),a.pxDp)}`);
+  const el=$('slPreview'); if(!el)return;
+  let slPx, loss;
+  if(_slMode==='price'){
+    slPx=parseFloat($('slDirectPrice')?.value||0);
+    if(!slPx){el.innerHTML='<span class="fspr-hint">أدخل سعر الوقف</span>';return;}
+    loss=(slPx-parseFloat(sl.entryPx))*parseFloat(sl.szi);
+  } else {
+    const val=parseFloat($('slAmount')?.value||0);
+    if(!val||val<=0){el.innerHTML='<span class="fspr-hint">أدخل الخسارة المسموحة بالدولار</span>';return;}
+    slPx=calcSlPrice(sl.entryPx,sl.szi,val); loss=-val;
+  }
+  const pct=((slPx-parseFloat(sl.entryPx))/parseFloat(sl.entryPx)*100).toFixed(2);
+  const up=loss>=0, cl=up?'g':'r', s=loss>=0?'+':'';
+  el.innerHTML=`
+    <div class="fsp-row"><span>سعر الوقف</span><span class="mono">${fmt(slPx,a.pxDp)} $</span></div>
+    <div class="fsp-row"><span>الخسارة المتوقعة</span><span class="mono ${cl}">${s}$${Math.abs(loss).toFixed(2)}</span></div>
+    <div class="fsp-row last"><span>نسبة التغيير</span><span class="mono ${cl}">${s}${pct}%</span></div>`;
 }
 
 async function execSL(){
   const sl=State.pendingSL; if(!sl)return closeModal('modalSL');
-  const val=parseFloat($('slAmount').value||0);
-  if(!val||val<=0) return toast('أدخل مبلغ الخسارة المسموح بها بالدولار','err');
   const a=ASSETS[sl.sym]; if(!a)return;
-  const slPx=calcSlPrice(sl.entryPx,sl.szi,val);
+  let slPx;
+  if(_slMode==='price'){
+    slPx=parseFloat($('slDirectPrice')?.value||0);
+    if(!slPx||slPx<=0) return toast('أدخل سعر الوقف','err');
+  } else {
+    const val=parseFloat($('slAmount')?.value||0);
+    if(!val||val<=0) return toast('أدخل مبلغ الخسارة المسموح بها','err');
+    slPx=calcSlPrice(sl.entryPx,sl.szi,val);
+  }
+  const isLong=parseFloat(sl.szi)>0;
+  if(isLong  && slPx>=parseFloat(sl.entryPx)) return toast('⚠️ SL يجب أن يكون تحت سعر الدخول','err');
+  if(!isLong && slPx<=parseFloat(sl.entryPx)) return toast('⚠️ SL يجب أن يكون فوق سعر الدخول','err');
   setBtnLoading('slExecute','⏳');
   showLoader(`${a.icon} تعيين وقف الخسارة...`);
   try {
@@ -1118,6 +1291,7 @@ async function login(){
     State.timers.push(setInterval(pollPrices,1000),setInterval(pollAccount,8000));
     startMainClock();
     startSessionPolling(); // جلسة اليوم H/L/%
+    startMainWs();         // WS لحظي: BBO + مراكز + أوامر
   } catch(e){
     hideLoader(); State.wallet=null;
     toast('خطأ: '+e.message.slice(0,80),'err');
@@ -1130,6 +1304,7 @@ function doLogout(){
   clearInterval(State._balTimer);
   clearInterval(State._clockTimer);
   if (State.inactivityTimer) clearTimeout(State.inactivityTimer);
+  wsMainClose(); // أغلق WS
   localStorage.removeItem(LS_KEY);
   localStorage.removeItem(PIN_KEY);
   localStorage.removeItem(LOCKED_KEY);
@@ -1213,12 +1388,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('tpCancel').onclick  =()=>{closeModal('modalTP');State.pendingTP=null;};
   $('tpExecute').onclick = () => requirePin(execTP);
   $('tpDelete').onclick  = () => requirePin(deleteTP);
-  $('tpAmount').oninput  =recalcTpPreview;
+  $('tpAmount').oninput  = recalcTpPreview;
+  $('tpDirectPrice').oninput = recalcTpPreview;
+  $('tpPresets')?.addEventListener('click', e=>{
+    const b=e.target.closest('.fs-preset'); if(!b)return;
+    $('tpTabAmount')?.click();
+    $('tpAmount').value=b.dataset.v; recalcTpPreview();
+    $('tpPresets').querySelectorAll('.fs-preset').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  });
 
   $('slCancel').onclick  =()=>{closeModal('modalSL');State.pendingSL=null;};
   $('slExecute').onclick = () => requirePin(execSL);
   $('slDelete').onclick  = () => requirePin(deleteSL);
-  $('slAmount').oninput  =recalcSlPreview;
+  $('slAmount').oninput  = recalcSlPreview;
+  $('slDirectPrice').oninput = recalcSlPreview;
+  $('slPresets')?.addEventListener('click', e=>{
+    const b=e.target.closest('.fs-preset'); if(!b)return;
+    $('slTabAmount')?.click();
+    $('slAmount').value=b.dataset.v; recalcSlPreview();
+    $('slPresets').querySelectorAll('.fs-preset').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  });
 
   $('balanceClose').onclick=()=>{ clearInterval(State._balTimer); closeModal('modalBalance'); };
   $('historyClose').onclick=()=>closeModal('modalHistory');
