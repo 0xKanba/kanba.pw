@@ -1,0 +1,44 @@
+{
+  "id": "instant",
+  "name": "Instant Guardian",
+  "type": "instant_funded",
+  "balances": [25000, 50000, 100000, 150000],
+  "profitTarget": "N/A",
+  "maxPosition": {"25k":"2 Mini/20 Micro","50k":"3 Mini/30 Micro","100k":"6 Mini/60 Micro","150k":"9 Mini/90 Micro"},
+  "dailyLoss": {"25k":"$625","50k":"$1,250","100k":"$2,500","150k":"$3,750"},
+  "breachType": "soft",
+  "softBreachNote": "warning + recovery chance, no immediate termination",
+  "maxDrawdown": {"25k":"$1,250","50k":"$2,500","100k":"$3,500","150k":"$5,000"},
+  "drawdownMode": "EOD_trailing",
+  "drawdownLock": "starting_balance + $100",
+  "scaling": false,
+  "guardianShield": "auto_close_at_2%_floating_loss",
+  "payout": {
+    "frequency": "14_days",
+    "minWinningDays": 10,
+    "minAmount": 500,
+    "processing": "≤48h_via_RiseWorks",
+    "cap": {"25k":750,"50k":1000,"100k":2000,"150k":3000}
+  },
+  "consistency": {
+    "funded": "20%",
+    "rule": "no_single_day_profit_≥20%_of_cycle_total"
+  },
+  "activationFee": 149,
+  "activationFeeNote": "paid_only_if_account_profitable",
+  "profitSplit": {"first_15k":"100%","after":"90%"},
+  "rules": {
+    "news": "no_orders_±5min_RedFolder_news",
+    "priceLimit": "no_trading_within_2%_CME_limit",
+    "riskReward": "max_5:1",
+    "stops": "mandatory_initial_stop_loss",
+    "automation": "no_bots/AI/>200trades_day",
+    "microscalping": "prohibited",
+    "martingale": "allowed_within_margin_limits",
+    "activity": "min_1_trade_per_7_days",
+    "tradingHours": "18:00-16:10_EST_auto_close_no_breach",
+    "maxAccounts": 3,
+    "kyc": "required_for_payout",
+    "reset": "not_available_for_funded"
+  }
+}
