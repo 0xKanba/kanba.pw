@@ -39,60 +39,12 @@ const State = {
   _sessionTimer: null
 };
 
-/* ─── قفل النشاط — مضمون 100% حتى مع Brave/Firefox throttling ───────────────
-   الاستراتيجية:
-   1. كل نشاط مستخدم → timestamp في localStorage (مصدر الحقيقة)
-   2. setInterval كل 30ث → يقرأ الـ timestamp ويقفل إن انتهت 15د
-   3. visibilitychange + focus + pageshow → فحص فوري عند العودة للتبويب
-   المنطق: setTimeout وحده يُثبَّط في الخلفية — الـ timestamp لا يُثبَّط أبداً
+/* ─── نظام القفل — يدوي فقط ────────────────────────────────────────────────
+   القفل يحدث فقط عند:
+   1. نقر زر 🔒 يدوياً
+   2. تسجيل الخروج
+   PIN يُطلب عند تنفيذ الصفقات والسحب فقط (requirePin)
 ──────────────────────────────────────────────────────────────────────────── */
-
-function _stampActivity() {
-  localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
-}
-
-function _isActivityExpired() {
-  const last = parseInt(localStorage.getItem(LAST_ACTIVITY_KEY) || '0');
-  return (Date.now() - last) > PIN_TIMEOUT;
-}
-
-function resetInactivityTimer() {
-  _stampActivity();
-}
-
-// Heartbeat عبر requestAnimationFrame — مضمون ضد Brave/Firefox throttling
-// rAF: يعمل بـ 60fps حين التبويب مرئي، يتوقف تلقائياً حين مخفي
-// عند عودة التبويب: يستأنف فوراً ويفحص الـ timestamp
-let _rafId       = null;
-let _lastRafMs   = 0;
-const RAF_CHECK  = 10_000; // فحص كل 10 ثوانٍ من وقت rAF الحقيقي
-
-function _rafHeartbeat(ts) {
-  if (ts - _lastRafMs >= RAF_CHECK) {
-    _lastRafMs = ts;
-    if (localStorage.getItem(PIN_KEY) && !State.isLocked) {
-      if (_isActivityExpired()) { lockApp(); return; } // لا تستمر بعد القفل
-    }
-  }
-  _rafId = requestAnimationFrame(_rafHeartbeat);
-}
-
-function startHeartbeat() {
-  if (_rafId) cancelAnimationFrame(_rafId);
-  _lastRafMs = performance.now();
-  _rafId = requestAnimationFrame(_rafHeartbeat);
-}
-
-// فحص فوري عند العودة للتبويب — هذا السطر يكسر أي throttling
-function _checkOnFocus() {
-  if (!localStorage.getItem(PIN_KEY)) return;
-  if (State.isLocked) return;
-  if (_isActivityExpired()) {
-    lockApp();
-  } else {
-    _stampActivity(); // تجديد النشاط عند عودة المستخدم
-  }
-}
 
 function lockApp(isManual = false) {
   const pin = localStorage.getItem(PIN_KEY);
@@ -105,7 +57,6 @@ function lockApp(isManual = false) {
   State.currentPinInput = '';
   updatePinDots();
   openModal('modalPIN');
-  // Hide cancel button when locked
   $('pinCancel').classList.add('hidden');
 }
 
@@ -113,7 +64,7 @@ function unlockApp() {
   State.isLocked = false;
   localStorage.setItem(LOCKED_KEY, 'false');
   localStorage.setItem(LAST_PIN_KEY, Date.now().toString());
-  _stampActivity(); // تجديد النشاط بعد فك القفل
+  State.lastPinTime = Date.now();
   State.currentPinInput = '';
   closeModal('modalPIN');
   $('pinCancel').classList.remove('hidden');
@@ -167,20 +118,14 @@ function updateSetPinDots() {
 
 function requirePin(callback) {
   const pin = localStorage.getItem(PIN_KEY);
-  if (!pin) {
-    // PIN is optional, if not set, just proceed
-    callback();
-    return;
-  }
-  
-  if (State.isLocked || Date.now() - State.lastPinTime > PIN_TIMEOUT) {
+  if (!pin) { callback(); return; }
+  if (State.isLocked) {
     State.pinCallback = callback;
     State.currentPinInput = '';
     updatePinDots();
     openModal('modalPIN');
-    $('pinCancel').classList.remove('hidden'); // Allow cancel if just expired
+    $('pinCancel').classList.remove('hidden');
   } else {
-    State.lastPinTime = Date.now();
     callback();
   }
 }
@@ -227,25 +172,8 @@ function handleVerifyPin() {
   }
 }
 
-// ─── مستمعات النشاط ────────────────────────────────────────────────────────
-['mousemove','keydown','click','touchstart','scroll','wheel'].forEach(evt =>
-  document.addEventListener(evt, resetInactivityTimer, { passive: true })
-);
+// لا يوجد قفل تلقائي — القفل يدوي فقط عبر زر 🔒
 
-// فحص فوري عند العودة للتبويب (يكسر أي throttling من Brave/Firefox)
-// إخفاء/إغلاق التبويب → قفل فوري عند العودة
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    if (localStorage.getItem(PIN_KEY)) localStorage.setItem(LOCKED_KEY, 'true');
-  } else {
-    _checkOnFocus();
-  }
-});
-window.addEventListener('focus', _checkOnFocus);
-window.addEventListener('pageshow', _checkOnFocus); // Back/Forward cache
-
-// طابع النشاط الأولي
-_stampActivity();
 
 // ════════════════════════════════════════
 // MsgPack
@@ -600,7 +528,14 @@ async function pollAccount(){
     State.balance={ total, margin:marginUsed, floatPnl };
 
     const rawPos=(xyz?.assetPositions||[]).filter(p=>parseFloat(p.position?.szi||0)!==0);
-    State.positions=rawPos.map(p=>({...p, tpsl:parseTpslFromOrders(State.openOrders,p.position.coin)}));
+    // احتفظ بـ TP/SL من الدورة السابقة إذا لم تتغير الأوامر
+    State.positions=rawPos.map(p=>{
+      const existing = State.positions.find(e=>e.position.coin===p.position.coin);
+      const tpsl = parseTpslFromOrders(State.openOrders, p.position.coin);
+      // إذا لم يتغير TP/SL استخدم القديم لتجنب الوميض
+      if(existing && !tpsl.tp && !tpsl.sl && existing.tpsl) return {...p, tpsl: existing.tpsl};
+      return {...p, tpsl};
+    });
     renderPositions();
     autoSetReferrer();
   } catch(e){ console.warn('[pollAccount]',e.message); }
@@ -619,11 +554,33 @@ function parseTpslFromOrders(orders,coin){
 function calcTpPrice(entryPx,szi,pnlTarget){ const sz=parseFloat(szi),ep=parseFloat(entryPx); return sz>0?ep+pnlTarget/sz:ep-pnlTarget/Math.abs(sz); }
 function calcSlPrice(entryPx,szi,slAmount){  const sz=parseFloat(szi),ep=parseFloat(entryPx); return sz>0?ep-slAmount/sz:ep+slAmount/Math.abs(sz); }
 
+let _posFingerprint = '';
 function renderPositions(){
   const count=State.positions.length;
+
+  // fingerprint: مقارنة سريعة لتجنب الرسم غير الضروري
+  const fp = State.positions.map(p=>{
+    const pos=p.position;
+    return `${pos.coin}|${pos.szi}|${pos.unrealizedPnl}|${p.tpsl?.tp||''}|${p.tpsl?.sl||''}`;
+  }).join(';');
+
   setTxt('positionsCount',count);
   const clsBtn=$('btnCloseAll');
   if(clsBtn) clsBtn.classList.toggle('hidden',count===0);
+
+  if(fp === _posFingerprint) {
+    // فقط حدّث PnL الأرقام بدون إعادة رسم كاملة
+    State.positions.forEach((p,i)=>{
+      const pnl=parseFloat(p.position.unrealizedPnl||0);
+      const el=document.querySelector(`[data-pnl-idx="${i}"]`);
+      if(el){ const s=pnl>=0?'+':''; el.textContent=`${s}$${fmt(pnl,2)}`; el.className=`pos-pnl ${pnl>=0?'pos':'neg'}`; }
+    });
+    const totalPnl=State.positions.reduce((s,p)=>s+parseFloat(p.position.unrealizedPnl||0),0);
+    const tEl=$('totalPnl');
+    if(tEl){ tEl.textContent=`${totalPnl>=0?'+':''}$${fmt(totalPnl,2)}`; tEl.className=`positions-pnl ${totalPnl>=0?'pos':'neg'}`; }
+    return;
+  }
+  _posFingerprint = fp;
   const list=$('positionsList');
   if(!count){
     list.innerHTML='<div class="positions-empty">📂 لا توجد صفقات مفتوحة</div>';
@@ -649,7 +606,7 @@ function renderPositions(){
           <div class="pos-dir ${isLong?'long':'short'}">${isLong?'▲ شراء':'▼ بيع'} · رافعة ${a.lev}x</div>
         </div>
         <div class="pos-right">
-          <div class="pos-pnl ${pCls}">${sign}$${fmt(pnl,2)}</div>
+          <div class="pos-pnl ${pCls}" data-pnl-idx="${i}">${sign}$${fmt(pnl,2)}</div>
           <div class="pos-size">${Math.abs(szi).toFixed(a.szDp)} ${a.unit}</div>
         </div>
       </div>
@@ -1185,7 +1142,7 @@ async function login(){
     autoSetReferrer();
     hideLoader();
     toast('مرحباً 🤝','ok');
-    State.timers.push(setInterval(pollPrices,1000),setInterval(pollAccount,8000));
+    State.timers.push(setInterval(pollPrices,1000), setInterval(pollAccount,3000));
     startMainClock();
     startSessionPolling(); // جلسة اليوم H/L/%
     startMainWs();         // WS لحظي: BBO + مراكز + أوامر
@@ -1200,7 +1157,7 @@ function doLogout(){
   clearInterval(State.priceTimer);
   clearInterval(State._balTimer);
   clearInterval(State._clockTimer);
-  if (State.inactivityTimer) clearTimeout(State.inactivityTimer);
+  if (State._sessionTimer) clearInterval(State._sessionTimer);
   wsMainClose(); // أغلق WS
   localStorage.removeItem(LS_KEY);
   localStorage.removeItem(PIN_KEY);
@@ -1361,23 +1318,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   const saved=localStorage.getItem(LS_KEY);
   if(saved){ $('privateKey').value=saved; login(); }
 
-  // Initialize lastPinTime from storage or now
-  const lastPin = localStorage.getItem(LAST_PIN_KEY);
-  if (lastPin) {
-    State.lastPinTime = parseInt(lastPin);
-  } else {
-    State.lastPinTime = Date.now();
-  }
-
-  // تشغيل الـ heartbeat لضمان القفل حتى في التبويبات الخلفية
-  startHeartbeat();
-
-  // Check if we should be locked on startup
-  if (localStorage.getItem(PIN_KEY)) {
-    if (_isActivityExpired() || localStorage.getItem(LOCKED_KEY) === 'true') {
-      lockApp();
-    } else {
-      _stampActivity();
-    }
-  }
+  // مسح LOCKED_KEY عند كل تحميل — القفل يدوي فقط
+  localStorage.removeItem(LOCKED_KEY);
 });
