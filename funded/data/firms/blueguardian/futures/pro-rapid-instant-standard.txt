@@ -1,0 +1,1409 @@
+Funded Trading Parameters
+Updated over a month ago
+Welcome to the Funded stage at Blue Guardian Futures We’re excited to welcome you to the funded stage at Blue Guardian Futures! Now that you’re officially a funded trader, you have the opportunity to earn real profits. Whether you’re newly funded or simply exploring our Funded Trading Parameters, this guide will cover the key rules and objectives for trading at this level.
+
+ 
+
+Keeping Your Account Active
+To keep your Funded Account active, you must place at least one trade within each seven-day period. Failing to trade within this timeframe may result in your account being marked inactive and breached. If you’re planning to take an extended break or vacation, please reach out to our support team to notify them of your plans.
+
+ 
+
+Funded Account Parameters After completing the evaluation through either the Standard or Guardian account, you’ll advance to the Sim Funded stage with Blue Guardian Futures. At this level, you can place trades and request payouts every 7 days, provided you have achieved 5 days with net positive trades, On Guardian Funded accounts you can request a payout once every 14 days.
+
+ 
+
+General Guidelines:
+You may have up to 3 Funded Accounts with us at any time. Your starting balance in the Funded stage will match the beginning balance of your evaluation account. - Refer to the Payout Policy for detailed payout request procedures.
+
+ 
+
+Specific Rules for the Standard and Guardian Plans:
+ 
+
+Standard Plan: This plan includes scaling requirements, consistency rules, and specific withdrawal restrictions (outlined below).
+
+ 
+
+Guardian Plan: While there are no scaling limitations as in the Standard account, traders are still expected to follow both prohibited conduct guidelines and the consistency rule.
+
+ 
+
+Rules of the Funded Account The primary requirement is to stay within the Maximum EOD (End of Day) Trailing Loss Limit.
+
+Objectives for Standard Funded Accounts:
+Scaling Guidelines: Follow the specific scaling guidelines that apply to each account type.
+
+Withdrawal Requirements: Review the pay-out policy for full withdrawal criteria.
+
+Prohibited Conduct: Follow the prohibited conduct guidelines.
+
+Consistency Standard: To maintain consistency, no single day’s profits should exceed 40% of the total profit during each pay-out cycle.
+
+ 
+
+ 
+
+Objectives for Guardian Funded Accounts:
+No Scaling Restrictions: Avoid overleveraging, especially when using micro contracts.
+
+Prohibited Conduct: Continue to adhere to the same trading guidelines as outlined in the Standard Plan.
+
+Consistency Guardiann: Ensure that no single day’s profits exceed 30% of the cumulative profit for each pay-out cycle.
+
+Objectives for Instant Guardian Accounts:
+Daily Loss Limit: Daily Loss limit will not lead to the termination of your account, this is a soft breach.
+
+Withdrawal Requirements: Review the pay-out policy for full withdrawal criteria.
+
+Prohibited Conduct: Follow the prohibited conduct guidelines.
+
+Consistency Instant: To maintain consistency, no single day’s profits should exceed 20% of the total profit during each pay-out cycle.
+
+ 
+
+Managing Your Trading with a Funded Account Consistent and disciplined trading is essential for success at this level.
+
+ 
+
+At Blue Guardian Futures, we support traders in sticking to their established trading styles while respecting the guidelines in the Funded Agreement.
+
+ 
+
+Keep your risk management practices steady - avoid large, sudden increases in contract size. Reasonable adjustments to your strategy based on current market conditions are fine (such as using one contract for lower-probability trades and increasing the number of contracts for higher-probability setups).
+
+ 
+
+Important Notes:
+Account Activity: If you’re unable to meet the one-trade-per-week requirement due to vacation or other circumstances, please contact support for assistance.
+
+Account Resets: Funded accounts cannot be reset.
+
+Account Limits: You can hold up to three funded accounts at one time, whether live or simulated.
+
+Withdrawal Timing: You may request a withdrawal 14 days after your first trade on the funded account. Following that, withdrawals may be made every 14 days based on the date of your last withdrawal. You will be able to withdraw your profits every week.Can I reset a Funded Account?
+Updated over a month ago
+At Blue Guardian Futures, while resetting a funded account is not available at this time, you do have the opportunity to reset your evaluation account for 30% below the original price during the evaluation phase, after failing your evaluation account you will be given 7 days to decide to reset your evaluation or not. This gives you the flexibility to refine your strategy and approach before moving into the funded stage, ensuring you're fully prepared for success.How Many Funded Accounts Am I Allowed at once?
+Updated over a month ago
+You are allowed to have up to 3 funded accounts. However, if you choose to stack additional accounts beyond this limit, you will be required to continue paying the monthly fee for the evaluation of each added account.
+
+ 
+
+ 
+
+If you have any questions about our evaluation plans, please feel free to contact our support team. They are available 24/7 to assist you. You can reach them via Live Chat, email, or by creating a ticket inside our Discord Community.Prohibited News Trading Activities
+We urge traders to proceed carefully around news releases. The following activities are strictly prohibited:
+
+Exploiting Immediate News Movements: Strategies like straddles or strangles that aim to capitalize on rapid news-driven market shifts are not allowed.
+
+Disguising News Trades: Presenting news-driven trades as routine strategies is prohibited.
+
+These restrictions apply during all red folder news releases.
+
+ 
+
+Standard Trading Protocols
+To maintain trading integrity, please follow these protocols:
+
+Stick to Your Usual Strategy: During news intervals, adhere to your regular trading approach.
+
+Follow Standard Entry Rules: Only initiate trades based on your established entry criteria.
+
+Clear Orders Around News Releases: Ensure no open positions or pending orders are in the order book two minutes before and after any data release.
+
+These protocols are in effect for all news events.
+
+ 
+
+Red Folder Data release: Special Considerations
+Exercise caution during Red folder Data Releases by adhering to these additional rules:
+
+Order Restrictions: Do not open or close or hold pending orders (including limit orders) within five minutes before or after a Red folder data release.
+
+ 
+
+What is a Red Folder dat release?
+ 
+
+Marked as red folder news releases on www.forexfactory.com are for example:
+
+For All Traders: FOMC Meetings, FOMC Minutes, Employment Reports, CPI, Trump Speeches, Jerome Powell, JOLTS, PMI, PPI, Unemployment Claims.
+
+For Energy Traders: EIA reports.
+
+For Agricultural Traders: Agricultural reports.
+
+Trading During Other News Releases
+You may continue to trade during other news releases if this aligns with your regular strategy. However, please be aware that data issues or disruptions with Deepcharts & Tradovate may occur during news events, and BGF is not liable for any resulting issues should you choose to trade during these times.News Trading Policies
+Updated over 3 weeks ago
+Prohibited News Trading Activities
+We urge traders to proceed carefully around news releases. The following activities are strictly prohibited:
+
+Exploiting Immediate News Movements: Strategies like straddles or strangles that aim to capitalize on rapid news-driven market shifts are not allowed.
+
+Disguising News Trades: Presenting news-driven trades as routine strategies is prohibited.
+
+These restrictions apply during all red folder news releases.
+
+ 
+
+Standard Trading Protocols
+To maintain trading integrity, please follow these protocols:
+
+Stick to Your Usual Strategy: During news intervals, adhere to your regular trading approach.
+
+Follow Standard Entry Rules: Only initiate trades based on your established entry criteria.
+
+Clear Orders Around News Releases: Ensure no open positions or pending orders are in the order book two minutes before and after any data release.
+
+These protocols are in effect for all news events.
+
+ 
+
+Red Folder Data release: Special Considerations
+Exercise caution during Red folder Data Releases by adhering to these additional rules:
+
+Order Restrictions: Do not open or close or hold pending orders (including limit orders) within five minutes before or after a Red folder data release.
+
+ 
+
+What is a Red Folder dat release?
+ 
+
+Marked as red folder news releases on www.forexfactory.com are for example:
+
+For All Traders: FOMC Meetings, FOMC Minutes, Employment Reports, CPI, Trump Speeches, Jerome Powell, JOLTS, PMI, PPI, Unemployment Claims.
+
+For Energy Traders: EIA reports.
+
+For Agricultural Traders: Agricultural reports.
+
+Trading During Other News Releases
+You may continue to trade during other news releases if this aligns with your regular strategy. However, please be aware that data issues or disruptions with Deepcharts & Tradovate may occur during news events, and BGF is not liable for any resulting issues should you choose to trade during these times.
+
+ 
+
+ 
+
+ 
+
+ 
+
+Note: News trading is permitted during the Evaluation phase; however, it cannot serve as the sole method to pass evaluation accounts. Additional trades must be present for a thorough account review before advancing to the funded phase
+
+How Many Funded Accounts Am I Allowed at once?
+Updated over a month ago
+You are allowed to have up to 3 funded accounts. However, if you choose to stack additional accounts beyond this limit, you will be required to continue paying the monthly fee for the evaluation of each added account.
+
+ 
+
+ 
+
+If you have any questions about our evaluation plans, please feel free to contact our support team. They are available 24/7 to assist you. You can reach them via Live Chat, email, or by creating a ticket inside our Discord Community.How often can I withdraw my Profits?
+Updated over 3 weeks ago
+On our Rapid Funded accounts you’re eligible to initiate withdrawals 3 days after your first trade, and then every 3 days after that. There is no minimum days requirement for this account type, assuming you meet the necessary withdrawal criteria you can withdraw your profits right away in the form of a reward. On Pro and Instant Standard accounts you can withdraw your profits once every 5 days and need atleast 5 consistent winning trading days.
+​
+
+ 
+
+To understand all the requirements for payout eligibility, please consult our payout policy. 2% Price Limit Rule
+Updated over a month ago
+At Blue Guardian Futures, our commitment is to shield our traders from the risks associated with market volatility and extreme price swings. To safeguard your capital, we enforce a policy that prohibits trading within 2% of a CME price limit. This approach ensures that you are not exposed to abrupt market movements that could result in substantial losses.
+
+ 
+
+A price limit represents the maximum allowable price fluctuation for a futures contract during a trading session. When the price limit is reached, various actions may occur depending on the contract: markets may pause until the limits can be adjusted, stay within the limit, or even halt for the day based on regulatory guidelines.
+
+ 
+
+How to Identify CME Price Limits for Your Contracts?
+ 
+
+Price limits are determined by the end-of-day settlement price and differ depending on the product, contract month, and the time of day (with different limits for overnight versus regular trading hours). Price limits are updated daily at 5:05 PM EST and can be accessed on the CME Price Limits page.
+
+ 
+
+How to Avoid Trading Within 2% of a Price Limit
+ 
+
+For equity products like ES, MES, NQ, MNQ, RTY, M2K, YM, and MYM, overnight price limits have been extended from 5% to 7%.
+
+To ensure you stay within safe trading parameters, monitor the % Net Change for the contract you’re trading on your platform’s quote board.
+
+ 
+
+Example: If the price limit is set at 5% up or down, you can calculate the 2% threshold to identify levels where you should stop trading to avoid breaching the limit. This simple step helps you navigate the market with greater security.
+
+ 
+
+What’s the purpose behind Blue Guardian Futures’ prohibition on this conduct?
+At Blue Guardian Futures, we enforce this policy to safeguard both our firm and our traders from the risks associated with extreme market conditions. Trading within 2% of a price limit exposes traders to significant risks, and to mitigate those.
+
+ 
+
+Furthermore, as a trader, it's essential to have a deep understanding of the markets you participate in. Knowing the contract specifications and price limits for the products you trade is vital to making informed decisions and managing risk effectively.
+
+ 
+
+For more detailed information on the products you trade, we encourage you to visit the CME Group website. Simply select your product from the homepage to access comprehensive details. 
+
+While there may be valid reasons to adjust individual trades or contract sizes, consistent trading practices are key. Significant deviations in contract size may suggest irregular or undisciplined trading patterns.
+
+ 
+
+Traders adhering to a systematic, disciplined methodology eschewing speculative gambles or attempts at oversized windfalls should find these expectations straightforward to meet. Given the broad range of trading scenarios, Blue Guardian Futures will not address clarification requests for every possible situation. Instead, traders are encouraged to align with the core principles of these guidelines: trade with discipline, not speculation. This approach will resolve the vast majority of uncertainties.
+
+ 
+
+
+Adding Into Positions
+Traders may initiate positions in line with their trading strategy or system rules and add to those positions as the market moves favourably. For instance, a trader entering a long position may increase their long contracts if the market trends positively. In Funded Accounts, scaling into profitable trades is permitted, including the use of larger contract sizes in such situations. However, it is crucial that traders adhere to a well-defined strategy with a clear directional bias, rather than engaging in reckless trading driven by hopes for sudden windfall gains.
+
+ 
+
+It is important to differentiate between strategic additions to successful trades and entering large contract sizes upfront with the expectation of a market reversal. Adding to winning positions as part of a deliberate strategy is acceptable, while placing large trades without a clear plan and simply hoping for favourable market movement is not allowed
+
+Risk management, Stoploss, Take Profit, Trailing
+Updated over a month ago
+At Blue Guardian Futures, we provide traders with an exceptional opportunity to build a funded trading relationship through our proprietary risk capital program. However, it’s critical that this opportunity is used responsibly. Misusing this program by recklessly "blowing through" risk capital and transferring all risk and loss to the company in hopes of setting up windfall payouts is strictly prohibited. Such behavior does not align with the professional trading practices we aim to support and will disqualify traders from transitioning to a Live Funded Account.
+
+Prohibited Practices
+Trading Without Stops: Trading without stop-loss strategies and relying on the Trailing Threshold to close a trade as a means of "blowing the account" is not allowed. This is not a trading strategy, it’s gambling.
+
+Every successful trader employs proper risk management techniques, including stop losses and clearly defined targets. These are non-negotiable elements of any credible system or strategy.
+
+The Importance of Stop Losses
+All strategies, including scalping, must incorporate initial stop losses. For example:
+
+A scalper targeting a 10-tick profit may set an initial stop loss of 30 ticks, risking 30 ticks to gain 10.
+
+A strategy aiming for 20 ticks of profit might include a 60-tick stop loss, risking three times the potential reward.
+
+This demonstrates a foundational principle of risk management: ensure that the risks you take align with your system’s back-tested performance and profitability.
+
+Avoid Windfall Strategies
+Proper risk management means avoiding reckless trading behaviors, such as:
+
+"All-in" Trading: Using maximum contract sizes to chase a "big win" early in the Funded Account evaluation process, with the hope of overcoming the trailing drawdown, then downsizing later. This is not a sustainable or responsible trading strategy—it’s gambling.
+
+Unplanned Withdrawals: Trading with large size in the early stages of a Funded account, only to attempt downsizing after a lucky win, reflects poor discipline and lack of adherence to risk management principles.
+
+Instead, prioritize a consist approach that honors stop-loss levels and protects your account balance. Risk management isn’t about gambling—it’s about systematically building your account.
+
+ 
+
+ 
+
+ 
+
+Inconsistent Sizing & Martingale Strategies
+We prioritize responsible risk management. As such, we do not support trading strategies that involve inconsistent contract sizing, especially those that increase risk exposure in an attempt to recover losses (commonly referred to as "martingale" strategies).
+
+ 
+
+These approaches are not aligned with our principles of consistent, disciplined trading and pose a significant risk to account longevity.
+
+ 
+
+Accounts employing such methods may be subject to review and potential action.
+
+For the best chance of success, traders should aim for steady position sizing and clearly defined risk per trade. Stay consistent, stay accountable.
+
+ 
+
+Trending and Long-Term Strategies
+For longer-term trades, the exact profit target may not always be clear, as the market could move anywhere from ten ticks to ten points. That’s why having an initial stop loss is so critical: it defines the amount of risk you’re willing to accept while seeking potential gains.
+
+Additionally, trailing stops can be an excellent tool when the market moves in your favor during significant trends. Allow your profits to grow while adjusting your stops to lock in gains and protect against losses. This is disciplined, effective risk management.
+
+
+Best Practices for Risk Management
+Plan Your Trades: Before entering any trade, have a clear exit strategy for both profits and losses.
+
+Define Your System: Use a structured system with risk-to-reward ratios that have been statistically back-tested and proven effective.
+
+Set Realistic Targets: Align your stop-loss and profit targets with your strategy’s historical performance and current market conditions.
+
+Stay Disciplined: Always honor your stops. Exiting a trade when your stop is hit protects your account and allows for future opportunities.
+
+
+​At Blue Guardian Futures, we are committed to fostering disciplined and consistent traders. By adhering to these principles, you’ll demonstrate the professionalism and skill required to build a successful trading career.Risk to Reward Ratio's
+Updated over a month ago
+At Blue Guardian Futures, we require our traders to adhere to a maximum risk-to-reward ratio of 5:1. This means for every 10 ticks of profit you aim to achieve, your stop loss should be set at no more than 50 ticks. While we allow the use of mental stops, responsible risk management is non-negotiable. Excessive risk-taking beyond the potential reward is unacceptable and could lead to a warning, or disqualification from payouts.
+​
+
+Here’s a practical example: if your profit target is $100, your initial stop loss must not exceed $500.
+​
+
+It’s critical to respect your stop-loss points. Adjusting stops to increase risk goes against sound trading principles and our policies. Instead, focus on moving stops forward to trail and secure profits. Protect what you’ve earned, let winning trades run, and remain disciplined in executing your trading plan.
+​
+
+We encourage a strategic, measured approach to trading. Stick to your system. Avoid chasing losses or taking impulsive risks in hopes of a rebound. At Blue Guardian Futures, consistent discipline and calculated decisions pave the way for success.
+
+Live Funded account at BGF
+Updated over a month ago
+Once you successfully complete your evaluation, you'll be upgraded to a Simulated Funded Account. Maintain consistent profitability, and our Risk Management team will reach out with an invitation to trade on a Live Funded Account.
+
+ 
+
+Your Live Funded Account is a real brokerage account, offering unique features that set it apart from the Simulated Funded Account. Here’s what you can expect:
+
+Static Drawdown
+
+A fixed maximum loss limit designed to help you manage risk effectively and trade with confidence.
+
+ 
+
+Customizable Daily Loss Limit
+
+Adjust your daily loss limit to align with your risk tolerance and trading strategy.
+
+ 
+
+Scaling Opportunities
+
+Consistent performance unlocks the ability to increase contract size, maximizing your profit potential.
+
+ 
+
+Live Funded Account Costs
+As a Live Funded Trader, you are responsible for covering the necessary costs associated with maintaining your account. These include:
+
+CME Professional Data Subscription – Required for accessing real-time market data.
+
+Round-Trip Commissions and Fees – Standard trading costs applied per executed trade.
+
+Platform License or Subscription – Any applicable fees for the trading platform you choose.
+
+All costs are automatically deducted from your Live Funded Account balance, ensuring a seamless trading experience. At Blue Guardian Futures, we prioritize transparency, so you always know what to expect.
+
+ 
+
+ 
+
+Our Risk Team actively monitors your performance in the Sim Funded Account. When they determine that you’ve demonstrated the consistency and discipline required, you'll receive an invitation to transition to a Live Funded Account. The timeline for this move varies, as each trader is evaluated on an individual basis. At Blue Guardian Futures, we recognize that every trader's journey is unique, and we’re committed to supporting your progression.
+
+Payout Policy
+Updated over 3 weeks ago
+ 
+
+At Blue Guardian Futures, we’re dedicated to transparency and supporting your trading success. Our payout policy is designed to strike a fair balance between helping you achieve your goals and maintaining account security.
+1. 100% Profit Split
+First $15,000 of your profits are all yours
+
+After that, there is a generous 90% profit split.
+
+2. Payout Eligibility
+Request a payout every 3 days on Rapid accounts only.
+
+To be eligible to request a payout on Rapid accounts no minimum days requirement needs to be met. On Pro and Instant plans you need to have 5 winning days with a minimum of $100/$200/$300, depending on your account size. You must also meet the consistency rule.
+
+To be eligible to request a payout on Pro and Instant accounts you need to have 10 winning days with a minimum of $100/$200/$300, depending on your account size. You must also meet
+the 30% consistency rule on Pro accounts and 20% on Instant standard accounts.
+
+Payout minimum is $500 on all account types.
+
+When you request your first payout your max drawdown will adjust to your starting balance +$100. Therefore, ensure you maintain some flexibility for additional trading.
+
+3. Flexible Payout Processing
+Payouts are processed within 48 hours.
+
+Requests are accepted Monday to Friday before 3PM CST
+
+Payouts will be processed through Riseworks
+
+ 
+
+ 
+
+Payout Cap
+Max Payout per account Size:
+​
+$25,000 Account: $750 per payout
+
+$50,000 Account: $1,000 per payout
+
+$100,000 Account: $2,000 per payout
+
+$150,000 Account: $3,000 per payout
+
+ 
+
+The payout cap varies depending on your account size, so it’s tailored to fit your trading level. This structure allows you to grow your account steadily, and once the cap is removed, you’ll have greater freedom to enjoy the full potential of your success. It’s a positive step in your journey with Blue Guardian Futures, helping you trade with confidence and security.
+
+ 
+
+Payout Targets
+A payout target is a specific profit threshold that must be reached before a payout can be requested, just like the consistency rule this resets upon payout request.
+
+ 
+
+1st Payout: Achieve 6% profit of your starting balance
+
+2nd Payout: Achieve 4% profit of your starting balance
+
+3rd Payout and beyond: Achieve 4% profit of your starting balance
+
+Payout Structure for the $50,000 Sim Funded Account
+
+ 
+
+To qualify for your first payout, you must meet the consistency rule and generate a profit of $3,000 (6%) on your account. For your second payout, an additional profit of $2,000 (4%) is required. To request your third payout, you’ll need to earn a further $2,000 (4%) in profit.
+
+ 
+
+Account Size
+
+Pay-out Profit Target 1
+
+Pay-out Profit Target 2
+
+Pay-out Profit Target 3
+
+$25,000
+
+$1,500
+
+$1,000
+
+$1,000
+
+$50,000
+
+$3,000
+
+$2,000
+
+$2,000
+
+$100,000
+
+$6,000
+
+$4,000
+
+$4,000
+
+$150,000
+
+$9,000
+
+$6,000
+
+$6,000
+
+ 
+
+If you find to have any questions about our evaluation plans, please do not hesitate to reach out to our support team. They are dedicated to help you out 24/7, You can reach out via Live Chat or our support email support@blueguardian.com. 24 Hours Payout Guarantee
+Updated over 3 weeks ago
+We are committed to processing all payouts within 24 business hours. If we fail to meet this timeframe, you will be automatically receive a $200 bonus upon your payout. 
+​
+​Please note:
+​
+Rewards are processed on business days only and the 24 Hours Reward Guarantee timer is paused during weekends. Our office operates from 9:00 AM Monday to 5:00 PM Friday (Dubai time).
+​
+
+During weekends and bank holidays, processing times may be slightly extended due to limited banking operations and reduced staff availability.
+​
+
+If there are any issues with your payout, our risk team will contact you via email.
+​
+
+Note:
+​Delays caused by compliance checks, risk reviews, or a lack of timely response on your part (including onboarding with Rise) do not qualify for the 100% profit split upgrade, as these situations fall outside our control. Thank you for your understanding and continued trust in Blue Guardian.
+
+paid out quick! 
+​
+
+Breach Type: Take advantage of our unique soft breach daily loss limit.
+​
+
+Weekly: Enjoy Instant access and 5 days to payout, our unique Instant funding plan offers it all. 
+
+ 
+
+ 
+
+Standard Evaluation
+The Blue Guardian Futures Standard Evaluation is designed for traders who prefer a more conservative strategy with lower initial costs.
+
+Balance
+
+$50,000
+
+$100,000
+
+$150,000
+
+Profit Target
+
+$3,000
+
+$6,000
+
+$9,000
+
+Max Position Size
+
+3 Mini's/30 Micro's
+
+6 Mini's/ 60 Micro's
+
+9 Mini's/ 90 Micro's
+
+Daily Loss Limit
+
+$1,250
+
+$2,500
+
+$3,750
+
+Breach Type
+
+Hard Breach
+
+Hard Breach
+
+Hard Breach
+
+Max Drawdown
+
+$2,500
+
+$3,500
+
+$5,000
+
+Drawdown Mode
+
+EOD
+
+EOD
+
+EOD
+
+Position Scaling
+
+Yes
+
+Yes
+
+Yes
+
+Payouts
+
+Weekly
+
+Weekly
+
+Weekly
+
+ 
+ 
+
+ 
+
+Standard Evaluation's Benefits:
+
+ 
+
+Cash out Quickly: Enjoy Weekly payouts after just 5 profitable trading days, with no fixed payout schedule, giving you the freedom to access your earnings any time.
+
+Low Upfront Costs: Take advantage of lower upfront costs with the Blue Guardian Futures Beginner Evaluation, without paying an activation fee.
+
+ 
+
+Guardian Evaluation
+Blue Guardian Futures' Guardian Evaluation is crafted for experienced traders who understand market dynamics and seek ultimate flexibility with tailored rules and parameters to maximize their trading potential.
+
+Balance
+
+$50,000
+
+$100,000
+
+$150,000
+
+Profit Target
+
+$4,000
+
+$8,000
+
+$12,000
+
+Max Position Size
+
+5 Mini's/50 Micro's
+
+10 Mini's/ 100 Micro's
+
+15 Mini's/ 150 Micro's
+
+Daily Loss Limit
+
+-
+
+-
+
+-
+
+Max Drawdown
+
+$2,000
+
+$3,000
+
+$6,000
+
+Drawdown Mode
+
+EOD
+
+EOD
+
+EOD
+
+Position Scaling
+
+Yes
+
+Yes
+
+Yes
+
+Payouts
+
+Bi-Weekly
+
+Bi-Weekly
+
+Bi-Weekly
+
+ 
+ 
+
+ 
+
+Guardian Evaluation's Benefits:
+
+No Daily Loss Limit: Enjoy a challenge without daily loss limit!
+
+Cash out Quickly: Enjoy Bi-Weekly payouts, with no fixed payout schedule, giving you the freedom to access your earnings any time. 
+​
+
+Activation Fee: Take advantage of a low upfront costs, and only pay for activation fee of $149 if you pass your evaluation!
+
+ 
+
+No Consistency Rule: In the evaluation stage, no consistency rule will be applied, in the Funded stage however a consistency of 30% is required.
+
+ 
+
+Guardian Shield: Blue Guardian Futures helps you to trade on another level, our Guardian Shield helps you by closing your trades when you reach a max floating loss of 2%.
+
+Account Size
+
+$50,000
+
+$100,000
+
+$150,000
+
+Profit Target
+
+$3,000 (6%)
+
+$6,000 (6%)
+
+$9,000 (6%)
+
+Max Position
+
+3 contracts
+
+6 contracts
+
+9 contracts
+
+Daily Loss Limit
+
+$1,250 (hard breach)
+
+$2,500 $1,250 (hard breach)
+
+$3,750 $1,250 (hard breach)
+
+Max Drawdown
+
+$2,500
+
+$3,500
+
+$5,000
+
+Drawdown Mode
+
+EOD
+
+EOD
+
+EOD
+
+ 
+ 
+
+Why do these parameters matter?
+
+ 
+
+Risk Management: Parameters like Maximum Drawdown, Daily Loss Limit, and EOD Drawdown support healthy risk management, keeping traders grounded during high-stakes moments.
+​
+
+Goal Orientation: The Profit Target serves as a clear target, promoting strategic planning and forward-thinking.
+​
+
+Consistent Trading: The Consistency Rule helps develop a stable trading approach, essential for building long-term success.
+
+ 
+
+How to tailor your trading to these parameters:
+
+ 
+
+Define Your Trades: Set entry and exit points, along with stop-loss and take-profit levels, before entering a trade.
+​
+
+Review Performance Regularly: Regularly check your account against the evaluation criteria. If you’re approaching the Daily Loss Limit, consider pausing for the day.
+​
+
+Stay Updated: Track market news and events that could impact trading decisions, helping you stay prepared and informed.
+​
+
+ 
+
+ 
+
+If you find to have any questions about our evaluation plans, please do not hesitate to reach out to our support team. They are dedicated to help you out 24/7, You can reach out via Live Chat or our support email support@blueguardianfutures.com.
+
+Maximum Drawdown
+Updated over 3 weeks ago
+At Blue Guardian Futures, the Maximum Drawdown is created so that traders create a consistency mindset. Together we build a steady and consistent trading career for you.
+
+ 
+
+The Maximum drawdown limit trails End of Day, this helps you plan your trades ahead and build a consistent plan to eliminate overrisking your positions or holding trades longer than you should. Building these habits will create a successfull trading career in no-time! 
+​
+When your maximum trailing drawdown has reached your starting balance on your funded account, the maximum loss limit locks at your initial starting balance plus $100. 
+​
+​Example:
+
+50k is 52k +$100 which is 52,1k
+
+100k is 103k +$100 which is 103.1k
+
+150k is 156k +$100 which is 156.1k
+
+Minimum Trading Days
+Updated over 3 weeks ago
+Blue Guardian Futures does not require a minimum amount of trading days on evaluation phases of each plan. However, our standard and Rapid plans do require to show consistency in performance to succesfully pass a evaluation.Consistency Rule
+Updated over a month ago
+The consistency rule applies to Blue Guardian Futures' funded and challenge phase. On both Standard and Guardian plans. Please make sure to read the below carefully before you start trading. 
+​
+
+On all plans consistency rule applies, that means that one trading day can not equal or be greater than the consistency percentage of the total profits made.
+
+ 
+
+
+Evaluation Phase
+If it does happen that one trading day exceeds the consistency mark of the profit target, you will have to continue trading until the highest profit trading day falls below the consistency mark.
+
+ 
+
+For example:
+
+ 
+
+When you made $1,300 on one trading day within your $50,000 Standard evaluation, your balance should atleast be $3,250 to pass your account. Even if the target to pass your evaluation is only $3,000.
+
+ 
+
+ 
+
+Highest Net Profit Day (sum of your wins and losses) / Total Account PnL
+
+ 
+
+Example: your highest net profit day is +$1,300 and your total PnL on the account at the time is +$3,000 : $1300 / $3000 = 0.43
+
+ 
+
+If the result is greater than 40% (0,4), you would need to continue trading until the percentage falls below the 40% to pass your evaluation.
+
+ 
+
+Having a high-profit day is not an issue as long as you havea higher total PnL on your account to support it.
+
+ 
+
+ 
+
+Funded Phase
+When the profits of one trading day equals or is greater than 40% of total profits made that payout period, you CANNOT request a payout until the highest profit trading day falls below the 40% of total profits made on that account within that particular period.
+
+ 
+
+On Guardian Funded accounts a consistency of 30% is required, and for Instant Guardian accounts a consistency of 20% is required.
+
+ 
+
+What if I make more than the consistency amount of my total PnL in one day? Will that breach my account?
+Your account will not be terminated if you violate the consistency rule, you must continue trading and make more profits until the highest profit trading day falls below the consistency percentage of total profits.
+
+ 
+
+$50,000 Standard Account Example:
+
+For example if you make $1500 in one trading day, you will atleast need to reach $3750 in total profits within that period to be able to withdraw profits from your account. 
+​
+​If you have any questions, please reach out to our support team, they are dedicated to help you out 24/7. Do not hesitate to reach out through live chat or open a ticket inside our Discord Community.
+
+Prohibited Trading Strategies
+Updated over a month ago
+The Simulated Market at Blue Guardian Futures is designed to closely mirror live trading conditions, but there can still be some kind of a difference. We understand the unique challenges this creates for our platform, our funding partners, and most importantly, our traders. To maintain a fair, transparent, and balanced trading environment, we've put policies in place to prevent practices that could take advantage of the simulated setup or deviate from ethical trading standards.
+
+ 
+
+Understanding Simulated trading environments
+Some trading strategies can take advantage of the simulated fill algorithm, leading to strong performance during the evaluation phase but ultimately resulting in losses when moved to live environments. A small number of traders, either unknowingly or with intent to game the system, may use these strategies, which are strictly prohibited at Blue Guardian Futures.
+
+ 
+
+1. Automated Trading Protocols
+At Blue Guardian Futures (BGF), we enforce rigorous guidelines to uphold a fair and transparent trading environment in automated trading:
+
+Automated Scalping: BGF limits the use of automated systems designed for ultra-high-frequency scalping, particularly systems that exceed 200 trades per day.
+
+Automated Tools: AI, bots, and other fully automated trading mechanisms are strictly prohibited across all account types.
+
+Semi-Automated Trading: Allowed only if traders actively monitor and manually manage trades, fully understanding the system’s purpose and limitations.
+
+Automated Behavior: Fully hands-off, continuous, day-and-night trading or any type of complete automation is strictly forbidden.
+
+ 
+
+2. Order Management and Market Conduct
+BGF prioritizes ethical trading practices and responsible order management to support a stable trading environment:
+
+Order Placement: Placing multiple limit orders at the same price to manipulate order fills is strictly prohibited.
+
+Gapped or Illiquid Market Trading: Trading strategies aimed at exploiting isolated fills in low-liquidity or gapped markets are not permitted.
+
+Slippage and Bracket Exploitation: Using tight brackets or taking advantage of the simulated market’s absence of slippage to gain favorable fills is forbidden.
+
+Economic Data Trading: Trading during tier 1 economic data releases is restricted to maintain stability.
+
+Compliance with CME Group: All trading activity must comply with CME Group rules and regulations.
+
+Collaborative Trading: Coordinated trading with others to execute identical or opposing strategies across unconnected accounts is not allowed.
+
+3. Policy Violations and Consequences
+BGF enforces strict consequences for policy violations to protect the integrity of our trading environment:
+
+Termination: BGF reserves the right to terminate agreements immediately if a trader violates policies.
+
+Profit Confiscation: Profits obtained through prohibited trading practices will be confiscated.
+
+Evaluation Review: All passed evaluations are subject to review. Traders found to be in breach of policies will not be funded and may be ineligible for refunds.
+
+Understanding Scalping vs. Microscalping
+At Blue Guardian Futures, we differentiate between scalping, which is an accepted trading strategy, and microscalping, which is prohibited.
+
+Scalping involves holding trades for a short period, often a few minutes, and targeting small but reasonable profit margins, such as 5-10 points. It requires skill, focus, and a keen understanding of market dynamics, and it can be a viable approach in both simulated and live trading environments.
+
+Microscalping, on the other hand, is an extremely aggressive subset of scalping. It typically involves holding trades for just a few seconds, executing an exceptionally high volume of trades, and aiming for minimal profit margins—often less than 5 points or even a fraction of a point.
+
+Why Microscalping is Prohibited
+Microscalping can exploit the simulated fill algorithms of trading evaluations. This behavior may result in inflated performance metrics during the evaluation phase but often fails to deliver sustainable results in live markets due to the reliance on conditions like minimal slippage and perfect execution. Key issues with microscalping include:
+
+Fill Manipulation: Microscalping can take advantage of simulated environments where fills are less impacted by slippage or latency, creating an unrealistic expectation of profitability.
+
+Market Integrity: The ultra-short durations and high frequency of trades can distort market behavior, making it difficult to maintain a fair trading environment.
+
+Reliability: The strategy's success often hinges on perfect conditions that are rarely found in live trading environments, leading to inconsistent results.
+
+By contrast, scalping, when conducted ethically and within reasonable limits, aligns with Blue Guardian Futures' standards and offers traders a legitimate path to profitability.
+
+ 
+
+While scalping is a legitimate and widely accepted strategy, microscalping is strictly prohibited at Blue Guardian Futures to preserve the integrity of our trading environment.
+
+ 
+
+5. Is Martingale Accepted?
+Yes, Blue Guardian Futures allows the use of Martingale strategies, provided traders operate within the platform's margin requirements, contract limitations, and risk parameters. This ensures that the strategy is applied responsibly and does not create excessive risk for the trader or the trading environment. If you have concerns about using Martingale, our support team is available to assist.
+
+ 
+
+If you have any questions on this topic, please feel free to reach out to our support team via Live Chat, submit a ticket on Discord, or email us at support@blueguardianfutures.com. We’re here to help!Can someone else trade my account?
+Updated over a month ago
+At Blue Guardian Futures, it is required that the trading account is exclusively traded by the account owner without any adaptions once a phase has been completed.
+
+In case a breach of this rule is detected, your account will be terminated immediatelyTrading Hours
+Updated over a month ago
+18:00-16:10 EST (Eastern Standard Time / NY Time)
+
+OR 06:00 PM - 04:10 PM EST (Eastern Standard Time / NY Time)
+
+ 
+
+Please note: All open trades will automatically close at 4:10 PM / 16:10 EST. This automatic close does not count as a rule violation and will not result in an account breach.
+
+ 
+
+ 
+
+Note: Trades will automatically close at 4:10 PM / 16:10 - And it will not result in a breach of the account
+
+Introduction to Blue Guardian Futures
+Updated over a month ago
+Welcome futures trader! We’re thrilled to have you join us on this exciting trading journey. Whether you're just starting out or you're a seasoned pro, Blue Guardian Futures is here to provide you with the resources, support, and opportunities to achieve trading excellence.
+
+ 
+
+Why Blue Guardian Futures?
+At Blue Guardian Futures, we’re not just a proprietary trading firm, we’re a trusted ally in your pursuit of success. Our mission is clear: empower traders to achieve financial freedom by offering access to robust capital, sophisticated risk management tools, and a community designed to help you thrive.
+
+ 
+
+Funded Trading Opportunities:
+Showcase your skills through our streamlined, one-phase evaluation process. Once you’ve proven your potential, you’ll gain access to a funded account, earning 100% of profits up to $15,000 and 90% after. Trade confidently, knowing you’re backed by Blue Guardian Futures.
+
+ 
+
+Payout Guarantee:
+We provide guarantee payouts within 48hrs, or we pay $200 extra, through bank transfers, cryptocurrency, and various local payment methods.
+
+ 
+
+One-time fees:
+
+At Blue Guardian Futures, you pay once and trade stress-free, no monthly fees, no deadlines. Take your time, follow your strategy, and pass when you’re ready.
+
+ 
+
+3-day payouts
+Traders can withdraw their rewards from once every 3 days, giving you quick access to your profits. Get rewarded consistently without unnecessary delays.
+
+ 
+
+Ready to take your trading to the next step?
+Get started today and take the next big step in your trading career. Our team is here to guide you every step of the way. If you have questions, connect with us through live chat or our Discord Community.
+
+Let’s build your trading future, together.Instrument Name
+
+Code
+
+Trading Hours
+
+Tick Size
+
+Tick Value
+
+Total Cost Per Side
+
+Corn
+
+ZC
+
+Sunday - Friday 19:00 - 07:45 CT
+Monday - Friday 08:30 - 13:20 CT
+
+0.0025
+
+$12.50
+
+2.67
+
+E-mini Dow Jones
+
+YM
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+1.00
+
+$5.00
+
+1.9
+
+Micro 10-Year Yield
+
+10Y
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.001
+
+$1.00
+
+0.92
+
+Micro E-mini dow Jones
+
+MYM
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+1.00
+
+$0.50
+
+0.62
+
+Soybean
+
+ZS
+
+Sunday - Friday 19:00 - 19:45 CT
+Daily Break: 08:30 - 13:20 CT
+
+0.0025
+
+$12.50
+
+2.67
+
+Soybean Meal
+
+ZM
+
+Sunday - Friday 19:00 - 19:45 CT
+Daily Break: 08:30 - 13:20 CT
+
+0.10
+
+$10.00
+
+2.67
+
+Soybean Oil
+
+ZL
+
+Sunday - Friday 19:00 - 19:45 CT
+Daily Break: 08:30 - 13:20 CT
+
+0.0001
+
+$6.00
+
+2.67
+
+US 10-Year Note
+
+ZN
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.015625
+
+$15.625
+
+1.37
+
+US 2-Year Note
+
+ZT
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.00390625
+
+$7.8125
+
+1.22
+
+US 5-Year Note
+
+ZF
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.0078125
+
+$7.8125
+
+1.27
+
+Wheat
+
+ZW
+
+Sunday - Friday 19:00 - 19:45 CT
+Daily Break: 08:30 - 13:20 CT
+
+0.0025
+
+$12.50
+
+2.67
+
+ 
+NYMEX - Instrument List
+Instrument Name
+
+Code
+
+Trading Hours
+
+Tick Size
+
+Tick Value
+
+Total Cost Per Side
+
+Crude Oil
+
+CL
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.01
+
+$10.00
+
+2.12
+
+E-mini Crude Oil
+
+QM
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.025
+
+$12.50
+
+1.82
+
+Heating Oil
+
+HO
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.0001
+
+$4.20
+
+2.12
+
+Micro Crude Oil
+
+MCL
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.01
+
+$1.00
+
+0.82
+
+Natural Gas
+
+NG
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.00025
+
+$2.50
+
+2.12
+
+RBOB Gasoline
+
+RB
+
+Sunday - Friday 17:00 - 16:00 CT
+Daily Break: 16:00 - 17:00 CT
+
+0.0001
+
+$4.20
+
+2.12
+
+ 
+
+Calendar month Expiration codes
+According to the codes below for example: an E-mini Nasdaq-100 contract expiring in December 2024 would be denoted as NQZ2024.
+
+Month
+
+Code
+
+January
+
+F
+
+February
+
+G
+
+March
+
+H
+
+April
+
+J
+
+May
+
+K
+
+June
+
+M
+
+July
+
+N
+
+August
+
+Q
+
+September
+
+U
+
+October
+
+V
+
+November
+
+X
+
+December
+
+Z
+
+KYC/AML Policies
+Updated over a month ago
+Overview
+Blue Guardian Futures prioritizes secure, compliant services by implementing robust Know Your Customer (KYC) and Anti-Money Laundering (AML) protocols, mandatory for users requesting payouts.
+
+ 
+
+When is KYC Required?
+KYC verification is required for all payout requests, whether for a simulated funded account or an affiliate payout. Verification is conducted once per user, with only one verified profile allowed per individual.
+
+ 
+
+Documents Required for Verification
+
+Proof of Identity (PoI)
+Submit a live photo of an accepted identity document, which may include:
+
+ 
+
+- Passport
+
+- National Identity Card
+
+- Driver’s License
+
+ 
+
+For a full list of accepted documents by country, visit https://www.veriff.com/blog/list-of-acceptable-kyc-documents
+
+ 
+
+Live Selfie or Video Recording
+Provide a live selfie or recording that clearly shows your face, matching the PoI document.
+
+ 
+
+Proof of Address (PoA)
+Provide one of the following, dated within the last three months:
+
+ 
+
+- Bank statement
+
+- Utility bill for services linked to your residence, such as electricity, water, or internet
+
+- Government-issued correspondence from a recognized authority
+
+- Current lease agreement, signed by both parties
+
+- Credit card statement
+
+- Employer certificate verifying your address
+
+- House purchase deed
+
+ 
+
+Alternative Proof of Address Examples
+If the above documents are unavailable, options like a passport, identity card, or driver’s license may be accepted if they contain your full address. Note that your PoA document must differ from your PoI document. If a document is declined, you may resubmit with an alternative.
+
+ 
+
+Anti-Money Laundering (AML) Screening
+To maintain compliance with AML regulations, all users must complete an automated AML screening to prevent money laundering and related activities. The screening includes checks for:
+
+ 
+
+- Global watchlists and sanctions, including OFAC, UN, HMT, EU, and others
+
+- Politically Exposed Persons (PEP) status
+
+- Adverse media reports
+
+ 
+
+Restricted Countries
+Blue Guardian Futures cannot provide services to specific countries due to sanctions, restrictions, or elevated fraud risk identified through financial scams and identity theft cases. Users with citizenship or residency in countries on OFAC's Sanctioned Countries list or those restricted by our partners are ineligible to open accounts.
+
+ 
+
+Disclaimer 
+​
+
+Our third-party KYC/AML processor oversees all verifications and document approvals. Blue Guardian Futures adheres to their determinations and cannot alter these decisions. Users must meet the legal age requirements to engage in trading activities in their jurisdictions. All policies are strictly enforced.
+
+ 
+
+If you have any questions, please reach out to our support team, they are dedicated to help you out 24/7. Do not hesitate to reach out through live chat, open a ticket inside our Discord Community, or reach out to our team by emailing support@blueguardianfutures.com .Ongoing KYC/Documentation Monitoring
+Updated over a month ago
+At Blue Guardian Futures, we use the Veriff system to verify the authenticity of all submitted documents with daily checks. This process ensures that each applicant’s identity document meets our validity standards.
+
+ 
+
+For a document to qualify:
+
+It must have an expiration date on or after the current date
+
+Or fall within an adjusted validity period defined by our system. 
+​
+
+This automated approach guarantees that only active, valid documents are used for secure and reliable verification.
