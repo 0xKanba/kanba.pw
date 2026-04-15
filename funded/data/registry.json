@@ -9,19 +9,19 @@
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "2step-pro",    "name": "2-Step Pro",    "path": "data/firms/holaprime/forex/2step.pro.json" },
-            { "id": "one-challenge","name": "One Challenge", "path": "data/firms/holaprime/forex/one-challenge.json" },
-            { "id": "direct",       "name": "Direct",        "path": "data/firms/holaprime/forex/direct.json" },
-            { "id": "2step-prime",  "name": "2-Step Prime",  "path": "data/firms/holaprime/forex/2step-prime.json" },
-            { "id": "1step-prime",  "name": "1-Step Prime",  "path": "data/firms/holaprime/forex/1step-prime.json" }
+            {"id": "2step-pro", "name": "2-Step Pro", "path": "data/firms/holaprime/forex/2step.pro.json"},
+            {"id": "one-challenge", "name": "One Challenge", "path": "data/firms/holaprime/forex/one-challenge.json"},
+            {"id": "direct", "name": "Direct", "path": "data/firms/holaprime/forex/direct.json"},
+            {"id": "2step-prime", "name": "2-Step Prime", "path": "data/firms/holaprime/forex/2step-prime.json"},
+            {"id": "1step-prime", "name": "1-Step Prime", "path": "data/firms/holaprime/forex/1step-prime.json"}
           ]
         },
         {
           "id": "futures",
           "name": "Futures",
           "accounts": [
-            { "id": "1step-prime", "name": "1-Step Prime",   "path": "data/firms/holaprime/futures/1step-prime.json" },
-            { "id": "direct",      "name": "Direct Account", "path": "data/firms/holaprime/futures/direct.json" }
+            {"id": "1step-prime", "name": "1-Step Prime", "path": "data/firms/holaprime/futures/1step-prime.json"},
+            {"id": "direct", "name": "Direct Account", "path": "data/firms/holaprime/futures/direct.json"}
           ]
         }
       ]
@@ -35,10 +35,10 @@
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "2step-challenge",  "name": "2-Step Challenge",  "path": "data/firms/finotivefunding/forex/2step-challenge.json" },
-            { "id": "2step-pro",        "name": "2-Step Pro",        "path": "data/firms/finotivefunding/forex/2step-pro.json" },
-            { "id": "instant-standard", "name": "Instant Standard",  "path": "data/firms/finotivefunding/forex/instant-standard.json" },
-            { "id": "instant-lite",     "name": "Instant Lite",      "path": "data/firms/finotivefunding/forex/instant-lite.json" }
+            {"id": "2step-challenge", "name": "2-Step Challenge", "path": "data/firms/finotivefunding/forex/2step-challenge.json"},
+            {"id": "2step-pro", "name": "2-Step Pro", "path": "data/firms/finotivefunding/forex/2step-pro.json"},
+            {"id": "instant-standard", "name": "Instant Standard", "path": "data/firms/finotivefunding/forex/instant-standard.json"},
+            {"id": "instant-lite", "name": "Instant Lite", "path": "data/firms/finotivefunding/forex/instant-lite.json"}
           ]
         }
       ]
@@ -52,7 +52,7 @@
           "id": "futures",
           "name": "Futures",
           "accounts": [
-            { "id": "1step-futures", "name": "1-Step Prime", "path": "data/firms/thetradingpit/futures/1step-prime.json" }
+            {"id": "1step-futures", "name": "1-Step Prime", "path": "data/firms/thetradingpit/futures/1step-prime.json"}
           ]
         }
       ]
@@ -66,7 +66,18 @@
           "id": "forex",
           "name": "Forex",
           "accounts": [
-            { "id": "instant-starter", "name": "Instant Starter", "path": "data/firms/blueguardian/forex/instant-starter.json" }
+            {"id": "instant-starter", "name": "Instant Starter", "path": "data/firms/blueguardian/forex/instant-starter.json"}
+          ]
+        },
+        {
+          "id": "futures",
+          "name": "Futures",
+          "url": "https://blueguardian.com/futures#choose-evaluation",
+          "accounts": [
+            {"id": "standard", "name": "Standard", "path": "data/firms/blueguardian/futures/standard.json"},
+            {"id": "pro", "name": "Pro Guardian", "path": "data/firms/blueguardian/futures/pro.json"},
+            {"id": "rapid", "name": "Rapid Funded", "path": "data/firms/blueguardian/futures/rapid.json"},
+            {"id": "instant", "name": "Instant Guardian", "path": "data/firms/blueguardian/futures/instant.json"}
           ]
         }
       ]
