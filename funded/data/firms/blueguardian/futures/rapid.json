@@ -1,49 +1,65 @@
 {
   "firm": {
-    "name": "Blue Guardian Futures",
+    "name": "Blue Guardian",
     "type": "Futures",
-    "model": "Rapid Funded",
-    "last_updated": "2024-05-20",
+    "model": "Rapid",
+    "last_updated": "2026-04-15",
     "sections": [
       {
         "id": "risk_parameters",
         "title": "Risk Parameters",
         "items": [
-          { "label": "Daily Loss Limit", "value": "Soft Breach", "detail": "25k:$625 | 50k:$1,250 | 100k:$2,500 | 150k:$3,750. Warning issued + recovery window. No immediate termination." },
-          { "label": "Max Drawdown", "value": "EOD Trailing", "detail": "25k:$1,250 | 50k:$2,500 | 100k:$3,500 | 150k:$5,000. Trails at EOD. Locks at Starting Balance + $100 post-payout." },
-          { "label": "Consistency Rule", "value": "≤ 40% per day", "detail": "Daily profit ≤ 40% of cycle total. Extend trading to dilute ratio; not a hard breach." },
-          { "label": "Inactivity Limit", "value": "7 Days", "detail": "Min 1 trade per 7 days. Notify support for breaks to prevent inactive status." }
+          { "label": "Daily Loss Limit",   "value": "3% of initial balance", "detail": "At 17:00 EST reset: floor = max(balance, equity) − 3% of initial balance. Hard breach = immediate closure." },
+          { "label": "Max Drawdown",       "value": "5% EOD trailing",       "detail": "Trails from highest closing trade balance. Locks at starting balance once 5% profit is reached. After lock → $100 buffer added. Includes closed PnL, swaps, commissions." },
+          { "label": "Consistency Rule",   "value": "≤ 40%",                 "detail": "No single day's profit may equal or exceed 40% of total payout-period profits. Must keep trading until ratio drops — does not breach account." },
+          { "label": "Inactivity",         "value": "1 trade / 7 days",      "detail": "At least one trade per 7-day period. Contact support before extended breaks." }
         ]
       },
       {
         "id": "trading_rules",
         "title": "Trading Rules",
         "items": [
-          { "label": "News Trading", "value": "Restricted", "detail": "±5 min Red Folder ban. Clear orders ±2 min all news. Data slippage possible; firm not liable for platform delays." },
-          { "label": "CME Price Limit", "value": "2% Buffer", "detail": "Trading within 2% of CME daily limit prohibited. Monitor overnight vs regular hour limits (5%-7% equity)." },
-          { "label": "Risk/Reward & Stops", "value": "Max 5:1 / Mandatory", "detail": "Initial SL required. Mental stops accepted but disciplined execution mandatory. No 'all-in' gambling sizing." },
-          { "label": "Automation & Scalping", "value": "Regulated", "detail": "Bots/AI banned. Microscalping & >200 trades/day prohibited. Martingale allowed within margin limits." },
-          { "label": "Trading Hours", "value": "18:00-16:10 EST", "detail": "Auto-close at 16:10 EST (no breach). Align with CME session breaks." }
+          { "label": "Trading Hours",    "value": "18:00 – 16:10 EST", "detail": "All open trades auto-close at 16:10 EST. Not a breach." },
+          { "label": "News Trading",     "value": "Restricted",        "detail": "No open/close/pending orders within 5 min before or after Red Folder releases (FOMC, CPI, NFP, Powell, JOLTS etc.). 2-min buffer for all news." },
+          { "label": "Overnight Hold",   "value": "Allowed",           "detail": "No restriction." },
+          { "label": "Weekend Hold",     "value": "Allowed",           "detail": "No restriction." },
+          { "label": "Martingale",       "value": "Allowed (limited)", "detail": "Permitted within margin/contract limits. Inconsistent sizing to recover losses may trigger review." },
+          { "label": "Max R:R Ratio",    "value": "5:1",               "detail": "Stop loss must not exceed 5× profit target." },
+          { "label": "2% Price Limit",   "value": "Prohibited zone",   "detail": "No trading within 2% of CME daily price limits." },
+          { "label": "Prohibited",       "value": "See detail",        "detail": "Microscalping, full AI/bot automation, collaborative trading, account sharing, delayed data exploitation, CME rule violations." }
         ]
       },
       {
         "id": "payouts",
         "title": "Payouts",
         "items": [
-          { "label": "Profit Split", "value": "100% / 90%", "detail": "100% up to $15k, then 90%. Fast-track processing prioritized for Rapid tier." },
-          { "label": "Frequency & Guarantee", "value": "Every 3 Days", "detail": "0 min winning days required. 24h processing guarantee; +$200 bonus if delayed. Min $500 withdrawal." },
-          { "label": "Payout Targets", "value": "N/A (Instant)", "detail": "No profit target to pass. Withdraw immediately upon meeting consistency & min days rules." },
-          { "label": "Payout Caps", "value": "Tiered", "detail": "25k:$750 | 50k:$1,000 | 100k:$2,000 | 150k:$3,000. Lifted after proven track record." }
+          { "label": "Profit Split",      "value": "100% → 90%",   "detail": "First $15,000 total profits = 100%. Beyond = 90% split." },
+          { "label": "Payout Cycle",      "value": "Every 3 days", "detail": "Eligible 3 days after first trade, then every 3 days. Fastest payout cycle available." },
+          { "label": "Winning Days",      "value": "None required", "detail": "No minimum profitable days needed — fastest access to profits. Must meet consistency rule." },
+          { "label": "Consistency",       "value": "≤ 40%",        "detail": "Best single day must not exceed 40% of total payout-period profits." },
+          { "label": "Payout Minimum",    "value": "$500",         "detail": "Minimum payout request across all account sizes." },
+          { "label": "First Payout DD",   "value": "Locks + $100", "detail": "After first payout, max drawdown adjusts to starting balance + $100." },
+          { "label": "Processing",        "value": "24 hrs guarantee", "detail": "Mon–Fri before 3PM CST via Riseworks. Delay past 24 hrs → $200 bonus." }
         ]
       },
       {
-        "id": "account_specs",
-        "title": "Account Specifications",
+        "id": "payout_caps",
+        "title": "Payout Cap + Targets",
+        "table": {
+          "headers": ["Account", "Max / Payout", "1st Target", "2nd Target", "3rd+ Target"],
+          "rows": [
+            ["$25,000",  "$750",  "$1,500 (6%)", "$1,000 (4%)", "$1,000 (4%)"],
+            ["$50,000",  "$1,000","$3,000 (6%)", "$2,000 (4%)", "$2,000 (4%)"],
+            ["$100,000", "$2,000","$6,000 (6%)", "$4,000 (4%)", "$4,000 (4%)"],
+            ["$150,000", "$3,000","$9,000 (6%)", "$6,000 (4%)", "$6,000 (4%)"]
+          ]
+        }
+      },
+      {
+        "id": "account_limits",
+        "title": "Account Limits",
         "items": [
-          { "label": "Account Type", "value": "Instant Funded", "detail": "Bypass evaluation. Start trading immediately. Activation fee $0. One-time setup." },
-          { "label": "Max Position Size", "value": "Standard Tier", "detail": "25k:2M/20μ | 50k:3M/30μ | 100k:6M/60μ | 150k:9M/90μ. Scaling permitted per risk guidelines." },
-          { "label": "Max Accounts", "value": "3 Funded", "detail": "Hold up to 3 Rapid/Sim accounts. Stacking beyond requires eval subscription fees." },
-          { "label": "KYC & Compliance", "value": "Mandatory for Payout", "detail": "Veriff verification required before first reward. Restricted jurisdictions blocked per OFAC/AML lists." }
+          { "label": "Max Funded Accounts", "value": "3 simultaneous", "detail": "Up to 3 funded accounts at any time. Funded accounts cannot be reset." }
         ]
       }
     ]
