@@ -1,44 +1,51 @@
 {
-  "id": "instant",
-  "name": "Instant Guardian",
-  "type": "instant_funded",
-  "balances": [25000, 50000, 100000, 150000],
-  "profitTarget": "N/A",
-  "maxPosition": {"25k":"2 Mini/20 Micro","50k":"3 Mini/30 Micro","100k":"6 Mini/60 Micro","150k":"9 Mini/90 Micro"},
-  "dailyLoss": {"25k":"$625","50k":"$1,250","100k":"$2,500","150k":"$3,750"},
-  "breachType": "soft",
-  "softBreachNote": "warning + recovery chance, no immediate termination",
-  "maxDrawdown": {"25k":"$1,250","50k":"$2,500","100k":"$3,500","150k":"$5,000"},
-  "drawdownMode": "EOD_trailing",
-  "drawdownLock": "starting_balance + $100",
-  "scaling": false,
-  "guardianShield": "auto_close_at_2%_floating_loss",
-  "payout": {
-    "frequency": "14_days",
-    "minWinningDays": 10,
-    "minAmount": 500,
-    "processing": "≤48h_via_RiseWorks",
-    "cap": {"25k":750,"50k":1000,"100k":2000,"150k":3000}
-  },
-  "consistency": {
-    "funded": "20%",
-    "rule": "no_single_day_profit_≥20%_of_cycle_total"
-  },
-  "activationFee": 149,
-  "activationFeeNote": "paid_only_if_account_profitable",
-  "profitSplit": {"first_15k":"100%","after":"90%"},
-  "rules": {
-    "news": "no_orders_±5min_RedFolder_news",
-    "priceLimit": "no_trading_within_2%_CME_limit",
-    "riskReward": "max_5:1",
-    "stops": "mandatory_initial_stop_loss",
-    "automation": "no_bots/AI/>200trades_day",
-    "microscalping": "prohibited",
-    "martingale": "allowed_within_margin_limits",
-    "activity": "min_1_trade_per_7_days",
-    "tradingHours": "18:00-16:10_EST_auto_close_no_breach",
-    "maxAccounts": 3,
-    "kyc": "required_for_payout",
-    "reset": "not_available_for_funded"
+  "firm": {
+    "name": "Blue Guardian Futures",
+    "type": "Futures",
+    "model": "Instant Guardian",
+    "last_updated": "2024-05-20",
+    "sections": [
+      {
+        "id": "risk_parameters",
+        "title": "Risk Parameters",
+        "items": [
+          { "label": "Daily Loss Limit", "value": "Soft Breach", "detail": "25k:$625 | 50k:$1,250 | 100k:$2,500 | 150k:$3,750. Warning + recovery window. No instant termination." },
+          { "label": "Max Drawdown", "value": "EOD Trailing", "detail": "25k:$1,250 | 50k:$2,500 | 100k:$3,500 | 150k:$5,000. Trails at EOD. Locks at Starting Balance + $100 post-payout." },
+          { "label": "Consistency Rule", "value": "≤ 20% per day", "detail": "Strictest tier. Single day profit ≤ 20% of cycle total. Extend cycle to normalize ratio before payout request." },
+          { "label": "Guardian Shield", "value": "2% Float Loss", "detail": "Auto-closes all trades at −2% floating loss. Protects capital from rapid intraday drawdowns." }
+        ]
+      },
+      {
+        "id": "trading_rules",
+        "title": "Trading Rules",
+        "items": [
+          { "label": "News Trading", "value": "Restricted", "detail": "±5 min Red Folder ban. Clear orders ±2 min all news. Firm not liable for slippage or platform sync issues." },
+          { "label": "CME Price Limit", "value": "2% Buffer", "detail": "No trading within 2% of CME limit. Prevents gap exposure during limit-up/down sessions." },
+          { "label": "Risk/Reward & Stops", "value": "Max 5:1 / Mandatory", "detail": "Initial SL required. Disciplined sizing only. Unplanned large contracts or revenge trading triggers review." },
+          { "label": "Automation & Scalping", "value": "Regulated", "detail": "AI/bots banned. Microscalping & >200 trades/day prohibited. Martingale allowed within margin constraints." },
+          { "label": "Trading Hours", "value": "18:00-16:10 EST", "detail": "Auto-close at 16:10 EST (no breach). Weekend holds allowed per exchange schedule." }
+        ]
+      },
+      {
+        "id": "payouts",
+        "title": "Payouts",
+        "items": [
+          { "label": "Profit Split", "value": "100% / 90%", "detail": "100% first $15k, 90% thereafter. Processed ≤48h via RiseWorks. No hidden fees." },
+          { "label": "Frequency & Conditions", "value": "Every 14 Days", "detail": "Requires 10 net-positive days. Min $500 withdrawal. Rolling 14-day cycle from last payout." },
+          { "label": "Payout Targets", "value": "N/A (Instant)", "detail": "No eval target. Withdraw upon meeting consistency, min days, & soft breach rules." },
+          { "label": "Payout Caps", "value": "Tiered", "detail": "25k:$750 | 50k:$1,000 | 100k:$2,000 | 150k:$3,000. Designed for steady capital preservation." }
+        ]
+      },
+      {
+        "id": "account_specs",
+        "title": "Account Specifications",
+        "items": [
+          { "label": "Account Type", "value": "Instant Funded", "detail": "Skip eval phase. Activation fee $149 charged ONLY if account becomes profitable." },
+          { "label": "Max Position Size", "value": "Standard Tier", "detail": "25k:2M/20μ | 50k:3M/30μ | 100k:6M/60μ | 150k:9M/90μ. Scaling disabled to enforce discipline." },
+          { "label": "Max Accounts", "value": "3 Funded", "detail": "Max 3 concurrent funded accounts. Additional accounts require separate eval subscriptions." },
+          { "label": "KYC & Compliance", "value": "Mandatory for Payout", "detail": "Full Veriff KYC/AML required. One profile per trader. Restricted regions blocked automatically." }
+        ]
+      }
+    ]
   }
 }
