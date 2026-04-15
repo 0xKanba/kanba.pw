@@ -1,51 +1,81 @@
 {
   "firm": {
-    "name": "Blue Guardian Futures",
+    "name": "Blue Guardian",
     "type": "Futures",
     "model": "Standard",
-    "last_updated": "2024-05-20",
+    "last_updated": "2026-04-15",
     "sections": [
       {
         "id": "risk_parameters",
-        "title": "Risk Parameters",
+        "title": "Evaluation Parameters",
         "items": [
-          { "label": "Daily Loss Limit", "value": "Hard Breach", "detail": "25k:$625 | 50k:$1,250 | 100k:$2,500 | 150k:$3,750. Exceeding it immediately breaches the account." },
-          { "label": "Max Drawdown", "value": "EOD Trailing", "detail": "25k:$1,250 | 50k:$2,500 | 100k:$3,500 | 150k:$5,000. Trails at EOD. Locks at Starting Balance + $100 after first payout." },
-          { "label": "Consistency Rule", "value": "≤ 40% per day", "detail": "No single day's profit may exceed 40% of cycle total. Not a breach; continue trading until ratio drops below threshold." },
-          { "label": "Inactivity Limit", "value": "7 Days", "detail": "Minimum 1 trade per rolling 7-day period. Contact support for vacation pauses to avoid breach." }
+          { "label": "Profit Target",      "value": "6% of balance",  "detail": "$50K→$3,000 · $100K→$6,000 · $150K→$9,000. No minimum trading days required." },
+          { "label": "Daily Loss Limit",   "value": "Hard breach",    "detail": "$50K→$1,250 · $100K→$2,500 · $150K→$3,750. Breaching = immediate account closure." },
+          { "label": "Max Drawdown",       "value": "EOD trailing",   "detail": "$50K→$2,500 · $100K→$3,500 · $150K→$5,000. Trails end-of-day balance. Locks at starting balance once profit threshold is reached, then adds $100 buffer (e.g. $50K locks at $50,100)." },
+          { "label": "Consistency Rule",   "value": "≤ 40%",          "detail": "Applies in both eval and funded. No single day's profit may equal or exceed 40% of total profits. Must keep trading until ratio drops below 40%. Does not breach account — only blocks passing/payout." },
+          { "label": "Position Scaling",   "value": "Allowed",        "detail": "May scale into winning positions. Avoid large upfront contract sizes as a gambling strategy." },
+          { "label": "Evaluation Reset",   "value": "30% of fee",     "detail": "Available within 7 days of failing evaluation. Reset restarts from beginning." }
         ]
+      },
+      {
+        "id": "exposure_limits",
+        "title": "Max Position Size",
+        "table": {
+          "headers": ["Account", "Max Contracts (Mini / Micro)"],
+          "rows": [
+            ["$50,000",  "3 Mini / 30 Micro"],
+            ["$100,000", "6 Mini / 60 Micro"],
+            ["$150,000", "9 Mini / 90 Micro"]
+          ]
+        }
       },
       {
         "id": "trading_rules",
         "title": "Trading Rules",
         "items": [
-          { "label": "News Trading", "value": "Restricted", "detail": "Strictly prohibited ±5 min around Red Folder events. Clear all orders ±2 min for all news. News trades cannot be sole method to pass eval." },
-          { "label": "CME Price Limit", "value": "2% Buffer", "detail": "Trading within 2% of CME daily price limit is prohibited to protect against extreme volatility gaps." },
-          { "label": "Risk/Reward Ratio", "value": "Max 5:1", "detail": "Stop loss must not exceed 5x profit target. Adjusting stops to widen risk is forbidden." },
-          { "label": "Stop Loss Policy", "value": "Mandatory Initial", "detail": "Every trade must open with a defined stop loss. Trading without SL or using DD as a stop = gambling & breach." },
-          { "label": "Automation & Scalping", "value": "Regulated", "detail": "Bots/AI fully banned. >200 trades/day & microscalping (<5 pts/seconds) prohibited. Semi-automated allowed with manual oversight." },
-          { "label": "Martingale & Hedging", "value": "Allowed", "detail": "Permitted if within margin limits & contract caps. Inconsistent sizing to recover losses is reviewed & restricted." },
-          { "label": "Trading Hours", "value": "18:00-16:10 EST", "detail": "Auto-close at 16:10 EST daily. Does not count as breach. Weekend/Overnight holds allowed per CME schedule." }
+          { "label": "Trading Hours",    "value": "18:00 – 16:10 EST", "detail": "All open trades auto-close at 16:10 EST. Not a breach." },
+          { "label": "News Trading",     "value": "Restricted",        "detail": "No open/close/pending orders within 5 min before or after any Red Folder release (FOMC, CPI, NFP, Powell, JOLTS, PMI, PPI etc.). 2-min buffer for all news events. News trading alone cannot be the sole method to pass evaluation." },
+          { "label": "Overnight Hold",   "value": "Allowed",           "detail": "No restriction on holding positions overnight." },
+          { "label": "Weekend Hold",     "value": "Allowed",           "detail": "No restriction on weekend positions." },
+          { "label": "Martingale",       "value": "Allowed (limited)", "detail": "Permitted within margin and contract limits. Inconsistent sizing to recover losses may trigger review." },
+          { "label": "Max R:R Ratio",    "value": "5:1",               "detail": "Stop loss must not exceed 5× profit target. Example: $100 target → max $500 stop loss." },
+          { "label": "2% Price Limit",   "value": "Prohibited zone",   "detail": "No trading within 2% of CME daily price limits. Monitor % Net Change on quote board." },
+          { "label": "Inactivity",       "value": "1 trade / 7 days",  "detail": "Funded stage: at least one trade per 7-day period. Contact support before extended breaks." },
+          { "label": "Prohibited",       "value": "See detail",        "detail": "Microscalping (<few seconds, >200 trades/day), AI/full automation, collaborative/coordinated trading, account sharing, delayed data exploitation, simulated fill gaming, CME rule violations." }
         ]
       },
       {
         "id": "payouts",
-        "title": "Payouts",
+        "title": "Funded Payouts",
         "items": [
-          { "label": "Profit Split", "value": "100% / 90%", "detail": "Keep 100% of first $15,000 profit. All subsequent profits split at 90% to trader / 10% to firm." },
-          { "label": "Frequency & Conditions", "value": "Every 7 Days", "detail": "Requires 5 net-positive trading days. Minimum withdrawal: $500. Processed ≤48h via RiseWorks." },
-          { "label": "Payout Targets", "value": "6% → 4%", "detail": "1st payout: 6% of starting balance. 2nd & beyond: 4% per cycle. Resets after each request." },
-          { "label": "Payout Caps", "value": "Tiered", "detail": "25k:$750 | 50k:$1,000 | 100k:$2,000 | 150k:$3,000 per request. Caps lift after consistent performance review." }
+          { "label": "Profit Split",      "value": "100% → 90%",      "detail": "First $15,000 of total profits = 100%. All profits beyond $15,000 = 90% split." },
+          { "label": "Payout Cycle",      "value": "Weekly",          "detail": "Every 7 days. Requires 5 profitable winning days per cycle." },
+          { "label": "Winning Day Min.",  "value": "$100 / $200 / $300","detail": "Minimum net profit per winning day: $100 ($50K) · $200 ($100K) · $300 ($150K)." },
+          { "label": "Consistency",       "value": "≤ 40%",           "detail": "Best single day must not exceed 40% of total payout-period profits." },
+          { "label": "Payout Minimum",    "value": "$500",            "detail": "Minimum payout request across all account sizes." },
+          { "label": "First Payout DD",   "value": "Locks + $100 buffer", "detail": "After first payout, max drawdown adjusts to starting balance + $100. Maintain buffer before requesting." },
+          { "label": "Processing",        "value": "24 hrs guarantee", "detail": "Processed Mon–Fri before 3PM CST via Riseworks. If delayed past 24 hrs → $200 bonus automatically added." }
         ]
       },
       {
-        "id": "account_specs",
-        "title": "Account Specifications",
+        "id": "payout_caps",
+        "title": "Payout Cap + Targets",
+        "table": {
+          "headers": ["Account", "Max / Payout", "1st Target", "2nd Target", "3rd+ Target"],
+          "rows": [
+            ["$25,000",  "$750",  "$1,500 (6%)", "$1,000 (4%)", "$1,000 (4%)"],
+            ["$50,000",  "$1,000","$3,000 (6%)", "$2,000 (4%)", "$2,000 (4%)"],
+            ["$100,000", "$2,000","$6,000 (6%)", "$4,000 (4%)", "$4,000 (4%)"],
+            ["$150,000", "$3,000","$9,000 (6%)", "$6,000 (4%)", "$6,000 (4%)"]
+          ]
+        }
+      },
+      {
+        "id": "account_limits",
+        "title": "Account Limits",
         "items": [
-          { "label": "Available Balances", "value": "$25K / $50K / $100K / $150K", "detail": "Starting balance matches eval size. No activation fee. One-time payment model." },
-          { "label": "Max Position Size", "value": "Contract Limits", "detail": "25k:2M/20μ | 50k:3M/30μ | 100k:6M/60μ | 150k:9M/90μ. Scaling allowed per guidelines." },
-          { "label": "Max Accounts", "value": "3 Funded", "detail": "Hold up to 3 funded accounts simultaneously. Exceeding requires ongoing eval fees." },
-          { "label": "KYC & Compliance", "value": "Mandatory for Payout", "detail": "Verified ID, PoA, & AML screening required via Veriff before first payout. Restricted jurisdictions apply." }
+          { "label": "Max Funded Accounts", "value": "3 simultaneous", "detail": "Up to 3 funded accounts (live or simulated) at any time. Funded accounts cannot be reset." },
+          { "label": "Live Account",         "value": "Invitation only", "detail": "Risk team monitors sim funded performance. Consistent traders receive live account invitation. Live accounts have static drawdown, customizable daily loss limit, and scaling." }
         ]
       }
     ]
