@@ -1,11 +1,10 @@
-const CACHE_NAME = 'hltrade-v4';
+const CACHE_NAME = 'hltrade-v5';
 const ASSETS = [
   '/',
   '/index.html',
   '/hl/hl.css',
   '/hl/hl.js',
   '/hl/chart.js',
-  '/hl/pay.html',
   '/hl/manifest.json',
   'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js',
