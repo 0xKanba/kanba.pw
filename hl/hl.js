@@ -173,7 +173,10 @@ function handleVerifyPin() {
 }
 
 // لا يوجد قفل تلقائي — القفل يدوي فقط عبر زر 🔒
+// القفل يبقى محفوظاً حتى بعد إغلاق المتصفح
 
+// عند إغلاق المتصفح/التبويب — لا تمس LOCKED_KEY (يبقى كما هو)
+// إذا كان مقفلاً قبل الإغلاق → يبقى مقفلاً عند العودة
 
 // ════════════════════════════════════════
 // MsgPack
@@ -1318,6 +1321,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   const saved=localStorage.getItem(LS_KEY);
   if(saved){ $('privateKey').value=saved; login(); }
 
-  // مسح LOCKED_KEY عند كل تحميل — القفل يدوي فقط
-  localStorage.removeItem(LOCKED_KEY);
+  // تحقق من حالة القفل عند بدء التشغيل
+  // إذا أغلق المستخدم المتصفح وهو مقفل → يبقى مقفلاً
+  if (localStorage.getItem(PIN_KEY) && localStorage.getItem(LOCKED_KEY) === 'true') {
+    // انتظر حتى يكتمل login() أولاً
+    setTimeout(() => {
+      if (State.wallet) lockApp();
+    }, 500);
+  }
 });
