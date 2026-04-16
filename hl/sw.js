@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hltrade-v3';
+const CACHE_NAME = 'hltrade-v4';
 const ASSETS = [
   '/',
   '/index.html',
@@ -12,43 +12,48 @@ const ASSETS = [
   'https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js'
 ];
 
-// Install Event
+// Install — cache all static assets immediately
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activate Event
+// Activate — remove old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
-      );
-    })
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
   );
   self.clients.claim();
 });
 
-// Fetch Event
+// Fetch — Cache-first for static assets, network-only for API
 self.addEventListener('fetch', e => {
-  // Skip cross-origin requests and non-GET requests
   if (e.request.method !== 'GET') return;
-  
+
+  const url = new URL(e.request.url);
+
+  // API calls — always network, never cache
+  if (url.hostname === 'api.hyperliquid.xyz' ||
+      url.hostname === 'arb1.arbitrum.io' ||
+      url.hostname === 'fonts.googleapis.com' && url.pathname.includes('css')) {
+    return; // let browser handle
+  }
+
+  // Static assets — cache-first
   e.respondWith(
-    caches.match(e.request).then(res => {
-      return res || fetch(e.request).catch(() => {
-        // Fallback or just fail
-      });
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res && res.status === 200 && res.type !== 'opaque') {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => cached);
     })
   );
 });
-
-// Inactivity check logic is handled in hl.js via localStorage timestamps
-// because Service Workers cannot access the DOM or reliably track mouse movements.
