@@ -678,14 +678,20 @@ function askTrade(isBuy){
   if(!p?.mid) return toast('لا يوجد سعر — السوق مغلق؟','err');
   const usd=(p.mid*qty).toFixed(2), mgn=(p.mid*qty/a.lev).toFixed(2);
   const liq=fmt(p.mid*(isBuy?1-1/a.lev:1+1/a.lev),a.pxDp);
+  const feeOpen  = (p.mid*qty*0.00009).toFixed(4);   // 0.009% فتح
+  const feeClose = (p.mid*qty*0.00009).toFixed(4);   // 0.009% إغلاق
+  const feeTot   = (p.mid*qty*0.00018).toFixed(4);   // المجموع
   setTxt('confirmTitle',`${a.icon} ${isBuy?'شراء ↑':'بيع ↓'} — ${a.name}`);
-  setTxt('confirmSubtitle',`رافعة ${a.lev}x`);
+  setTxt('confirmSubtitle',`رافعة ${a.lev}x · تنفيذ فوري`);
   $('confirmDetails').innerHTML=`
     <div class="confirm-row"><span class="confirm-key">الكمية</span><span class="confirm-val">${qty} ${a.unit}</span></div>
     <div class="confirm-row"><span class="confirm-key">السعر</span><span class="confirm-val">${fmt(p.mid,a.pxDp)} $</span></div>
     <div class="confirm-row"><span class="confirm-key">القيمة الكلية</span><span class="confirm-val">≈ $${usd}</span></div>
     <div class="confirm-row"><span class="confirm-key">الهامش المطلوب</span><span class="confirm-val warn">≈ $${mgn}</span></div>
-    <div class="confirm-row"><span class="confirm-key">التصفية التقريبية</span><span class="confirm-val sell">≈ ${liq} $</span></div>`;
+    <div class="confirm-row"><span class="confirm-key">التصفية التقريبية</span><span class="confirm-val sell">≈ ${liq} $</span></div>
+    <div class="confirm-row"><span class="confirm-key">رسوم الفتح</span><span class="confirm-val fee">$${feeOpen} (0.009%)</span></div>
+    <div class="confirm-row"><span class="confirm-key">رسوم الإغلاق</span><span class="confirm-val fee">$${feeClose} (0.009%)</span></div>
+    <div class="confirm-row"><span class="confirm-key">إجمالي الرسوم</span><span class="confirm-val fee">≈ $${feeTot}</span></div>`;
   const btn=$('confirmExecute');
   btn.className=`btn-modal btn-confirm ${isBuy?'btn-success':'btn-danger'}`;
   btn.innerHTML=isBuy?'✅ تأكيد الشراء':'✅ تأكيد البيع';
@@ -722,12 +728,14 @@ window.askClose=function(i){
   const a=ASSETS[coin]||{name:coin,unit:'',icon:'📊',pxDp:2,szDp:2};
   const pnl=parseFloat(pos.unrealizedPnl||0), cur=State.prices[coin]?.mid||0;
   setTxt('closeTitle',`${a.icon} إغلاق — ${a.name}`);
+  const closeFee = cur ? (Math.abs(szi)*cur*0.00009).toFixed(4) : '—';
   $('closeDetails').innerHTML=`
     <div class="confirm-row"><span class="confirm-key">الاتجاه</span><span class="confirm-val ${szi>0?'buy':'sell'}">${szi>0?'▲ شراء':'▼ بيع'}</span></div>
     <div class="confirm-row"><span class="confirm-key">الكمية</span><span class="confirm-val">${Math.abs(szi).toFixed(a.szDp)} ${a.unit}</span></div>
     <div class="confirm-row"><span class="confirm-key">سعر الدخول</span><span class="confirm-val">${fmt(pos.entryPx||0,a.pxDp)} $</span></div>
     <div class="confirm-row"><span class="confirm-key">السعر الحالي</span><span class="confirm-val">${cur?fmt(cur,a.pxDp):'—'} $</span></div>
-    <div class="confirm-row"><span class="confirm-key">الربح / الخسارة</span><span class="confirm-val ${pnl>=0?'buy':'sell'}">${pnl>=0?'+':''}$${fmt(pnl,2)}</span></div>`;
+    <div class="confirm-row"><span class="confirm-key">الربح / الخسارة</span><span class="confirm-val ${pnl>=0?'buy':'sell'}">${pnl>=0?'+':''}$${fmt(pnl,2)}</span></div>
+    <div class="confirm-row"><span class="confirm-key">رسوم الإغلاق</span><span class="confirm-val fee">$${closeFee} (0.009%)</span></div>`;
   State.pendingClose=i; openModal('modalClose');
 };
 
