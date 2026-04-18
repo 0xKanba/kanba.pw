@@ -69,7 +69,12 @@
   </nav>
 
   <div class="tabs">
-    <button class="tab active" data-asset="GOLD">
+    <button class="tab" data-asset="NQ">
+      <span class="tab-icon">📊</span>
+      <span class="tab-name">ناسداك</span>
+      <span class="tab-price" id="priceNQ">—</span>
+    </button>
+    <button class="tab" data-asset="GOLD">
       <span class="tab-icon">🟡</span>
       <span class="tab-name">ذهب</span>
       <span class="tab-price" id="priceGOLD">—</span>
@@ -322,7 +327,7 @@
 
     <div class="form-group">
       <label>عنوان المحفظة على Arbitrum</label>
-      <input type="text" class="form-input" id="withdrawAddress" placeholder="0x... " dir="ltr">
+      <input type="text" class="form-input" id="withdrawAddress" placeholder="0x... أو كاش" dir="ltr">
     </div>
 
     <div class="modal-buttons">
