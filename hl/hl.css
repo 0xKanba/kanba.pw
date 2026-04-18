@@ -831,3 +831,44 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .fs-exec-btn:disabled { opacity:.5; pointer-events:none; }
 .tp-exec { background:linear-gradient(135deg,var(--tp),#1a9e72); box-shadow:0 4px 18px var(--tp-dim); }
 .sl-exec { background:linear-gradient(135deg,var(--sl),#bf5b1a); box-shadow:0 4px 18px var(--sl-dim); }
+
+
+/* ════════════════════
+   WITHDRAW FEE PANEL
+════════════════════ */
+.withdraw-fee-warn {
+  background: color-mix(in srgb, var(--dn) 14%, var(--bg-input));
+  border: 2px solid var(--dn);
+  border-radius: var(--r-md);
+  color: var(--dn);
+  font-size: 15px; font-weight: 700;
+  padding: 14px 16px; margin-bottom: 16px;
+  line-height: 1.7; text-align: center;
+}
+.withdraw-fee-warn strong { font-weight: 900; font-size: 17px; }
+
+.withdraw-preview {
+  background: var(--bg-input); border: 1.5px solid var(--border-strong);
+  border-radius: var(--r-md); padding: 14px; margin-bottom: 14px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.withdraw-preview.hidden { display: none; }
+.wp-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  font-size: 15px; font-weight: 700;
+}
+.wp-row:last-of-type { border: none; }
+.wp-net { margin-top: 4px; }
+.wp-val { font-family: var(--font-mono); font-size: 17px; font-weight: 900; }
+.wp-val.red   { color: var(--dn); }
+.wp-val.green { color: var(--up); }
+
+.wp-add-fee {
+  margin-top: 12px; width: 100%;
+  background: var(--ac-dim); border: 1.5px solid var(--ac);
+  color: var(--ac); border-radius: var(--r-sm);
+  padding: 13px; font-size: 15px; font-weight: 800;
+  font-family: var(--font-ui);
+}
+.wp-add-fee:active { filter: brightness(.9); }
