@@ -70,27 +70,27 @@
 
   <div class="tabs">
     <button class="tab" data-asset="NQ">
-      <span class="tab-icon">📊</span>
+      <img class="tab-img" src="/hl/images/100.png" alt="NQ" loading="eager">
       <span class="tab-name">ناسداك</span>
       <span class="tab-price" id="priceNQ">—</span>
     </button>
     <button class="tab" data-asset="GOLD">
-      <span class="tab-icon">🟡</span>
+      <img class="tab-img" src="/hl/images/gold.svg" alt="GOLD" loading="eager">
       <span class="tab-name">ذهب</span>
       <span class="tab-price" id="priceGOLD">—</span>
     </button>
     <button class="tab" data-asset="SILVER">
-      <span class="tab-icon">⚪</span>
+      <img class="tab-img" src="/hl/images/silver.svg" alt="SILVER" loading="eager">
       <span class="tab-name">فضة</span>
       <span class="tab-price" id="priceSILVER">—</span>
     </button>
     <button class="tab" data-asset="CL">
-      <span class="tab-icon">🛢</span>
+      <img class="tab-img" src="/hl/images/oil.svg" alt="CL" loading="eager">
       <span class="tab-name">نفط</span>
       <span class="tab-price" id="priceCL">—</span>
     </button>
     <button class="tab tab-chart" id="tabChart">
-      <span class="tab-icon">📈</span>
+      <span style="font-size:20px;line-height:1">📈</span>
       <span class="tab-name">رسم</span>
     </button>
   </div>
@@ -264,14 +264,13 @@
 </div>
 
 <div class="modal-overlay" id="modalHistory">
-  <div class="modal">
-    <div class="modal-handle"></div>
+  <div class="modal" style="display:flex;flex-direction:column;">
     <h3 class="modal-title">📜 تاريخ الصفقات</h3>
-    <p class="modal-subtitle">آخر 10 صفقات مكتملة</p>
-    <div class="history-list" id="historyList" style="max-height: 400px; overflow-y: auto;">
+    <p class="modal-subtitle" id="historySubtitle">جاري التحميل...</p>
+    <div class="history-list" id="historyList">
       <div class="balance-loading">⏳ جاري جلب التاريخ...</div>
     </div>
-    <div class="modal-buttons modal-buttons-center" style="margin-top: 15px;">
+    <div class="modal-buttons modal-buttons-center" style="padding-top:16px;margin-top:auto;flex-shrink:0;">
       <button class="btn-modal btn-cancel" id="historyClose">إغلاق</button>
     </div>
   </div>
