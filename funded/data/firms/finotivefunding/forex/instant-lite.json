@@ -11,8 +11,6 @@
         "items": [
           { "label": "Daily Drawdown",        "value": "3%",   "detail": "Equity must not fall below 3% of previous day's closing balance at any point. Resets daily at 17:00 NY Time. Hard breach = immediate closure without refund." },
           { "label": "Max Overall Drawdown",  "value": "6%",   "detail": "Equity must not fall below 6% of initial balance. Static for account lifetime. Hard breach = immediate closure without refund." },
-          { "label": "Floating DD — Warning", "value": "1.0%", "detail": "Warning notification issued when combined unrealised loss on any single symbol reaches 1.0% of initial balance. No strike applied. Example: $50K account → warning at −$500 on any one symbol." },
-          { "label": "Floating DD — Breach",  "value": "1.5%", "detail": "First breach = formal warning, no strike. Second breach onwards = 1 soft breach strike each time. Measured per symbol, net of all open positions on that symbol. Always vs initial balance (not current equity)." },
           { "label": "Profit Target",         "value": "None", "detail": "Instant funding — no evaluation, no profit target required." },
           { "label": "Min Profitable Days",   "value": "5 days / cycle", "detail": "5 profitable days required per 14-day payout cycle before each payout. Profitable day = balance at 23:00 CET ≥ 0.5% higher than previous day. Cannot request payout or scale until MPD is met." },
           { "label": "Consistency Rule",      "value": "None", "detail": "No consistency requirement for this account type." }
