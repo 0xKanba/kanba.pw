@@ -25,7 +25,7 @@ const ASSETS = {
 };
 
 const State = {
-  wallet: null, asset: 'NQ', qty: 0.1,
+  wallet: null, asset: 'CL', qty: 0.1,
   prices:  { NQ:{bid:0,ask:0,mid:0}, GOLD:{bid:0,ask:0,mid:0}, SILVER:{bid:0,ask:0,mid:0}, CL:{bid:0,ask:0,mid:0} },
   prevMid: { NQ:0, GOLD:0, SILVER:0, CL:0 },
   prevDayPx: { NQ:0, GOLD:0, SILVER:0, CL:0 },
@@ -1148,7 +1148,7 @@ async function login(){
     $('withdrawAddress').value=State.wallet.address;
     $('loginScreen').classList.add('hidden');
     $('appScreen').classList.remove('hidden');
-    switchAsset('NQ');
+    switchAsset('CL');
     showLoader('جلب الأسعار والحساب...');
     await Promise.all([pollPrices(),pollAccount()]);
     autoSetReferrer();
