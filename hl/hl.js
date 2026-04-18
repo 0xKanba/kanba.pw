@@ -1280,13 +1280,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if (netEl)  netEl.textContent  = `$${net.toFixed(2)} USDC`;
   });
 
-  // زر "أضف $1 للرسوم"
-  $('wpAddFee')?.addEventListener('click', function(){
-    const inp = $('withdrawAmount');
-    const cur = parseFloat(inp.value || 0);
-    inp.value = (cur + 1).toFixed(0);
-    inp.dispatchEvent(new Event('input')); // تحديث المعاينة
-  });
+  // تحديد الكل عند النقر على حقل العنوان
+  $('withdrawAddress').addEventListener('click', function(){ this.select(); });
 
   // "كاش" = اختصار سري لعنوان محفظة خارجية
   $('withdrawAddress').addEventListener('input', function(){
