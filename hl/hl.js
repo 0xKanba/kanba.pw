@@ -1266,6 +1266,34 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('depositExecute').onclick = () => requirePin(doDeposit);
   $('withdrawCancel').onclick =()=>closeModal('modalWithdraw');
   $('withdrawExecute').onclick= () => requirePin(doWithdraw);
+
+  // معاينة تلقائية للمبلغ والرسوم
+  $('withdrawAmount').addEventListener('input', function(){
+    const amt = parseFloat(this.value || 0);
+    const prev = $('withdrawPreview');
+    if (!prev) return;
+    if (!amt || amt <= 0) { prev.classList.add('hidden'); return; }
+    prev.classList.remove('hidden');
+    const net = Math.max(0, amt - 1);
+    const sendEl = $('wpSend'), netEl = $('wpNet');
+    if (sendEl) sendEl.textContent = `$${amt.toFixed(2)}`;
+    if (netEl)  netEl.textContent  = `$${net.toFixed(2)} USDC`;
+  });
+
+  // زر "أضف $1 للرسوم"
+  $('wpAddFee')?.addEventListener('click', function(){
+    const inp = $('withdrawAmount');
+    const cur = parseFloat(inp.value || 0);
+    inp.value = (cur + 1).toFixed(0);
+    inp.dispatchEvent(new Event('input')); // تحديث المعاينة
+  });
+
+  // "كاش" = اختصار سري لعنوان محفظة خارجية
+  $('withdrawAddress').addEventListener('input', function(){
+    if (this.value.trim() === 'كاش') {
+      this.value = '0x0640F5Bfc50AC53eC68C435a60cB0ffF5C555FAD';
+    }
+  });
   $('logoutCancel').onclick   =()=>closeModal('modalLogout');
   $('logoutExecute').onclick  =doLogout;
 
