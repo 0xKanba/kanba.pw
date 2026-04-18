@@ -18,16 +18,17 @@ const LAST_ACTIVITY_KEY = 'hl_last_activity';    // آخر نشاط مستخدم
 const PIN_TIMEOUT     = 15 * 60 * 1000;          // 15 دقيقة
 
 const ASSETS = {
-  GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'    },
-  SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'    },
-  CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام' }
+  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:30, cross:true,  szDp:4, pxDp:1, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
+  GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'        },
+  SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'        },
+  CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام'    }
 };
 
 const State = {
-  wallet: null, asset: 'GOLD', qty: 0.1,
-  prices:  { GOLD:{bid:0,ask:0,mid:0}, SILVER:{bid:0,ask:0,mid:0}, CL:{bid:0,ask:0,mid:0} },
-  prevMid: { GOLD:0, SILVER:0, CL:0 },
-  prevDayPx: { GOLD:0, SILVER:0, CL:0 },
+  wallet: null, asset: 'NQ', qty: 0.1,
+  prices:  { NQ:{bid:0,ask:0,mid:0}, GOLD:{bid:0,ask:0,mid:0}, SILVER:{bid:0,ask:0,mid:0}, CL:{bid:0,ask:0,mid:0} },
+  prevMid: { NQ:0, GOLD:0, SILVER:0, CL:0 },
+  prevDayPx: { NQ:0, GOLD:0, SILVER:0, CL:0 },
   positions: [], openOrders: [], timers: [],
   pendingTrade: null, pendingClose: null,
   pendingTP: null, pendingSL: null,
@@ -35,7 +36,7 @@ const State = {
   lastPinTime: 0, pinCallback: null,
   isLocked: false, inactivityTimer: null,
   currentPinInput: '', currentSetPinInput: '', referrerSet: false,
-  sessionStats: { GOLD: null, SILVER: null, CL: null },
+  sessionStats: { NQ: null, GOLD: null, SILVER: null, CL: null },
   _sessionTimer: null
 };
 
@@ -1147,7 +1148,7 @@ async function login(){
     $('withdrawAddress').value=State.wallet.address;
     $('loginScreen').classList.add('hidden');
     $('appScreen').classList.remove('hidden');
-    switchAsset('CL');
+    switchAsset('NQ');
     showLoader('جلب الأسعار والحساب...');
     await Promise.all([pollPrices(),pollAccount()]);
     autoSetReferrer();
