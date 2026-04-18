@@ -979,40 +979,61 @@ async function showHistory(){
   if(!State.wallet) return toast('سجّل الدخول أولاً','err');
   openModal('modalHistory');
   const list=$('historyList');
+  const sub=$('historySubtitle');
   list.innerHTML='<div class="balance-loading">⏳ جاري جلب التاريخ...</div>';
   try {
     const fills=await hlInfo({type:'userFills',user:State.wallet.address});
     if(!Array.isArray(fills)||fills.length===0){
+      if(sub) sub.textContent='لا يوجد تاريخ صفقات بعد';
       list.innerHTML='<div class="positions-empty">📂 لا يوجد تاريخ صفقات</div>';
       return;
     }
-    // نأخذ آخر 10 عمليات
-    const lastFills=fills.slice(0,10);
+    const lastFills=fills.slice(0,20);
+    if(sub) sub.textContent=`آخر ${lastFills.length} صفقة مكتملة`;
     list.innerHTML=lastFills.map(f=>{
       const coin=shortCoin(f.coin), a=ASSETS[coin]||{name:coin,icon:'📊',pxDp:2,szDp:2,unit:''};
       const isBuy=f.side==='B', pnl=parseFloat(f.closedPnl||0), fee=parseFloat(f.fee||0);
-      
-      // تنسيق التاريخ والوقت (12 ساعة، أرقام إنجليزية، DD-MM-YYYY)
-      const d = new Date(f.time);
-      const dateStr = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
-      const timeStr = d.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      
-      const pCls=pnl>0?'pos':pnl<0?'neg':'';
+      const d=new Date(f.time);
+      const dateStr=`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+      const timeStr=d.toLocaleTimeString('en-US',{hour12:true,hour:'2-digit',minute:'2-digit'});
+      const pCls=pnl>0?'pos':pnl<0?'neg':'zero';
+      const pSign=pnl>0?'+':'';
+      const pText=pnl!==0?`${pSign}$${fmt(pnl,2)}`:'—';
+      // صورة الأصل أو رمز emoji
+      const imgMap={NQ:'/hl/images/100.png',GOLD:'/hl/images/gold.svg',SILVER:'/hl/images/silver.svg',CL:'/hl/images/oil.svg'};
+      const assetImg=imgMap[coin]
+        ?`<img src="${imgMap[coin]}" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;" alt="${coin}">`
+        :`<span>${a.icon}</span>`;
       return `<div class="history-item">
         <div class="hist-top">
-          <div class="hist-asset">${a.icon} ${a.name}</div>
-          <div class="hist-type ${isBuy?'buy':'sell'}">${isBuy?'شراء ↑':'بيع ↓'}</div>
-          <div class="hist-pnl ${pCls}">${pnl!==0?(pnl>0?'+':'')+'$'+fmt(pnl,2):'—'}</div>
+          <div class="hist-asset">${assetImg} ${a.name}</div>
+          <div class="hist-badge">
+            <span class="hist-type ${isBuy?'buy':'sell'}">${isBuy?'▲ شراء':'▼ بيع'}</span>
+          </div>
+          <div class="hist-pnl ${pCls}">${pText}</div>
         </div>
         <div class="hist-grid">
-          <div class="hist-cell"><span class="hist-lbl">الحجم</span><span class="hist-val">${f.sz} ${a.unit}</span></div>
-          <div class="hist-cell"><span class="hist-lbl">السعر</span><span class="hist-val">${fmt(f.px,a.pxDp)} $</span></div>
-          <div class="hist-cell"><span class="hist-lbl">الرسوم</span><span class="hist-val">${fmt(fee,4)} $</span></div>
-          <div class="hist-cell"><span class="hist-lbl">التاريخ</span><span class="hist-val" style="font-size:9px">${dateStr} ${timeStr}</span></div>
+          <div class="hist-cell">
+            <span class="hist-lbl">الحجم</span>
+            <span class="hist-val">${f.sz} ${a.unit}</span>
+          </div>
+          <div class="hist-cell">
+            <span class="hist-lbl">السعر</span>
+            <span class="hist-val">${fmt(f.px,a.pxDp)} $</span>
+          </div>
+          <div class="hist-cell">
+            <span class="hist-lbl">الرسوم</span>
+            <span class="hist-val" style="color:var(--warn)">$${fmt(fee,4)}</span>
+          </div>
+          <div class="hist-cell">
+            <span class="hist-lbl">التوقيت</span>
+            <span class="hist-val date">${dateStr}<br>${timeStr}</span>
+          </div>
         </div>
       </div>`;
     }).join('');
   } catch(e){
+    if(sub) sub.textContent='';
     list.innerHTML=`<div class="balance-loading" style="color:var(--dn)">❌ فشل جلب التاريخ</div>`;
   }
 }
