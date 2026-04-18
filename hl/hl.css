@@ -196,23 +196,43 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .nav-address:hover { color:var(--text-primary); border-color:var(--border-strong); }
 
 /* ════════════════════
-   TABS
+   TABS — صور احترافية
 ════════════════════ */
-.tabs { display:flex; padding:6px 8px 5px; gap:5px; background:var(--bg-app); flex-shrink:0; }
+.tabs {
+  display:flex; padding:6px 8px 5px; gap:5px;
+  background:var(--bg-app); flex-shrink:0;
+}
 .tab {
   flex:1; border-radius:var(--r-md); border:1.5px solid var(--border);
-  background:var(--bg-elev); padding:6px 4px;
-  display:flex; flex-direction:column; align-items:center; gap:2px; transition:all .2s;
+  background:var(--bg-elev); padding:5px 3px 4px;
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+  transition:all .18s; position:relative; overflow:hidden;
 }
-.tab:active { transform:scale(.95); }
-.tab.active { border-color:var(--ac); background:var(--bg-input); box-shadow:0 0 12px var(--ac-dim); }
-.tab-icon { font-size:16px; line-height:1; }
-.tab-name { font-size:11px; font-weight:800; color:var(--text-secondary); }
+.tab:active { transform:scale(.94); }
+.tab.active {
+  border-color:var(--ac); background:var(--bg-input);
+  box-shadow:0 0 14px var(--ac-dim);
+}
+/* صورة الأصل */
+.tab-img {
+  width:28px; height:28px; object-fit:contain;
+  display:block; margin:0 auto;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));
+}
+.tab-name {
+  font-size:10px; font-weight:800; color:var(--text-secondary);
+  line-height:1; letter-spacing:.3px;
+}
 .tab.active .tab-name { color:var(--text-primary); }
-.tab-price { font-family:var(--font-mono); font-size:12px; font-weight:800; color:var(--text-secondary); }
+.tab-price {
+  font-family:var(--font-mono); font-size:10px; font-weight:800;
+  color:var(--text-secondary); line-height:1;
+}
 .tab-price.up { color:var(--up); }
 .tab-price.dn { color:var(--dn); }
-.tab-chart { flex:.75; }
+.tab-chart { flex:.6; }
+.tab-chart .tab-img { width:22px; height:22px; opacity:.7; }
+.tab.active .tab-chart .tab-img { opacity:1; }
 
 /* ════════════════════
    MAIN LAYOUT
@@ -321,17 +341,16 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
   display:flex; align-items:center; justify-content:center;
 }
 
-/* أزرار الشراء والبيع */
 .trade-buttons { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .btn-trade {
-  border-radius:var(--r-lg); min-height:70px;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  border-radius:var(--r-md); min-height:44px; /* 70→44 تقريباً نصف */
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
 }
 .btn-trade:disabled { opacity:.45; pointer-events:none; }
-.btn-buy  { background:linear-gradient(155deg,var(--up),#1a7f37); box-shadow:0 5px 20px var(--up-dim); }
-.btn-sell { background:linear-gradient(155deg,var(--dn),#a0281e); box-shadow:0 5px 20px var(--dn-dim); }
-.btn-label { font-size:21px; font-weight:900; color:#fff; }
-.btn-price { font-family:var(--font-mono); font-size:12px; color:rgba(255,255,255,.88); font-weight:700; }
+.btn-buy  { background:linear-gradient(155deg,var(--up),#1a7f37); box-shadow:0 3px 12px var(--up-dim); }
+.btn-sell { background:linear-gradient(155deg,var(--dn),#a0281e); box-shadow:0 3px 12px var(--dn-dim); }
+.btn-label { font-size:16px; font-weight:900; color:#fff; }  /* 21→16 */
+.btn-price { font-family:var(--font-mono); font-size:11px; color:rgba(255,255,255,.88); font-weight:700; }
 
 /* ════════════════════
    POSITIONS
@@ -527,26 +546,51 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .btn-danger  { background:linear-gradient(135deg,var(--dn),#a0281e); box-shadow:0 4px 22px var(--dn-dim); }
 
 /* ════════════════════
-   HISTORY — ستايل بسيط احترافي كبير
+   HISTORY — احترافي ملء شاشة
 ════════════════════ */
+.history-list { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .history-item {
-  background:var(--bg-input); border:1.5px solid var(--border);
-  border-radius:var(--r-md); padding:14px; margin-bottom:10px;
-  display:flex; flex-direction:column; gap:8px;
+  border-bottom:1px solid var(--border);
+  padding:14px 16px;
+  display:flex; flex-direction:column; gap:10px;
 }
-.hist-top { display:flex; justify-content:space-between; align-items:center; }
-.hist-asset { font-weight:900; font-size:17px; }
-.hist-type { font-size:13px; font-weight:800; padding:4px 10px; border-radius:999px; }
-.hist-type.buy { background:var(--up-dim); color:var(--up); }
+.history-item:last-child { border-bottom:none; }
+.hist-top {
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+}
+.hist-asset { font-weight:900; font-size:18px; display:flex; align-items:center; gap:6px; }
+.hist-badge {
+  display:flex; align-items:center; gap:6px;
+}
+.hist-type {
+  font-size:13px; font-weight:800; padding:4px 12px;
+  border-radius:var(--r-pill);
+}
+.hist-type.buy  { background:var(--up-dim); color:var(--up); }
 .hist-type.sell { background:var(--dn-dim); color:var(--dn); }
-.hist-pnl { font-family:var(--font-mono); font-size:20px; font-weight:900; }
+.hist-pnl {
+  font-family:var(--font-mono); font-size:22px; font-weight:900;
+  text-align:left;
+}
 .hist-pnl.pos { color:var(--up); }
 .hist-pnl.neg { color:var(--dn); }
+.hist-pnl.zero{ color:var(--text-secondary); }
 
-.hist-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.hist-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px; background:var(--bg-input);
+  border-radius:var(--r-md); padding:10px 12px;
+}
 .hist-cell { display:flex; flex-direction:column; gap:3px; }
-.hist-lbl { font-size:11px; color:var(--text-secondary); font-weight:800; text-transform:uppercase; letter-spacing:.8px; }
-.hist-val { font-family:var(--font-mono); font-size:14px; font-weight:800; color:var(--text-primary); }
+.hist-lbl {
+  font-size:10px; color:var(--text-secondary);
+  font-weight:800; text-transform:uppercase; letter-spacing:.8px;
+}
+.hist-val {
+  font-family:var(--font-mono); font-size:15px;
+  font-weight:800; color:var(--text-primary);
+}
+.hist-val.date { font-size:12px; color:var(--text-secondary); line-height:1.4; }
 
 /* ════════════════════
    BALANCE
