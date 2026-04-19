@@ -18,7 +18,7 @@ const LAST_ACTIVITY_KEY = 'hl_last_activity';    // آخر نشاط مستخدم
 const PIN_TIMEOUT     = 15 * 60 * 1000;          // 15 دقيقة
 
 const ASSETS = {
-  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:30, cross:true,  szDp:5, pxDp:1, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
+  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:25, cross:true,  szDp:5, pxDp:1, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
   GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'        },
   SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'        },
   CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام'    }
