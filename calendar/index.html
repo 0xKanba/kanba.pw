@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HL-QUANT | تقويم التداول</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/calendar/style.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
@@ -37,9 +37,9 @@
             <section class="calendar-section">
                 <div class="calendar-title">Calendar</div>
                 <div class="calendar-nav">
-                    <button id="prevMonth" class="nav-arrow"><i data-lucide="chevron-left"></i></button>
+                    <button id="prevMonth" class="nav-arrow"><i data-lucide="chevron-right"></i></button>
                     <h2 id="currentMonthYear">--</h2>
-                    <button id="nextMonth" class="nav-arrow"><i data-lucide="chevron-right"></i></button>
+                    <button id="nextMonth" class="nav-arrow"><i data-lucide="chevron-left"></i></button>
                 </div>
                 
                 <div class="calendar-grid-header">
@@ -72,7 +72,7 @@
         <!-- Empty State -->
         <div id="emptyState" class="empty-state">
             <i data-lucide="shield-check" size="64"></i>
-            <p>بانتظار تحليل البيانات السري...</p>
+            <p>بانتظار تحليل البيانات ...</p>
         </div>
     </main>
 
@@ -87,7 +87,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="/calendar/script.js"></script>
     <script>lucide.createIcons();</script>
 </body>
 </html>
