@@ -87,7 +87,7 @@ function renderStats() {
 
     const updateEl = (id, val) => {
         const el = document.getElementById(id);
-        el.innerText = (val >= 0 ? '+' : '-') + '$' + Math.abs(val).toFixed(0);
+        el.innerText = (val >= 0 ? '+' : '-') + '$' + Math.abs(val).toFixed(2); // Two decimals
         el.className = 'stat-value ' + (val >= 0 ? 'profit' : 'loss');
     };
 
@@ -101,8 +101,8 @@ function renderCalendar() {
     calendarDays.innerHTML = '';
     const start = dateFns.startOfMonth(currentMonth);
     const end = dateFns.endOfMonth(start);
-    const startWeek = dateFns.startOfWeek(start, { weekStartsOn: 0 }); // Sunday start to match header
-    const endWeek = dateFns.endOfWeek(end, { weekStartsOn: 0 });
+    const startWeek = dateFns.startOfWeek(start, { weekStartsOn: 1 }); // Monday start
+    const endWeek = dateFns.endOfWeek(end, { weekStartsOn: 1 });
 
     monthYearText.innerText = dateFns.format(currentMonth, 'MMMM yyyy');
 
@@ -117,12 +117,12 @@ function renderCalendar() {
         box.className = `day-box ${!isCurrentMonth ? 'not-current' : ''}`;
         
         // Coloring based on profit/loss
-        if (pnl > 0.1) box.classList.add('box-profit');
-        if (pnl < -0.1) box.classList.add('box-loss');
+        if (pnl > 0.01) box.classList.add('box-profit');
+        if (pnl < -0.01) box.classList.add('box-loss');
 
         box.innerHTML = `
             <span class="day-num">${dateFns.format(day, 'd')}</span>
-            <div class="day-val">${pnl !== 0 ? (pnl > 0 ? '$' : '-$') + Math.abs(pnl).toFixed(0) : ''}</div>
+            <div class="day-val">${pnl !== 0 ? (pnl > 0 ? '$' : '-$') + Math.abs(pnl).toFixed(2) : ''}</div>
         `;
 
         if (isCurrentMonth) {
@@ -137,27 +137,49 @@ function showDailyAudit(date) {
     const dateKey = dateFns.format(date, 'yyyy-MM-dd');
     const dayFills = allFills.filter(f => new Date(f.time).toISOString().split('T')[0] === dateKey);
     
-    document.getElementById('modalDate').innerText = dateFns.format(date, 'EEEE, d MMMM');
+    document.getElementById('tradeSubtitle').innerText = `تفاصيل الصفقات ليوم ${dateFns.format(date, 'd MMMM yyyy')}`;
     const container = document.getElementById('dayFills');
     container.innerHTML = '';
 
     if (dayFills.length === 0) {
-        container.innerHTML = '<p style="text-align:center; opacity:0.3">لا توجد صفقات مغلقة هذا اليوم</p>';
+        container.innerHTML = '<p style="text-align:center; opacity:0.3; padding: 2rem;">لا توجد صفقات مغلقة هذا اليوم</p>';
     } else {
         dayFills.forEach(f => {
             const pnl = parseFloat(f.closedPnl) - parseFloat(f.fee);
-            const row = document.createElement('div');
-            row.className = 'fill-row';
-            row.innerHTML = `
-                <div style="text-align:right">
-                    <div style="font-weight:900; color:white">${f.coin}</div>
-                    <div style="font-size:0.6rem; opacity:0.5">${f.side === 'B' ? 'BUY' : 'SELL'}</div>
+            const card = document.createElement('div');
+            card.className = 'trade-card';
+            card.innerHTML = `
+                <div class="trade-card-top">
+                    <div class="coin-name">${f.coin}</div>
+                    <div class="trade-side ${f.side === 'B' ? 'side-buy' : 'side-sell'}">
+                        ${f.side === 'B' ? '▲ شراء' : '▼ بيع'}
+                    </div>
                 </div>
-                <div style="color: ${pnl >= 0 ? 'var(--success)' : 'var(--error)'}; font-weight:900; font-family:var(--font-mono)">
-                    ${pnl > 0 ? '+' : ''}${pnl.toFixed(2)}$
+                <div class="trade-card-details">
+                    <div class="detail-item">
+                        <span class="detail-label">السعر</span>
+                        <span class="detail-value">$ ${parseFloat(f.px).toFixed(2)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">الحجم</span>
+                        <span class="detail-value">${parseFloat(f.sz).toFixed(3)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">التوقيت</span>
+                        <span class="detail-value">${dateFns.format(new Date(f.time), 'HH:mm:ss')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">الرسوم</span>
+                        <span class="detail-value text-error">$ ${parseFloat(f.fee).toFixed(4)}</span>
+                    </div>
+                </div>
+                <div style="margin-top:0.8rem; text-align:left">
+                    <span class="pnl-badge ${pnl >= 0 ? 'text-success' : 'text-error'}">
+                        ${pnl >= 0 ? '+' : '-'}$ ${Math.abs(pnl).toFixed(2)}
+                    </span>
                 </div>
             `;
-            container.appendChild(row);
+            container.appendChild(card);
         });
     }
     

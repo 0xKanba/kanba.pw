@@ -117,7 +117,8 @@ button[type="submit"] {
   text-align: center;
   margin-bottom: 8px;
   color: var(--text-dim);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 900;
 }
 
 .calendar-grid-header div {
@@ -193,12 +194,12 @@ button[type="submit"] {
 .stat-value.profit { color: var(--success); }
 .stat-value.loss { color: var(--error); }
 
-/* Modal & Others */
+/* Common Modal Bases */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -209,23 +210,117 @@ button[type="submit"] {
 .modal {
   background: #1c1c1c;
   width: 100%;
-  max-width: 400px;
-  border-radius: 1rem;
+  max-width: 450px;
+  border-radius: 2rem;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
-.modal-header {
-  padding: 1rem;
+/* Modal Refined */
+.modal-header-ref {
+  padding: 1.5rem;
+  text-align: center;
   border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
+}
+
+.modal-header-ref h3 {
+  font-size: 1.2rem;
+  font-weight: 900;
+  margin-bottom: 0.3rem;
+  color: #fff;
+}
+
+.modal-header-ref p {
+  font-size: 0.75rem;
+  color: var(--text-dim);
 }
 
 .modal-content {
   padding: 1rem;
-  max-height: 60vh;
+  max-height: 50vh;
   overflow-y: auto;
+  background: #111;
+}
+
+.trade-card {
+  background: var(--card);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+}
+
+.trade-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.coin-name {
+  font-weight: 900;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.trade-side {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 900;
+}
+
+.side-buy { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+.side-sell { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+
+.trade-card-details {
+  background: #181818;
+  border-radius: 0.6rem;
+  padding: 0.8rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+
+.detail-value {
+  font-size: 0.75rem;
+  font-weight: bold;
+  font-family: var(--font-mono);
+}
+
+.pnl-badge {
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+.modal-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+#closeModal {
+  width: 100%;
+  padding: 1rem;
+  background: #242424;
+  border: 1px solid var(--border);
+  color: #fff;
+  border-radius: 4rem;
+  font-weight: 900;
+  cursor: pointer;
+  font-size: 1rem;
 }
 
 .hidden { display: none !important; }
