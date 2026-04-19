@@ -648,13 +648,23 @@ function renderPositions(){
 // ════════════════════════════════════════
 // تبويب الأصول
 // ════════════════════════════════════════
+const ASSET_IMAGES = {
+  NQ:     '/hl/images/100.png',
+  GOLD:   '/hl/images/gold.svg',
+  SILVER: '/hl/images/silver.svg',
+  CL:     '/hl/images/oil.svg',
+};
+
 function switchAsset(sym){
   State.asset=sym;
   document.querySelectorAll('.tab[data-asset]').forEach(t=>t.classList.toggle('active',t.dataset.asset===sym));
   const a=ASSETS[sym];
   setTxt('priceAssetName',a.name); setTxt('tradeAssetName',a.name); setTxt('qtyUnit',a.unit);
+  // تحديث صورة بطاقة السعر
+  const img=$('priceAssetImg');
+  if(img && ASSET_IMAGES[sym]) { img.src=ASSET_IMAGES[sym]; img.alt=sym; }
   renderPresets(a.presets); State.prevMid[sym]=0; updatePriceUI();
-  $('priceSession')?.classList.add('hidden'); // إخفاء حتى تُحمَّل بيانات الأصل الجديد
+  $('priceSession')?.classList.add('hidden');
   fetchSessionStats(sym);
   if(typeof ChartModule!=='undefined') ChartModule.switchAssetChart(sym);
 }
