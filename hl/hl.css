@@ -196,43 +196,68 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .nav-address:hover { color:var(--text-primary); border-color:var(--border-strong); }
 
 /* ════════════════════
-   TABS — صور احترافية
+   TABS — 50/50 هندسي
 ════════════════════ */
 .tabs {
-  display:flex; padding:6px 8px 5px; gap:5px;
+  display:flex; gap:5px; padding:6px 8px 5px;
   background:var(--bg-app); flex-shrink:0;
 }
 .tab {
   flex:1; border-radius:var(--r-md); border:1.5px solid var(--border);
-  background:var(--bg-elev); padding:5px 3px 4px;
-  display:flex; flex-direction:column; align-items:center; gap:1px;
-  transition:all .18s; position:relative; overflow:hidden;
+  background:var(--bg-elev);
+  display:flex; flex-direction:row; align-items:stretch;
+  overflow:hidden; transition:border-color .18s, box-shadow .18s;
+  min-height:52px; cursor:pointer;
 }
-.tab:active { transform:scale(.94); }
+.tab:active { transform:scale(.97); }
 .tab.active {
-  border-color:var(--ac); background:var(--bg-input);
+  border-color:var(--ac);
   box-shadow:0 0 14px var(--ac-dim);
 }
-/* صورة الأصل */
+/* يسار ٥٠٪ — صورة */
+.tab-left {
+  width:50%; display:flex; align-items:center; justify-content:center;
+  background:color-mix(in srgb, var(--bg-input) 80%, transparent);
+  padding:4px 2px;
+}
 .tab-img {
-  width:28px; height:28px; object-fit:contain;
-  display:block; margin:0 auto;
-  filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));
+  width:34px; height:34px; object-fit:contain;
+  display:block;
+  /* ثابتة — لا وميض لون */
+  filter:drop-shadow(0 1px 5px rgba(0,0,0,.45));
+}
+/* يمين ٥٠٪ — اسم + سعر */
+.tab-right {
+  width:50%; display:flex; flex-direction:column;
+  align-items:flex-start; justify-content:center;
+  padding:3px 5px; gap:3px; overflow:hidden;
 }
 .tab-name {
-  font-size:10px; font-weight:800; color:var(--text-secondary);
-  line-height:1; letter-spacing:.3px;
+  font-size:10px; font-weight:900; color:var(--text-secondary);
+  line-height:1; white-space:nowrap;
 }
 .tab.active .tab-name { color:var(--text-primary); }
 .tab-price {
-  font-family:var(--font-mono); font-size:10px; font-weight:800;
+  font-family:var(--font-mono); font-size:11px; font-weight:800;
   color:var(--text-secondary); line-height:1;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;
 }
 .tab-price.up { color:var(--up); }
 .tab-price.dn { color:var(--dn); }
-.tab-chart { flex:.6; }
-.tab-chart .tab-img { width:22px; height:22px; opacity:.7; }
-.tab.active .tab-chart .tab-img { opacity:1; }
+/* تاب الرسم — عمود عادي */
+.tab-chart {
+  flex:0 0 46px; flex-direction:column;
+  align-items:center; justify-content:center; gap:1px;
+  padding:4px 2px;
+}
+.tab-chart .tab-left,
+.tab-chart .tab-right { display:none; }
+.tab-chart-inner {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:1px;
+  width:100%; height:100%;
+}
+
 
 /* ════════════════════
    MAIN LAYOUT
@@ -251,18 +276,46 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 }
 
 /* ════════════════════
-   PRICE CARD
+   PRICE CARD — 50/50 هندسي
 ════════════════════ */
 .price-card {
-  border-radius:var(--r-lg); padding:14px 12px;
-  display:flex; flex-direction:column; align-items:center; gap:4px;
+  border-radius:var(--r-lg); overflow:hidden;
   border:2px solid var(--border-strong); background:var(--bg-elev);
-  transition:background .3s,border-color .3s,box-shadow .3s; flex-shrink:0;
+  transition:border-color .4s, box-shadow .4s; flex-shrink:0;
+  display:flex; flex-direction:row; align-items:stretch;
+  min-height:90px;
 }
-.price-card.up { border-color:color-mix(in srgb,var(--up) 60%,transparent); background:color-mix(in srgb,var(--up) 9%,var(--bg-elev)); box-shadow:0 0 24px var(--up-dim); }
-.price-card.dn { border-color:color-mix(in srgb,var(--dn) 60%,transparent); background:color-mix(in srgb,var(--dn) 9%,var(--bg-elev)); box-shadow:0 0 24px var(--dn-dim); }
-.price-asset { font-size:12px; font-weight:900; color:var(--text-secondary); letter-spacing:1px; }
-.price-value { font-family:var(--font-mono); font-size:32px; font-weight:800; line-height:1; }
+/* لا وميض لون على الكارد كله — فقط حد خفيف */
+.price-card.up { border-color:color-mix(in srgb,var(--up) 50%,transparent); box-shadow:0 0 18px var(--up-dim); }
+.price-card.dn { border-color:color-mix(in srgb,var(--dn) 50%,transparent); box-shadow:0 0 18px var(--dn-dim); }
+
+/* يسار ٥٠٪ — صورة ملء كامل */
+.price-img-wrap {
+  width:50%; display:flex; align-items:center; justify-content:center;
+  background:var(--bg-input); padding:8px;
+  flex-shrink:0;
+}
+.price-img-wrap img {
+  width:100%; max-width:70px; height:70px; object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));
+  /* ثابتة — لا يتغير لونها */
+}
+
+/* يمين ٥٠٪ — البيانات */
+.price-data {
+  width:50%; display:flex; flex-direction:column;
+  justify-content:center; padding:10px 12px; gap:4px;
+  overflow:hidden;
+}
+.price-asset {
+  font-size:11px; font-weight:900; color:var(--text-secondary);
+  letter-spacing:.8px; text-transform:uppercase;
+}
+.price-value {
+  font-family:var(--font-mono); font-size:26px; font-weight:800;
+  line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
 .price-value.up { color:var(--up); }
 .price-value.dn { color:var(--dn); }
 .price-value.n  { color:var(--text-primary); }
@@ -280,18 +333,18 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 }
 .price-session.hidden { display:none !important; }
 .ps-chg {
-  font-family:var(--font-mono); font-size:14px; font-weight:900;
-  min-width:56px; text-align:center;
+  font-family:var(--font-mono); font-size:12px; font-weight:900;
+  text-align:left;
 }
 .ps-chg.up { color:var(--up); }
 .ps-chg.dn { color:var(--dn); }
 .ps-chg.n  { color:var(--text-secondary); }
-.ps-h { font-family:var(--font-mono); font-size:12px; font-weight:800; color:var(--up); }
-.ps-l { font-family:var(--font-mono); font-size:12px; font-weight:800; color:var(--dn); }
-.ps-divider { color:var(--border-strong); font-size:13px; font-weight:800; }
-.price-meta-row { display:flex; align-items:center; justify-content:space-between; width:100%; gap:6px; }
-.price-bid-ask { font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); font-weight:700; }
-.price-timer { font-size:10px; color:var(--text-secondary); font-family:var(--font-mono); font-weight:700; }
+.ps-h { font-family:var(--font-mono); font-size:10px; font-weight:800; color:var(--up); }
+.ps-l { font-family:var(--font-mono); font-size:10px; font-weight:800; color:var(--dn); }
+.ps-divider { color:var(--border-strong); font-size:10px; }
+.price-meta-row { display:flex; align-items:center; justify-content:space-between; width:100%; gap:4px; }
+.price-bid-ask { font-family:var(--font-mono); font-size:10px; color:var(--text-secondary); font-weight:700; }
+.price-timer { font-size:9px; color:var(--text-secondary); font-family:var(--font-mono); font-weight:700; }
 
 /* ════════════════════
    TRADE PANEL — أزرار كبيرة وواضحة
