@@ -9,7 +9,8 @@
   <meta name="apple-mobile-web-app-title" content="HLTrade">
   <meta name="theme-color" content="#c96442">
   <title>HL Trade · Hyperliquid Terminal</title>
-    <link rel="icon" href="/images/btc.png" type="image/png"/>
+  <link rel="icon" href="/images/btc.png" type="image/png"/>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/hl/hl.css">
@@ -58,8 +59,8 @@
   <nav class="nav">
     <div class="nav-left">
       <div class="nav-logo" id="navLogo" style="cursor:pointer">⚡ HL<em>Trade</em></div>
-      <a href="/calendar/?0xe8eD44072089b32BD8CC5Efe217e49D13aAa8B3f" class="nav-status" style="text-decoration:none; color:inherit;">
-        <span class="status-dot"></span>مباشر
+      <a href="/hlpaper/" class="nav-status" style="text-decoration:none; color:inherit;">
+        <span class="status-dot"></span>LIVE
       </a>
     </div>
     <div class="nav-right">
@@ -72,37 +73,23 @@
   <div class="tabs">
     <button class="tab" data-asset="NQ">
       <div class="tab-left"><img class="tab-img" src="/hl/images/100.png" alt="NQ" loading="eager"></div>
-      <div class="tab-right">
-        <span class="tab-name">ناسداك</span>
-        <span class="tab-price" id="priceNQ">—</span>
-      </div>
+      <div class="tab-right"><span class="tab-price" id="priceNQ">—</span></div>
     </button>
     <button class="tab" data-asset="GOLD">
       <div class="tab-left"><img class="tab-img" src="/hl/images/gold.svg" alt="GOLD" loading="eager"></div>
-      <div class="tab-right">
-        <span class="tab-name">ذهب</span>
-        <span class="tab-price" id="priceGOLD">—</span>
-      </div>
+      <div class="tab-right"><span class="tab-price" id="priceGOLD">—</span></div>
     </button>
     <button class="tab" data-asset="SILVER">
       <div class="tab-left"><img class="tab-img" src="/hl/images/silver.svg" alt="SILVER" loading="eager"></div>
-      <div class="tab-right">
-        <span class="tab-name">فضة</span>
-        <span class="tab-price" id="priceSILVER">—</span>
-      </div>
+      <div class="tab-right"><span class="tab-price" id="priceSILVER">—</span></div>
     </button>
     <button class="tab" data-asset="CL">
       <div class="tab-left"><img class="tab-img" src="/hl/images/oil.svg" alt="CL" loading="eager"></div>
-      <div class="tab-right">
-        <span class="tab-name">نفط</span>
-        <span class="tab-price" id="priceCL">—</span>
-      </div>
+      <div class="tab-right"><span class="tab-price" id="priceCL">—</span></div>
     </button>
     <button class="tab tab-chart" id="tabChart">
-      <div class="tab-chart-inner">
-        <span style="font-size:20px;line-height:1">📈</span>
-        <span class="tab-name">رسم</span>
-      </div>
+      <div class="tab-left"><span style="font-size:22px;line-height:1">📈</span></div>
+      <div class="tab-right"><span class="tab-price">رسم</span></div>
     </button>
   </div>
 
