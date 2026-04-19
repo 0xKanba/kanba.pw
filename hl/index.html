@@ -70,28 +70,38 @@
 
   <div class="tabs">
     <button class="tab" data-asset="NQ">
-      <img class="tab-img" src="/hl/images/100.png" alt="NQ" loading="eager">
-      <span class="tab-name">ناسداك</span>
-      <span class="tab-price" id="priceNQ">—</span>
+      <div class="tab-left"><img class="tab-img" src="/hl/images/100.png" alt="NQ" loading="eager"></div>
+      <div class="tab-right">
+        <span class="tab-name">ناسداك</span>
+        <span class="tab-price" id="priceNQ">—</span>
+      </div>
     </button>
     <button class="tab" data-asset="GOLD">
-      <img class="tab-img" src="/hl/images/gold.svg" alt="GOLD" loading="eager">
-      <span class="tab-name">ذهب</span>
-      <span class="tab-price" id="priceGOLD">—</span>
+      <div class="tab-left"><img class="tab-img" src="/hl/images/gold.svg" alt="GOLD" loading="eager"></div>
+      <div class="tab-right">
+        <span class="tab-name">ذهب</span>
+        <span class="tab-price" id="priceGOLD">—</span>
+      </div>
     </button>
     <button class="tab" data-asset="SILVER">
-      <img class="tab-img" src="/hl/images/silver.svg" alt="SILVER" loading="eager">
-      <span class="tab-name">فضة</span>
-      <span class="tab-price" id="priceSILVER">—</span>
+      <div class="tab-left"><img class="tab-img" src="/hl/images/silver.svg" alt="SILVER" loading="eager"></div>
+      <div class="tab-right">
+        <span class="tab-name">فضة</span>
+        <span class="tab-price" id="priceSILVER">—</span>
+      </div>
     </button>
     <button class="tab" data-asset="CL">
-      <img class="tab-img" src="/hl/images/oil.svg" alt="CL" loading="eager">
-      <span class="tab-name">نفط</span>
-      <span class="tab-price" id="priceCL">—</span>
+      <div class="tab-left"><img class="tab-img" src="/hl/images/oil.svg" alt="CL" loading="eager"></div>
+      <div class="tab-right">
+        <span class="tab-name">نفط</span>
+        <span class="tab-price" id="priceCL">—</span>
+      </div>
     </button>
     <button class="tab tab-chart" id="tabChart">
-      <span style="font-size:20px;line-height:1">📈</span>
-      <span class="tab-name">رسم</span>
+      <div class="tab-chart-inner">
+        <span style="font-size:20px;line-height:1">📈</span>
+        <span class="tab-name">رسم</span>
+      </div>
     </button>
   </div>
 
@@ -99,19 +109,26 @@
     <!-- عمود التداول -->
     <div class="col-left">
       <div class="price-card" id="priceCard">
-        <div class="price-asset" id="priceAssetName">نفط خام</div>
-        <div class="price-value" id="priceValue">—</div>
-        <div class="price-delta" id="priceDelta"></div>
-        <div class="price-session hidden" id="priceSession">
-          <span class="ps-chg" id="psChg"></span>
-          <span class="ps-divider">|</span>
-          <span class="ps-h" id="psH"></span>
-          <span class="ps-divider">|</span>
-          <span class="ps-l" id="psL"></span>
+        <!-- يسار: صورة الأصل -->
+        <div class="price-img-wrap" id="priceImgWrap">
+          <img id="priceAssetImg" src="/hl/images/oil.svg" alt="asset" loading="eager">
         </div>
-        <div class="price-meta-row">
-          <span class="price-bid-ask" id="priceBidAsk"></span>
-          <span class="price-timer" id="priceTimer">↻ —</span>
+        <!-- يمين: البيانات -->
+        <div class="price-data">
+          <div class="price-asset" id="priceAssetName">نفط خام</div>
+          <div class="price-value" id="priceValue">—</div>
+          <div class="price-delta" id="priceDelta"></div>
+          <div class="price-session hidden" id="priceSession">
+            <span class="ps-chg" id="psChg"></span>
+            <span class="ps-divider">|</span>
+            <span class="ps-h" id="psH"></span>
+            <span class="ps-divider">|</span>
+            <span class="ps-l" id="psL"></span>
+          </div>
+          <div class="price-meta-row">
+            <span class="price-bid-ask" id="priceBidAsk"></span>
+            <span class="price-timer" id="priceTimer">↻ —</span>
+          </div>
         </div>
       </div>
 
