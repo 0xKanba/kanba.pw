@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hltrade-v5';
+const CACHE_NAME = 'hltrade-v6';
 const ASSETS = [
   '/',
   '/index.html',
@@ -6,20 +6,32 @@ const ASSETS = [
   '/hl/hl.js',
   '/hl/chart.js',
   '/hl/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap',
+  // صور الأصول
+  '/hl/images/oil.svg',
+  '/hl/images/gold.svg',
+  '/hl/images/silver.svg',
+  '/hl/images/100.png',
+  // صور الفوتر
+  '/hl/images/balance.png',
+  '/hl/images/history.png',
+  '/hl/images/diposit.png',
+  '/hl/images/withdraw.png',
+  '/hl/images/calendar.png',
+  // مكتبات خارجية
   'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js',
   'https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js'
 ];
 
-// Install — cache all static assets immediately
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache =>
+      // addAll مع تجاهل الأخطاء لكل عنصر منفرداً
+      Promise.allSettled(ASSETS.map(url => cache.add(url)))
+    )
   );
   self.skipWaiting();
 });
 
-// Activate — remove old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -29,27 +41,21 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch — Cache-first for static assets, network-only for API
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-
   const url = new URL(e.request.url);
 
-  // API calls — always network, never cache
+  // API — دائماً شبكة
   if (url.hostname === 'api.hyperliquid.xyz' ||
-      url.hostname === 'arb1.arbitrum.io' ||
-      url.hostname === 'fonts.googleapis.com' && url.pathname.includes('css')) {
-    return; // let browser handle
-  }
+      url.hostname === 'arb1.arbitrum.io') return;
 
-  // Static assets — cache-first
+  // Cache-first للأصول الثابتة
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(res => {
         if (res && res.status === 200 && res.type !== 'opaque') {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+          caches.open(CACHE_NAME).then(c => c.put(e.request, res.clone()));
         }
         return res;
       }).catch(() => cached);
