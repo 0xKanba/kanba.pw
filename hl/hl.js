@@ -18,23 +18,20 @@ const LAST_ACTIVITY_KEY = 'hl_last_activity';    // آخر نشاط مستخدم
 const PIN_TIMEOUT     = 15 * 60 * 1000;          // 15 دقيقة
 
 const ASSETS = {
-  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:30, cross:true,  szDp:5, pxDp:1, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
+  // XYZ100: onlyIsolated=true, maxLeverage=20, szDecimals=4 (من الوثائق الرسمية)
+  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:20, cross:false, szDp:4, pxDp:1, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
   GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'        },
   SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'        },
   CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام'    }
 };
 
-// ✅ إصلاح bug XYZ100: shortCoin('xyz:XYZ100')='XYZ100' لكن ASSETS key='NQ'
-// هذا الـ map يحوّل coin name → ASSETS key
+// إصلاح shortCoin: 'xyz:XYZ100' → 'XYZ100' → 'NQ'
 const COIN_TO_SYM = {};
 Object.entries(ASSETS).forEach(([sym,a]) => {
-  const coin = a.coin.includes(':') ? a.coin.split(':')[1] : a.coin;
-  COIN_TO_SYM[coin] = sym;   // 'XYZ100'→'NQ', 'GOLD'→'GOLD', etc.
-  COIN_TO_SYM[sym]  = sym;   // 'NQ'→'NQ' fallback
+  const raw = a.coin.includes(':') ? a.coin.split(':')[1] : a.coin;
+  COIN_TO_SYM[raw] = sym;
+  COIN_TO_SYM[sym] = sym;
 });
-function resolveAsset(coinOrSym) {
-  return COIN_TO_SYM[coinOrSym] || coinOrSym;
-}
 
 const State = {
   wallet: null, asset: 'CL', qty: 0.1,
@@ -256,7 +253,7 @@ function wire(n,dp){ let s=(+n).toFixed(dp); if(s.includes('.')) s=s.replace(/\.
 const fmt=(n,d)=>(+n).toFixed(d);
 function shortCoin(c){
   const raw = c.includes(':') ? c.split(':')[1] : c;
-  return COIN_TO_SYM[raw] || raw; // 'XYZ100'→'NQ', 'GOLD'→'GOLD'
+  return COIN_TO_SYM[raw] || raw;
 }
 
 // ════════════════════════════════════════
