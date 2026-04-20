@@ -197,85 +197,96 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 
 
 /* ════════════════════
-   TABS — ديناميكي لجميع الأجهزة
+   TABS — ديناميكي: صورة + سعر
 ════════════════════ */
 .tabs {
-  display:flex; gap:4px; padding:5px 7px 4px;
+  display:flex; gap:3px; padding:4px 6px;
   background:var(--bg-app); flex-shrink:0;
 }
 .tab {
-  flex:1; border-radius:var(--r-md); border:1.5px solid var(--border);
+  flex:1; border-radius:var(--r-sm); border:1.5px solid var(--border);
   background:var(--bg-elev);
   display:flex; flex-direction:column; align-items:stretch;
   overflow:hidden; transition:border-color .18s, box-shadow .18s;
   cursor:pointer; min-width:0;
 }
-.tab:active { transform:scale(.96); }
-.tab.active { border-color:var(--ac); box-shadow:0 0 12px var(--ac-dim); }
+.tab:active { transform:scale(.95); }
+.tab.active { border-color:var(--ac); box-shadow:0 0 10px var(--ac-dim); background:var(--bg-input); }
 
-/* طبقة ١ — صورة — موبايل: مربع بـ aspect-ratio، كمبيوتر: ارتفاع ثابت */
+/* طبقة ١ — صورة بارتفاع ثابت (لا aspect-ratio على desktop) */
 .tab-left {
-  width:100%;
-  aspect-ratio:1/1;        /* موبايل */
+  width:100%; height:clamp(32px,7vw,44px);
   display:flex; align-items:center; justify-content:center;
-  background:color-mix(in srgb, var(--bg-input) 80%, transparent);
-  padding:clamp(3px,2%,8px);
+  background:color-mix(in srgb, var(--bg-input) 70%, transparent);
+  padding:clamp(2px,1vw,5px);
 }
 .tab-img {
-  width:80%; height:80%; object-fit:contain; display:block;
-  filter:drop-shadow(0 1px 4px rgba(0,0,0,.45));
-  max-width:36px; max-height:36px;
+  width:auto; height:100%; max-width:100%;
+  object-fit:contain; display:block;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));
 }
 
 /* طبقة ٢ — السعر */
 .tab-right {
   width:100%; display:flex; align-items:center; justify-content:center;
-  padding:2px 2px 3px; border-top:1px solid var(--border);
+  padding:2px 1px 3px; border-top:1px solid var(--border);
 }
 .tab-name { display:none; }
 .tab-price {
   font-family:var(--font-mono);
-  font-size:clamp(9px,2vw,13px);   /* يكبر مع الشاشة */
+  font-size:clamp(9px,1.8vw,12px);
   font-weight:800; color:var(--text-secondary);
   line-height:1; text-align:center;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  padding:0 2px; width:100%;
+  padding:0 1px; width:100%;
 }
 .tab-price.up { color:var(--up); }
 .tab-price.dn { color:var(--dn); }
 
 /* تاب الرسم */
-.tab-chart { flex:0 0 clamp(36px,8vw,52px); }
-.tab-chart .tab-left { aspect-ratio:unset; flex:1; background:none; padding:4px; }
-.tab-chart .tab-right { border-top:none; padding:2px; }
+.tab-chart { flex:0 0 clamp(34px,7vw,46px); }
+.tab-chart .tab-left { height:clamp(28px,6vw,38px); background:none; }
+.tab-chart .tab-right { border-top:none; padding:1px; }
 
-/* كمبيوتر — ارتفاع ثابت بدل aspect-ratio الذي يكبر كثيراً */
-@media (min-width:640px) {
-  .tab-left { aspect-ratio:unset; height:52px; }
-  .tab-img  { max-width:32px; max-height:32px; }
+/* ════════════════════
+   MAIN LAYOUT — ديناميكي
+════════════════════ */
+.main {
+  flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  display:flex; flex-direction:column; gap:6px; padding:6px 7px 4px;
+  min-height:0;
+}
+.main::-webkit-scrollbar { width:3px; }
+.main::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.col-left, .col-right { display:flex; flex-direction:column; gap:6px; }
+
+/* Desktop — جانب بجانب */
+@media (min-width:680px) {
+  .main { flex-direction:row; align-items:flex-start; gap:8px; overflow:visible; }
+  .col-left  { flex:1.1; min-width:0; overflow-y:auto; max-height:calc(100vh - 140px); }
+  .col-right { flex:1;   min-width:0; overflow-y:auto; max-height:calc(100vh - 140px); }
 }
 
 /* ════════════════════
-   PRICE CARD — صورة يسار، بيانات وسط يمين
+   PRICE CARD — صورة يسار ×3، بيانات وسط
 ════════════════════ */
 .price-card {
   border-radius:var(--r-lg); overflow:hidden;
   border:2px solid var(--border-strong); background:var(--bg-elev);
   transition:border-color .4s, box-shadow .4s; flex-shrink:0;
   display:flex; flex-direction:row; align-items:stretch;
-  min-height:clamp(90px,22vw,130px);
+  min-height:clamp(80px,20vw,110px);
 }
 .price-card.up { border-color:color-mix(in srgb,var(--up) 50%,transparent); box-shadow:0 0 18px var(--up-dim); }
 .price-card.dn { border-color:color-mix(in srgb,var(--dn) 50%,transparent); box-shadow:0 0 18px var(--dn-dim); }
 
-/* يسار ٥٠٪ — صورة */
+/* يسار ٥٠٪ — صورة ×3 */
 .price-img-wrap {
   width:50%; display:flex; align-items:center; justify-content:center;
-  background:var(--bg-input); padding:clamp(6px,3%,14px); flex-shrink:0;
+  background:var(--bg-input); padding:8px; flex-shrink:0;
 }
 .price-img-wrap img {
-  width:90%; height:90%; object-fit:contain; display:block;
-  max-width:clamp(70px,15vw,120px); max-height:clamp(70px,15vw,120px);
+  width:85%; max-width:clamp(65px,14vw,100px); height:auto; object-fit:contain; display:block;
   filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));
 }
 
@@ -283,21 +294,20 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .price-data {
   width:50%; display:flex; flex-direction:column;
   align-items:center; justify-content:center;
-  padding:clamp(6px,3%,14px); gap:3px; overflow:hidden; text-align:center;
+  padding:10px 8px; gap:4px; overflow:hidden; text-align:center;
 }
 .price-asset {
-  font-size:clamp(9px,1.8vw,13px); font-weight:900;
-  color:var(--text-secondary); letter-spacing:.8px; text-transform:uppercase;
+  font-size:11px; font-weight:900; color:var(--text-secondary);
+  letter-spacing:.8px; text-transform:uppercase;
 }
 .price-value {
-  font-family:var(--font-mono);
-  font-size:clamp(18px,4.5vw,32px);
-  font-weight:800; line-height:1; white-space:nowrap;
+  font-family:var(--font-mono); font-size:26px; font-weight:800;
+  line-height:1; white-space:nowrap;
 }
 .price-value.up { color:var(--up); }
 .price-value.dn { color:var(--dn); }
 .price-value.n  { color:var(--text-primary); }
-.price-delta { font-family:var(--font-mono); font-size:clamp(11px,2.5vw,15px); font-weight:800; }
+.price-delta { font-family:var(--font-mono); font-size:13px; font-weight:800; }
 .price-delta.up { color:var(--up); }
 .price-delta.dn { color:var(--dn); }
 .price-delta.n  { color:var(--text-secondary); }
@@ -461,56 +471,47 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .btn-pos-close:hover,.btn-pos-close:active { background:var(--dn); color:#fff; }
 
 /* ════════════════════
-   FOOTER — صور احترافية
+   FOOTER
 ════════════════════ */
 .footer {
-  display:flex; gap:5px;
-  padding:6px 8px max(8px,env(safe-area-inset-bottom));
+  display:flex; gap:4px;
+  padding:5px 6px max(8px,env(safe-area-inset-bottom));
   background:var(--bg-card); border-top:1px solid var(--border); flex-shrink:0;
 }
 .footer-btn {
   flex:1; background:var(--bg-input); border:1.5px solid var(--border-strong);
   border-radius:var(--r-md); color:var(--text-secondary);
-  padding:5px 3px 6px;
-  display:flex; flex-direction:column;
+  padding:5px 3px 6px; display:flex; flex-direction:column;
   align-items:center; justify-content:center;
-  gap:3px; font-size:9px; font-weight:800;
-  letter-spacing:.4px; text-transform:uppercase;
-  transition:all .15s; min-width:0;
+  gap:2px; font-size:9px; font-weight:800;
+  letter-spacing:.3px; text-transform:uppercase;
+  transition:border-color .15s, background .15s;
+  min-width:0;
 }
-.footer-btn:active { transform:scale(.92); background:var(--bg-elev); }
-.footer-btn:hover  { border-color:var(--ac); color:var(--text-primary); }
+.footer-btn:active { transform:scale(.93); background:var(--bg-elev); border-color:var(--ac); }
+.footer-btn:hover  { border-color:var(--ac); }
 
-/* صورة الزر */
+/* صورة الزر — ملونة بدون filter */
 .footer-img {
-  width:clamp(22px,5vw,30px); height:clamp(22px,5vw,30px);
+  width:clamp(20px,4.5vw,26px);
+  height:clamp(20px,4.5vw,26px);
   object-fit:contain; display:block;
-  filter:invert(.6) sepia(.2);    /* تكييف اللون للثيم الداكن */
-  transition:filter .15s;
-}
-.footer-btn:hover .footer-img,
-.footer-btn:active .footer-img {
-  filter:invert(.2) sepia(1) saturate(3) hue-rotate(5deg);
+  /* لا filter — نعرض الصورة بلونها الأصلي */
 }
 
-/* نص الزر */
 .footer-lbl {
-  font-size:clamp(8px,1.8vw,11px); font-weight:800;
+  font-size:clamp(8px,1.6vw,10px); font-weight:800;
   color:var(--text-secondary); line-height:1;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;
-  text-align:center;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  width:100%; text-align:center;
 }
+.footer-logout { flex:0.5; opacity:.6; }
+.footer-logout .footer-img { width:clamp(16px,3.5vw,20px); height:clamp(16px,3.5vw,20px); }
 
-/* زر الخروج — أصغر وخافت */
-.footer-logout {
-  flex:0.5; opacity:.5; font-size:8px;
-}
-.footer-logout .footer-img { width:18px; height:18px; }
-
-/* Desktop — أكبر قليلاً */
+/* Desktop footer */
 @media (min-width:640px) {
-  .footer { padding:8px 12px 10px; gap:8px; }
-  .footer-btn { padding:8px 6px 9px; }
+  .footer { padding:7px 10px 9px; gap:6px; }
+  .footer-btn { padding:7px 5px 8px; }
 }
 
 .hidden { display: none !important; }
