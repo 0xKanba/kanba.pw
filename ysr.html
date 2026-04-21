@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PocketOption · Performance Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/yaser.css" />
+  <link rel="icon" href="/images/a.png" type="image/png">
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">PO</div>
+    <div>
+      <div class="brand-name">PocketOption</div>
+      <div class="brand-sub">Binary Options</div>
+    </div>
+  </div>
+  <div class="topbar-right">April 2024 – February 2026 &nbsp;·&nbsp; Full Report</div>
+</div>
+
+<!-- ── PAGE ── -->
+<div class="page">
+
+  <!-- KPIs -->
+  <div style="margin-top:28px; margin-bottom:14px;" class="sec-label">Performance Indicators</div>
+  <div class="kpi-strip" id="kpi-strip"></div>
+
+  <!-- CHART -->
+  <div class="sec-label">Monthly Profit & Loss</div>
+  <div class="card">
+    <div class="card-head">
+      <span>Net P&L per Month — USD</span>
+      <span>🟩 Profit &nbsp; 🟥 Loss</span>
+    </div>
+    <div class="card-body" style="padding: 22px 18px 14px;">
+      <div id="chart-container"></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="sec-label">Monthly Breakdown</div>
+  <div class="card">
+    <div class="card-head">
+      <span>Trades · Volume · Profit/Loss</span>
+    </div>
+    <div style="overflow-x: auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Trades</th>
+            <th>Win Rate</th>
+            <th>Volume</th>
+            <th>Net P&L</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+        <tfoot id="tbl-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- CAPITAL FLOW -->
+  <div class="sec-label">Capital Stages</div>
+  <div class="card" style="overflow: hidden;">
+    <div class="card-head">
+      <span>Deposits · Withdrawals · Results</span>
+    </div>
+    <div class="flow-grid" id="flow-grid"></div>
+  </div>
+
+</div>
+
+<!-- ── STORY ── -->
+<div class="story">
+  <div class="story-lbl">Capital Narrative Summary</div>
+  <div class="story-text">
+    From <span class="hi-neu">22 August 2024</span> to <span class="hi-neu">22 September 2024</span> —
+    deposited <span class="hi-pos">$1,900</span> and generated profits of <span class="hi-pos">$94,000</span>,
+    then withdrew <span class="hi-neg">$32,735</span> and re-deposited <span class="hi-pos">$16,000</span> of it ·
+    then withdrew <span class="hi-neg">$5,000</span> and deposited it back again 😂 ·
+    From <span class="hi-neu">22 September</span> to <span class="hi-neu">1 October 2024</span> —
+    lost <span class="hi-neg">$77,836</span> in 9 days wiping all profits ·
+    deposited the remaining <span class="hi-pos">$16,000</span> back,
+    then added <span class="hi-pos">$12,705</span> from an external source —
+    and lost it all throughout <span class="hi-neg">2025</span>.
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<div class="footer">
+  <span>PocketOption · Binary Options Performance Audit</span>
+  <span>apr 2024 - feb 2026 · 8,626 Total Trades</span>
+</div>
+
+<script src="/js/yaser.js"></script>
+</body>
+</html>
