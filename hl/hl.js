@@ -18,8 +18,7 @@ const LAST_ACTIVITY_KEY = 'hl_last_activity';    // آخر نشاط مستخدم
 const PIN_TIMEOUT     = 15 * 60 * 1000;          // 15 دقيقة
 
 const ASSETS = {
-  // XYZ100: onlyIsolated=true, maxLeverage=20, szDecimals=4 (من الوثائق الرسمية)
-  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:20, cross:false, szDp:4, pxDp:1, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
+  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:30, cross:true,  szDp:4, pxDp:1, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
   GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'        },
   SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'        },
   CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام'    }
@@ -574,38 +573,44 @@ let _posFingerprint = '';
 function renderPositions(){
   const count=State.positions.length;
 
-  // fingerprint: مقارنة سريعة لتجنب الرسم غير الضروري
+  // fingerprint بدون PnL — PnL يتحدث دائماً بدون إعادة رسم
   const fp = State.positions.map(p=>{
     const pos=p.position;
-    return `${pos.coin}|${pos.szi}|${pos.unrealizedPnl}|${p.tpsl?.tp||''}|${p.tpsl?.sl||''}`;
+    return `${pos.coin}|${pos.szi}|${p.tpsl?.tp||''}|${p.tpsl?.sl||''}`;
   }).join(';');
 
   setTxt('positionsCount',count);
   const clsBtn=$('btnCloseAll');
   if(clsBtn) clsBtn.classList.toggle('hidden',count===0);
 
-  if(fp === _posFingerprint) {
-    // فقط حدّث PnL الأرقام بدون إعادة رسم كاملة
-    State.positions.forEach((p,i)=>{
-      const pnl=parseFloat(p.position.unrealizedPnl||0);
-      const el=document.querySelector(`[data-pnl-idx="${i}"]`);
-      if(el){ const s=pnl>=0?'+':''; el.textContent=`${s}$${fmt(pnl,2)}`; el.className=`pos-pnl ${pnl>=0?'pos':'neg'}`; }
-    });
-    const totalPnl=State.positions.reduce((s,p)=>s+parseFloat(p.position.unrealizedPnl||0),0);
-    const tEl=$('totalPnl');
-    if(tEl){ tEl.textContent=`${totalPnl>=0?'+':''}$${fmt(totalPnl,2)}`; tEl.className=`positions-pnl ${totalPnl>=0?'pos':'neg'}`; }
-    return;
+  // تحديث PnL فقط — دائماً وبسلاسة بدون إعادة رسم
+  const totalPnl=State.positions.reduce((s,p)=>s+parseFloat(p.position.unrealizedPnl||0),0);
+  State.positions.forEach((p,i)=>{
+    const pnl=parseFloat(p.position.unrealizedPnl||0);
+    const el=document.querySelector(`[data-pnl-idx="${i}"]`);
+    if(el){
+      const s=pnl>=0?'+':'';
+      el.textContent=`${s}$${fmt(pnl,2)}`;
+      el.className=`pos-pnl ${pnl>=0?'pos':'neg'}`;
+    }
+  });
+  const tEl=$('totalPnl');
+  if(tEl){
+    tEl.textContent=`${totalPnl>=0?'+':''}$${fmt(totalPnl,2)}`;
+    tEl.className=`positions-pnl ${totalPnl>=0?'pos':'neg'}`;
   }
+
+  // إذا لم تتغير البنية → لا إعادة رسم
+  if(fp === _posFingerprint) return;
   _posFingerprint = fp;
+
   const list=$('positionsList');
   if(!count){
     list.innerHTML='<div class="positions-empty">📂 لا توجد صفقات مفتوحة</div>';
-    setTxt('totalPnl',''); $('totalPnl').className='positions-pnl'; return;
+    return;
   }
-  let totalPnl=0;
   list.innerHTML=State.positions.map((p,i)=>{
     const pos=p.position, szi=parseFloat(pos.szi), pnl=parseFloat(pos.unrealizedPnl||0);
-    totalPnl+=pnl;
     const coin=shortCoin(pos.coin), a=ASSETS[coin]||{name:coin,unit:'',icon:'📊',pxDp:2,szDp:2};
     const isLong=szi>0, sign=pnl>=0?'+':'', pCls=pnl>=0?'pos':'neg';
     const curPx=State.prices[coin]?.mid;
@@ -651,9 +656,6 @@ function renderPositions(){
       </div>
     </div>`;
   }).join('');
-  const totalEl=$('totalPnl');
-  totalEl.textContent=`${totalPnl>=0?'+':''}$${fmt(totalPnl,2)}`;
-  totalEl.className=`positions-pnl ${totalPnl>=0?'pos':'neg'}`;
   if(typeof ChartModule!=='undefined') ChartModule.refreshLines();
 }
 
@@ -730,11 +732,38 @@ async function execTrade(){
   setBtnLoading('confirmExecute','⏳');
   showLoader(`${a.icon} ${isBuy?'شراء':'بيع'} ${qty} ${a.unit}...`);
   try {
-    try { await hlExchange({type:'updateLeverage',asset:a.idx,isCross:a.cross,leverage:a.lev}); } catch{}
-    const px=wire(p.mid*(isBuy?1.02:0.98),a.pxDp);
-    await hlExchange({type:'order',orders:[{a:a.idx,b:isBuy,p:px,s:wire(qty,a.szDp),r:false,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
-    closeModal('modalConfirm');
-    toast(`✅ تم — ${a.icon} ${isBuy?'شراء':'بيع'} ${qty} ${a.unit}`,'ok',5000);
+    // ضبط الرافعة أولاً — صامت إذا فشل
+    try {
+      await hlExchange({type:'updateLeverage', asset:a.idx, isCross:a.cross, leverage:a.lev});
+    } catch(e){ console.warn('[leverage]', e.message); }
+
+    // بناء الأمر — slippage 3% لـ NQ لأن سعره مرتفع
+    const slip = sym==='NQ' ? 0.03 : 0.02;
+    const px = wire(p.mid*(isBuy ? 1+slip : 1-slip), a.pxDp);
+    const res = await hlExchange({
+      type:'order',
+      orders:[{a:a.idx, b:isBuy, p:px, s:wire(qty,a.szDp), r:false, t:{limit:{tif:'Ioc'}}}],
+      grouping:'na'
+    });
+
+    // فحص حالة التنفيذ الفعلية
+    const status = res?.response?.data?.statuses?.[0];
+    if(status?.error) {
+      throw new Error(status.error);
+    }
+    if(status?.filled) {
+      const f=status.filled;
+      closeModal('modalConfirm');
+      toast(`✅ مُنفَّذ — ${a.icon} ${f.totalSz} بسعر ${fmt(parseFloat(f.avgPx),a.pxDp)}`,'ok',5000);
+    } else if(status?.resting) {
+      // أمر معلق (لم يُملأ فوراً)
+      closeModal('modalConfirm');
+      toast(`⏳ أمر معلق — ${a.icon} ${qty} ${a.unit}`,'info',4000);
+    } else {
+      // IOC بدون ملء
+      closeModal('modalConfirm');
+      toast(`⚠️ لم يُنفَّذ — السوق بعيد عن السعر المطلوب`,'err',5000);
+    }
     autoSetReferrer();
     State.pendingTrade=null;
     setTimeout(pollAccount,2000);
