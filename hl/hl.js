@@ -248,7 +248,31 @@ function setTxt(id,t){ const e=$(id); if(e) e.textContent=t; }
 function setText(id,t,c){ const e=$(id); if(!e)return; e.textContent=t; if(c) e.className=c; }
 function setBtnLoading(id,t='⏳'){ const b=$(id); if(!b)return; b._orig=b.innerHTML; b.disabled=true; b.innerHTML=t; }
 function resetBtn(id){ const b=$(id); if(!b)return; b.disabled=false; if(b._orig) b.innerHTML=b._orig; }
-function wire(n,dp){ let s=(+n).toFixed(dp); if(s.includes('.')) s=s.replace(/\.?0+$/,''); return s; }
+// wireSz: حجم — قطع للمنازل العشرية المطلوبة
+function wireSz(n, szDp) {
+  const factor = Math.pow(10, szDp);
+  const s = (Math.floor(Math.abs(+n) * factor) / factor).toFixed(szDp);
+  return s.includes('.') ? s.replace(/\.?0+$/, '') : s;
+}
+
+// wirePx: سعر — قاعدة Hyperliquid: ≤5 أرقام معنوية + max (6-szDp) خانات عشرية
+function wirePx(n, szDp) {
+  const price = Math.abs(+n);
+  if (!price) return '0';
+  const MAX_DECIMALS = 6;
+  const maxDp = MAX_DECIMALS - szDp;
+  const magnitude = Math.floor(Math.log10(price));
+  const sigFigDp = Math.max(0, 4 - magnitude);
+  const dp = Math.min(maxDp, sigFigDp);
+  const factor = Math.pow(10, dp);
+  const rounded = Math.round(price * factor) / factor;
+  const s = rounded.toFixed(dp);
+  // فقط نزيل الأصفار بعد النقطة العشرية
+  return s.includes('.') ? s.replace(/\.?0+$/, '') : s;
+}
+
+// wire (للتوافق — size فقط)
+function wire(n, dp) { return wireSz(n, dp); }
 const fmt=(n,d)=>(+n).toFixed(d);
 function shortCoin(c){
   const raw = c.includes(':') ? c.split(':')[1] : c;
@@ -739,7 +763,7 @@ async function execTrade(){
 
     // بناء الأمر — slippage 3% لـ NQ لأن سعره مرتفع
     const slip = sym==='NQ' ? 0.03 : 0.02;
-    const px = wire(p.mid*(isBuy ? 1+slip : 1-slip), a.pxDp);
+    const px = wirePx(p.mid*(isBuy ? 1+slip : 1-slip), a.szDp);
     const res = await hlExchange({
       type:'order',
       orders:[{a:a.idx, b:isBuy, p:px, s:wire(qty,a.szDp), r:false, t:{limit:{tif:'Ioc'}}}],
@@ -801,7 +825,7 @@ async function execClose(){
   showLoader(`إغلاق ${a.icon} ${a.name}...`);
   try {
     const isBuy=szi<0;
-    await hlExchange({type:'order',orders:[{a:a.idx,b:isBuy,p:wire(mid*(isBuy?1.02:0.98),a.pxDp),s:wire(Math.abs(szi),a.szDp),r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
+    await hlExchange({type:'order',orders:[{a:a.idx,b:isBuy,p:wirePx(mid*(isBuy?1.02:0.98),a.szDp),s:wire(Math.abs(szi),a.szDp),r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
     closeModal('modalClose'); toast(`✅ أُغلقت — ${a.icon} ${a.name}`,'ok',4000);
     State.pendingClose=null; setTimeout(pollAccount,2000);
   } catch(e){ toast(tradeErr(e.message),'err',6000); }
@@ -833,7 +857,7 @@ async function execCloseAll(){
       if(!a||!mid){fail++;continue;}
       try {
         const isBuy=szi<0;
-        await hlExchange({type:'order',orders:[{a:a.idx,b:isBuy,p:wire(mid*(isBuy?1.02:0.98),a.pxDp),s:wire(Math.abs(szi),a.szDp),r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
+        await hlExchange({type:'order',orders:[{a:a.idx,b:isBuy,p:wirePx(mid*(isBuy?1.02:0.98),a.szDp),s:wire(Math.abs(szi),a.szDp),r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
         ok++;
       } catch(e){fail++;console.warn('[closeAll]',coin,e.message);}
     }
@@ -1012,10 +1036,10 @@ async function placeNativeTpsl(sym,sziStr,tpslType,triggerPxNum){
   const sz=parseFloat(sziStr), isBuy=sz<0;
   const absSz=wire(Math.abs(sz),asset.szDp);
   const tPx=triggerPxNum;
-  const limitPx=isBuy?wire(tPx*1.10,asset.pxDp):wire(tPx*0.90,asset.pxDp);
+  const limitPx=isBuy?wirePx(tPx*1.10,asset.szDp):wirePx(tPx*0.90,asset.szDp);
   const res=await hlExchange({
     type:'order',
-    orders:[{a:asset.idx,b:isBuy,p:limitPx,s:absSz,r:true,t:{trigger:{isMarket:true,triggerPx:wire(tPx,asset.pxDp),tpsl:tpslType}}}],
+    orders:[{a:asset.idx,b:isBuy,p:limitPx,s:absSz,r:true,t:{trigger:{isMarket:true,triggerPx:wirePx(tPx,asset.szDp),tpsl:tpslType}}}],
     grouping:'positionTpsl'
   });
   const status=res?.response?.data?.statuses?.[0];
