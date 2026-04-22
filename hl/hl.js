@@ -950,9 +950,26 @@ window.openTP=async function(i){
     if(State.positions[i]) State.positions[i].tpsl=freshTpsl;
   } catch{}
   hideLoader();
-  $('tpCurrentDetails').innerHTML=freshTpsl.tp
-    ?`<div class="confirm-row"><span class="confirm-key">هدف الربح الحالي</span><span class="confirm-val tp">$${fmt(freshTpsl.tp,a.pxDp)}</span></div>`
-    :`<div class="confirm-row"><span class="confirm-key">الهدف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+  // بناء تفاصيل ثابتة من TP الحالي
+  function buildTpDetails(tpPx, szi, a){
+    if(!tpPx||!szi) return `<div class="confirm-row"><span class="confirm-key">الهدف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+    const sz=Math.abs(parseFloat(szi));
+    const entry=parseFloat(State.pendingTP?.entryPx||0);
+    const grossPnl=(tpPx-entry)*parseFloat(szi);
+    const fee=tpPx*sz*0.00009;
+    const net=grossPnl-fee;
+    const sign=net>=0?'+':'';
+    return `
+      <div class="confirm-row"><span class="confirm-key">هدف الربح الحالي</span><span class="confirm-val tp">$${fmt(tpPx,a.pxDp)}</span></div>
+      <div class="tpsl-breakdown">
+        <div class="tb-row"><span>💰 ربح متوقع</span><span class="tb-mono pos">${grossPnl>=0?'+':''}$${Math.abs(grossPnl).toFixed(2)}</span></div>
+        <div class="tb-row"><span>💸 رسوم الإغلاق</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
+        <div class="tb-row tb-net"><span>🏁 صافي النهائي</span><span class="tb-mono ${net>=0?'pos':'neg'}">${sign}$${Math.abs(net).toFixed(2)}</span></div>
+      </div>`;
+  }
+  $('tpCurrentDetails').innerHTML = freshTpsl.tp
+    ? buildTpDetails(freshTpsl.tp, pos.szi, a)
+    : `<div class="confirm-row"><span class="confirm-key">الهدف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
   $('tpDeleteRow').classList.toggle('hidden',!freshTpsl.tpOid);
   $('tpAmount').value='';
   setTxt('tpPreview','سعر التفعيل: —');
@@ -1040,9 +1057,26 @@ window.openSL=async function(i){
     if(State.positions[i]) State.positions[i].tpsl=freshTpsl;
   } catch{}
   hideLoader();
-  $('slCurrentDetails').innerHTML=freshTpsl.sl
-    ?`<div class="confirm-row"><span class="confirm-key">وقف الخسارة الحالي</span><span class="confirm-val sl">$${fmt(freshTpsl.sl,a.pxDp)}</span></div>`
-    :`<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+  // بناء تفاصيل ثابتة من SL الحالي
+  function buildSlDetails(slPx, szi, a){
+    if(!slPx||!szi) return `<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+    const sz=Math.abs(parseFloat(szi));
+    const entry=parseFloat(State.pendingSL?.entryPx||0);
+    const grossPnl=(slPx-entry)*parseFloat(szi);
+    const fee=slPx*sz*0.00009;
+    const net=grossPnl-fee;
+    const sign=net>=0?'+':'';
+    return `
+      <div class="confirm-row"><span class="confirm-key">وقف الخسارة الحالي</span><span class="confirm-val sl">$${fmt(slPx,a.pxDp)}</span></div>
+      <div class="tpsl-breakdown">
+        <div class="tb-row"><span>📉 خسارة متوقعة</span><span class="tb-mono neg">${grossPnl>=0?'+':''}$${Math.abs(grossPnl).toFixed(2)}</span></div>
+        <div class="tb-row"><span>💸 رسوم الإغلاق</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
+        <div class="tb-row tb-net"><span>🏁 صافي النهائي</span><span class="tb-mono ${net>=0?'pos':'neg'}">${sign}$${Math.abs(net).toFixed(2)}</span></div>
+      </div>`;
+  }
+  $('slCurrentDetails').innerHTML = freshTpsl.sl
+    ? buildSlDetails(freshTpsl.sl, pos.szi, a)
+    : `<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
   $('slDeleteRow').classList.toggle('hidden',!freshTpsl.slOid);
   $('slAmount').value='';
   setTxt('slPreview','سعر الوقف: —');
