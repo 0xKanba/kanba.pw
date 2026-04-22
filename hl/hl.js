@@ -574,10 +574,11 @@ async function pollAccount(){
     State.positions=rawPos.map(p=>{
       const existing = State.positions.find(e=>e.position.coin===p.position.coin);
       const tpsl = parseTpslFromOrders(State.openOrders, p.position.coin);
-      // إذا لم يتغير TP/SL استخدم القديم لتجنب الوميض
       if(existing && !tpsl.tp && !tpsl.sl && existing.tpsl) return {...p, tpsl: existing.tpsl};
       return {...p, tpsl};
     });
+    // تحديث رسوم التمويل من cumFunding.sinceOpen مباشرة (الرقم الحقيقي)
+    updateFundingFromPositions(rawPos);
     renderPositions();
     autoSetReferrer();
   } catch(e){ console.warn('[pollAccount]',e.message); }
@@ -597,50 +598,48 @@ function calcTpPrice(entryPx,szi,pnlTarget){ const sz=parseFloat(szi),ep=parseFl
 function calcSlPrice(entryPx,szi,slAmount){  const sz=parseFloat(szi),ep=parseFloat(entryPx); return sz>0?ep-slAmount/sz:ep+slAmount/Math.abs(sz); }
 
 // ════════════════════════════════════════
-// رسوم التمويل — يتجدد كل ساعة
+// رسوم التمويل — من cumFunding.sinceOpen مباشرة
+// المصدر الصحيح: assetPositions[].position.cumFunding.sinceOpen
+// هذا هو نفس الرقم الذي يظهر في الموقع الرسمي
 // ════════════════════════════════════════
+function updateFundingFromPositions(positions){
+  // استخرج sinceOpen من كل صفقة مفتوحة مباشرة
+  const acc = {};
+  for(const p of positions||[]) {
+    const pos = p.position;
+    const coin = pos.coin||'';
+    const raw = coin.includes(':') ? coin.split(':')[1] : coin;
+    const sym = COIN_TO_SYM[raw] || raw;
+    // cumFunding.sinceOpen = رسوم التمويل منذ فتح الصفقة (القيمة الصحيحة)
+    const sinceOpen = parseFloat(pos.cumFunding?.sinceOpen || 0);
+    acc[sym] = sinceOpen;
+  }
+  State.fundingRates = acc;
+  // تحديث UI
+  Object.entries(acc).forEach(([sym, usd]) => {
+    document.querySelectorAll(`[data-funding-sym="${sym}"]`).forEach(el => {
+      const s = usd >= 0 ? '+' : '';
+      el.textContent = `${s}$${Math.abs(usd).toFixed(4)}`;
+      el.className = `pos-funding-val ${usd >= 0 ? 'pos' : 'neg'}`;
+    });
+  });
+}
+
 async function fetchFundingRates(){
+  // للتاريخ — يُستخدم في showHistory فقط
+  // الصفقات المفتوحة: updateFundingFromPositions() أسرع وأدق
   if(!State.wallet) return;
   try {
-    // جلب رسوم التمويل من ledgerUpdates للمستخدم
-    const ledger = await hlInfo({
-      type:'userFundingHistory',
-      user:State.wallet.address,
-      startTime: Date.now() - 8*3600*1000 // آخر 8 ساعات
-    }).catch(()=>[]);
-    if(!Array.isArray(ledger)) return;
-    // تجميع الرسوم لكل أصل
-    const acc = {};
-    for(const e of ledger) {
-      const d = e.delta;
-      if(d?.type!=='funding') continue;
-      const coin = d.coin||'';
-      const raw = coin.includes(':') ? coin.split(':')[1] : coin;
-      const sym = COIN_TO_SYM[raw] || raw;
-      if(!acc[sym]) acc[sym] = 0;
-      acc[sym] += parseFloat(d.usdc||0);
-    }
-    State.fundingRates = acc;
-    // تحديث عناصر UI مباشرة
-    Object.entries(acc).forEach(([sym, usd]) => {
-      document.querySelectorAll(`[data-funding-sym="${sym}"]`).forEach(el => {
-        const s = usd >= 0 ? '+' : '';
-        el.textContent = `${s}$${Math.abs(usd).toFixed(4)}`;
-        el.className = `pos-funding-val ${usd >= 0 ? 'pos' : 'neg'}`;
-      });
-    });
+    const xyz = await hlInfo({type:'clearinghouseState', user:State.wallet.address, dex:'xyz'}).catch(()=>({}));
+    const rawPos = (xyz?.assetPositions||[]).filter(p=>parseFloat(p.position?.szi||0)!==0);
+    if(rawPos.length) updateFundingFromPositions(rawPos);
   } catch(e){ console.warn('[funding]', e.message); }
 }
 
 function startFundingTimer(){
   clearInterval(State._fundingTimer);
   fetchFundingRates();
-  // تحديث عند بداية كل ساعة جديدة
-  const msToNextHour = (3600 - (Math.floor(Date.now()/1000) % 3600)) * 1000;
-  setTimeout(() => {
-    fetchFundingRates();
-    State._fundingTimer = setInterval(fetchFundingRates, 3600*1000);
-  }, msToNextHour);
+  State._fundingTimer = setInterval(fetchFundingRates, 60*1000); // كل دقيقة
 }
 
 let _posFingerprint = '';
@@ -950,26 +949,25 @@ window.openTP=async function(i){
     if(State.positions[i]) State.positions[i].tpsl=freshTpsl;
   } catch{}
   hideLoader();
-  // بناء تفاصيل ثابتة من TP الحالي
-  function buildTpDetails(tpPx, szi, a){
-    if(!tpPx||!szi) return `<div class="confirm-row"><span class="confirm-key">الهدف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+  function buildTpDetails(tpPx, entryPx, szi, a){
+    if(!tpPx) return `<div class="confirm-row"><span class="confirm-key">الهدف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
     const sz=Math.abs(parseFloat(szi));
-    const entry=parseFloat(State.pendingTP?.entryPx||0);
-    const grossPnl=(tpPx-entry)*parseFloat(szi);
+    const ep=parseFloat(entryPx||0);
+    // ربح متوقع = (سعر TP - سعر الدخول) × الحجم
+    const grossPnl=(tpPx-ep)*parseFloat(szi);
     const fee=tpPx*sz*0.00009;
     const net=grossPnl-fee;
-    const sign=net>=0?'+':'';
+    const gSign=grossPnl>=0?'+':'';
+    const nSign=net>=0?'+':'';
     return `
-      <div class="confirm-row"><span class="confirm-key">هدف الربح الحالي</span><span class="confirm-val tp">$${fmt(tpPx,a.pxDp)}</span></div>
+      <div class="confirm-row"><span class="confirm-key">🎯 سعر التفعيل</span><span class="confirm-val tp">$${fmt(tpPx,a.pxDp)}</span></div>
       <div class="tpsl-breakdown">
-        <div class="tb-row"><span>💰 ربح متوقع</span><span class="tb-mono pos">${grossPnl>=0?'+':''}$${Math.abs(grossPnl).toFixed(2)}</span></div>
+        <div class="tb-row"><span>💰 ربح متوقع</span><span class="tb-mono pos">${gSign}$${Math.abs(grossPnl).toFixed(2)}</span></div>
         <div class="tb-row"><span>💸 رسوم الإغلاق</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
-        <div class="tb-row tb-net"><span>🏁 صافي النهائي</span><span class="tb-mono ${net>=0?'pos':'neg'}">${sign}$${Math.abs(net).toFixed(2)}</span></div>
+        <div class="tb-row tb-net"><span>🏁 صافي النهائي</span><span class="tb-mono ${net>=0?'pos':'neg'}">${nSign}$${Math.abs(net).toFixed(2)}</span></div>
       </div>`;
   }
-  $('tpCurrentDetails').innerHTML = freshTpsl.tp
-    ? buildTpDetails(freshTpsl.tp, pos.szi, a)
-    : `<div class="confirm-row"><span class="confirm-key">الهدف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+  $('tpCurrentDetails').innerHTML = buildTpDetails(freshTpsl.tp, pos.entryPx, pos.szi, a);
   $('tpDeleteRow').classList.toggle('hidden',!freshTpsl.tpOid);
   $('tpAmount').value='';
   setTxt('tpPreview','سعر التفعيل: —');
@@ -1057,26 +1055,24 @@ window.openSL=async function(i){
     if(State.positions[i]) State.positions[i].tpsl=freshTpsl;
   } catch{}
   hideLoader();
-  // بناء تفاصيل ثابتة من SL الحالي
-  function buildSlDetails(slPx, szi, a){
-    if(!slPx||!szi) return `<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+  function buildSlDetails(slPx, entryPx, szi, a){
+    if(!slPx) return `<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
     const sz=Math.abs(parseFloat(szi));
-    const entry=parseFloat(State.pendingSL?.entryPx||0);
-    const grossPnl=(slPx-entry)*parseFloat(szi);
+    const ep=parseFloat(entryPx||0);
+    const grossPnl=(slPx-ep)*parseFloat(szi);
     const fee=slPx*sz*0.00009;
     const net=grossPnl-fee;
-    const sign=net>=0?'+':'';
+    const gSign=grossPnl>=0?'+':'';
+    const nSign=net>=0?'+':'';
     return `
-      <div class="confirm-row"><span class="confirm-key">وقف الخسارة الحالي</span><span class="confirm-val sl">$${fmt(slPx,a.pxDp)}</span></div>
+      <div class="confirm-row"><span class="confirm-key">⛔ سعر الوقف</span><span class="confirm-val sl">$${fmt(slPx,a.pxDp)}</span></div>
       <div class="tpsl-breakdown">
-        <div class="tb-row"><span>📉 خسارة متوقعة</span><span class="tb-mono neg">${grossPnl>=0?'+':''}$${Math.abs(grossPnl).toFixed(2)}</span></div>
+        <div class="tb-row"><span>📉 خسارة متوقعة</span><span class="tb-mono neg">${gSign}$${Math.abs(grossPnl).toFixed(2)}</span></div>
         <div class="tb-row"><span>💸 رسوم الإغلاق</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
-        <div class="tb-row tb-net"><span>🏁 صافي النهائي</span><span class="tb-mono ${net>=0?'pos':'neg'}">${sign}$${Math.abs(net).toFixed(2)}</span></div>
+        <div class="tb-row tb-net"><span>🏁 صافي النهائي</span><span class="tb-mono ${net>=0?'pos':'neg'}">${nSign}$${Math.abs(net).toFixed(2)}</span></div>
       </div>`;
   }
-  $('slCurrentDetails').innerHTML = freshTpsl.sl
-    ? buildSlDetails(freshTpsl.sl, pos.szi, a)
-    : `<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+  $('slCurrentDetails').innerHTML = buildSlDetails(freshTpsl.sl, pos.entryPx, pos.szi, a);
   $('slDeleteRow').classList.toggle('hidden',!freshTpsl.slOid);
   $('slAmount').value='';
   setTxt('slPreview','سعر الوقف: —');
