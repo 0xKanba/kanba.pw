@@ -963,10 +963,21 @@ window.openTP=async function(i){
 function recalcTpPreview(){
   const tp=State.pendingTP; if(!tp)return;
   const val=parseFloat($('tpAmount')?.value||0);
-  if(!val||val<=0){setTxt('tpPreview','سعر التفعيل: —');return;}
-  const a=ASSETS[tp.sym]||{pxDp:2};
+  const el=$('tpPreview'); if(!el)return;
+  if(!val||val<=0){ el.innerHTML='<span style="color:var(--text-secondary)">سعر التفعيل: —</span>'; return; }
+  const a=ASSETS[tp.sym]||{pxDp:2,szDp:4};
   const px=calcTpPrice(tp.entryPx,tp.szi,val);
-  setTxt('tpPreview',`✅ سعر التفعيل: $${fmt(px,a.pxDp)}`);
+  const sz=Math.abs(parseFloat(tp.szi));
+  // رسوم الإغلاق 0.009%
+  const fee=(px*sz*0.00009);
+  const net=val-fee;
+  el.innerHTML=`
+    <div class="tpsl-breakdown">
+      <div class="tb-row"><span>✅ سعر التفعيل</span><span class="tb-mono">$${fmt(px,a.pxDp)}</span></div>
+      <div class="tb-row"><span>💰 ربح متوقع</span><span class="tb-mono pos">+$${val.toFixed(2)}</span></div>
+      <div class="tb-row"><span>💸 رسوم الإغلاق</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
+      <div class="tb-row tb-net"><span>🏁 صافي الربح</span><span class="tb-mono ${net>=0?'pos':'neg'}">${net>=0?'+':''}$${net.toFixed(2)}</span></div>
+    </div>`;
 }
 
 async function execTP(){
@@ -1042,10 +1053,20 @@ window.openSL=async function(i){
 function recalcSlPreview(){
   const sl=State.pendingSL; if(!sl)return;
   const val=parseFloat($('slAmount')?.value||0);
-  if(!val||val<=0){setTxt('slPreview','سعر الوقف: —');return;}
-  const a=ASSETS[sl.sym]||{pxDp:2};
+  const el=$('slPreview'); if(!el)return;
+  if(!val||val<=0){ el.innerHTML='<span style="color:var(--text-secondary)">سعر الوقف: —</span>'; return; }
+  const a=ASSETS[sl.sym]||{pxDp:2,szDp:4};
   const px=calcSlPrice(sl.entryPx,sl.szi,val);
-  setTxt('slPreview',`⛔ سعر الوقف: $${fmt(px,a.pxDp)}`);
+  const sz=Math.abs(parseFloat(sl.szi));
+  const fee=(px*sz*0.00009);
+  const net=-(val+fee); // خسارة
+  el.innerHTML=`
+    <div class="tpsl-breakdown">
+      <div class="tb-row"><span>⛔ سعر الوقف</span><span class="tb-mono">$${fmt(px,a.pxDp)}</span></div>
+      <div class="tb-row"><span>📉 خسارة متوقعة</span><span class="tb-mono neg">−$${val.toFixed(2)}</span></div>
+      <div class="tb-row"><span>💸 رسوم الإغلاق</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
+      <div class="tb-row tb-net"><span>🏁 صافي الخسارة</span><span class="tb-mono neg">${net.toFixed(2)}</span></div>
+    </div>`;
 }
 
 async function execSL(){
