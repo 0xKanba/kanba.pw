@@ -441,12 +441,15 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .pos-size { font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); font-weight:700; }
 
 .pos-data-grid {
-  display:grid; grid-template-columns:1fr 1fr; gap:5px;
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;
   background:var(--bg-elev); border-radius:var(--r-sm); padding:8px;
 }
 .pos-data-item { display:flex; flex-direction:column; gap:2px; }
 .pos-data-label { font-size:10px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.8px; }
 .pos-data-value { font-family:var(--font-mono); font-size:14px; font-weight:800; }
+.pos-funding-val { font-family:var(--font-mono); font-size:13px; font-weight:800; }
+.pos-funding-val.pos { color:var(--up); }
+.pos-funding-val.neg { color:var(--dn); }
 
 .pos-tpsl-row { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
 .tpsl-btn {
@@ -984,3 +987,23 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; }
   font-family: var(--font-ui);
 }
 .wp-add-fee:active { filter: brightness(.9); }
+
+/* ════════════════════
+   TP/SL Breakdown Preview
+════════════════════ */
+.tpsl-breakdown {
+  display:flex; flex-direction:column; gap:0;
+  font-size:14px; font-weight:700;
+}
+.tb-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid var(--border);
+  color:var(--text-secondary);
+}
+.tb-row:last-child { border:none; }
+.tb-net { margin-top:2px; }
+.tb-net span:first-child { color:var(--text-primary); font-weight:900; }
+.tb-mono { font-family:var(--font-mono); font-size:16px; font-weight:800; }
+.tb-mono.pos  { color:var(--up); }
+.tb-mono.neg  { color:var(--dn); }
+.tb-mono.warn { color:var(--warn); }
