@@ -21,11 +21,18 @@
 
   .cal-header {
     display:flex; align-items:center; justify-content:space-between;
-    padding:16px 18px 12px;
+    padding:14px 16px 10px;
     border-bottom:1px solid rgba(255,255,255,.07);
     flex-shrink:0;
   }
   .cal-title { font-size:18px; font-weight:900; color:#f0ece4; }
+  .cal-back-btn {
+    background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.12);
+    color:#f0ece4; border-radius:20px; padding:7px 18px;
+    font-size:13px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+  }
+  .cal-back-btn:active { transform:scale(.96); }
   .cal-close {
     background:rgba(255,255,255,.08); border:none; color:#f0ece4;
     width:34px; height:34px; border-radius:50%; font-size:18px;
@@ -94,7 +101,7 @@
   .cal-day.loss   { background:rgba(240,82,72,.13); border-color:rgba(240,82,72,.3); }
   .cal-day:hover  { border-color:#e07248; }
   .cal-dn  { font-size:9px; font-weight:700; opacity:.5; color:#f0ece4; }
-  .cal-dv  { font-size:9px; font-weight:800; text-align:center; }
+  .cal-dv  { font-size:clamp(8px,2vw,11px); font-weight:800; text-align:center; line-height:1.1; }
   .cal-dv.profit-txt { color:#34c85a; }
   .cal-dv.loss-txt   { color:#f05248; }
 
@@ -167,12 +174,13 @@
   const html = `
   <div id="calModal">
     <div class="cal-header">
-      <span class="cal-title">📅 تقويم التداول</span>
-      <button class="cal-close" id="calCloseBtn">✕</button>
+      <button class="cal-back-btn" id="calCloseBtn">← رجوع</button>
+      <span class="cal-title">📅 تقويم</span>
+      <span style="width:68px"></span>
     </div>
     <div class="cal-body">
-      <!-- Search -->
-      <div class="cal-search">
+      <!-- Search (hidden by default, shown only if no connected wallet) -->
+      <div class="cal-search" id="calSearchRow" style="display:none">
         <input class="cal-input" id="calWalletInput" placeholder="عنوان المحفظة 0x..." dir="ltr">
         <button class="cal-search-btn" id="calSearchBtn">تحليل</button>
       </div>
@@ -363,12 +371,16 @@
   window.openCalendar = function(){
     const modal=$('calModal');
     modal.classList.add('open');
-    // استخدام عنوان المحفظة الحالية تلقائياً
     const addr=window.State?.wallet?.address||'';
     if(addr){
-      const inp=$('calWalletInput');
-      inp.value=addr;
+      // محفظة متصلة — إخفاء حقل البحث وتحليل مباشرة
+      const row=$('calSearchRow');
+      if(row) row.style.display='none';
       if(!_fills.length) analyze(addr);
+    } else {
+      // لا توجد محفظة — إظهار حقل البحث
+      const row=$('calSearchRow');
+      if(row) row.style.display='flex';
     }
   };
 
