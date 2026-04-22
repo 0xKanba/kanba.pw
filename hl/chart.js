@@ -261,7 +261,10 @@ const ChartModule = (function () {
   /* ════════════
      مساعدات
   ════════════ */
-  const coin = s => `xyz:${s}`;
+  const coin = s => {
+    if(typeof ASSETS!=='undefined'&&ASSETS[s]?.coin) return ASSETS[s].coin;
+    return `xyz:${s}`;
+  };
   const ai   = s => (typeof ASSETS!=='undefined'&&ASSETS[s])||{pxDp:2,szDp:2,name:s,icon:'📊',unit:'',lev:10,presets:[1],idx:0,cross:true};
   const setStatus = t => { const e=document.getElementById('_cWs'); if(e) e.textContent=t; };
   const isDark = () => window.matchMedia('(prefers-color-scheme:dark)').matches;
