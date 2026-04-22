@@ -21,11 +21,18 @@
 
   .cal-header {
     display:flex; align-items:center; justify-content:space-between;
-    padding:16px 18px 12px;
+    padding:14px 16px 10px;
     border-bottom:1px solid rgba(255,255,255,.07);
     flex-shrink:0;
   }
   .cal-title { font-size:18px; font-weight:900; color:#f0ece4; }
+  .cal-back-btn {
+    background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.12);
+    color:#f0ece4; border-radius:20px; padding:7px 18px;
+    font-size:13px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+  }
+  .cal-back-btn:active { transform:scale(.96); }
   .cal-close {
     background:rgba(255,255,255,.08); border:none; color:#f0ece4;
     width:34px; height:34px; border-radius:50%; font-size:18px;
@@ -38,23 +45,7 @@
   }
 
   /* search */
-  .cal-search {
-    display:flex; gap:8px; margin-bottom:14px;
-  }
-  .cal-input {
-    flex:1; background:#1e1c18; border:1.5px solid #48443c;
-    border-radius:10px; padding:10px 14px; color:#f0ece4;
-    font-family:'IBM Plex Mono',monospace; font-size:12px;
-    outline:none;
-  }
-  .cal-input:focus { border-color:#e07248; }
-  .cal-search-btn {
-    background:#e07248; color:#fff; border:none;
-    border-radius:10px; padding:10px 16px;
-    font-weight:800; font-size:13px; cursor:pointer;
-    white-space:nowrap;
-  }
-  .cal-search-btn:disabled { opacity:.5; cursor:not-allowed; }
+
 
   /* nav */
   .cal-nav {
@@ -94,7 +85,7 @@
   .cal-day.loss   { background:rgba(240,82,72,.13); border-color:rgba(240,82,72,.3); }
   .cal-day:hover  { border-color:#e07248; }
   .cal-dn  { font-size:9px; font-weight:700; opacity:.5; color:#f0ece4; }
-  .cal-dv  { font-size:9px; font-weight:800; text-align:center; }
+  .cal-dv  { font-size:clamp(8px,2vw,11px); font-weight:800; text-align:center; line-height:1.1; }
   .cal-dv.profit-txt { color:#34c85a; }
   .cal-dv.loss-txt   { color:#f05248; }
 
@@ -167,18 +158,15 @@
   const html = `
   <div id="calModal">
     <div class="cal-header">
-      <span class="cal-title">📅 تقويم التداول</span>
-      <button class="cal-close" id="calCloseBtn">✕</button>
+      <button class="cal-back-btn" id="calCloseBtn">← رجوع</button>
+      <span class="cal-title">📅 تقويم</span>
+      <span style="width:68px"></span>
     </div>
     <div class="cal-body">
-      <!-- Search -->
-      <div class="cal-search">
-        <input class="cal-input" id="calWalletInput" placeholder="عنوان المحفظة 0x..." dir="ltr">
-        <button class="cal-search-btn" id="calSearchBtn">تحليل</button>
-      </div>
+      <!-- عنوان المحفظة تلقائي — لا يظهر حقل البحث -->
 
       <!-- Stats -->
-      <div class="cal-stats" id="calStats" style="display:none">
+      <div class="cal-stats" id="calStats" style="display:none"><!-- يظهر بعد التحميل -->
         <div class="cal-stat"><span class="cal-stat-lbl">24س</span><span class="cal-stat-val" id="cStat24">—</span></div>
         <div class="cal-stat"><span class="cal-stat-lbl">7 أيام</span><span class="cal-stat-val" id="cStat7">—</span></div>
         <div class="cal-stat"><span class="cal-stat-lbl">30 يوم</span><span class="cal-stat-val" id="cStat30">—</span></div>
@@ -257,10 +245,14 @@
     const sw=startOfWeek(start);
 
     $('calMonthLbl').textContent=MONTHS_AR[_curMonth.getMonth()]+' '+_curMonth.getFullYear();
+    $('calStats').style.display='grid';
+    $('calNav').style.display='flex';
+    $('calGridHdr').style.display='grid';
 
     let d=new Date(sw);
-    // Fill until end of week that contains end of month
-    const endWeekDay=end.getDay(); const daysToAdd=endWeekDay===0?0:7-endWeekDay;
+    // اكمل الأسبوع الأخير حتى الأحد
+    const endWeekDay=end.getDay();
+    const daysToAdd=endWeekDay===0?0:7-endWeekDay;
     const gridEnd=addDays(end,daysToAdd);
 
     while(d<=gridEnd){
@@ -359,16 +351,16 @@
   $('calWalletInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) analyze(v); }});
   $('calWalletInput').onfocus=()=>$('calWalletInput').select();
 
-  /* ─── Open from footer ─── */
+  /* ─── Open from footer — تلقائي ─── */
   window.openCalendar = function(){
     const modal=$('calModal');
     modal.classList.add('open');
-    // استخدام عنوان المحفظة الحالية تلقائياً
+    _curMonth = new Date(); // ابدأ دائماً من الشهر الحالي
     const addr=window.State?.wallet?.address||'';
-    if(addr){
-      const inp=$('calWalletInput');
-      inp.value=addr;
-      if(!_fills.length) analyze(addr);
+    if(addr && !_fills.length) {
+      analyze(addr);
+    } else if(addr && _fills.length) {
+      renderCal(); renderStats(); // أعد رسم إذا البيانات موجودة
     }
   };
 
