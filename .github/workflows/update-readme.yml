@@ -15,9 +15,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Generate MD files map (تم نقله للأولوية الأولى)
+        run: |
+          mkdir -p md # هذا الأمر يضمن إنشاء مجلد md إذا لم يكن موجوداً
+          if [ -n "$(ls -A md/*.md 2>/dev/null)" ]; then
+            echo "[" > md/files.json
+            ls md/*.md 2>/dev/null | xargs -I {} basename {} .md | awk 'NR>1{printf ","}{printf "\"%s\"", $0}' >> md/files.json
+            echo "]" >> md/files.json
+          else
+            echo "[]" > md/files.json
+          fi
+
       - name: Generate tree and update safely
         run: |
-          # ⬇️ هذا هو السطر الذي يولد الشجرة، لقد أزلت 'md' من القائمة ليظهر المجلد ⬇️
+          # الآن سيجد مجلد md وبداخله files.json
           tree -I '.git|.github|node_modules' --charset utf-8 > tree.txt
           
           # تجهيز الشجرة الجديدة بين العلامات
@@ -37,16 +48,6 @@ jobs:
           
           # تنظيف
           rm -f tree.txt new_tree.txt
-
-      - name: Generate MD files map
-        run: |
-          if [ -d "md" ]; then
-            echo "[" > md/files.json
-            ls md/*.md 2>/dev/null | xargs -I {} basename {} .md | awk 'NR>1{printf ","}{printf "\"%s\"", $0}' >> md/files.json
-            echo "]" >> md/files.json
-          else
-            echo "[]" > md/files.json
-          fi
 
       - name: Commit and push if changed
         run: |
