@@ -7,7 +7,6 @@
   <link rel="icon" href="/images/btc.png" type="image/png"/>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    /* إزالة جميع الهوامش والحدود */
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -46,17 +45,21 @@
   <div id="content">Loading...</div>
 
   <script>
-    // دالة للتحقق من وجود الملف على السيرفر بدون تحميله بالكامل
-    async function checkFileExists(url) {
-      try {
-        const response = await fetch(url, { method: 'HEAD' }); // HEAD يطلب فقط الترويسة وليس المحتوى
-        return response.ok; // يعود بـ true إذا كان موجود (200)، و false إذا لم يكن (404)
-      } catch (e) {
-        return false; // في حال خطأ بالشبكة
-      }
-    }
+    let allowedFiles = []; // هنا سنخزن أسماء الملفات الصحيحة
 
-    async function loadContent() {
+    // 1. جلب خريطة الملفات من ملف files.json الذي صنعه البوت
+    fetch('md/files.json')
+      .then(r => r.json())
+      .then(files => {
+        allowedFiles = files; // حفظ القائمة
+        loadContent(); // الآن ابدأ بتحميل المحتوى
+      })
+      .catch(e => {
+        // إذا فشل تحميل الخريطة، نعرض رسالة خطأ
+        document.getElementById('content').innerHTML = '<p style="color:red; text-align:center;">Error loading file map.</p>';
+      });
+
+    function loadContent() {
       let hash = window.location.hash.substring(1);
       const contentDiv = document.getElementById('content');
 
@@ -66,44 +69,31 @@
         return;
       }
 
-      // إذا كتب المستخدم كلمة readme، اعرضها مباشرة بدون فحص (لأنها الافتراضية)
-      if (hash === 'readme') {
-        const filePath = `md/readme.md`;
-        contentDiv.innerHTML = '<p style="text-align:center; color:#888;">Loading...</p>';
-        
-        try {
-          const r = await fetch(filePath);
-          if (!r.ok) throw new Error('Not Found');
-          const text = await r.text();
-          renderMarkdown(text, contentDiv, 'readme');
-        } catch (e) {
-           contentDiv.innerHTML = '<p style="text-align:center; color:#red;">الملف readme.md غير موجود!</p>';
-        }
+      // ⬇️ السحر هنا ⬇️
+      // إذا كان الملف غير موجود في القائمة التي جلبناها من البوت، انقل المستخدم فوراً لـ readme
+      if (!allowedFiles.includes(hash)) {
+        window.location.hash = 'readme';
         return;
       }
 
-      // ⬇️ هنا الذكاء ⬇️: فحص أي ملف آخر قبل جلبه
+      // إذا كان الملف موجوداً في القائمة، قم بجلبه وعرضه بأمان تام
       const filePath = `md/${hash}.md`;
-      contentDiv.innerHTML = '<p style="text-align:center; color:#888;">Checking file...</p>';
+      contentDiv.innerHTML = '<p style="text-align:center; color:#888;">Loading...</p>';
 
-      const exists = await checkFileExists(filePath);
-
-      if (exists) {
-        // الملف موجود، قم بجلبه وعرضه بأمان
-        try {
-          const r = await fetch(filePath);
-          const text = await r.text();
+      fetch(filePath)
+        .then(r => {
+          if (!r.ok) throw new Error('Not Found');
+          return r.text();
+        })
+        .then(text => {
           renderMarkdown(text, contentDiv, hash);
-        } catch (e) {
-          window.location.hash = 'readme'; // احتياط
-        }
-      } else {
-        // الملف غير موجود! انقل المستخدم فوراً إلى readme بدون إظهار أي كود مزعج
-        window.location.hash = 'readme';
-      }
+        })
+        .catch(e => {
+          // احتياط أمان إضافي
+          window.location.hash = 'readme';
+        });
     }
 
-    // دالة مساعدة لتحويل النص وتطبيق الاتجاه
     function renderMarkdown(text, element, title) {
       const firstMeaningfulLine = text.trim().split('\n').find(line => line.trim() !== '');
       const hasArabic = /[\u0600-\u06FF]/.test(firstMeaningfulLine || '');
@@ -115,7 +105,7 @@
       document.title = title; 
     }
 
-    loadContent();
+    // الاستماع لتغيير الهاش
     window.addEventListener('hashchange', loadContent);
   </script>
 </body>
