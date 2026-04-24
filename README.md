@@ -1,3 +1,14 @@
+# Kanba
+***
+https://kanba.pw/
+***
+https://tst.kanba.pw/
+***
+https://shop.kanba.pw/
+***
+![kanba](/images/0xKanba.png)
+***
+
 ## 📂 هيكل المشروع
 ```text
 .
