@@ -1,11 +1,11 @@
 # Kanba
+
+[Link](https://kanba.pw/)
 ***
-https://kanba.pw/
-***
-![Kanna](/images/0xKanba.png)
+![Kanba](/images/0xKanba.png)
 ***
 # Younis 
-***
+
 https://kanba.pw/younis
 ***
 ![Younis](/images/Younis.png)
