@@ -45,17 +45,16 @@
   <div id="content">Loading...</div>
 
   <script>
-    let allowedFiles = []; // هنا سنخزن أسماء الملفات الصحيحة
+    let allowedFiles = []; 
 
-    // 1. جلب خريطة الملفات من ملف files.json الذي صنعه البوت
+    // جلب خريطة الملفات
     fetch('md/files.json')
       .then(r => r.json())
       .then(files => {
-        allowedFiles = files; // حفظ القائمة
-        loadContent(); // الآن ابدأ بتحميل المحتوى
+        allowedFiles = files; 
+        loadContent(); 
       })
       .catch(e => {
-        // إذا فشل تحميل الخريطة، نعرض رسالة خطأ
         document.getElementById('content').innerHTML = '<p style="color:red; text-align:center;">Error loading file map.</p>';
       });
 
@@ -63,20 +62,19 @@
       let hash = window.location.hash.substring(1);
       const contentDiv = document.getElementById('content');
 
-      // إذا كان الرابط فارغاً، حوله إلى readme
+      // إذا كان الرابط فارغاً، حوله إلى us افتراضياً
       if (!hash) {
         window.location.hash = 'us';
         return;
       }
 
-      // ⬇️ السحر هنا ⬇️
-      // إذا كان الملف غير موجود في القائمة التي جلبناها من البوت، انقل المستخدم فوراً لـ readme
+      // إذا كان الملف غير موجود في القائمة، انقل المستخدم فوراً لـ us
       if (!allowedFiles.includes(hash)) {
-        window.location.hash = 'readme';
+        window.location.hash = 'us';
         return;
       }
 
-      // إذا كان الملف موجوداً في القائمة، قم بجلبه وعرضه بأمان تام
+      // جلب وعرض الملف الصحيح
       const filePath = `md/${hash}.md`;
       contentDiv.innerHTML = '<p style="text-align:center; color:#888;">Loading...</p>';
 
@@ -89,8 +87,7 @@
           renderMarkdown(text, contentDiv, hash);
         })
         .catch(e => {
-          // احتياط أمان إضافي
-          window.location.hash = 'readme';
+          window.location.hash = 'us'; // احتياط
         });
     }
 
@@ -105,7 +102,6 @@
       document.title = title; 
     }
 
-    // الاستماع لتغيير الهاش
     window.addEventListener('hashchange', loadContent);
   </script>
 </body>
