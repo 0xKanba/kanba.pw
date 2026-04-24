@@ -68,8 +68,8 @@
           "accounts": [
             { "id": "instant-starter", "name": "Instant Starter", "path": "data/firms/blueguardian/forex/instant-starter.json" }
           ]
-        },
-        
-          ]
         }
-  
+      ]
+    }
+  ]
+}
