@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded',function(){const link=document.crea
           <a href="/index.html" class="footer-tab" data-page="index">Kanba</a>
           <a href="/younis.html" class="footer-tab" data-page="younis">Younis</a>
           <a href="/ccr.html" class="footer-tab"  data-page="ccr">Compounding Calc.</a>
-          <a href="/funded/index.html" class="footer-tab" data-page="funded/index">All funded rules</a>
+          <a href="/funded/index.html" class="footer-tab" data-page="/funded/index">All funded rules</a>
           <a href="/videos.html" class="footer-tab" target="_blank" data-page="videos">my videos</a>
 
         </div>
