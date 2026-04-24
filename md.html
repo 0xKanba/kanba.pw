@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MD</title>
-    <link rel="icon" href="/images/btc.png" type="image/png"/>
+  <title>Content</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     /* إزالة جميع الهوامش والحدود */
@@ -23,10 +22,9 @@
       padding: 30px 20px;
       max-width: 900px;
       margin: 0 auto;
-      text-align: center; /* توسيط نص افتراضي */
+      text-align: center;
     }
 
-    /* الوضع الداكن حسب إعدادات الجهاز */
     @media (prefers-color-scheme: dark) {
       body {
         color: #eee;
@@ -37,13 +35,11 @@
       th, td { border-color: #555; }
     }
 
-    /* توسيط المحتوى فقط */
     #content {
-      text-align: initial; /* يعود للنص الطبيعي (ليس مركّزًا) بعد التحليل */
+      text-align: initial;
       margin: 0 auto;
     }
 
-    /* تنسيق عام للمحتوى */
     h1, h2, h3, h4, h5, h6 {
       margin: 1.5em 0 1em;
       color: #0074d9;
@@ -109,37 +105,48 @@
   <div id="content">Loading...</div>
 
   <script>
-    // 1. جلب اسم الملف من الرابط (مثال: ?file=1.md) <-- جديد
-    const urlParams = new URLSearchParams(window.location.search);
-    const fileName = urlParams.get('file') || '1.md'; // <-- جديد: إذا لم يوجد، استخدم 1.md
-    const filePath = `md/${fileName}`; // <-- جديد: إضافة مسار مجلد md
+    function loadContent() {
+      // 1. قراءة ما بعد علامة # (مثال: #tst)
+      const hash = window.location.hash.substring(1); 
+      
+      // 2. إذا لم يكن هناك اسم ملف، نستخدم 1 كافتراضي
+      const fileName = hash || '1'; 
+      
+      // 3. بناء المسار: نضيف .md تلقائياً للإختصار (المجلد هو نفسه مجلد الصفحة الحالية)
+      const filePath = `./${fileName}.md`;
 
-    // 2. جلب الملف الديناميكي <-- جديد (تغيير الرابط الثابت إلى filePath)
-    fetch(filePath)
-      .then(r => {
-        if (!r.ok) throw new Error('File not found'); // <-- جديد: التحقق من وجود الملف
-        return r.text();
-      })
-      .then(text => {
-        const contentDiv = document.getElementById('content');
+      const contentDiv = document.getElementById('content');
 
-        // تحليل النص لتحديد اللغة والاتجاه
-        const firstMeaningfulLine = text.trim().split('\n').find(line => line.trim() !== '');
-        const hasArabic = /[\u0600-\u06FF]/.test(firstMeaningfulLine || '');
+      fetch(filePath)
+        .then(r => {
+          if (!r.ok) throw new Error('File not found');
+          return r.text();
+        })
+        .then(text => {
+          // تحليل النص لتحديد اللغة والاتجاه
+          const firstMeaningfulLine = text.trim().split('\n').find(line => line.trim() !== '');
+          const hasArabic = /[\u0600-\u06FF]/.test(firstMeaningfulLine || '');
 
-        // تطبيق الاتجاه تلقائيًا فقط على المحتوى، بدون تغيير الصفحة ككل
-        contentDiv.style.direction = hasArabic ? 'rtl' : 'ltr';
-        contentDiv.style.textAlign = hasArabic ? 'right' : 'left';
+          // تطبيق الاتجاه تلقائيًا
+          contentDiv.style.direction = hasArabic ? 'rtl' : 'ltr';
+          contentDiv.style.textAlign = hasArabic ? 'right' : 'left';
 
-        // تحويل Markdown إلى HTML
-        contentDiv.innerHTML = marked.parse(text);
-        
-        // تحديث عنوان الصفحة في التاب للمتصفح <-- جديد
-        document.title = fileName.replace('.md', ''); 
-      })
-      .catch(e => {
-        document.getElementById('content').innerHTML = `<p style="color:red; text-align:center;">الملف ${filePath} غير موجود.</p>`; // <-- جديد: رسالة خطأ بالعربي
-      });
+          // تحويل Markdown إلى HTML
+          contentDiv.innerHTML = marked.parse(text);
+          
+          // تحديث عنوان التاب في المتصفح
+          document.title = fileName; 
+        })
+        .catch(e => {
+          contentDiv.innerHTML = `<p style="color:red; text-align:center;">الملف ${filePath} غير موجود.</p>`;
+        });
+    }
+
+    // تشغيل الدالة عند فتح الصفحة لأول مرة
+    loadContent();
+
+    // تشغيل الدالة مرة أخرى إذا قام المستخدم بتغيير الـ # في الرابط
+    window.addEventListener('hashchange', loadContent);
   </script>
 </body>
 </html>
