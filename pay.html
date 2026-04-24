@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pay for your website create</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0a0a0d;
+            color: #e8e8ed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            background: #141418;
+            border: 1px solid #232329;
+            border-radius: 16px;
+            padding: 44px 40px;
+            max-width: 460px;
+            width: 100%;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,107,53,0.1);
+            color: #ff6b35;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: #ff6b35;
+            margin-bottom: 6px;
+        }
+
+        .price span {
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #666;
+        }
+
+        .desc {
+            color: #777;
+            font-size: 0.92rem;
+            line-height: 1.8;
+            margin-bottom: 28px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #232329;
+            margin-bottom: 24px;
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        ul li {
+            padding: 9px 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #d0d0da;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        ul li i {
+            color: #ff6b35;
+            font-size: 0.55rem;
+            flex-shrink: 0;
+        }
+
+        .domain {
+            background: #1a1a20;
+            border: 1px solid #232329;
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .domain i {
+            color: #ff6b35;
+            font-size: 0.85rem;
+        }
+
+        .domain span {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #c0c0cc;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #ff6b35;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.85; }
+
+        /* ===== Payment Screen ===== */
+        .pay-screen {
+            display: none;
+        }
+
+        .pay-screen.active {
+            display: block;
+        }
+
+        .back-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 28px;
+            cursor: pointer;
+            color: #777;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .back-row:hover { color: #ff6b35; }
+
+        .pay-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .pay-subtitle {
+            color: #777;
+            font-size: 0.88rem;
+            margin-bottom: 24px;
+        }
+
+        .network-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(40,160,240,0.1);
+            color: #28a0f0;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            margin-bottom: 22px;
+        }
+
+        .copy-block {
+            background: #1a1a20;
+            border: 1px solid #232329;
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+        }
+
+        .copy-label {
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .copy-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .copy-value {
+            font-weight: 900;
+            font-size: 0.95rem;
+            color: #d0d0da;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .copy-value.mono {
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            letter-spacing: 0.3px;
+        }
+
+        .copy-btn {
+            flex-shrink: 0;
+            background: #232329;
+            border: 1px solid #2e2e36;
+            border-radius: 8px;
+            color: #999;
+            padding: 7px 12px;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .copy-btn.copied {
+            border-color: #2dd4a0;
+            color: #2dd4a0;
+        }
+
+        .paid-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            color: #777;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: 1px solid #232329;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 24px;
+            transition: all 0.2s;
+        }
+
+        .paid-btn:hover {
+            border-color: #2dd4a0;
+            color: #2dd4a0;
+        }
+
+        .note {
+            text-align: center;
+            color: #555;
+            font-size: 0.78rem;
+            margin-top: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+
+        <!-- Service Card -->
+        <div id="serviceCard">
+            <div class="badge"><i class="fas fa-bolt"></i> Monthly Plan</div>
+
+            <h1>Build & Publish Your Website</h1>
+
+            <div class="price">$35 <span>/ month</span></div>
+
+            <p class="desc">
+                Create your site and connect it to your own domain. Everything ready in minutes — no complexity.
+            </p>
+
+            <hr class="divider">
+
+            <ul>
+                <li><i class="fas fa-circle"></i> Full Website Creation</li>
+                <li><i class="fas fa-circle"></i> Custom Domain Connection</li>
+                <li><i class="fas fa-circle"></i> Free SSL Certificate</li>
+                <li><i class="fas fa-circle"></i> Fast & Secure Hosting</li>
+            </ul>
+
+            <div class="domain">
+                <i class="fas fa-globe"></i>
+                <span>yourname.zai.dev</span>
+            </div>
+
+            <button class="btn" onclick="showPayment()">Get Started — $35/month</button>
+        </div>
+
+        <!-- Payment Screen -->
+        <div class="pay-screen" id="payScreen">
+            <div class="back-row" onclick="showService()">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </div>
+
+            <div class="pay-title">Deposit USDC</div>
+            <div class="pay-subtitle">Send exactly the amount below on Arbitrum One</div>
+
+            <div class="network-badge">
+                <i class="fas fa-link"></i>
+                Arbitrum One
+            </div>
+
+            <!-- Amount -->
+            <div class="copy-block">
+                <div class="copy-label">Amount</div>
+                <div class="copy-row">
+                    <div class="copy-value" id="amountVal">35.00 USDC</div>
+                    <button class="copy-btn" onclick="copyText('35.00', this)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="copy-block">
+                <div class="copy-label">Deposit Address</div>
+                <div class="copy-row">
+                    <div class="copy-value mono" id="addrVal">0x121B845Cb550dD5B01B9eAc5BD65f79d84c6Ee99</div>
+                    <button class="copy-btn" onclick="copyText('0x121B845Cb550dD5B01B9eAc5BD65f79d84c6Ee99', this)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <button class="paid-btn" onclick="showService()">I've Paid</button>
+
+            <p class="note">Make sure to send only USDC on Arbitrum One network.<br>Sending other tokens or using a different network may result in loss.</p>
+        </div>
+
+    </div>
+
+    <script>
+        const serviceCard = document.getElementById('serviceCard');
+        const payScreen = document.getElementById('payScreen');
+
+        function showPayment() {
+            serviceCard.style.display = 'none';
+            payScreen.classList.add('active');
+        }
+
+        function showService() {
+            payScreen.classList.remove('active');
+            serviceCard.style.display = 'block';
+        }
+
+        function copyText(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const origHTML = btn.innerHTML;
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = origHTML;
+                }, 1500);
+            });
+        }
+    </script>
+
+</body>
+</html>
