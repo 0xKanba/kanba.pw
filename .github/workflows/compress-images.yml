@@ -1,0 +1,41 @@
+name: Compress Images
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch: # هذا يضيف زر لتشغيل البوت يدوياً متى أردت
+
+jobs:
+  compress:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ImageMagick
+        run: sudo apt-get install -y imagemagick
+
+      - name: Compress Images
+        run: |
+          # جلب الرسالة الأصلية للاستخدام لاحقاً
+          ORIGINAL_MESSAGE=$(git log -1 --pretty=%B)
+          
+          echo "🔍 البحث عن الصور لضغطها..."
+          # ضغط صور PNG (جودة 85%)
+          find . -type f -name "*.png" ! -path "./.git/*" -exec mogrify -quality 85 -strip {} \;
+          
+          # ضغط صور JPG/JPEG (جودة 85%)
+          find . -type f -name "*.jpg" ! -path "./.git/*" -exec mogrify -quality 85 -strip {} \;
+          find . -type f -name "*.jpeg" ! -path "./.git/*" -exec mogrify -quality 85 -strip {} \;
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "🖼️ ضغط الصور تلقائياً لتسريع الموقع"
+          git push
