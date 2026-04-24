@@ -1,3 +1,4 @@
+const TROY_OZ_PER_GRAM = 1/31.1035;
 /* ═══════════════════════════════════════════════════════════════
    HL Trade · hl.js v8.0
    ✅ Fix TP/SL Cancel logic
@@ -17,9 +18,13 @@ const LAST_PIN_KEY    = 'hl_trade_last_pin';     // آخر إدخال PIN صحي
 const LAST_ACTIVITY_KEY = 'hl_last_activity';    // آخر نشاط مستخدم (للقفل التلقائي)
 const PIN_TIMEOUT     = 15 * 60 * 1000;          // 15 دقيقة
 
+const TROY_OZ = 31.1035; // 1 troy ounce = 31.1035 gram
+
 const ASSETS = {
   NQ:     { coin:'xyz:XYZ100', idx:110000, lev:30, cross:true,  szDp:4, pxDp:0, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
-  GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب'        },
+  GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب (أونصة)' },
+  // غرام الذهب — بصري فقط، يُحوَّل لـ GOLD عند التنفيذ
+  XAU:    { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:2, pxDp:2, unit:'غرام',  presets:[1,2,5,10,20,50],  icon:'⚖️', name:'ذهب (غرام)', gram:true },
   SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'        },
   CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام'    }
 };
@@ -34,10 +39,10 @@ Object.entries(ASSETS).forEach(([sym,a]) => {
 
 const State = {
   wallet: null, asset: 'CL', qty: 0.1,
-  prices:  { NQ:{bid:0,ask:0,mid:0}, GOLD:{bid:0,ask:0,mid:0}, SILVER:{bid:0,ask:0,mid:0}, CL:{bid:0,ask:0,mid:0} },
-  prevMid: { NQ:0, GOLD:0, SILVER:0, CL:0 },
-  prevDayPx: { NQ:0, GOLD:0, SILVER:0, CL:0 },
-  fundingRates: {},
+  prices:  { NQ:{bid:0,ask:0,mid:0}, GOLD:{bid:0,ask:0,mid:0}, XAU:{bid:0,ask:0,mid:0}, SILVER:{bid:0,ask:0,mid:0}, CL:{bid:0,ask:0,mid:0} },
+  prevMid: { NQ:0, GOLD:0, XAU:0, SILVER:0, CL:0 },
+  prevDayPx: { NQ:0, GOLD:0, XAU:0, SILVER:0, CL:0 },
+  fundingRates: {}, // GOLDG مرتبط بـ GOLD
   positions: [], openOrders: [], timers: [],
   pendingTrade: null, pendingClose: null,
   pendingTP: null, pendingSL: null,
@@ -45,7 +50,7 @@ const State = {
   lastPinTime: 0, pinCallback: null,
   isLocked: false, inactivityTimer: null,
   currentPinInput: '', currentSetPinInput: '', referrerSet: false,
-  sessionStats: { NQ: null, GOLD: null, SILVER: null, CL: null },
+  sessionStats: { NQ: null, GOLD: null, XAU: null, SILVER: null, CL: null },
   _sessionTimer: null
 };
 
@@ -451,13 +456,27 @@ function wsMainClose() {
 function _onWsBbo(data) {
   const coin = data.coin || '';
   const raw  = coin.includes(':') ? coin.split(':')[1] : coin;
-  const sym  = COIN_TO_SYM[raw] || raw;   // XYZ100→NQ
+  const sym  = COIN_TO_SYM[raw] || raw;
   if (!ASSETS[sym]) return;
   const bid = parseFloat(data.bbo?.[0]?.px || 0);
   const ask = parseFloat(data.bbo?.[1]?.px || 0);
   const mid = (bid && ask) ? (bid + ask) / 2 : (bid || ask);
   if (!mid) return;
   State.prices[sym] = {bid, ask, mid};
+  // XAU (غرام الذهب) = سعر GOLD ÷ TROY_OZ
+  if(sym === 'GOLD') {
+    const gBid=bid/TROY_OZ, gAsk=ask/TROY_OZ, gMid=mid/TROY_OZ;
+    State.prices['XAU'] = {bid:gBid, ask:gAsk, mid:gMid};
+    const xauEl=$('priceXAU');
+    if(xauEl){
+      const dir=gMid>State.prevMid['XAU']?'up':gMid<State.prevMid['XAU']?'dn':'';
+      xauEl.textContent=fmt(gMid,ASSETS['XAU'].pxDp);
+      xauEl.className=`tab-price${dir?' '+dir:''}`;
+      if(dir) setTimeout(()=>xauEl.className='tab-price',800);
+      State.prevMid['XAU']=gMid;
+    }
+    if(State.asset==='XAU') updatePriceUI();
+  }
   const el = $(`price${sym}`);
   if (el) {
     const dir = mid > State.prevMid[sym] ? 'up' : mid < State.prevMid[sym] ? 'dn' : '';
@@ -465,7 +484,32 @@ function _onWsBbo(data) {
     el.className = `tab-price${dir ? ' ' + dir : ''}`;
     if (dir) setTimeout(() => el.className = 'tab-price', 800);
   }
+  // GOLDG يُزامن سعره مع GOLD (مقسوم على 31.1035 لسعر الغرام)
+  if (sym === 'GOLD') {
+    const gramMid = mid / 31.1035;
+    const gramBid = bid ? bid / 31.1035 : 0;
+    const gramAsk = ask ? ask / 31.1035 : 0;
+    State.prices['GOLDG'] = {bid:gramBid, ask:gramAsk, mid:gramMid};
+    const ge = $('priceGOLDG');
+    if (ge) {
+      const dir2 = gramMid > State.prevMid['GOLDG'] ? 'up' : gramMid < State.prevMid['GOLDG'] ? 'dn' : '';
+      ge.textContent = fmt(gramMid, ASSETS['GOLDG'].pxDp);
+      ge.className = `tab-price${dir2 ? ' '+dir2 : ''}`;
+      if (dir2) setTimeout(() => ge.className = 'tab-price', 800);
+    }
+    State.prevMid['GOLDG'] = gramMid;
+  }
+  // XAU (غرام ذهب) = GOLD ÷ 31.1035
+  if (sym === 'GOLD') {
+    const gm = mid/31.1035;
+    State.prices['XAU'] = {bid:bid/31.1035, ask:ask/31.1035, mid:gm};
+    State.prevMid['XAU'] = gm;
+    const xe=$('priceXAU'); if(xe){ xe.textContent=fmt(gm,2); }
+    if(State.asset==='XAU') updatePriceUI();
+  }
   if (sym === State.asset) updatePriceUI();
+  // GOLDG أيضاً تحديث إذا كان الأصل المحدد
+  if (sym === 'GOLD' && State.asset === 'GOLDG') updatePriceUI();
 }
 
 let _ctxCounter = 0;
@@ -517,7 +561,9 @@ async function pollPrices(){
 }
 
 function updatePriceUI(){
-  const a=ASSETS[State.asset], p=State.prices[State.asset];
+  const a=ASSETS[State.asset];
+  // XAU: السعر من State.prices['XAU'] = GOLD price / TROY_OZ
+  const p=State.prices[State.asset];
   if(!p||!p.mid) return;
   const dir=p.mid>State.prevMid[State.asset]?1:p.mid<State.prevMid[State.asset]?-1:0;
   const cls=dir>0?'up':dir<0?'dn':'n';
@@ -748,6 +794,7 @@ function renderPositions(){
 // تبويب الأصول
 // ════════════════════════════════════════
 const ASSET_IMAGES = {
+  XAU:    '/hl/images/gold.svg',
   NQ:     '/hl/images/100.png',
   GOLD:   '/hl/images/gold.svg',
   SILVER: '/hl/images/silver.svg',
@@ -811,8 +858,15 @@ function askTrade(isBuy){
 
 async function execTrade(){
   if(!State.pendingTrade){ closeModal('modalConfirm'); return; }
-  const {isBuy,qty,sym}=State.pendingTrade;
+  let {isBuy,qty,sym}=State.pendingTrade;
   const a=ASSETS[sym], p=State.prices[sym];
+
+  // غرام الذهب → تحويل لأونصة قبل الإرسال
+  let execQty=qty, execSym=sym, execAsset=a, execPrice=p;
+  if(a.gram){
+    execQty=+(qty/TROY_OZ).toFixed(ASSETS['GOLD'].szDp);
+    execSym='GOLD'; execAsset=ASSETS['GOLD']; execPrice=State.prices['GOLD'];
+  }
   if(!p?.mid){ toast('لا يوجد سعر','err'); closeModal('modalConfirm'); return; }
   setBtnLoading('confirmExecute','⏳');
   showLoader(`${a.icon} ${isBuy?'شراء':'بيع'} ${qty} ${a.unit}...`);
@@ -839,7 +893,7 @@ async function execTrade(){
     if(status?.filled) {
       const f=status.filled;
       closeModal('modalConfirm');
-      toast(`✅ مُنفَّذ — ${a.icon} ${f.totalSz} بسعر ${fmt(parseFloat(f.avgPx),a.pxDp)}`,'ok',5000);
+      const dispSz=a.gram?(+f.totalSz*TROY_OZ).toFixed(2):f.totalSz; toast(`✅ مُنفَّذ — ${a.icon} ${dispSz} ${a.unit} بسعر ${fmt(parseFloat(f.avgPx)/( a.gram?TROY_OZ:1),a.pxDp)}`,'ok',5000);
     } else if(status?.resting) {
       // أمر معلق (لم يُملأ فوراً)
       closeModal('modalConfirm');
