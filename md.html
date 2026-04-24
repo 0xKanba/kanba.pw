@@ -108,8 +108,17 @@
   <div id="content">Loading...</div>
 
   <script>
-    fetch('README.md')
-      .then(r => r.text())
+    // 1. جلب اسم الملف من الرابط (مثال: ?file=1.md) <-- جديد
+    const urlParams = new URLSearchParams(window.location.search);
+    const fileName = urlParams.get('file') || '1.md'; // <-- جديد: إذا لم يوجد، استخدم 1.md
+    const filePath = `md/${fileName}`; // <-- جديد: إضافة مسار مجلد md
+
+    // 2. جلب الملف الديناميكي <-- جديد (تغيير الرابط الثابت إلى filePath)
+    fetch(filePath)
+      .then(r => {
+        if (!r.ok) throw new Error('File not found'); // <-- جديد: التحقق من وجود الملف
+        return r.text();
+      })
       .then(text => {
         const contentDiv = document.getElementById('content');
 
@@ -123,9 +132,12 @@
 
         // تحويل Markdown إلى HTML
         contentDiv.innerHTML = marked.parse(text);
+        
+        // تحديث عنوان الصفحة في التاب للمتصفح <-- جديد
+        document.title = fileName.replace('.md', ''); 
       })
       .catch(e => {
-        document.getElementById('content').innerHTML = '<p style="color:#888">Failed to load content.</p>';
+        document.getElementById('content').innerHTML = `<p style="color:red; text-align:center;">الملف ${filePath} غير موجود.</p>`; // <-- جديد: رسالة خطأ بالعربي
       });
   </script>
 </body>
