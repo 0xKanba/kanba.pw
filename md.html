@@ -112,9 +112,8 @@
       // 2. إذا لم يكن هناك اسم ملف، نستخدم 1 كافتراضي
       const fileName = hash || '1'; 
       
-      // 3. بناء المسار: نضيف .md تلقائياً للإختصار (المجلد هو نفسه مجلد الصفحة الحالية)
-      const filePath = `./${fileName}.md`;
-
+      // 3. بناء المسار: نضيف .md تلقائياً ونحدد مجلد md
+      const filePath = `md/${fileName}.md`;
       const contentDiv = document.getElementById('content');
 
       fetch(filePath)
