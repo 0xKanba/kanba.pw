@@ -1,0 +1,47 @@
+name: Auto Update Project Tree
+
+on:
+  push:
+    branches:
+      - main # قم بتغييرها إلى master إذا كان الفرع الرئيسي في مشروعك اسمه master
+
+jobs:
+  update-structure:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate tree and update README.md
+        run: |
+          # توليد هيكل المشروع (مع إخفاء ملفات النظام الغير مهمة)
+          tree -I '.git|.github|node_modules' --charset utf-8 > tree.txt
+          
+          # تجهيز الهيكل الجديد
+          echo "## 📂 هيكل المشروع" > new_section.md
+          echo '```text' >> new_section.md
+          cat tree.txt >> new_section.md
+          echo '```' >> new_section.md
+          
+          # إذا كان README.md موجود، نحذف الهيكل القديم ونضع الجديد. وإذا لم يكن موجوداً ننشئه.
+          if [ -f README.md ]; then
+            sed -i '/## 📂 هيكل المشروع/,/```/d' README.md
+            cat new_section.md README.md > temp.md
+            mv temp.md README.md
+          else
+            mv new_section.md README.md
+          fi
+          
+          # تنظيف الملفات المؤقتة
+          rm tree.txt new_section.md
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --staged --quiet || git commit -m "🔄 تحديث هيكل المشروع تلقائياً"
+          git push
