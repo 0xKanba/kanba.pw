@@ -3,7 +3,7 @@ name: Auto Update Project Tree
 on:
   push:
     branches:
-      - master # قم بتغييرها إلى master إذا كان الفرع الرئيسي في مشروعك اسمه master
+      - main
 
 jobs:
   update-structure:
@@ -17,7 +17,7 @@ jobs:
 
       - name: Generate tree and update README.md
         run: |
-          # توليد هيكل المشروع (مع إخفاء ملفات النظام الغير مهمة)
+          # توليد هيكل المشروع
           tree -I '.git|.github|node_modules' --charset utf-8 > tree.txt
           
           # تجهيز الهيكل الجديد
@@ -26,7 +26,7 @@ jobs:
           cat tree.txt >> new_section.md
           echo '```' >> new_section.md
           
-          # إذا كان README.md موجود، نحذف الهيكل القديم ونضع الجديد. وإذا لم يكن موجوداً ننشئه.
+          # إذا كان README.md موجود، نحذف الهيكل القديم ونضع الجديد
           if [ -f README.md ]; then
             sed -i '/## 📂 هيكل المشروع/,/```/d' README.md
             cat new_section.md README.md > temp.md
@@ -35,8 +35,8 @@ jobs:
             mv new_section.md README.md
           fi
           
-          # تنظيف الملفات المؤقتة
-          rm tree.txt new_section.md
+          # تنظيف الملفات المؤقتة (أضفنا f لمنع خطأ إذا لم يكن الملف موجوداً)
+          rm -f tree.txt new_section.md
 
       - name: Commit and push if changed
         run: |
