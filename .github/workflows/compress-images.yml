@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-  workflow_dispatch: # هذا يضيف زر لتشغيل البوت يدوياً متى أردت
+  workflow_dispatch: # زر لتشغيل البوت يدوياً متى أردت
 
 jobs:
   compress:
@@ -19,23 +19,29 @@ jobs:
       - name: Install ImageMagick
         run: sudo apt-get install -y imagemagick
 
-      - name: Compress Images
+      - name: Compress Images in /images/ only
         run: |
-          # جلب الرسالة الأصلية للاستخدام لاحقاً
-          ORIGINAL_MESSAGE=$(git log -1 --pretty=%B)
+          # التأكد من وجود مجلد images قبل البدء لتجنب الأخطاء
+          if [ ! -d "images" ]; then
+            echo "مجلد images غير موجود، تخطي الضغط..."
+            exit 0
+          fi
           
-          echo "🔍 البحث عن الصور لضغطها..."
-          # ضغط صور PNG (جودة 85%)
-          find . -type f -name "*.png" ! -path "./.git/*" -exec mogrify -quality 85 -strip {} \;
+          echo "🖼️ بدء ضغط الصور داخل مجلد images/ فقط..."
           
-          # ضغط صور JPG/JPEG (جودة 85%)
-          find . -type f -name "*.jpg" ! -path "./.git/*" -exec mogrify -quality 85 -strip {} \;
-          find . -type f -name "*.jpeg" ! -path "./.git/*" -exec mogrify -quality 85 -strip {} \;
+          # ضغط صور PNG داخل images فقط
+          find images -type f -name "*.png" -exec mogrify -quality 85 -strip {} \;
+          
+          # ضغط صور JPG/JPEG داخل images فقط
+          find images -type f -name "*.jpg" -exec mogrify -quality 85 -strip {} \;
+          find images -type f -name "*.jpeg" -exec mogrify -quality 85 -strip {} \;
+          
+          echo "✅ انتهى الضغط!"
 
       - name: Commit and push if changed
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git diff --staged --quiet || git commit -m "🖼️ ضغط الصور تلقائياً لتسريع الموقع"
+          git add images/
+          git diff --staged --quiet || git commit -m "🖼️ ضغط صور مجلد images تلقائياً"
           git push
