@@ -15,28 +15,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate tree and update README.md
+      - name: Generate tree and update safely
         run: |
-          # توليد هيكل المشروع
+          # توليد الشجرة
           tree -I '.git|.github|node_modules' --charset utf-8 > tree.txt
           
-          # تجهيز الهيكل الجديد
-          echo "## 📂 هيكل المشروع" > new_section.md
-          echo '```text' >> new_section.md
-          cat tree.txt >> new_section.md
-          echo '```' >> new_section.md
+          # تجهيز الشجرة الجديدة بين العلامات
+          echo '<!-- TREE START -->' > new_tree.txt
+          echo '```text' >> new_tree.txt
+          cat tree.txt >> new_tree.txt
+          echo '```' >> new_tree.txt
+          echo '<!-- TREE END -->' >> new_tree.txt
           
-          # إذا كان README.md موجود، نحذف الهيكل القديم ونضع الجديد
-          if [ -f README.md ]; then
-            sed -i '/## 📂 هيكل المشروع/,/```/d' README.md
-            cat new_section.md README.md > temp.md
-            mv temp.md README.md
+          # إذا لم يكن README موجوداً، ننشئه بالعلامات
+          if [ ! -f README.md ]; then
+            cat new_tree.txt > README.md
           else
-            mv new_section.md README.md
+            # استخدام perl لاستبدال النص بين العلامات فقط دون المساس بالباقي
+            perl -i -0pe 's/<!-- TREE START -->.*?<!-- TREE END -->/`cat new_tree.txt`/smge' README.md
           fi
           
-          # تنظيف الملفات المؤقتة (أضفنا f لمنع خطأ إذا لم يكن الملف موجوداً)
-          rm -f tree.txt new_section.md
+          # تنظيف
+          rm -f tree.txt new_tree.txt
 
       - name: Commit and push if changed
         run: |
