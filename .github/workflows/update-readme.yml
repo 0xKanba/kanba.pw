@@ -3,7 +3,7 @@ name: Auto Update Project Tree
 on:
   push:
     branches:
-      - main # قم بتغييرها إلى master إذا كان الفرع الرئيسي في مشروعك اسمه master
+      - master # قم بتغييرها إلى master إذا كان الفرع الرئيسي في مشروعك اسمه master
 
 jobs:
   update-structure:
