@@ -15,20 +15,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate MD files map (تم نقله للأولوية الأولى)
+      - name: Generate MD files map
         run: |
-          mkdir -p md # هذا الأمر يضمن إنشاء مجلد md إذا لم يكن موجوداً
-          if [ -n "$(ls -A md/*.md 2>/dev/null)" ]; then
-            echo "[" > md/files.json
-            ls md/*.md 2>/dev/null | xargs -I {} basename {} .md | awk 'NR>1{printf ","}{printf "\"%s\"", $0}' >> md/files.json
-            echo "]" >> md/files.json
+          mkdir -p md
+          if ls md/*.md 1> /dev/null 2>&1; then
+            printf '[' > md/files.json
+            ls md/*.md | xargs -I {} basename {} .md | sed 's/^/"/;s/$/"/' | paste -sd ',' - >> md/files.json
+            printf ']' >> md/files.json
           else
-            echo "[]" > md/files.json
+            echo '[]' > md/files.json
           fi
 
-      - name: Generate tree and update safely
+      - name: Generate tree and update README.md safely
         run: |
-          # الآن سيجد مجلد md وبداخله files.json
+          # توليد الشجرة
           tree -I '.git|.github|node_modules' --charset utf-8 > tree.txt
           
           # تجهيز الشجرة الجديدة بين العلامات
@@ -38,12 +38,21 @@ jobs:
           echo '```' >> new_tree.txt
           echo '<!-- TREE END -->' >> new_tree.txt
           
-          # إذا لم يكن README موجوداً، ننشئه بالعلامات
+          # إذا لم يكن README موجوداً، ننشئه
           if [ ! -f README.md ]; then
             cat new_tree.txt > README.md
           else
-            # استخدام perl لاستبدال النص بين العلامات فقط دون المساس بالباقي
-            perl -i -0pe 's/<!-- TREE START -->.*?<!-- TREE END -->/`cat new_tree.txt`/smge' README.md
+            # استخدام Python لاستبدال النص بأمان تام 100% دون المساس بالباقي
+            python3 -c "
+            import re
+            with open('README.md', 'r', encoding='utf-8') as f: content = f.read()
+            with open('new_tree.txt', 'r', encoding='utf-8') as f: new_tree = f.read()
+            if '<!-- TREE START -->' in content and '<!-- TREE END -->' in content:
+                new_content = re.sub(r'<!-- TREE START -->.*?<!-- TREE END -->', new_tree, content, flags=re.DOTALL)
+            else:
+                new_content = content + '\n\n' + new_tree
+            with open('README.md', 'w', encoding='utf-8') as f: f.write(new_content)
+            "
           fi
           
           # تنظيف
