@@ -17,7 +17,7 @@ jobs:
 
       - name: Generate tree and update safely
         run: |
-          # توليد الشجرة
+          # ⬇️ هذا هو السطر الذي يولد الشجرة، لقد أزلت 'md' من القائمة ليظهر المجلد ⬇️
           tree -I '.git|.github|node_modules' --charset utf-8 > tree.txt
           
           # تجهيز الشجرة الجديدة بين العلامات
