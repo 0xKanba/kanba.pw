@@ -15,47 +15,44 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate MD files map
+      - name: Update files.json map
         run: |
           mkdir -p md
-          if ls md/*.md 1> /dev/null 2>&1; then
-            printf '[' > md/files.json
-            ls md/*.md | xargs -I {} basename {} .md | sed 's/^/"/;s/$/"/' | paste -sd ',' - >> md/files.json
-            printf ']' >> md/files.json
-          else
-            echo '[]' > md/files.json
-          fi
+          echo -n "[" > md/files.json
+          FIRST=true
+          for f in md/*.md; do
+            if [ -f "$f" ]; then
+              NAME=$(basename "$f" .md)
+              if [ "$FIRST" = true ]; then
+                FIRST=false
+              else
+                echo -n "," >> md/files.json
+              fi
+              echo -n "\"$NAME\"" >> md/files.json
+            fi
+          done
+          echo "]" >> md/files.json
 
-      - name: Generate tree and update README.md safely
+      - name: Update README.md structure
         run: |
-          # توليد الشجرة
           tree -I '.git|.github|node_modules' --charset utf-8 > tree.txt
           
-          # تجهيز الشجرة الجديدة بين العلامات
-          echo '<!-- TREE START -->' > new_tree.txt
+          echo "<!-- TREE START -->" > new_tree.txt
           echo '```text' >> new_tree.txt
           cat tree.txt >> new_tree.txt
           echo '```' >> new_tree.txt
-          echo '<!-- TREE END -->' >> new_tree.txt
+          echo "<!-- TREE END -->" >> new_tree.txt
           
-          # إذا لم يكن README موجوداً، ننشئه
           if [ ! -f README.md ]; then
             cat new_tree.txt > README.md
           else
-            # استخدام Python لاستبدال النص بأمان تام 100% دون المساس بالباقي
-            python3 -c "
-            import re
-            with open('README.md', 'r', encoding='utf-8') as f: content = f.read()
-            with open('new_tree.txt', 'r', encoding='utf-8') as f: new_tree = f.read()
-            if '<!-- TREE START -->' in content and '<!-- TREE END -->' in content:
-                new_content = re.sub(r'<!-- TREE START -->.*?<!-- TREE END -->', new_tree, content, flags=re.DOTALL)
-            else:
-                new_content = content + '\n\n' + new_tree
-            with open('README.md', 'w', encoding='utf-8') as f: f.write(new_content)
-            "
+            if grep -q "<!-- TREE START -->" README.md; then
+              sed -i '/<!-- TREE START -->/,/<!-- TREE END -->/d' README.md
+            fi
+            echo "" >> README.md
+            cat new_tree.txt >> README.md
           fi
           
-          # تنظيف
           rm -f tree.txt new_tree.txt
 
       - name: Commit and push if changed
@@ -63,5 +60,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md md/files.json
-          git diff --staged --quiet || git commit -m "🔄 تحديث هيكل المشروع وملف الخريطة تلقائياً"
+          git diff --staged --quiet || git commit -m "🔄 Auto-update structure & map"
           git push
