@@ -99,104 +99,58 @@
       code { background: #333; }
       pre { background: #222; }
     }
-
-    /* ⬇️ تنسيق شاشة الخطأ الداكنة الجديدة ⬇️ */
-    #error-screen {
-      display: none; /* مخفي افتراضياً */
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #1a1a1a; /* خلفية داكنة جداً */
-      color: #ffffff; /* نص أبيض */
-      display: flex; /* استخدام Flexbox للتوسيط */
-      flex-direction: column;
-      justify-content: center; /* توسيط عمودي */
-      align-items: center; /* توسيط أفقي */
-      text-align: center;
-      z-index: 9999; /* للتأكد من ظهورها فوق كل شيء */
-      font-family: monospace;
-    }
-    
-    #error-screen h1 {
-      font-size: 3em;
-      color: #ff4d4d; /* أحمر للفت الانتباه */
-      margin-bottom: 10px;
-      text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
-    }
-    
-    #error-screen p {
-      font-size: 1.2em;
-      color: #cccccc;
-      letter-spacing: 1px;
-    }
-
-    #error-screen code {
-      background: #333;
-      padding: 5px 10px;
-      border-radius: 5px;
-      color: #4fc3f7;
-      border: 1px solid #555;
-    }
   </style>
 </head>
 <body>
 
-  <!-- شاشة الخطأ المخصصة (مخفية افتراضياً) -->
-  <div id="error-screen" style="display: none;">
-    <h1>404</h1>
-    <p>Page not found</p>
-    <p style="margin-top: 20px; font-size: 1em;">Change <code>#</code> to a valid file name</p>
-  </div>
-
-  <!-- محتوى الـ MD العادي -->
   <div id="content">Loading...</div>
 
   <script>
     function loadContent() {
-      const hash = window.location.hash.substring(1);
-      const fileName = hash || '1';
+      // ⬇️ القائمة البيضاء: ضع هنا أسماء الملفات الصحيحة فقط (بدون .md) ⬇️
+      const allowedFiles = ['readme', '1', 'tst']; 
+      
+      let hash = window.location.hash.substring(1);
+      
+      // إذا كان الرابط فارغاً، اجعله readme افتراضياً
+      if (!hash) {
+        window.location.hash = 'readme'; 
+        return; // أوقف الكود هنا، وسيعمل تلقائياً بسبب تغيير الهاش
+      }
+
+      // ⬇️ الفلترة السحرية: إذا وضع ملفاً غير موجود في القائمة، أحعه إلى readme ⬇️
+      if (!allowedFiles.includes(hash)) {
+        window.location.hash = 'readme'; // سيغير الرابط إلى #readme
+        return; // أوقف الكود، ولن يتم جلب أي ملف خاطئ
+      }
+
+      const fileName = hash;
       const filePath = `md/${fileName}.md`;
 
       const contentDiv = document.getElementById('content');
-      const errorScreen = document.getElementById('error-screen');
-
-      // إخفاء شاشة الخطأ وإظهار التحميل عند كل محاولة جديدة
-      errorScreen.style.display = 'none';
-      contentDiv.style.display = 'block';
-      contentDiv.innerHTML = '<p style="text-align:center; color:#888;">Loading...</p>';
 
       fetch(filePath)
         .then(r => {
-          // ⬇️ التعديل السحري هنا: إذا لم يكن الملف موجوداً نعرض شاشة الخطأ فوراً ⬇️
-          if (!r.ok) {
-            errorScreen.style.display = 'flex'; // إظهار شاشة الخطأ الداكنة
-            contentDiv.style.display = 'none';  // إخفاء محتوى التحميل
-            throw new Error('Not Found'); // إيقاف باقي الكود لكي لا يقرأ محتوى الخطأ من Cloudflare
-          }
+          if (!r.ok) throw new Error('Not Found');
           return r.text();
         })
         .then(text => {
-          // تحليل النص لتحديد اللغة والاتجاه
           const firstMeaningfulLine = text.trim().split('\n').find(line => line.trim() !== '');
           const hasArabic = /[\u0600-\u06FF]/.test(firstMeaningfulLine || '');
 
-          // تطبيق الاتجاه تلقائيًا
           contentDiv.style.direction = hasArabic ? 'rtl' : 'ltr';
           contentDiv.style.textAlign = hasArabic ? 'right' : 'left';
 
-          // تحويل Markdown إلى HTML
           contentDiv.innerHTML = marked.parse(text);
           document.title = fileName; 
         })
         .catch(e => {
-          // الخطأ تم التقاطه بالفعل في الأعلى، هذا مجرد تأمين إضافي
-          console.error('Error loading MD:', e);
+          // في حال حدث خطأ غير متوقع بالشبكة، يعود لـ readme
+          window.location.hash = 'readme';
         });
     }
 
-    // تشغيل الدالة عند فتح الصفحة لأول مرة
     loadContent();
-
-    // تشغيل الدالة مرة أخرى إذا قام المستخدم بتغيير الـ # في الرابط
     window.addEventListener('hashchange', loadContent);
   </script>
 </body>
