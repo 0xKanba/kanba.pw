@@ -37,11 +37,19 @@ jobs:
           
           # تنظيف
           rm -f tree.txt new_tree.txt
-
-      - name: Commit and push if changed
+                - name: Generate MD files map
+        run: |
+          if [ -d "md" ]; then
+            echo "[" > md/files.json
+            ls md/*.md 2>/dev/null | xargs -I {} basename {} .md | awk 'NR>1{printf ","}{printf "\"%s\"", $0}' >> md/files.json
+            echo "]" >> md/files.json
+          else
+            echo "[]" > md/files.json
+          fi
+            - name: Commit and push if changed
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git diff --staged --quiet || git commit -m "🔄 تحديث هيكل المشروع تلقائياً"
+          git add README.md md/files.json  # ← أضفنا md/files.json هنا
+          git diff --staged --quiet || git commit -m "🔄 تحديث هيكل المشروع وملف الخريطة تلقائياً"
           git push
