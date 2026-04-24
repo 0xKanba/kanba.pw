@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z AI — Website Builder</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0a0a0d;
+            color: #e8e8ed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            background: #141418;
+            border: 1px solid #232329;
+            border-radius: 16px;
+            padding: 44px 40px;
+            max-width: 460px;
+            width: 100%;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,107,53,0.1);
+            color: #ff6b35;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: #ff6b35;
+            margin-bottom: 6px;
+        }
+
+        .price span {
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #666;
+        }
+
+        .desc {
+            color: #777;
+            font-size: 0.92rem;
+            line-height: 1.8;
+            margin-bottom: 28px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #232329;
+            margin-bottom: 24px;
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        ul li {
+            padding: 9px 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #d0d0da;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        ul li i {
+            color: #ff6b35;
+            font-size: 0.55rem;
+            flex-shrink: 0;
+        }
+
+        .domain {
+            background: #1a1a20;
+            border: 1px solid #232329;
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .domain i {
+            color: #ff6b35;
+            font-size: 0.85rem;
+        }
+
+        .domain span {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #c0c0cc;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #ff6b35;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.85; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+
+        <div class="badge"><i class="fas fa-bolt"></i> Monthly Plan</div>
+
+        <h1>Build & Publish Your Website</h1>
+
+        <div class="price">$35 <span>/ month</span></div>
+
+        <p class="desc">
+            Create your site and connect it to your own domain. Everything ready in minutes — no complexity.
+        </p>
+
+        <hr class="divider">
+
+        <ul>
+            <li><i class="fas fa-circle"></i> Full Website Creation</li>
+            <li><i class="fas fa-circle"></i> Custom Domain Connection</li>
+            <li><i class="fas fa-circle"></i> Free SSL Certificate</li>
+            <li><i class="fas fa-circle"></i> Fast & Secure Hosting</li>
+        </ul>
+
+        <div class="domain">
+            <i class="fas fa-globe"></i>
+            <span>domain.com</span>
+        </div>
+
+        <button class="btn">Get Started — $35/month</button>
+
+    </div>
+
+</body>
+</html>
