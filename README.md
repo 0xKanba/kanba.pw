@@ -13,6 +13,7 @@ https://shop.kanba.pw/
 
 
 
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -108,7 +109,6 @@ https://shop.kanba.pw/
 ├── md
 │   ├── files.json
 │   ├── us.md
-│   ├── wtf.md
 │   └── xz.md
 ├── md.html
 ├── scc.html
@@ -117,6 +117,6 @@ https://shop.kanba.pw/
 ├── younis.html
 └── ysr.html
 
-21 directories, 77 files
+21 directories, 76 files
 ```
 <!-- TREE END -->
