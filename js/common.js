@@ -30,22 +30,27 @@ document.addEventListener('DOMContentLoaded', function() {
   if (footerElement) footerElement.innerHTML = footerHTML;
 
   setTimeout(() => {
-    // جلب المسار الحالي وتحويله لأحرف صغيرة
-    let currentPath = window.location.pathname.toLowerCase().trim();
-    
-    // إذا كان المسار ينتهي بشرطة مائلة (مثل / أو /funded/)، نفترض وجود index.html
-    if (currentPath.endsWith('/')) {
-        currentPath += 'index.html';
-    }
-
-    // مطابقة المسار الحالي مع رابط كل زر
-    document.querySelectorAll('.footer-tab').forEach(tab => {
-      const tabHref = tab.getAttribute('href').toLowerCase();
+    // دالة لتجريد المسار من الزوائد وتوحيد شكله
+    const normalizePath = (path) => {
+      let p = path.toLowerCase().trim();
+      // إزالة الشرطة المائلة النهائية وامتداد html
+      p = p.replace(/\/$/, '').replace(/\.html$/, ''); 
       
-      // إذا تطابق المسار الحالي مع رابط الزر، أضف كلاس active
-      if (currentPath === tabHref) {
+      // معالجة مسار الجذر الرئيسي
+      if (p === '' || p === '/index') return '/index'; 
+      // معالجة الجذور الفرعية (مثل /funded/index)
+      if (p.endsWith('/index')) return p.replace('/index', ''); 
+      
+      return p;
+    };
+
+    const currentPath = normalizePath(window.location.pathname);
+
+    document.querySelectorAll('.footer-tab').forEach(tab => {
+      const tabPath = normalizePath(tab.getAttribute('href'));
+      
+      if (currentPath === tabPath) {
         tab.classList.add('active');
       }
     });
   }, 150);
-});
