@@ -1,5 +1,11 @@
 const TROY = 31.1035; // أونصة تروي per gram
 
+/* ─── ثوابت localStorage ─── */
+const LS_KEY       = 'hl_trade_pk';
+const PIN_KEY      = 'hl_trade_pin';
+const LOCKED_KEY   = 'hl_trade_locked';
+const LAST_PIN_KEY = 'hl_last_pin_time';
+
 const ASSETS = {
   XAU:    { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:1, pxDp:2, unit:'غرام',  presets:[1,2,5,10,20,50],  icon:'⚖️', name:'ذهب/غرام', gram:true  },
   NQ:     { coin:'xyz:XYZ100', idx:110000, lev:30, cross:true,  szDp:4, pxDp:0, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100'              },
