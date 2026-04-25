@@ -844,11 +844,7 @@ async function execTrade(){
   const execMid = a.gram ? p.mid*TROY : p.mid;
   const execSzDp = a.gram ? 4 : a.szDp;
 
-  // غرام الذهب → تحويل لأونصة قبل الإرسال
-  if(a.gram){
-    execQty=+(qty/TROY_OZ).toFixed(ASSETS['GOLD'].szDp);
-    execSym='GOLD'; execAsset=ASSETS['GOLD']; execPrice=State.prices['GOLD'];
-  }
+
   if(!p?.mid){ toast('لا يوجد سعر','err'); closeModal('modalConfirm'); return; }
   setBtnLoading('confirmExecute','⏳');
   showLoader(`${a.icon} ${isBuy?'شراء':'بيع'} ${qty} ${a.unit}...`);
@@ -860,10 +856,11 @@ async function execTrade(){
 
     // بناء الأمر — slippage 3% لـ NQ لأن سعره مرتفع
     const slip = sym==='NQ' ? 0.03 : 0.02;
-    const px = wirePx(p.mid*(isBuy ? 1+slip : 1-slip), a.szDp);
+    const _px = wirePx(execMid*(isBuy ? 1+slip : 1-slip), execSzDp);
+    const _sz = wireSz(execQty, execSzDp);
     const res = await hlExchange({
       type:'order',
-      orders:[{a:a.idx, b:isBuy, p:px, s:wire(qty,a.szDp), r:false, t:{limit:{tif:'Ioc'}}}],
+      orders:[{a:a.idx, b:isBuy, p:_px, s:_sz, r:false, t:{limit:{tif:'Ioc'}}}],
       grouping:'na'
     });
 
