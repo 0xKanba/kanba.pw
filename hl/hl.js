@@ -1,32 +1,11 @@
-const TROY_OZ_PER_GRAM = 1/31.1035;
-/* ═══════════════════════════════════════════════════════════════
-   HL Trade · hl.js v8.0
-   ✅ Fix TP/SL Cancel logic
-   ✅ Trade History implementation
-   ✅ Main Clock & About Modal
-   ✅ Improved Error Handling
-═══════════════════════════════════════════════════════════════ */
-
-const HL_API  = 'https://api.hyperliquid.xyz';
-const ARB_RPC = 'https://arb1.arbitrum.io/rpc';
-const USDC_CA = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
-const BRDG_CA = '0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7';
-const LS_KEY          = 'hl_trade_pk';
-const PIN_KEY         = 'hl_trade_pin';
-const LOCKED_KEY      = 'hl_trade_locked';
-const LAST_PIN_KEY    = 'hl_trade_last_pin';     // آخر إدخال PIN صحيح (لـ requirePin)
-const LAST_ACTIVITY_KEY = 'hl_last_activity';    // آخر نشاط مستخدم (للقفل التلقائي)
-const PIN_TIMEOUT     = 15 * 60 * 1000;          // 15 دقيقة
-
-const TROY_OZ = 31.1035; // 1 troy ounce = 31.1035 gram
+const TROY = 31.1035; // أونصة تروي per gram
 
 const ASSETS = {
-  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:30, cross:true,  szDp:4, pxDp:0, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100' },
-  GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب (أونصة)' },
-  // غرام الذهب — بصري فقط، يُحوَّل لـ GOLD عند التنفيذ
-  XAU:    { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:2, pxDp:2, unit:'غرام',  presets:[1,2,5,10,20,50],  icon:'⚖️', name:'ذهب (غرام)', gram:true },
-  SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'        },
-  CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام'    }
+  XAU:    { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:1, pxDp:2, unit:'غرام',  presets:[1,2,5,10,20,50],  icon:'⚖️', name:'ذهب/غرام', gram:true  },
+  NQ:     { coin:'xyz:XYZ100', idx:110000, lev:30, cross:true,  szDp:4, pxDp:0, unit:'عقد',   presets:[0.1,0.5,1,2,5],   icon:'📊', name:'ناسداك 100'              },
+  GOLD:   { coin:'xyz:GOLD',   idx:110003, lev:25, cross:true,  szDp:4, pxDp:2, unit:'أونصة', presets:[0.1,0.5,1,2,5],   icon:'🟡', name:'ذهب (أونصة)'            },
+  SILVER: { coin:'xyz:SILVER', idx:110026, lev:25, cross:true,  szDp:2, pxDp:2, unit:'أونصة', presets:[1,2,3,5,8,10,20], icon:'⚪', name:'فضة'                    },
+  CL:     { coin:'xyz:CL',     idx:110029, lev:20, cross:false, szDp:3, pxDp:2, unit:'برميل', presets:[1,2,3,5,8,10,20], icon:'🛢', name:'نفط خام'                 }
 };
 
 // إصلاح shortCoin: 'xyz:XYZ100' → 'XYZ100' → 'NQ'
@@ -39,9 +18,9 @@ Object.entries(ASSETS).forEach(([sym,a]) => {
 
 const State = {
   wallet: null, asset: 'CL', qty: 0.1,
-  prices:  { NQ:{bid:0,ask:0,mid:0}, GOLD:{bid:0,ask:0,mid:0}, XAU:{bid:0,ask:0,mid:0}, SILVER:{bid:0,ask:0,mid:0}, CL:{bid:0,ask:0,mid:0} },
-  prevMid: { NQ:0, GOLD:0, XAU:0, SILVER:0, CL:0 },
-  prevDayPx: { NQ:0, GOLD:0, XAU:0, SILVER:0, CL:0 },
+  prices:  { XAU:{bid:0,ask:0,mid:0}, XAU:{bid:0,ask:0,mid:0}, NQ:{bid:0,ask:0,mid:0}, GOLD:{bid:0,ask:0,mid:0}, SILVER:{bid:0,ask:0,mid:0}, CL:{bid:0,ask:0,mid:0} },
+  prevMid: { XAU:0, NQ:0, GOLD:0, SILVER:0, CL:0 },
+  prevDayPx: { XAU:0, NQ:0, GOLD:0, SILVER:0, CL:0 },
   fundingRates: {}, // GOLDG مرتبط بـ GOLD
   positions: [], openOrders: [], timers: [],
   pendingTrade: null, pendingClose: null,
@@ -50,7 +29,7 @@ const State = {
   lastPinTime: 0, pinCallback: null,
   isLocked: false, inactivityTimer: null,
   currentPinInput: '', currentSetPinInput: '', referrerSet: false,
-  sessionStats: { NQ: null, GOLD: null, XAU: null, SILVER: null, CL: null },
+  sessionStats: { XAU: null, NQ: null, GOLD: null, SILVER: null, CL: null },
   _sessionTimer: null
 };
 
@@ -860,9 +839,12 @@ async function execTrade(){
   if(!State.pendingTrade){ closeModal('modalConfirm'); return; }
   let {isBuy,qty,sym}=State.pendingTrade;
   const a=ASSETS[sym], p=State.prices[sym];
+  // XAU: تحويل بصري (غرام) → حقيقي (أونصة) قبل الإرسال
+  const execQty = a.gram ? +(qty/TROY).toFixed(4) : qty;
+  const execMid = a.gram ? p.mid*TROY : p.mid;
+  const execSzDp = a.gram ? 4 : a.szDp;
 
   // غرام الذهب → تحويل لأونصة قبل الإرسال
-  let execQty=qty, execSym=sym, execAsset=a, execPrice=p;
   if(a.gram){
     execQty=+(qty/TROY_OZ).toFixed(ASSETS['GOLD'].szDp);
     execSym='GOLD'; execAsset=ASSETS['GOLD']; execPrice=State.prices['GOLD'];
