@@ -60,6 +60,7 @@
 
 **الخلاصة:**
 MT5 = نظام قديم يعتمد على وسيط
+
 [Hyperliquid](https://app.hyperliquid.xyz/join/KANBA) = نظام جديد يعتمد عليك
 
 ---
