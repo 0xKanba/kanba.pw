@@ -24,21 +24,20 @@
     #content { 
       text-align: initial; 
       margin: 0 auto; 
-      /* الصفحة مخفية تماماً حتى ننزل للمكان الصحيح */
-      opacity: 0; 
+      opacity: 0; /* مخفي حتى يتم التمرير للمكان الصحيح */
+      transition: opacity 0.15s ease;
     }
-
-    /* عند إضافة هذا الكلاس، تظهر الصفحة فوراً */
-    #content.loaded { 
-      opacity: 1; 
-    }
+    #content.visible { opacity: 1; }
 
     h1, h2, h3, h4, h5, h6 { 
       margin: 1.5em 0 1em; 
       color: #0074d9; 
       text-align: center; 
-      position: relative;
-      scroll-margin-top: 20px; /* مسافة من الأعلى عند النزول */
+      scroll-margin-top: 25px; /* ضمان عدم الالتصاق بسقف المتصفح */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     p, ul, ol, pre { margin-bottom: 1em; }
@@ -56,24 +55,32 @@
       code { background: #333; } pre { background: #222; }
     }
 
-    .heading-link {
-      position: absolute;
-      right: -30px;
-      left: auto;
-      top: 50%;
-      transform: translateY(-50%);
-      opacity: 0;
-      transition: opacity 0.2s;
+    /* تنسيق زر النسخ الواضح والظاهر دائماً */
+    .copy-btn {
+      background: none;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.7em;
+      padding: 3px 8px;
+      color: #888;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       text-decoration: none !important;
-      font-size: 0.6em;
-      color: #aaa !important;
     }
-    [dir="ltr"] .heading-link {
-      left: -30px;
-      right: auto;
+    .copy-btn:hover { color: #0074d9; border-color: #0074d9; }
+    @media (prefers-color-scheme: dark) {
+      .copy-btn { border-color: #555; color: #aaa; }
+      .copy-btn:hover { color: #4fc3f7; border-color: #4fc3f7; }
     }
-    h1:hover .heading-link {
-      opacity: 1;
+    
+    /* رسالة "تم النسخ" */
+    .copied-msg {
+      color: #28a745;
+      font-size: 0.8em;
+      display: none;
     }
   </style>
 </head>
@@ -82,7 +89,6 @@
   <div id="content">Loading...</div>
 
   <script>
-    // منع المتصفح من القفز عشوائياً بمفرده
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
@@ -98,7 +104,7 @@
       .catch(e => {
         const contentDiv = document.getElementById('content');
         contentDiv.innerHTML = '<p style="color:red; text-align:center;">Error loading file map.</p>';
-        contentDiv.classList.add('loaded');
+        contentDiv.classList.add('visible');
       });
 
     function loadContent() {
@@ -114,7 +120,7 @@
       }
 
       const filePath = `md/${fileName}.md`;
-      contentDiv.classList.remove('loaded'); // إخفاء الصفحة أثناء التحضير
+      contentDiv.classList.remove('visible');
 
       fetch(filePath)
         .then(r => {
@@ -124,24 +130,21 @@
         .then(text => {
           renderMarkdown(text, contentDiv, fileName);
           
-          // ⬇️ الحل الجذري: انتظر حتى يرسم المتصفح الصفحة بالكامل ثم انزل ⬇️
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              if (subHeading) {
-                const target = document.getElementById(subHeading);
-                if (target) {
-                  // نزول فوري ودقيق للمكان
-                  target.scrollIntoView({ behavior: 'instant', block: 'start' });
-                } else {
-                  window.scrollTo(0, 0); // إذا لم يجد العنوان، ابقَ في الأعلى
-                }
+          // التمرير الدقيق جداً بعد رسم الصفحة مباشرة
+          setTimeout(() => {
+            if (subHeading) {
+              const target = document.getElementById(subHeading);
+              if (target) {
+                target.scrollIntoView({ behavior: 'instant', block: 'start' });
               } else {
                 window.scrollTo(0, 0);
               }
-              // الآن بعد أن أصبحنا في المكان الصحيح، اعرض الصفحة للمستخدم!
-              contentDiv.classList.add('loaded');
-            });
-          });
+            } else {
+              window.scrollTo(0, 0);
+            }
+            // إظهار الصفحة بعد الانتهاء من التمرير
+            contentDiv.classList.add('visible');
+          }, 50); // 50 ملي ثانية تكفي لرسم الصفحة دون تأخير محسوس
         })
         .catch(e => {
           window.location.hash = 'us';
@@ -161,14 +164,22 @@
         const text = data.text;
         const level = data.depth;
         
-        // تحسين دقة إنشاء الـ ID ليتطابق مع الرابط تماماً
-        let id = text.toLowerCase()
-                     .replace(/\s+/g, '-')       // المسافات إلى شرطة
-                     .replace(/[^\w\u0600-\u06FF-]/g, ''); // إزالة الرموز الغريبة مع الحفاظ على العربي والإنجليزي والشرطة
-
+        // إنشاء ID آمن يطابق ما يتم استخراجه من الرابط
+        let id = text.trim()
+                     .toLowerCase()
+                     .replace(/\s+/g, '-')      // المسافات إلى شرطة
+                     .replace(/[^\w\u0600-\u06FF-]/g, ''); // إزالة الرموز مع الإبقاء على الشرطة
+        
         if (level === 1) {
           const headingLink = `${fileName}/${id}`;
-          return `<h1 id="${id}">${text}<a class="heading-link" href="#${headingLink}" title="Copy link">🔗</a></h1>`;
+          // الزر يظهر دائماً بجانب العنوان وينسخ الرابط عند الضغط عليه
+          return `<h1 id="${id}">
+                    <span>${text}</span>
+                    <button class="copy-btn" onclick="copyLink('${headingLink}', this)">
+                      📋 Copy
+                    </button>
+                    <span class="copied-msg">Copied!</span>
+                  </h1>`;
         }
         
         return `<h${level} id="${id}">${text}</h${level}>`;
@@ -176,6 +187,25 @@
 
       element.innerHTML = marked.parse(text, { renderer });
       document.title = fileName; 
+    }
+
+    // دالة نسخ الرابط للحافظة وإظهار رسالة التأكيد
+    function copyLink(linkHash, btnElement) {
+      const fullLink = `${window.location.origin}${window.location.pathname}#${linkHash}`;
+      
+      navigator.clipboard.writeText(fullLink).then(() => {
+        const msg = btnElement.nextElementSibling;
+        msg.style.display = 'inline';
+        btnElement.style.display = 'none';
+        
+        setTimeout(() => {
+          msg.style.display = 'none';
+          btnElement.style.display = 'inline-flex';
+        }, 2000); // إخفاء رسالة "تم النسخ" بعد ثانيتين
+      }).catch(err => {
+        // احتياط للمتصفحات القديمة
+        window.prompt("Copy this link:", fullLink);
+      });
     }
 
     window.addEventListener('hashchange', loadContent);
