@@ -295,6 +295,13 @@ function _onWsBbo(data){
   if(sym===State.asset)updatePriceUI();
 }
 
+/* ════ رسوم حسب الأصل ════
+   GOLD/XAU: 0.09% فتح + 0.09% إغلاق = 0.18% إجمالي
+   باقي الأصول: 0.009% فتح + 0.009% إغلاق
+════════════════════════════ */
+function feeRate(sym){return(sym==='GOLD'||sym==='XAU')?0.0009:0.00009;}
+function feeRatePct(sym){return(sym==='GOLD'||sym==='XAU')?'0.09%':'0.009%';}
+
 /* ════ REST Polling — كل 2 ثانية دائماً ════ */
 let _ctxCounter=0;
 async function pollPrices(){
@@ -314,9 +321,13 @@ async function pollPrices(){
   }
   _ctxCounter++;
 
-  // REST prices — يعمل دائماً كـ backup (ضمان تحديث 2 ثانية)
+  // ✅ إصلاح الخلل الجذري: XAU مستثنى من uniqueCoins لأنه مشتق من GOLD
+  // Object.keys يُرجع XAU قبل GOLD فكان يضع سعر الأونصة في XAU!
   const uniqueCoins={};
-  Object.keys(ASSETS).forEach(sym=>{const c=ASSETS[sym].coin;if(!uniqueCoins[c])uniqueCoins[c]=sym;});
+  Object.keys(ASSETS).forEach(sym=>{
+    if(sym==='XAU')return; // XAU مشتق من GOLD — يُحسب تلقائياً عند معالجة GOLD
+    const c=ASSETS[sym].coin;if(!uniqueCoins[c])uniqueCoins[c]=sym;
+  });
   await Promise.all(Object.entries(uniqueCoins).map(async([coinStr,sym])=>{
     try{
       const lb=await hlInfo({type:'l2Book',coin:coinStr});
@@ -543,8 +554,9 @@ function askTrade(isBuy){
   const usd=(tradeMid*ozQty).toFixed(2);
   const mgn=(tradeMid*ozQty/a.lev).toFixed(2);
   const liq=fmt(p.mid*(isBuy?1-1/a.lev:1+1/a.lev),a.pxDp);
-  const feeOpen=(tradeMid*ozQty*0.00009).toFixed(4);
-  const feeTot=(tradeMid*ozQty*0.00018).toFixed(4);
+  const fr=feeRate(State.asset);
+  const feeOpen=(tradeMid*ozQty*fr).toFixed(4);
+  const feeTot=(tradeMid*ozQty*fr*2).toFixed(4);
 
   setTxt('confirmTitle',`${a.icon} ${isBuy?'شراء ↑':'بيع ↓'} — ${a.name}`);
   setTxt('confirmSubtitle',`رافعة ${a.lev}x · تنفيذ فوري`);
@@ -554,7 +566,7 @@ function askTrade(isBuy){
     <div class="confirm-row"><span class="confirm-key">القيمة الكلية</span><span class="confirm-val">≈ $${usd}</span></div>
     <div class="confirm-row"><span class="confirm-key">الهامش المطلوب</span><span class="confirm-val warn">≈ $${mgn}</span></div>
     <div class="confirm-row"><span class="confirm-key">التصفية التقريبية</span><span class="confirm-val sell">≈ ${liq} $</span></div>
-    <div class="confirm-row"><span class="confirm-key">رسوم الفتح</span><span class="confirm-val fee">$${feeOpen} (0.009%)</span></div>
+    <div class="confirm-row"><span class="confirm-key">رسوم الفتح</span><span class="confirm-val fee">$${feeOpen} (${feeRatePct(State.asset)})</span></div>
     <div class="confirm-row"><span class="confirm-key">إجمالي الرسوم</span><span class="confirm-val fee">≈ $${feeTot}</span></div>`;
   const btn=$('confirmExecute');
   btn.className=`btn-modal btn-confirm ${isBuy?'btn-success':'btn-danger'}`;
@@ -600,14 +612,14 @@ window.askClose=function(i){
   const a=ASSETS[coin]||{name:coin,unit:'',icon:'📊',pxDp:2,szDp:2};
   const pnl=parseFloat(pos.unrealizedPnl||0),cur=State.prices[coin]?.mid||0;
   setTxt('closeTitle',`${a.icon} إغلاق — ${a.name}`);
-  const closeFee=cur?(Math.abs(szi)*cur*0.00009).toFixed(4):'—';
+  const closeFee=cur?(Math.abs(szi)*cur*feeRate(coin)).toFixed(4):'—';
   $('closeDetails').innerHTML=`
     <div class="confirm-row"><span class="confirm-key">الاتجاه</span><span class="confirm-val ${szi>0?'buy':'sell'}">${szi>0?'▲ شراء':'▼ بيع'}</span></div>
     <div class="confirm-row"><span class="confirm-key">الكمية</span><span class="confirm-val">${Math.abs(szi).toFixed(a.szDp)} ${a.unit}</span></div>
     <div class="confirm-row"><span class="confirm-key">سعر الدخول</span><span class="confirm-val">${fmt(pos.entryPx||0,a.pxDp)} $</span></div>
     <div class="confirm-row"><span class="confirm-key">السعر الحالي</span><span class="confirm-val">${cur?fmt(cur,a.pxDp):'—'} $</span></div>
     <div class="confirm-row"><span class="confirm-key">الربح / الخسارة</span><span class="confirm-val ${pnl>=0?'buy':'sell'}">${pnl>=0?'+':''}$${fmt(pnl,2)}</span></div>
-    <div class="confirm-row"><span class="confirm-key">رسوم الإغلاق</span><span class="confirm-val fee">$${closeFee} (0.009%)</span></div>`;
+    <div class="confirm-row"><span class="confirm-key">رسوم الإغلاق</span><span class="confirm-val fee">$${closeFee} (${coin==='GOLD'||coin==='XAU'?'0.09%':'0.009%'})</span></div>`;
   State.pendingClose=i;openModal('modalClose');
 };
 async function execClose(){
@@ -666,7 +678,7 @@ window.openTP=async function(i){
   hideLoader();
   function buildTpD(tpPx,ep,szi,a){
     if(!tpPx)return`<div class="confirm-row"><span class="confirm-key">الهدف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
-    const sz=Math.abs(parseFloat(szi)),gross=(tpPx-parseFloat(ep))*parseFloat(szi),fee=tpPx*sz*0.00009,net=gross-fee;
+    const sz=Math.abs(parseFloat(szi)),gross=(tpPx-parseFloat(ep))*parseFloat(szi),fee=tpPx*sz*feeRate(coin),net=gross-fee;
     return`<div class="confirm-row"><span class="confirm-key">🎯 سعر التفعيل</span><span class="confirm-val tp">$${fmt(tpPx,a.pxDp)}</span></div>
       <div class="tpsl-breakdown">
         <div class="tb-row"><span>💰 ربح متوقع</span><span class="tb-mono pos">${gross>=0?'+':''}$${Math.abs(gross).toFixed(2)}</span></div>
@@ -685,7 +697,7 @@ function recalcTpPreview(){
   const val=parseFloat($('tpAmount')?.value||0),el=$('tpPreview');if(!el)return;
   if(!val||val<=0){el.innerHTML='<span style="color:var(--text-secondary)">سعر التفعيل: —</span>';return;}
   const a=ASSETS[tp.sym]||{pxDp:2},px=calcTpPrice(tp.entryPx,tp.szi,val);
-  const sz=Math.abs(parseFloat(tp.szi)),fee=px*sz*0.00009,net=val-fee;
+  const sz=Math.abs(parseFloat(tp.szi)),fee=px*sz*feeRate(tp.sym),net=val-fee;
   el.innerHTML=`<div class="tpsl-breakdown">
     <div class="tb-row"><span>✅ سعر التفعيل</span><span class="tb-mono">$${fmt(px,a.pxDp)}</span></div>
     <div class="tb-row"><span>💰 ربح متوقع</span><span class="tb-mono pos">+$${val.toFixed(2)}</span></div>
@@ -733,7 +745,7 @@ window.openSL=async function(i){
   hideLoader();
   function buildSlD(slPx,ep,szi,a){
     if(!slPx)return`<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
-    const sz=Math.abs(parseFloat(szi)),gross=(slPx-parseFloat(ep))*parseFloat(szi),fee=slPx*sz*0.00009,net=gross-fee;
+    const sz=Math.abs(parseFloat(szi)),gross=(slPx-parseFloat(ep))*parseFloat(szi),fee=slPx*sz*feeRate(coin),net=gross-fee;
     return`<div class="confirm-row"><span class="confirm-key">⛔ سعر الوقف</span><span class="confirm-val sl">$${fmt(slPx,a.pxDp)}</span></div>
       <div class="tpsl-breakdown">
         <div class="tb-row"><span>📉 خسارة متوقعة</span><span class="tb-mono neg">${gross>=0?'+':''}$${Math.abs(gross).toFixed(2)}</span></div>
@@ -752,7 +764,7 @@ function recalcSlPreview(){
   const val=parseFloat($('slAmount')?.value||0),el=$('slPreview');if(!el)return;
   if(!val||val<=0){el.innerHTML='<span style="color:var(--text-secondary)">سعر الوقف: —</span>';return;}
   const a=ASSETS[sl.sym]||{pxDp:2},px=calcSlPrice(sl.entryPx,sl.szi,val);
-  const sz=Math.abs(parseFloat(sl.szi)),fee=px*sz*0.00009,net=-(val+fee);
+  const sz=Math.abs(parseFloat(sl.szi)),fee=px*sz*feeRate(sl.sym),net=-(val+fee);
   el.innerHTML=`<div class="tpsl-breakdown">
     <div class="tb-row"><span>⛔ سعر الوقف</span><span class="tb-mono">$${fmt(px,a.pxDp)}</span></div>
     <div class="tb-row"><span>📉 خسارة</span><span class="tb-mono neg">−$${val.toFixed(2)}</span></div>
