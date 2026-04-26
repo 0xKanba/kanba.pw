@@ -23,7 +23,13 @@
 
     #content { text-align: initial; margin: 0 auto; }
 
-    h1, h2, h3, h4, h5, h6 { margin: 1.5em 0 1em; color: #0074d9; text-align: center; }
+    h1, h2, h3, h4, h5, h6 { 
+      margin: 1.5em 0 1em; 
+      color: #0074d9; 
+      text-align: center; 
+      position: relative;
+    }
+
     p, ul, ol, pre { margin-bottom: 1em; }
     a { color: #0056b3; text-decoration: underline; }
     img { max-width: 100%; border-radius: 8px; margin: 15px auto; display: block; }
@@ -38,6 +44,27 @@
     @media (prefers-color-scheme: dark) {
       code { background: #333; } pre { background: #222; }
     }
+
+    /* تنسيق أيقونة الرابط بجانب h1 فقط */
+    .heading-link {
+      position: absolute;
+      right: -30px;
+      left: auto;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      text-decoration: none !important;
+      font-size: 0.6em;
+      color: #aaa !important;
+    }
+    [dir="ltr"] .heading-link {
+      left: -30px;
+      right: auto;
+    }
+    h1:hover .heading-link {
+      opacity: 1; /* تظهر فقط عند تمرير الماوس على العنوان الرئيسي */
+    }
   </style>
 </head>
 <body>
@@ -47,7 +74,6 @@
   <script>
     let allowedFiles = []; 
 
-    // جلب خريطة الملفات
     fetch('md/files.json')
       .then(r => r.json())
       .then(files => {
@@ -62,20 +88,15 @@
       let hash = window.location.hash.substring(1);
       const contentDiv = document.getElementById('content');
 
-      // إذا كان الرابط فارغاً، حوله إلى us افتراضياً
-      if (!hash) {
+      let fileName = hash.split('/')[0] || 'us';
+      let subHeading = hash.includes('/') ? hash.split('/')[1] : null;
+
+      if (!allowedFiles.includes(fileName)) {
         window.location.hash = 'us';
         return;
       }
 
-      // إذا كان الملف غير موجود في القائمة، انقل المستخدم فوراً لـ us
-      if (!allowedFiles.includes(hash)) {
-        window.location.hash = 'us';
-        return;
-      }
-
-      // جلب وعرض الملف الصحيح
-      const filePath = `md/${hash}.md`;
+      const filePath = `md/${fileName}.md`;
       contentDiv.innerHTML = '<p style="text-align:center; color:#888;">Loading...</p>';
 
       fetch(filePath)
@@ -84,22 +105,51 @@
           return r.text();
         })
         .then(text => {
-          renderMarkdown(text, contentDiv, hash);
+          renderMarkdown(text, contentDiv, fileName);
+          
+          if (subHeading) {
+            setTimeout(() => {
+              const target = document.getElementById(subHeading);
+              if (target) target.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
         })
         .catch(e => {
-          window.location.hash = 'us'; // احتياط
+          window.location.hash = 'us';
         });
     }
 
-    function renderMarkdown(text, element, title) {
+    function renderMarkdown(text, element, fileName) {
       const firstMeaningfulLine = text.trim().split('\n').find(line => line.trim() !== '');
       const hasArabic = /[\u0600-\u06FF]/.test(firstMeaningfulLine || '');
 
       element.style.direction = hasArabic ? 'rtl' : 'ltr';
       element.style.textAlign = hasArabic ? 'right' : 'left';
 
-      element.innerHTML = marked.parse(text);
-      document.title = title; 
+      const renderer = new marked.Renderer();
+      
+      // ⬇️ التعديل الدقيق هنا: فقط لـ h1 (مستوى 1) ⬇️
+      renderer.heading = function(data) {
+        const text = data.text;
+        const level = data.depth; // المستوى (1 = # ، 2 = ## ، إلخ)
+        
+        // إنشاء ID للعنوان (نحتاجه حتى لو لم نضع رابطاً لكي يعمل التمرير إذا تم مشاركة الرابط)
+        const id = text.toLowerCase()
+                       .replace(/[^\w\u0600-\u06FF\s-]/g, '')
+                       .replace(/\s+/g, '-');
+
+        // إذا كان العنوان رئيسياً (# فقط = level 1)، أضف له الرابط المخصص والأيقونة
+        if (level === 1) {
+          const headingLink = `${fileName}/${id}`;
+          return `<h1 id="${id}">${text}<a class="heading-link" href="#${headingLink}" title="Copy link">🔗</a></h1>`;
+        }
+        
+        // أما إذا كان فرعياً (## أو ###)، اتركه عادياً جداً بدون أيقونة أو رابط مخصص
+        return `<h${level} id="${id}">${text}</h${level}>`;
+      };
+
+      element.innerHTML = marked.parse(text, { renderer });
+      document.title = fileName; 
     }
 
     window.addEventListener('hashchange', loadContent);
