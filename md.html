@@ -28,11 +28,17 @@
 
     #content { text-align: initial; margin: 0 auto; }
 
-    h1, h2, h3, h4, h5, h6 {
+    /* العناوين الرئيسية فقط (h1 و h2) */
+    h1 {
       margin: 1.5em 0 1em; color: #0074d9; text-align: center;
       position: relative; display: flex;
       align-items: center; justify-content: center;
-      flex-wrap: wrap; gap: 4px;
+      flex-wrap: wrap; gap: 10px; /* المسافة بين النص ورابط 🔗 */
+    }
+
+    /* العناوين الفرعية (بدون أيقونة الربط) */
+    h2, h3, h4, h5, h6 {
+      margin: 1.2em 0 0.8em; color: #0074d9; text-align: center;
     }
 
     .heading-link {
@@ -100,7 +106,6 @@
           '<p style="color:red;text-align:center;">Error loading file map.</p>';
       });
 
-    /* ── فك الـ hash مع دعم الترميز ── */
     function parseHash() {
       let raw = window.location.hash.substring(1);
       try { raw = decodeURIComponent(raw); } catch (e) {}
@@ -109,7 +114,6 @@
       return { file: raw.substring(0, idx), anchor: raw.substring(idx + 1) };
     }
 
-    /* ── التحميل الرئيسي ── */
     function loadContent() {
       const { file, anchor } = parseHash();
       const contentDiv = document.getElementById('content');
@@ -117,7 +121,6 @@
       if (!file) { window.location.hash = 'us'; return; }
       if (!allowedFiles.includes(file)) { window.location.hash = 'us'; return; }
 
-      /* منع المتصفح من التمرير التلقائي لعنصر غير موجود بعد */
       if (anchor) {
         history.replaceState(null, '', '#' + file);
       }
@@ -130,7 +133,6 @@
         .catch(() => { window.location.hash = 'us'; });
     }
 
-    /* ── تحويل نص إلى id صالح ── */
     function slugify(text) {
       return text
         .trim()
@@ -140,7 +142,6 @@
         .toLowerCase() || 'section';
     }
 
-    /* ── عرض Markdown + أزرار 🔗 + تمرير ── */
     function renderMarkdown(text, element, fileHash, anchorId) {
       const firstLine = text.trim().split('\n').find(l => l.trim() !== '');
       const isRtl = /[\u0600-\u06FF]/.test(firstLine || '');
@@ -151,8 +152,8 @@
       element.innerHTML = marked.parse(text);
       document.title = fileHash;
 
-      /* إضافة id + زر 🔋 لكل عنوان */
-      const headings = element.querySelectorAll('h1,h2,h3,h4,h5,h6');
+      /* إضافة id + زر 🔗 للعناوين الرئيسية فقط (h1, h2) */
+      const headings = element.querySelectorAll('h1, h2');
       const idCount = {};
 
       headings.forEach(h => {
@@ -178,11 +179,9 @@
         h.appendChild(a);
       });
 
-      /* ── استعادة الـ hash الكامل والتمرير ── */
       if (anchorId) {
         history.replaceState(null, '', '#' + fileHash + '/' + anchorId);
 
-        /* محاولات متعددة لضمان التمرير بعد رسم DOM بالكامل */
         function tryScroll() {
           const el = document.getElementById(anchorId);
           if (el) {
@@ -192,18 +191,14 @@
           return false;
         }
 
-        /* محاولة فورية */
         tryScroll();
-        /* ثم بعد أطر الرسم */
         requestAnimationFrame(tryScroll);
-        /* ثم بتأخيرات تصاعدية لضمان اكتمال التخطيط */
         setTimeout(tryScroll, 50);
         setTimeout(tryScroll, 150);
         setTimeout(tryScroll, 400);
       }
     }
 
-    /* ── إشعار النسخ ── */
     function showToast() {
       const t = document.getElementById('copyToast');
       t.classList.add('show');
