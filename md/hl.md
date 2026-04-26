@@ -60,7 +60,7 @@
 
 **الخلاصة:**
 MT5 = نظام قديم يعتمد على وسيط
-Hyperliquid = نظام جديد يعتمد عليك
+[Hyperliquid](https://app.hyperliquid.xyz/join/KANBA) = نظام جديد يعتمد عليك
 
 ---
 
@@ -90,7 +90,7 @@ Hyperliquid = نظام جديد يعتمد عليك
 إذا أردت تجربة مركزة وبسيطة،
 يمكنك استخدام هذا الموقع المرتبط بالمنصة:
 
-https://kanba.pw/hl/
+[GOLD & OIL](https://kanba.pw/hl/)
 
 يركز على أهم الأسواق:
 
