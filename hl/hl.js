@@ -448,9 +448,9 @@ function _onWsBbo(data) {
   const mid = (bid && ask) ? (bid + ask) / 2 : (bid || ask);
   if (!mid) return;
   State.prices[sym] = {bid, ask, mid};
-  // XAU (غرام الذهب) = سعر GOLD ÷ TROY_OZ
+  // XAU (غرام الذهب) = سعر GOLD ÷ TROY
   if(sym === 'GOLD') {
-    const gBid=bid/TROY_OZ, gAsk=ask/TROY_OZ, gMid=mid/TROY_OZ;
+    const gBid=bid/TROY, gAsk=ask/TROY, gMid=mid/TROY;
     State.prices['XAU'] = {bid:gBid, ask:gAsk, mid:gMid};
     const xauEl=$('priceXAU');
     if(xauEl){
@@ -547,7 +547,7 @@ async function pollPrices(){
 
 function updatePriceUI(){
   const a=ASSETS[State.asset];
-  // XAU: السعر من State.prices['XAU'] = GOLD price / TROY_OZ
+  // XAU: السعر من State.prices['XAU'] = GOLD price / TROY
   const p=State.prices[State.asset];
   if(!p||!p.mid) return;
   const dir=p.mid>State.prevMid[State.asset]?1:p.mid<State.prevMid[State.asset]?-1:0;
@@ -878,7 +878,7 @@ async function execTrade(){
     if(status?.filled) {
       const f=status.filled;
       closeModal('modalConfirm');
-      const dispSz=a.gram?(+f.totalSz*TROY_OZ).toFixed(2):f.totalSz; toast(`✅ مُنفَّذ — ${a.icon} ${dispSz} ${a.unit} بسعر ${fmt(parseFloat(f.avgPx)/( a.gram?TROY_OZ:1),a.pxDp)}`,'ok',5000);
+      const dispSz=a.gram?(+f.totalSz*TROY).toFixed(2):f.totalSz; toast(`✅ مُنفَّذ — ${a.icon} ${dispSz} ${a.unit} بسعر ${fmt(parseFloat(f.avgPx)/( a.gram?TROY:1),a.pxDp)}`,'ok',5000);
     } else if(status?.resting) {
       // أمر معلق (لم يُملأ فوراً)
       closeModal('modalConfirm');
