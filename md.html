@@ -22,7 +22,7 @@
       th { background: #161b22; color: #c9d1d9; }
       code, pre { background: #161b22; }
     }
-    #content { direction: auto; text-align: left; }
+    #content { direction: auto; text-align: left; min-height: 60vh; }
     h1, h2, h3, h4, h5, h6 { margin: 1.5em 0 0.5em; scroll-margin-top: 20px; }
     p, ul, ol, pre, blockquote { margin-bottom: 1em; }
     a { color: #0969da; text-decoration: none; }
@@ -34,39 +34,46 @@
     code { background: #f6f8fa; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
     pre { background: #f6f8fa; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.9em; }
     .anchor-link {
-      color: #0969da; font-size: 0.8em; margin-left: 8px; text-decoration: none;
-      vertical-align: middle; cursor: pointer; opacity: 0.7;
+      color: #0969da; font-size: 0.8em; margin-inline-start: 8px; text-decoration: none;
+      vertical-align: middle; cursor: pointer; opacity: 0.7; display: inline-block;
     }
     .anchor-link:hover { opacity: 1; }
-    .error { color: #cf222e; text-align: center; margin-top: 20px; }
+    .error { color: #cf222e; text-align: center; margin-top: 40px; font-size: 1.1em; }
   </style>
 </head>
 <body>
-  <div id="content"><p style="text-align:center; color:#6e7781;">Loading...</p></div>
+  <div id="content"><p style="text-align:center; color:#6e7781; padding-top:40px;">Loading...</p></div>
   <script>
     let allowedFiles = [];
     let isLoading = false;
     let isReady = false;
+    const DEFAULT_FILE = 'us';
 
-    function generateGitHubId(text) {
+    function generateId(text) {
       return text.trim().toLowerCase()
         .replace(/[^\w\s\u0600-\u06FF\u4e00-\u9fff-]/g, '')
         .replace(/\s+/g, '-');
     }
 
-    function renderMarkdown(mdText, container, file, targetId) {
+    function setHashSilently(file, id = '') {
+      const h = id ? `${file}#${id}` : file;
+      window.history.replaceState(null, '', `#${h}`);
+    }
+
+    function renderMarkdown(mdText, file, targetId) {
+      const container = document.getElementById('content');
       container.style.direction = 'auto';
       container.style.textAlign = 'left';
 
       const renderer = new marked.Renderer();
       renderer.heading = (text, level) => {
-        const id = generateGitHubId(text);
-        const btn = `<a href="#" class="anchor-link" data-id="${id}" title="Copy link">🔗</a>`;
+        const id = generateId(text);
+        const btn = `<a href="#" class="anchor-link" data-id="${id}" title="Copy section link">🔗</a>`;
         return `<h${level} id="${id}">${text}${btn}</h${level}>`;
       };
 
       container.innerHTML = marked.parse(mdText, { renderer });
-      document.title = `${file} - MD Viewer`;
+      document.title = `${file} - Viewer`;
 
       container.querySelectorAll('.anchor-link').forEach(link => {
         link.addEventListener('click', e => {
@@ -80,46 +87,46 @@
         });
       });
 
-      if (targetId) {
-        const el = document.getElementById(targetId);
+      // Scroll target or first heading
+      let scrollId = targetId || container.querySelector('h1, h2, h3, h4, h5, h6')?.id;
+      if (scrollId) {
+        const el = document.getElementById(scrollId);
         if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
       }
     }
 
     function loadContent() {
-      if (isLoading) return;
+      if (isLoading || !isReady) return;
       isLoading = true;
 
-      const hash = window.location.hash.replace(/^#/, '') || 'us';
-      const parts = hash.split('#');
-      const file = parts[0] || 'us';
-      const targetId = parts.length > 1 ? decodeURIComponent(parts.slice(1).join('#')) : '';
+      const raw = window.location.hash.replace(/^#/, '') || DEFAULT_FILE;
+      const decoded = decodeURIComponent(raw);
+      const parts = decoded.split('#');
+      const file = parts[0] || DEFAULT_FILE;
+      const targetId = parts.length > 1 ? parts.slice(1).join('#') : '';
 
-      const container = document.getElementById('content');
-
-      if (!allowedFiles.includes(file)) {
-        window.location.hash = 'us';
-        isLoading = false;
-        return;
+      if (allowedFiles.length && !allowedFiles.includes(file)) {
+        setHashSilently(DEFAULT_FILE);
+        return loadContent();
       }
 
-      container.innerHTML = '<p style="text-align:center; color:#6e7781;">Loading...</p>';
+      const container = document.getElementById('content');
+      container.innerHTML = '<p style="text-align:center; color:#6e7781; padding-top:40px;">Loading...</p>';
 
-      fetch(`md/${file}.md`)
-        .then(res => { if (!res.ok) throw new Error('404'); return res.text(); })
-        .then(text => renderMarkdown(text, container, file, targetId))
-        .catch(err => {
+      fetch(`/md/${file}.md`)
+        .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.text(); })
+        .then(text => renderMarkdown(text, file, targetId))
+        .catch(() => {
           container.innerHTML = `<div class="error">Failed to load: ${file}.md</div>`;
-          window.location.hash = 'us';
+          setHashSilently(DEFAULT_FILE);
         })
         .finally(() => isLoading = false);
     }
 
-    // Initialize
-    fetch('md/files.json')
+    fetch('/md/files.json')
       .then(r => r.json())
       .then(files => {
-        allowedFiles = Array.isArray(files) ? files : [];
+        allowedFiles = Array.isArray(files) ? files : [DEFAULT_FILE];
         isReady = true;
         loadContent();
       })
@@ -127,7 +134,7 @@
         document.getElementById('content').innerHTML = '<div class="error">Failed to load files.json</div>';
       });
 
-    window.addEventListener('hashchange', () => { if (isReady) loadContent(); });
+    window.addEventListener('hashchange', loadContent);
   </script>
 </body>
 </html>
