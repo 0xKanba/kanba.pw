@@ -11,13 +11,18 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      line-height: 1.8; color: #222; background: #fff;
+      line-height: 1.8; 
+      color: #111; /* لون نص أسود قاتم للوضع الفاتح لزيادة الوضوح */
+      background: #fff;
       font-size: 18px; padding: 30px 20px;
       max-width: 900px; margin: 0 auto; text-align: center;
     }
 
     @media (prefers-color-scheme: dark) {
-      body { color: #eee; background: #121212; }
+      body { 
+        color: #f5f5f5; /* لون نص أبيض ناصع للوضع الداكن */
+        background: #121212; 
+      }
       a { color: #4fc3f7; } table { border-color: #444; } th, td { border-color: #555; }
     }
 
@@ -44,19 +49,19 @@
       code { background: #333; } pre { background: #222; }
     }
 
-    /* ⬇️ تنسيق زر النسخ (دائماً ظاهر، صغير، ديناميكي) ⬇️ */
+    /* ⬇️ تنسيق أيقونة النسخ (مرنة، ظاهرة دائماً، متناسقة) ⬇️ */
     .heading-link {
       display: inline-block;
-      margin-right: 8px; /* مسافة بين الأيقونة والنص للعربي */
-      font-size: 0.6em;  /* حجم ديناميكي يتناسب مع حجم العنوان */
+      margin-right: 8px; 
+      font-size: 0.6em;  /* حجم ديناميكي يكبر ويصغر مع العنوان */
       vertical-align: middle;
       text-decoration: none !important;
-      color: #ccc !important;
+      color: #aaa !important; /* لون رمادي واضح但不 منفز */
       transition: color 0.2s;
     }
     [dir="ltr"] .heading-link {
       margin-right: 0;
-      margin-left: 8px; /* مسافة للإنجليزي */
+      margin-left: 8px; 
     }
     .heading-link:hover {
       color: #0074d9 !important;
@@ -103,15 +108,16 @@
         .then(text => {
           renderMarkdown(text, contentDiv, fileName);
           
-          // ⬇️ النزول التلقائي الديناميكي (باستخدام الـ ID المشفر) ⬇️
+          // ⬇️ الحل الجذري للنزول التلقائي الديناميكي ⬇️
           if (subHeading) {
+            // نعطي المتصفح 50 ميلي ثانية لرسم الـ DOM على الشاشة فعلياً قبل النزول
             setTimeout(() => {
-              const targetId = decodeURIComponent(subHeading); // فك التشفير للبحث في الصفحة
-              const target = document.getElementById(targetId);
+              // نبحث عن الـ ID كما هو في الرابط بالضبط
+              const target = document.getElementById(subHeading);
               if (target) {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }
-            }, 200); // تأخير بسيط لضمان تحميل الـ Markdown بالكامل
+            }, 50);
           }
         })
         .catch(e => {
@@ -132,13 +138,15 @@
         const text = data.text;
         const level = data.depth;
         
-        // ⬇️ السحر هنا: تشفير النص ليصبح ID صحيح 100% للمتصفح ⬇️
-        const id = encodeURIComponent(text.trim());
+        // تنظيف النص من أي تاجات HTML داخلية قد يضعها marked
+        const cleanText = text.replace(/<[^>]*>/g, '').trim();
+        
+        // تشفير النص ليكون ID آمن تماماً ومطابق لما سيظهر في الرابط
+        const id = encodeURIComponent(cleanText);
 
         // فقط للعناوين الرئيسية (#)
         if (level === 1) {
           const headingLink = `${fileName}/${id}`;
-          // الأيقونة تظهر أولاً ثم النص (متناسقة وصغيرة)
           return `<h1 id="${id}"><a class="heading-link" href="#${headingLink}" title="Copy link">🔗</a>${text}</h1>`;
         }
         
