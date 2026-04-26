@@ -12,6 +12,9 @@ https://shop.kanba.pw/
 
 </div>
 
+
+<img width="2000" height="1200" alt="1000004867" src="https://github.com/user-attachments/assets/97fac217-b2b3-4f9c-976e-eb2f91f787cc" />
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -120,5 +123,3 @@ https://shop.kanba.pw/
 21 directories, 78 files
 ```
 <!-- TREE END -->
-
-<img width="2000" height="1200" alt="1000004867" src="https://github.com/user-attachments/assets/97fac217-b2b3-4f9c-976e-eb2f91f787cc" />
