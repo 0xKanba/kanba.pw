@@ -10,8 +10,8 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     html {
-      scroll-behavior: auto;           /* تمرير فوري بدون أي تأثير */
-      scroll-padding-top: 24px;        /* مسافة من الأعلى عند التمرير */
+      scroll-behavior: auto;
+      scroll-padding-top: 24px;
     }
 
     body {
@@ -35,7 +35,6 @@
       flex-wrap: wrap; gap: 4px;
     }
 
-    /* زر 🔗 بجانب كل عنوان */
     .heading-link {
       font-size: 0.5em;
       text-decoration: none;
@@ -48,7 +47,6 @@
     }
     .heading-link:hover { opacity: 1; }
 
-    /* إشعار نسخ الرابط */
     .copy-toast {
       position: fixed;
       bottom: 30px;
@@ -102,9 +100,10 @@
           '<p style="color:red;text-align:center;">Error loading file map.</p>';
       });
 
-    /* ── فك الـ hash إلى ملف + anchor ── */
+    /* ── فك الـ hash مع دعم الترميز ── */
     function parseHash() {
-      const raw = window.location.hash.substring(1);
+      let raw = window.location.hash.substring(1);
+      try { raw = decodeURIComponent(raw); } catch (e) {}
       const idx = raw.indexOf('/');
       if (idx === -1) return { file: raw, anchor: '' };
       return { file: raw.substring(0, idx), anchor: raw.substring(idx + 1) };
@@ -118,6 +117,11 @@
       if (!file) { window.location.hash = 'us'; return; }
       if (!allowedFiles.includes(file)) { window.location.hash = 'us'; return; }
 
+      /* منع المتصفح من التمرير التلقائي لعنصر غير موجود بعد */
+      if (anchor) {
+        history.replaceState(null, '', '#' + file);
+      }
+
       contentDiv.innerHTML = '<p style="text-align:center;color:#888;">Loading...</p>';
 
       fetch('md/' + file + '.md')
@@ -126,17 +130,17 @@
         .catch(() => { window.location.hash = 'us'; });
     }
 
-    /* ── تحويل نص عادي إلى id صالح (يدعم أي لغة) ── */
+    /* ── تحويل نص إلى id صالح ── */
     function slugify(text) {
       return text
         .trim()
-        .replace(/[^\p{L}\p{N}\s-]/gu, '')   // إبقاء الحروف والأرقام بأي لغة
+        .replace(/[^\p{L}\p{N}\s-]/gu, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .toLowerCase() || 'section';
     }
 
-    /* ── عرض Markdown + إضافة أزرار 🔗 ── */
+    /* ── عرض Markdown + أزرار 🔗 + تمرير ── */
     function renderMarkdown(text, element, fileHash, anchorId) {
       const firstLine = text.trim().split('\n').find(l => l.trim() !== '');
       const isRtl = /[\u0600-\u06FF]/.test(firstLine || '');
@@ -147,7 +151,7 @@
       element.innerHTML = marked.parse(text);
       document.title = fileHash;
 
-      /* إضافة id + زر 🔗 لكل h1-h6 */
+      /* إضافة id + زر 🔋 لكل عنوان */
       const headings = element.querySelectorAll('h1,h2,h3,h4,h5,h6');
       const idCount = {};
 
@@ -174,16 +178,32 @@
         h.appendChild(a);
       });
 
-      /* تمرير فوري للعنوان المطلوب */
+      /* ── استعادة الـ hash الكامل والتمرير ── */
       if (anchorId) {
-        requestAnimationFrame(() => {
+        history.replaceState(null, '', '#' + fileHash + '/' + anchorId);
+
+        /* محاولات متعددة لضمان التمرير بعد رسم DOM بالكامل */
+        function tryScroll() {
           const el = document.getElementById(anchorId);
-          if (el) el.scrollIntoView({ behavior: 'instant', block: 'start' });
-        });
+          if (el) {
+            el.scrollIntoView({ behavior: 'instant', block: 'start' });
+            return true;
+          }
+          return false;
+        }
+
+        /* محاولة فورية */
+        tryScroll();
+        /* ثم بعد أطر الرسم */
+        requestAnimationFrame(tryScroll);
+        /* ثم بتأخيرات تصاعدية لضمان اكتمال التخطيط */
+        setTimeout(tryScroll, 50);
+        setTimeout(tryScroll, 150);
+        setTimeout(tryScroll, 400);
       }
     }
 
-    /* ── إشعار نسخ الرابط ── */
+    /* ── إشعار النسخ ── */
     function showToast() {
       const t = document.getElementById('copyToast');
       t.classList.add('show');
