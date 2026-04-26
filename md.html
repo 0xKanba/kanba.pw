@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Markdown Viewer</title>
+  <title>MD Viewer</title>
   <link rel="icon" href="/images/btc.png" type="image/png" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
@@ -11,8 +11,8 @@
     html { scroll-behavior: auto !important; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      line-height: 1.7; color: #24292f; background: #ffffff;
-      font-size: 16px; padding: 20px; max-width: 900px; margin: 0 auto;
+      line-height: 1.7; color: #24292f; background: #fff;
+      font-size: 16px; padding: 24px 16px; max-width: 900px; margin: 0 auto;
     }
     @media (prefers-color-scheme: dark) {
       body { color: #c9d1d9; background: #0d1117; }
@@ -22,119 +22,127 @@
       th { background: #161b22; color: #c9d1d9; }
       code, pre { background: #161b22; }
     }
-    #content { direction: auto; text-align: left; min-height: 60vh; }
+    #content { direction: auto; text-align: start; }
     h1, h2, h3, h4, h5, h6 { margin: 1.5em 0 0.5em; scroll-margin-top: 20px; }
     p, ul, ol, pre, blockquote { margin-bottom: 1em; }
     a { color: #0969da; text-decoration: none; }
     a:hover { text-decoration: underline; }
-    img { max-width: 100%; border-radius: 6px; margin: 10px 0; display: block; }
+    img { max-width: 100%; border-radius: 6px; margin: 10px auto; display: block; }
     table { width: 100%; border-collapse: collapse; margin: 15px 0; }
     th, td { border: 1px solid #d0d7de; padding: 8px 12px; }
     th { background: #f6f8fa; font-weight: 600; }
     code { background: #f6f8fa; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
-    pre { background: #f6f8fa; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.9em; }
-    .anchor-link {
-      color: #0969da; font-size: 0.8em; margin-inline-start: 8px; text-decoration: none;
-      vertical-align: middle; cursor: pointer; opacity: 0.7; display: inline-block;
+    pre { background: #f6f8fa; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.9em; text-align: start; }
+    .anchor {
+      color: #0969da; font-size: 0.85em; margin-inline-start: 8px;
+      text-decoration: none; cursor: pointer; opacity: 0.7; vertical-align: middle;
+      display: inline-block; line-height: 1;
     }
-    .anchor-link:hover { opacity: 1; }
-    .error { color: #cf222e; text-align: center; margin-top: 40px; font-size: 1.1em; }
+    .anchor:hover { opacity: 1; }
+    .error { color: #cf222e; text-align: center; margin: 40px 0; font-size: 1.1em; }
   </style>
 </head>
 <body>
   <div id="content"><p style="text-align:center; color:#6e7781; padding-top:40px;">Loading...</p></div>
   <script>
-    let allowedFiles = [];
-    let isLoading = false;
-    let isReady = false;
-    const DEFAULT_FILE = 'us';
+    const DEFAULT = 'us';
+    let files = [], ready = false, busy = false;
 
-    function generateId(text) {
-      return text.trim().toLowerCase()
-        .replace(/[^\w\s\u0600-\u06FF\u4e00-\u9fff-]/g, '')
-        .replace(/\s+/g, '-');
-    }
+    // GitHub-style ID generator (supports all languages)
+    const toId = t => t.trim().toLowerCase()
+      .replace(/[^\w\s\u0600-\u06FF\u4e00-\u9fff\u0400-\u04FF\u00C0-\u024F-]/g, '')
+      .replace(/\s+/g, '-');
 
-    function setHashSilently(file, id = '') {
-      const h = id ? `${file}#${id}` : file;
-      window.history.replaceState(null, '', `#${h}`);
-    }
+    // Silent hash update (no hashchange loop)
+    const setHash = (f, h = '') => {
+      const val = h ? `${f}#${h}` : f;
+      history.replaceState(null, '', '#' + encodeURIComponent(val));
+    };
 
-    function renderMarkdown(mdText, file, targetId) {
-      const container = document.getElementById('content');
-      container.style.direction = 'auto';
-      container.style.textAlign = 'left';
+    // Parse hash: #file#heading → {file, heading}
+    const parseHash = () => {
+      const raw = decodeURIComponent(location.hash.slice(1) || DEFAULT);
+      const [file, ...rest] = raw.split('#');
+      return { file: file || DEFAULT, heading: rest.join('#') || null };
+    };
+
+    // Render markdown + attach anchors + instant scroll
+    const render = (md, file, target) => {
+      const el = document.getElementById('content');
+      el.style.direction = 'auto'; el.style.textAlign = 'start';
 
       const renderer = new marked.Renderer();
-      renderer.heading = (text, level) => {
-        const id = generateId(text);
-        const btn = `<a href="#" class="anchor-link" data-id="${id}" title="Copy section link">🔗</a>`;
-        return `<h${level} id="${id}">${text}${btn}</h${level}>`;
+      renderer.heading = (txt, lvl) => {
+        const id = toId(txt);
+        return `<h${lvl} id="${id}">${txt}<a href="#" class="anchor" data-id="${id}" title="Copy link">🔗</a></h${lvl}>`;
       };
 
-      container.innerHTML = marked.parse(mdText, { renderer });
-      document.title = `${file} - Viewer`;
+      el.innerHTML = marked.parse(md, { renderer });
+      document.title = `${file} • MD`;
 
-      container.querySelectorAll('.anchor-link').forEach(link => {
-        link.addEventListener('click', e => {
+      // Anchor click → copy deep link
+      el.querySelectorAll('.anchor').forEach(a => {
+        a.onclick = e => {
           e.preventDefault();
           const id = e.target.dataset.id;
-          const url = `${window.location.origin}${window.location.pathname}#${file}#${encodeURIComponent(id)}`;
+          const url = `${location.origin}${location.pathname}#${file}#${encodeURIComponent(id)}`;
           navigator.clipboard.writeText(url).then(() => {
             e.target.textContent = '✅';
-            setTimeout(() => e.target.textContent = '🔗', 1200);
+            setTimeout(() => e.target.textContent = '🔗', 1000);
           }).catch(() => prompt('Copy:', url));
-        });
+        };
       });
 
-      // Scroll target or first heading
-      let scrollId = targetId || container.querySelector('h1, h2, h3, h4, h5, h6')?.id;
-      if (scrollId) {
-        const el = document.getElementById(scrollId);
-        if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
+      // Instant scroll: target → first heading → top
+      const tid = target || [...el.querySelectorAll('h1,h2,h3,h4,h5,h6')][0]?.id;
+      if (tid) {
+        const node = document.getElementById(tid);
+        if (node) node.scrollIntoView({ behavior: 'auto', block: 'start' });
       }
-    }
+    };
 
-    function loadContent() {
-      if (isLoading || !isReady) return;
-      isLoading = true;
+    // Load file with retry logic for Cloudflare Pages path quirks
+    const load = async () => {
+      if (busy || !ready) return;
+      busy = true;
 
-      const raw = window.location.hash.replace(/^#/, '') || DEFAULT_FILE;
-      const decoded = decodeURIComponent(raw);
-      const parts = decoded.split('#');
-      const file = parts[0] || DEFAULT_FILE;
-      const targetId = parts.length > 1 ? parts.slice(1).join('#') : '';
+      const { file, heading } = parseHash();
+      const el = document.getElementById('content');
 
-      if (allowedFiles.length && !allowedFiles.includes(file)) {
-        setHashSilently(DEFAULT_FILE);
-        return loadContent();
+      if (!files.includes(file)) { setHash(DEFAULT); return load(); }
+
+      el.innerHTML = '<p style="text-align:center;color:#6e7781;padding-top:40px">Loading...</p>';
+
+      // Try relative then root-relative path (Cloudflare Pages compatibility)
+      const paths = [`./md/${file}.md`, `/md/${file}.md`, `md/${file}.md`];
+      let text, err;
+
+      for (const p of paths) {
+        try {
+          const r = await fetch(p);
+          if (r.ok) { text = await r.text(); break; }
+          err = `HTTP ${r.status}`;
+        } catch (e) { err = e.message; }
       }
 
-      const container = document.getElementById('content');
-      container.innerHTML = '<p style="text-align:center; color:#6e7781; padding-top:40px;">Loading...</p>';
+      if (text) {
+        render(text, file, heading);
+      } else {
+        el.innerHTML = `<div class="error">❌ ${file}.md not found<br><small style="color:#666">${err}</small></div>`;
+        setHash(DEFAULT);
+      }
+      busy = false;
+    };
 
-      fetch(`/md/${file}.md`)
-        .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.text(); })
-        .then(text => renderMarkdown(text, file, targetId))
-        .catch(() => {
-          container.innerHTML = `<div class="error">Failed to load: ${file}.md</div>`;
-          setHashSilently(DEFAULT_FILE);
-        })
-        .finally(() => isLoading = false);
-    }
-
-    fetch('/md/files.json')
+    // Init
+    fetch('./md/files.json')
       .then(r => r.json())
-      .then(files => {
-        allowedFiles = Array.isArray(files) ? files : [DEFAULT_FILE];
-        isReady = true;
-        loadContent();
-      })
+      .then(list => { files = Array.isArray(list) ? list : [DEFAULT]; ready = true; load(); })
       .catch(() => {
-        document.getElementById('content').innerHTML = '<div class="error">Failed to load files.json</div>';
+        document.getElementById('content').innerHTML = '<div class="error">⚠️ files.json missing</div>';
       });
 
-    window.addEventListener('hashchange', loadContent);
+    addEventListener('hashchange', () => { if (ready) load(); });
   </script>
 </body>
 </html>
