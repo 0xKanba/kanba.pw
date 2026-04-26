@@ -21,14 +21,24 @@
       a { color: #4fc3f7; } table { border-color: #444; } th, td { border-color: #555; }
     }
 
-    #content { text-align: initial; margin: 0 auto; }
+    #content { 
+      text-align: initial; 
+      margin: 0 auto; 
+      /* ⬇️ السحر هنا: نجعل المحتوى مخفياً افتراضياً ⬇️ */
+      opacity: 0; 
+      transition: opacity 0.1s ease-in; 
+    }
+
+    /* كلاس للإظهار الفوري بعد الجاهزية */
+    #content.loaded { 
+      opacity: 1; 
+    }
 
     h1, h2, h3, h4, h5, h6 { 
       margin: 1.5em 0 1em; 
       color: #0074d9; 
       text-align: center; 
       position: relative;
-      /* ⬇️ السحر هنا: يضمن عدم التصاق العنوان بأعلى الشاشة عند النزول إليه ⬇️ */
       scroll-margin-top: 20px; 
     }
 
@@ -73,6 +83,11 @@
   <div id="content">Loading...</div>
 
   <script>
+    // ⬇️ إيقاف المتصفح من محاولة النزول بمفرده قبلنا ⬇️
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
     let allowedFiles = []; 
 
     fetch('md/files.json')
@@ -83,6 +98,7 @@
       })
       .catch(e => {
         document.getElementById('content').innerHTML = '<p style="color:red; text-align:center;">Error loading file map.</p>';
+        document.getElementById('content').classList.add('loaded');
       });
 
     function loadContent() {
@@ -98,6 +114,9 @@
       }
 
       const filePath = `md/${fileName}.md`;
+      
+      // إخفاء المحتوى أثناء التحميل والمعالجة
+      contentDiv.classList.remove('loaded'); 
       contentDiv.innerHTML = '<p style="text-align:center; color:#888;">Loading...</p>';
 
       fetch(filePath)
@@ -108,23 +127,20 @@
         .then(text => {
           renderMarkdown(text, contentDiv, fileName);
           
-          // ⬇️ المعالجة الذكية للنزول الفوري بدون قفز ⬇️
+          // ⬇️ الخطوات السحرية للنزول بدون تأثير ⬇️
           if (subHeading) {
-            // نوقف سلوك المتصفح الافتراضي المزعج
-            history.scrollRestoration = 'manual';
-            
-            // نستخدم MutationObserver لمراقبة متى يظهر العنصر في DOM
-            // بمجرد ظهوره ينزل إليه فوراً، بدلاً من انتظار تحميل الصفحة بالكامل
-            const observer = new MutationObserver(() => {
-              const target = document.getElementById(subHeading);
-              if (target) {
-                target.scrollIntoView({ behavior: 'instant', block: 'start' });
-                observer.disconnect(); // إيقاف المراقبة بعد الوصول
-              }
-            });
-            
-            observer.observe(contentDiv, { childList: true, subtree: true });
+            const target = document.getElementById(subHeading);
+            if (target) {
+              // 1. القفز الفوري للمكان بدون أن يرى المستخدم شيئاً (لأن opacity = 0)
+              window.scrollTo(0, target.offsetTop - 20); 
+            }
+          } else {
+            // إذا لم يكن هناك عنوان فرعي، نتأكد أننا في الأعلى
+            window.scrollTo(0, 0);
           }
+          
+          // 2. بعد أن أصبحنا في المكان الصحيح، نُظهر الصفحة فوراً!
+          contentDiv.classList.add('loaded');
         })
         .catch(e => {
           window.location.hash = 'us';
