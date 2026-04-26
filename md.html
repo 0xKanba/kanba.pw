@@ -11,18 +11,13 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      line-height: 1.8; 
-      color: #111; /* لون نص أسود قاتم للوضع الفاتح لزيادة الوضوح */
-      background: #fff;
+      line-height: 1.8; color: #222; background: #fff;
       font-size: 18px; padding: 30px 20px;
       max-width: 900px; margin: 0 auto; text-align: center;
     }
 
     @media (prefers-color-scheme: dark) {
-      body { 
-        color: #f5f5f5; /* لون نص أبيض ناصع للوضع الداكن */
-        background: #121212; 
-      }
+      body { color: #eee; background: #121212; }
       a { color: #4fc3f7; } table { border-color: #444; } th, td { border-color: #555; }
     }
 
@@ -32,6 +27,9 @@
       margin: 1.5em 0 1em; 
       color: #0074d9; 
       text-align: center; 
+      position: relative;
+      /* ⬇️ السحر هنا: يضمن عدم التصاق العنوان بأعلى الشاشة عند النزول إليه ⬇️ */
+      scroll-margin-top: 20px; 
     }
 
     p, ul, ol, pre { margin-bottom: 1em; }
@@ -49,22 +47,24 @@
       code { background: #333; } pre { background: #222; }
     }
 
-    /* ⬇️ تنسيق أيقونة النسخ (مرنة، ظاهرة دائماً، متناسقة) ⬇️ */
     .heading-link {
-      display: inline-block;
-      margin-right: 8px; 
-      font-size: 0.6em;  /* حجم ديناميكي يكبر ويصغر مع العنوان */
-      vertical-align: middle;
+      position: absolute;
+      right: -30px;
+      left: auto;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.2s;
       text-decoration: none !important;
-      color: #aaa !important; /* لون رمادي واضح但不 منفز */
-      transition: color 0.2s;
+      font-size: 0.6em;
+      color: #aaa !important;
     }
     [dir="ltr"] .heading-link {
-      margin-right: 0;
-      margin-left: 8px; 
+      left: -30px;
+      right: auto;
     }
-    .heading-link:hover {
-      color: #0074d9 !important;
+    h1:hover .heading-link {
+      opacity: 1;
     }
   </style>
 </head>
@@ -108,16 +108,22 @@
         .then(text => {
           renderMarkdown(text, contentDiv, fileName);
           
-          // ⬇️ الحل الجذري للنزول التلقائي الديناميكي ⬇️
+          // ⬇️ المعالجة الذكية للنزول الفوري بدون قفز ⬇️
           if (subHeading) {
-            // نعطي المتصفح 50 ميلي ثانية لرسم الـ DOM على الشاشة فعلياً قبل النزول
-            setTimeout(() => {
-              // نبحث عن الـ ID كما هو في الرابط بالضبط
+            // نوقف سلوك المتصفح الافتراضي المزعج
+            history.scrollRestoration = 'manual';
+            
+            // نستخدم MutationObserver لمراقبة متى يظهر العنصر في DOM
+            // بمجرد ظهوره ينزل إليه فوراً، بدلاً من انتظار تحميل الصفحة بالكامل
+            const observer = new MutationObserver(() => {
               const target = document.getElementById(subHeading);
               if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                target.scrollIntoView({ behavior: 'instant', block: 'start' });
+                observer.disconnect(); // إيقاف المراقبة بعد الوصول
               }
-            }, 50);
+            });
+            
+            observer.observe(contentDiv, { childList: true, subtree: true });
           }
         })
         .catch(e => {
@@ -138,19 +144,16 @@
         const text = data.text;
         const level = data.depth;
         
-        // تنظيف النص من أي تاجات HTML داخلية قد يضعها marked
-        const cleanText = text.replace(/<[^>]*>/g, '').trim();
-        
-        // تشفير النص ليكون ID آمن تماماً ومطابق لما سيظهر في الرابط
-        const id = encodeURIComponent(cleanText);
+        const id = text.toLowerCase()
+                       .replace(/[^\w\u0600-\u06FF\s-]/g, '')
+                       .replace(/\s+/g, '-');
 
-        // فقط للعناوين الرئيسية (#)
         if (level === 1) {
           const headingLink = `${fileName}/${id}`;
-          return `<h1 id="${id}"><a class="heading-link" href="#${headingLink}" title="Copy link">🔗</a>${text}</h1>`;
+          return `<h1 id="${id}">${text}<a class="heading-link" href="#${headingLink}" title="Copy link">🔗</a></h1>`;
         }
         
-        return `<h${level}>${text}</h${level}>`;
+        return `<h${level} id="${id}">${text}</h${level}>`;
       };
 
       element.innerHTML = marked.parse(text, { renderer });
