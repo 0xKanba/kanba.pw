@@ -24,12 +24,11 @@
     #content { 
       text-align: initial; 
       margin: 0 auto; 
-      /* ⬇️ السحر هنا: نجعل المحتوى مخفياً افتراضياً ⬇️ */
+      /* الصفحة مخفية تماماً حتى ننزل للمكان الصحيح */
       opacity: 0; 
-      transition: opacity 0.1s ease-in; 
     }
 
-    /* كلاس للإظهار الفوري بعد الجاهزية */
+    /* عند إضافة هذا الكلاس، تظهر الصفحة فوراً */
     #content.loaded { 
       opacity: 1; 
     }
@@ -39,7 +38,7 @@
       color: #0074d9; 
       text-align: center; 
       position: relative;
-      scroll-margin-top: 20px; 
+      scroll-margin-top: 20px; /* مسافة من الأعلى عند النزول */
     }
 
     p, ul, ol, pre { margin-bottom: 1em; }
@@ -83,7 +82,7 @@
   <div id="content">Loading...</div>
 
   <script>
-    // ⬇️ إيقاف المتصفح من محاولة النزول بمفرده قبلنا ⬇️
+    // منع المتصفح من القفز عشوائياً بمفرده
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
@@ -97,8 +96,9 @@
         loadContent(); 
       })
       .catch(e => {
-        document.getElementById('content').innerHTML = '<p style="color:red; text-align:center;">Error loading file map.</p>';
-        document.getElementById('content').classList.add('loaded');
+        const contentDiv = document.getElementById('content');
+        contentDiv.innerHTML = '<p style="color:red; text-align:center;">Error loading file map.</p>';
+        contentDiv.classList.add('loaded');
       });
 
     function loadContent() {
@@ -114,10 +114,7 @@
       }
 
       const filePath = `md/${fileName}.md`;
-      
-      // إخفاء المحتوى أثناء التحميل والمعالجة
-      contentDiv.classList.remove('loaded'); 
-      contentDiv.innerHTML = '<p style="text-align:center; color:#888;">Loading...</p>';
+      contentDiv.classList.remove('loaded'); // إخفاء الصفحة أثناء التحضير
 
       fetch(filePath)
         .then(r => {
@@ -127,20 +124,24 @@
         .then(text => {
           renderMarkdown(text, contentDiv, fileName);
           
-          // ⬇️ الخطوات السحرية للنزول بدون تأثير ⬇️
-          if (subHeading) {
-            const target = document.getElementById(subHeading);
-            if (target) {
-              // 1. القفز الفوري للمكان بدون أن يرى المستخدم شيئاً (لأن opacity = 0)
-              window.scrollTo(0, target.offsetTop - 20); 
-            }
-          } else {
-            // إذا لم يكن هناك عنوان فرعي، نتأكد أننا في الأعلى
-            window.scrollTo(0, 0);
-          }
-          
-          // 2. بعد أن أصبحنا في المكان الصحيح، نُظهر الصفحة فوراً!
-          contentDiv.classList.add('loaded');
+          // ⬇️ الحل الجذري: انتظر حتى يرسم المتصفح الصفحة بالكامل ثم انزل ⬇️
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (subHeading) {
+                const target = document.getElementById(subHeading);
+                if (target) {
+                  // نزول فوري ودقيق للمكان
+                  target.scrollIntoView({ behavior: 'instant', block: 'start' });
+                } else {
+                  window.scrollTo(0, 0); // إذا لم يجد العنوان، ابقَ في الأعلى
+                }
+              } else {
+                window.scrollTo(0, 0);
+              }
+              // الآن بعد أن أصبحنا في المكان الصحيح، اعرض الصفحة للمستخدم!
+              contentDiv.classList.add('loaded');
+            });
+          });
         })
         .catch(e => {
           window.location.hash = 'us';
@@ -160,9 +161,10 @@
         const text = data.text;
         const level = data.depth;
         
-        const id = text.toLowerCase()
-                       .replace(/[^\w\u0600-\u06FF\s-]/g, '')
-                       .replace(/\s+/g, '-');
+        // تحسين دقة إنشاء الـ ID ليتطابق مع الرابط تماماً
+        let id = text.toLowerCase()
+                     .replace(/\s+/g, '-')       // المسافات إلى شرطة
+                     .replace(/[^\w\u0600-\u06FF-]/g, ''); // إزالة الرموز الغريبة مع الحفاظ على العربي والإنجليزي والشرطة
 
         if (level === 1) {
           const headingLink = `${fileName}/${id}`;
