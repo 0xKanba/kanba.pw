@@ -1,321 +1,401 @@
-/* c.js — تقويم التداول HLTrade v3.0 */
+/* c.js — تقويم التداول v4 — ديناميكي، بلا scroll خارجي */
 (function(){
 'use strict';
 
-/* ── CSS ── */
 document.head.insertAdjacentHTML('beforeend',`<style>
-#calMod{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.93);
-  backdrop-filter:blur(16px);display:none;flex-direction:column;
-  font-family:'Cairo',sans-serif;direction:rtl;}
+#calMod{
+  position:fixed;inset:0;z-index:500;
+  background:var(--bg-app,#131210);
+  display:none;flex-direction:column;overflow:hidden;
+  font-family:'Cairo',sans-serif;direction:rtl;
+}
 #calMod.open{display:flex;}
-.ch{display:flex;align-items:center;justify-content:space-between;
-  padding:13px 16px 11px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
-.ch-title{font-size:17px;font-weight:900;color:#f0ece4;}
-.ch-back{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.14);
-  color:#f0ece4;border-radius:20px;padding:7px 18px;font-size:13px;
-  font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;}
-.ch-back:active{transform:scale(.96);}
-.cbody{flex:1;overflow-y:auto;padding:12px 10px;-webkit-overflow-scrolling:touch;}
-/* Stats */
-.cstats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:13px;}
-.cstat{background:#1e1c18;border-radius:10px;padding:9px 3px;text-align:center;
-  border:1px solid rgba(255,255,255,.06);}
-.cstat-l{font-size:9px;color:#8a8278;display:block;margin-bottom:3px;font-weight:700;}
-.cstat-v{font-size:12px;font-weight:900;font-family:'IBM Plex Mono',monospace;}
-.cstat-v.up{color:#34c85a;} .cstat-v.dn{color:#f05248;} .cstat-v.dim{color:#8a8278;}
+
+/* Header */
+.cal-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  flex-shrink:0;background:var(--bg-card,#1e1c18);
+}
+.cal-title{font-size:16px;font-weight:900;color:var(--text-primary,#f0ece4);}
+.cal-back{
+  background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.15);
+  color:var(--text-primary,#f0ece4);border-radius:20px;padding:6px 16px;
+  font-size:13px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;
+}
+
+/* Stats — ثابتة أعلى */
+.cal-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  padding:8px 10px 0;flex-shrink:0;
+  background:var(--bg-app,#131210);
+}
+.cal-stat{
+  background:var(--bg-card,#1e1c18);border-radius:8px;
+  padding:8px 3px;text-align:center;
+  border:1px solid rgba(255,255,255,.06);
+}
+.cal-stat-l{font-size:9px;color:#8a8278;display:block;margin-bottom:2px;font-weight:700;}
+.cal-stat-v{font-size:11px;font-weight:900;font-family:'IBM Plex Mono',monospace;}
+.cal-stat-v.up{color:#34c85a;} .cal-stat-v.dn{color:#f05248;} .cal-stat-v.dim{color:#8a8278;}
+
 /* Nav */
-.cnav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:9px;}
-.cnav-btn{background:rgba(255,255,255,.08);border:none;color:#f0ece4;
-  width:30px;height:30px;border-radius:50%;font-size:17px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;}
-.cnav-btn:active{transform:scale(.88);}
-.cmonth{font-size:15px;font-weight:800;color:#f0ece4;min-width:128px;text-align:center;}
+.cal-nav{
+  display:flex;align-items:center;justify-content:center;
+  gap:12px;padding:8px 10px 4px;flex-shrink:0;
+}
+.cal-nav-btn{
+  background:rgba(255,255,255,.08);border:none;
+  color:var(--text-primary,#f0ece4);
+  width:28px;height:28px;border-radius:50%;font-size:16px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.cal-month{font-size:14px;font-weight:800;color:var(--text-primary,#f0ece4);
+  min-width:120px;text-align:center;}
+
 /* Grid header */
-.cghdr{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px;}
-.cghdr span{text-align:center;font-size:9px;font-weight:800;color:#8a8278;
-  background:#1e1c18;padding:4px 0;border-radius:4px;}
-/* Calendar grid */
-.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cday{background:#1e1c18;border-radius:6px;aspect-ratio:1/1.2;
-  padding:4px 3px;display:flex;flex-direction:column;
-  justify-content:space-between;cursor:pointer;
-  border:1px solid transparent;transition:border-color .12s;overflow:hidden;}
-.cday.dim{opacity:.2;pointer-events:none;}
-.cday.profit{background:rgba(52,200,90,.14);border-color:rgba(52,200,90,.35);}
-.cday.loss{background:rgba(240,82,72,.14);border-color:rgba(240,82,72,.35);}
-.cday.today{border-color:#e07248!important;}
-.cday:hover:not(.dim){border-color:#e07248;}
-.cdn{font-size:9px;font-weight:700;color:#8a8278;line-height:1;}
-.cdv{font-size:clamp(8px,2.2vw,12px);font-weight:900;text-align:center;
-  line-height:1.1;font-family:'IBM Plex Mono',monospace;}
-.cdv.up{color:#34c85a;} .cdv.dn{color:#f05248;}
+.cal-ghdr{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:2px;
+  padding:0 10px 3px;flex-shrink:0;
+}
+.cal-ghdr span{
+  text-align:center;font-size:9px;font-weight:800;color:#8a8278;
+  background:var(--bg-card,#1e1c18);padding:3px 0;border-radius:3px;
+}
+
+/* Calendar grid — يملأ المساحة المتبقية */
+.cal-grid-wrap{
+  flex:1;overflow-y:auto;padding:0 10px 10px;
+  -webkit-overflow-scrolling:touch;
+}
+.cal-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:2px;
+}
+.cal-day{
+  background:var(--bg-card,#1e1c18);border-radius:5px;
+  aspect-ratio:1/1.1;
+  display:flex;flex-direction:column;
+  justify-content:space-between;padding:3px;
+  cursor:pointer;border:1px solid transparent;
+  overflow:hidden;
+}
+.cal-day.dim{opacity:.2;pointer-events:none;}
+.cal-day.profit{background:rgba(52,200,90,.15);border-color:rgba(52,200,90,.4);}
+.cal-day.loss{background:rgba(240,82,72,.15);border-color:rgba(240,82,72,.4);}
+.cal-day.today{border-color:#e07248!important;}
+.cal-day:hover:not(.dim){border-color:#e07248;}
+.cal-dn{font-size:8px;font-weight:700;color:#8a8278;line-height:1;}
+.cal-dv{
+  font-size:clamp(8px,1.9vw,11px);
+  font-weight:900;text-align:center;line-height:1;
+  font-family:'IBM Plex Mono',monospace;
+}
+.cal-dv.up{color:#34c85a;} .cal-dv.dn{color:#f05248;}
+
 /* Loader */
-.cload{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:50px;gap:14px;color:#8a8278;font-size:14px;font-weight:700;}
-.cspinner{width:28px;height:28px;border:3px solid rgba(255,255,255,.1);
-  border-top-color:#e07248;border-radius:50%;animation:cSpin .8s linear infinite;}
+.cal-load{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:12px;color:#8a8278;font-size:14px;font-weight:700;
+}
+.cal-spin{
+  width:26px;height:26px;border:3px solid rgba(255,255,255,.1);
+  border-top-color:#e07248;border-radius:50%;
+  animation:cSpin .8s linear infinite;
+}
 @keyframes cSpin{to{transform:rotate(360deg);}}
+
 /* Day detail */
-.cdet{position:absolute;inset:0;z-index:10;background:rgba(19,18,16,.97);
-  display:none;flex-direction:column;overflow:hidden;}
-.cdet.open{display:flex;}
-.cdh{display:flex;align-items:center;justify-content:space-between;
-  padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
-.cdh-t{font-size:15px;font-weight:900;color:#f0ece4;}
-.cdb{flex:1;overflow-y:auto;padding:12px;}
-.ctot{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:20px;
-  font-weight:900;margin-bottom:12px;}
-.ctcard{background:#1e1c18;border-radius:11px;padding:11px;margin-bottom:9px;
-  border:1px solid rgba(255,255,255,.07);}
-.ctt{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
-.ctcoin{font-weight:900;font-size:15px;color:#f0ece4;}
-.ctside{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;}
-.ctside.buy{background:rgba(52,200,90,.2);color:#34c85a;}
-.ctside.sell{background:rgba(240,82,72,.2);color:#f05248;}
-.ctg{display:grid;grid-template-columns:1fr 1fr;gap:5px;
-  background:#131210;border-radius:7px;padding:7px;}
-.cti{display:flex;flex-direction:column;gap:2px;}
-.ctl{font-size:9px;color:#8a8278;font-weight:800;text-transform:uppercase;}
-.ctv{font-size:12px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:#f0ece4;}
-.ctpnl{margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:900;}
-.ctpnl.up{color:#34c85a;} .ctpnl.dn{color:#f05248;}
-.cempty{text-align:center;padding:40px;color:#8a8278;font-size:14px;font-weight:700;}
+.cal-det{
+  position:absolute;inset:0;z-index:10;
+  background:var(--bg-app,#131210);
+  display:none;flex-direction:column;
+}
+.cal-det.open{display:flex;}
+.cal-det-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08);
+  flex-shrink:0;background:var(--bg-card,#1e1c18);
+}
+.cal-det-body{flex:1;overflow-y:auto;padding:10px;}
+.cal-tot{
+  text-align:center;font-family:'IBM Plex Mono',monospace;
+  font-size:22px;font-weight:900;margin-bottom:10px;
+}
+.cal-tcard{
+  background:var(--bg-card,#1e1c18);border-radius:10px;
+  padding:10px;margin-bottom:8px;
+  border:1px solid rgba(255,255,255,.07);
+}
+.cal-tt{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.cal-tc{font-weight:900;font-size:14px;color:var(--text-primary,#f0ece4);}
+.cal-ts{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;}
+.cal-ts.buy{background:rgba(52,200,90,.2);color:#34c85a;}
+.cal-ts.sell{background:rgba(240,82,72,.2);color:#f05248;}
+.cal-tg{
+  display:grid;grid-template-columns:1fr 1fr;gap:5px;
+  background:rgba(0,0,0,.25);border-radius:6px;padding:7px;
+}
+.cal-ti{display:flex;flex-direction:column;gap:1px;}
+.cal-tl{font-size:9px;color:#8a8278;font-weight:700;text-transform:uppercase;}
+.cal-tv{font-size:12px;font-weight:800;font-family:'IBM Plex Mono',monospace;
+  color:var(--text-primary,#f0ece4);}
+.cal-tp{
+  margin-top:7px;font-family:'IBM Plex Mono',monospace;
+  font-size:16px;font-weight:900;
+}
+.cal-tp.up{color:#34c85a;} .cal-tp.dn{color:#f05248;}
+.cal-empty{text-align:center;padding:40px;color:#8a8278;font-size:14px;font-weight:700;}
+.cal-fund-card{
+  background:rgba(224,114,72,.1);border:1px solid rgba(224,114,72,.3);
+  border-radius:10px;padding:10px;margin-bottom:8px;
+}
 </style>`);
 
-/* ── HTML ── */
 document.body.insertAdjacentHTML('beforeend',`
 <div id="calMod">
-  <div class="ch">
-    <button class="ch-back" id="calBack">← رجوع</button>
-    <span class="ch-title">📅 تقويم التداول</span>
-    <span style="width:72px"></span>
+  <div class="cal-hdr">
+    <button class="cal-back" id="calBack">← رجوع</button>
+    <span class="cal-title">📅 تقويم التداول</span>
+    <span style="width:70px"></span>
   </div>
-  <div class="cbody" id="calBody">
-    <div class="cload" id="calLoad"><div class="cspinner"></div><span>جاري التحميل...</span></div>
-    <div id="calCont" style="display:none">
-      <div class="cstats" id="calStats"></div>
-      <div class="cnav">
-        <button class="cnav-btn" id="calPrev">›</button>
-        <span class="cmonth" id="calMonth">—</span>
-        <button class="cnav-btn" id="calNext">‹</button>
-      </div>
-      <div class="cghdr">
-        <span>إث</span><span>ث</span><span>أر</span><span>خ</span><span>ج</span><span>س</span><span>أح</span>
-      </div>
-      <div class="cgrid" id="calGrid"></div>
+
+  <div class="cal-load" id="calLoad">
+    <div class="cal-spin"></div><span>جاري التحميل...</span>
+  </div>
+
+  <div id="calMain" style="display:none;flex:1;flex-direction:column;overflow:hidden;display:none;">
+    <div class="cal-stats" id="calStats"></div>
+    <div class="cal-nav">
+      <button class="cal-nav-btn" id="calPrev">›</button>
+      <span class="cal-month" id="calMonth">—</span>
+      <button class="cal-nav-btn" id="calNext">‹</button>
+    </div>
+    <div class="cal-ghdr">
+      <span>إث</span><span>ث</span><span>أر</span><span>خ</span>
+      <span>ج</span><span>س</span><span>أح</span>
+    </div>
+    <div class="cal-grid-wrap">
+      <div class="cal-grid" id="calGrid"></div>
     </div>
   </div>
-  <div class="cdet" id="calDet">
-    <div class="cdh">
-      <span class="cdh-t" id="calDetT">—</span>
-      <button class="ch-back" id="calDetClose">✕</button>
+
+  <div class="cal-det" id="calDet">
+    <div class="cal-det-hdr">
+      <span id="calDetT" style="font-size:15px;font-weight:900;">—</span>
+      <button class="cal-back" id="calDetClose">✕</button>
     </div>
-    <div class="cdb" id="calDetB"></div>
+    <div class="cal-det-body" id="calDetB"></div>
   </div>
 </div>`);
 
-/* ── State ── */
-const MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-let _fills=[], _fundMap={}, _dayMap={}, _cur=new Date(), _loaded=false;
+const MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو',
+              'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+let _fills=[], _fundMap={}, _dayMap={}, _cur=new Date(), _ready=false;
 const $=id=>document.getElementById(id);
 
-/* ── Helpers ── */
-function dayKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
-function monStart(d){ const r=new Date(d); const day=r.getDay(); r.setDate(r.getDate()-(day===0?6:day-1)); return r; }
+function dayKey(d){
+  return d.getFullYear()+'-'+
+    String(d.getMonth()+1).padStart(2,'0')+'-'+
+    String(d.getDate()).padStart(2,'0');
+}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function monStart(d){
+  const r=new Date(d);
+  const day=r.getDay();
+  r.setDate(r.getDate()-(day===0?6:day-1));
+  return r;
+}
 
-/* ── Get wallet address from localStorage ── */
-function getWalletAddr(){
-  // 1. From hl.js State (if script loaded and logged in)
+function getAddr(){
   if(window.State?.wallet?.address) return window.State.wallet.address;
-  // 2. From localStorage private key → derive address via ethers
-  const pk = localStorage.getItem('hl_trade_pk');
-  if(pk && typeof ethers !== 'undefined'){
-    try{ return new ethers.Wallet(pk).address; } catch{}
+  const pk=localStorage.getItem('hl_trade_pk');
+  if(pk){
+    try{
+      if(typeof ethers!=='undefined') return new ethers.Wallet(pk).address;
+    }catch{}
   }
   return null;
 }
 
-/* ── API ── */
-async function fetchFills(addr){
+async function api(body){
   const r=await fetch('https://api.hyperliquid.xyz/info',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({type:'userFills',user:addr})
+    body:JSON.stringify(body)
   });
-  if(!r.ok) throw new Error('فشل الاتصال');
   return r.json();
 }
 
-// رسوم التمويل: userFundingHistory — delta.type==='funding', delta.usdc = المبلغ
-async function fetchFundingHistory(addr){
-  const startTime = Date.now() - 365*24*3600*1000; // سنة كاملة
-  const r=await fetch('https://api.hyperliquid.xyz/info',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({type:'userFundingHistory',user:addr,startTime})
-  });
-  if(!r.ok) return [];
-  const data = await r.json();
-  return Array.isArray(data) ? data : [];
-}
-
-/* ── Build maps ── */
-function buildMaps(fills, fundingHistory){
-  // يومي PnL
-  const dayMap={};
+function buildMaps(fills,funding){
+  const dayMap={}, fundMap={};
   fills.forEach(f=>{
-    const key=dayKey(new Date(f.time));
+    const k=dayKey(new Date(f.time));
     const pnl=parseFloat(f.closedPnl||0)-parseFloat(f.fee||0);
-    dayMap[key]=(dayMap[key]||0)+pnl;
+    dayMap[k]=(dayMap[k]||0)+pnl;
   });
-
-  // رسوم التمويل: مجموع delta.usdc لكل يوم
-  // usdc موجب = استقبلت / سالب = دفعت
-  const fundMap={};
-  fundingHistory.forEach(e=>{
-    const d=e.delta; if(d?.type!=='funding') return;
-    const key=dayKey(new Date(e.time));
-    const usd=parseFloat(d.usdc||0);
-    fundMap[key]=(fundMap[key]||0)+usd;
+  (funding||[]).forEach(e=>{
+    if(e.delta?.type!=='funding') return;
+    const k=dayKey(new Date(e.time));
+    const usd=parseFloat(e.delta.usdc||0);
+    fundMap[k]=(fundMap[k]||0)+usd;
   });
-
-  return {dayMap, fundMap};
+  return {dayMap,fundMap};
 }
 
-/* ── Stats ── */
-function renderStats(){
+function showStats(){
   const now=Date.now();
-  const sum=ms=>_fills.filter(f=>f.time>=now-ms).reduce((s,f)=>s+parseFloat(f.closedPnl||0)-parseFloat(f.fee||0),0);
+  const pnl=ms=>_fills.filter(f=>f.time>=now-ms)
+    .reduce((s,f)=>s+parseFloat(f.closedPnl||0)-parseFloat(f.fee||0),0);
   const all=_fills.reduce((s,f)=>s+parseFloat(f.closedPnl||0)-parseFloat(f.fee||0),0);
-  const f=(v)=>{const s=v>=0?'+':'';const c=v>=0?'up':'dn';return `<span class="cstat-v ${c}">${s}$${Math.abs(v).toFixed(2)}</span>`;};
-  $('calStats').innerHTML=`
-    <div class="cstat"><span class="cstat-l">24س</span>${f(sum(86400000))}</div>
-    <div class="cstat"><span class="cstat-l">7 أيام</span>${f(sum(7*86400000))}</div>
-    <div class="cstat"><span class="cstat-l">30 يوم</span>${f(sum(30*86400000))}</div>
-    <div class="cstat"><span class="cstat-l">الكل</span>${f(all)}</div>`;
+  const row=(lbl,v)=>`<div class="cal-stat">
+    <span class="cal-stat-l">${lbl}</span>
+    <span class="cal-stat-v ${v>=0?'up':'dn'}">${v>=0?'+':''}$${Math.abs(v).toFixed(2)}</span>
+  </div>`;
+  $('calStats').innerHTML=
+    row('24 س',pnl(86400000))+
+    row('7 أيام',pnl(604800000))+
+    row('30 يوم',pnl(2592000000))+
+    row('الكل',all);
 }
 
-/* ── Render calendar ── */
-function renderCal(){
-  const y=_cur.getFullYear(), m=_cur.getMonth();
+function showCal(){
+  const y=_cur.getFullYear(),m=_cur.getMonth();
   $('calMonth').textContent=MONTHS[m]+' '+y;
   const first=new Date(y,m,1), last=new Date(y,m+1,0);
-  const startGrid=monStart(first);
-  const lastDay=last.getDay(); const toSun=lastDay===0?0:7-lastDay;
-  const endGrid=addDays(last,toSun);
-  const todayKey=dayKey(new Date());
+  const start=monStart(first);
+  const end=addDays(last, last.getDay()===0?0:7-last.getDay());
+  const todayK=dayKey(new Date());
   const grid=$('calGrid'); grid.innerHTML='';
-  let d=new Date(startGrid);
-  while(d<=endGrid){
-    const key=dayKey(d);
-    const pnl=_dayMap[key]||0;
-    const fund=_fundMap[key]||0;
-    const inMonth=d.getMonth()===m&&d.getFullYear()===y;
-    const isToday=key===todayKey;
+  let d=new Date(start);
+  while(d<=end){
+    const k=dayKey(d);
+    const trad=_dayMap[k]||0, fund=_fundMap[k]||0;
+    const total=trad+fund;
+    const inM=d.getMonth()===m&&d.getFullYear()===y;
     const box=document.createElement('div');
-    let cls='cday';
-    if(!inMonth) cls+=' dim';
-    else if(pnl>0.005) cls+=' profit';
-    else if(pnl<-0.005) cls+=' loss';
-    if(isToday) cls+=' today';
+    let cls='cal-day';
+    if(!inM) cls+=' dim';
+    else if(total>0.005) cls+=' profit';
+    else if(total<-0.005) cls+=' loss';
+    if(k===todayK) cls+=' today';
     box.className=cls;
-    let pnlHtml='';
-    if(inMonth&&(pnl!==0||fund!==0)){
-      const total=pnl+fund;
+    let pHtml='';
+    if(inM&&total!==0){
       const abs=Math.abs(total);
-      const txt=abs>=1000?abs.toFixed(0):abs>=100?abs.toFixed(1):abs>=10?abs.toFixed(2):abs.toFixed(2);
-      pnlHtml=`<span class="cdv ${total>=0?'up':'dn'}">${total>=0?'':'−'}$${txt}</span>`;
+      const txt=abs>=1000?abs.toFixed(0):abs>=10?abs.toFixed(1):abs.toFixed(2);
+      pHtml=`<span class="cal-dv ${total>0?'up':'dn'}">${total>0?'':'-'}$${txt}</span>`;
+    } else {
+      pHtml='<span></span>';
     }
-    box.innerHTML=`<span class="cdn">${d.getDate()}</span>${pnlHtml}`;
-    if(inMonth){ const snap=new Date(d); box.onclick=()=>showDay(snap); }
+    box.innerHTML=`<span class="cal-dn">${d.getDate()}</span>${pHtml}`;
+    if(inM){const snap=new Date(d);box.onclick=()=>showDay(snap);}
     grid.appendChild(box);
     d=addDays(d,1);
   }
 }
 
-/* ── Day detail ── */
 function showDay(date){
-  const key=dayKey(date);
-  const fills=_fills.filter(f=>dayKey(new Date(f.time))===key);
-  const fund=_fundMap[key]||0;
+  const k=dayKey(date);
+  const fills=_fills.filter(f=>dayKey(new Date(f.time))===k);
+  const fund=_fundMap[k]||0;
   $('calDetT').textContent=`${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
   const body=$('calDetB'); body.innerHTML='';
-  if(!fills.length&&fund===0){
-    body.innerHTML='<div class="cempty">📂 لا توجد صفقات هذا اليوم</div>'; $('calDet').classList.add('open'); return;
+  const trad=fills.reduce((s,f)=>s+parseFloat(f.closedPnl||0)-parseFloat(f.fee||0),0);
+  const total=trad+fund;
+  if(fills.length===0&&fund===0){
+    body.innerHTML='<div class="cal-empty">📂 لا توجد صفقات هذا اليوم</div>';
+    $('calDet').classList.add('open'); return;
   }
-  const tradePnl=fills.reduce((s,f)=>s+parseFloat(f.closedPnl||0)-parseFloat(f.fee||0),0);
-  const total=tradePnl+fund;
-  body.insertAdjacentHTML('beforeend',`<div class="ctot" style="color:${total>=0?'#34c85a':'#f05248'}">${total>=0?'+':'-'}$${Math.abs(total).toFixed(2)}</div>`);
-  // رسوم التمويل
+  body.insertAdjacentHTML('beforeend',
+    `<div class="cal-tot" style="color:${total>=0?'#34c85a':'#f05248'}">
+      ${total>=0?'+':'-'}$${Math.abs(total).toFixed(2)}
+    </div>`);
   if(fund!==0){
     body.insertAdjacentHTML('beforeend',`
-      <div class="ctcard" style="border-color:rgba(224,114,72,.3)">
-        <div class="ctt"><span class="ctcoin">💰 رسوم التمويل</span></div>
-        <div style="font-family:'IBM Plex Mono';font-size:16px;font-weight:900;text-align:left;color:${fund>=0?'#34c85a':'#f05248'}">${fund>=0?'+':'-'}$${Math.abs(fund).toFixed(6)}</div>
+      <div class="cal-fund-card">
+        <div style="font-size:12px;font-weight:700;color:#e07248;margin-bottom:4px;">💰 رسوم التمويل</div>
+        <div style="font-family:'IBM Plex Mono';font-size:17px;font-weight:900;
+          color:${fund>=0?'#34c85a':'#f05248'}">
+          ${fund>=0?'+':'-'}$${Math.abs(fund).toFixed(6)}
+        </div>
       </div>`);
   }
   fills.forEach(f=>{
     const pnl=parseFloat(f.closedPnl||0)-parseFloat(f.fee||0);
     const t=new Date(f.time);
-    const time=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
-    const card=document.createElement('div'); card.className='ctcard';
-    card.innerHTML=`
-      <div class="ctt">
-        <span class="ctcoin">${f.coin}</span>
-        <span class="ctside ${f.side==='B'?'buy':'sell'}">${f.side==='B'?'▲ شراء':'▼ بيع'}</span>
+    const tm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+    const c=document.createElement('div'); c.className='cal-tcard';
+    c.innerHTML=`
+      <div class="cal-tt">
+        <span class="cal-tc">${f.coin}</span>
+        <span class="cal-ts ${f.side==='B'?'buy':'sell'}">${f.side==='B'?'▲ شراء':'▼ بيع'}</span>
       </div>
-      <div class="ctg">
-        <div class="cti"><span class="ctl">السعر</span><span class="ctv">$${parseFloat(f.px).toFixed(2)}</span></div>
-        <div class="cti"><span class="ctl">الحجم</span><span class="ctv">${parseFloat(f.sz).toFixed(4)}</span></div>
-        <div class="cti"><span class="ctl">الوقت</span><span class="ctv">${time}</span></div>
-        <div class="cti"><span class="ctl">رسوم التداول</span><span class="ctv" style="color:#f0be30">$${parseFloat(f.fee||0).toFixed(4)}</span></div>
+      <div class="cal-tg">
+        <div class="cal-ti"><span class="cal-tl">السعر</span><span class="cal-tv">$${parseFloat(f.px).toFixed(2)}</span></div>
+        <div class="cal-ti"><span class="cal-tl">الحجم</span><span class="cal-tv">${parseFloat(f.sz).toFixed(4)}</span></div>
+        <div class="cal-ti"><span class="cal-tl">الوقت</span><span class="cal-tv">${tm}</span></div>
+        <div class="cal-ti"><span class="cal-tl">رسوم التداول</span><span class="cal-tv" style="color:#f0be30">$${parseFloat(f.fee||0).toFixed(4)}</span></div>
       </div>
-      <div class="ctpnl ${pnl>=0?'up':'dn'}">${pnl>=0?'+':'-'}$${Math.abs(pnl).toFixed(2)}</div>`;
-    body.appendChild(card);
+      <div class="cal-tp ${pnl>=0?'up':'dn'}">${pnl>=0?'+':'-'}$${Math.abs(pnl).toFixed(2)}</div>`;
+    body.appendChild(c);
   });
   $('calDet').classList.add('open');
 }
 
-/* ── Load data ── */
+function showMain(){
+  $('calLoad').style.display='none';
+  const main=$('calMain');
+  main.style.display='flex';
+  main.style.flexDirection='column';
+  main.style.overflow='hidden';
+  main.style.flex='1';
+}
+
 async function load(addr){
   $('calLoad').style.display='flex';
-  $('calLoad').innerHTML='<div class="cspinner"></div><span>جاري التحميل...</span>';
-  $('calCont').style.display='none';
+  $('calLoad').innerHTML='<div class="cal-spin"></div><span>جاري التحميل...</span>';
+  $('calMain').style.display='none';
   try{
-    const [fills,funding]=await Promise.all([fetchFills(addr), fetchFundingHistory(addr)]);
+    const [fills,funding]=await Promise.all([
+      api({type:'userFills',user:addr}),
+      api({type:'userFundingHistory',user:addr,startTime:Date.now()-365*86400000}).catch(()=>[])
+    ]);
     _fills=Array.isArray(fills)?fills:[];
-    const maps=buildMaps(_fills,funding);
+    const maps=buildMaps(_fills,Array.isArray(funding)?funding:[]);
     _dayMap=maps.dayMap; _fundMap=maps.fundMap;
-    _loaded=true;
-    renderStats(); renderCal();
-    $('calLoad').style.display='none';
-    $('calCont').style.display='block';
+    _ready=true;
+    showStats(); showCal(); showMain();
   }catch(e){
-    $('calLoad').innerHTML=`<span style="color:#f05248;font-size:15px">❌ ${e.message}</span>`;
+    $('calLoad').innerHTML=`<span style="color:#f05248;font-size:14px">❌ ${e.message}</span>`;
   }
 }
 
-/* ── Events ── */
 $('calBack').onclick=()=>$('calMod').classList.remove('open');
 $('calDetClose').onclick=()=>$('calDet').classList.remove('open');
-$('calPrev').onclick=()=>{_cur=new Date(_cur.getFullYear(),_cur.getMonth()-1,1);renderCal();};
-$('calNext').onclick=()=>{_cur=new Date(_cur.getFullYear(),_cur.getMonth()+1,1);renderCal();};
+$('calPrev').onclick=()=>{_cur=new Date(_cur.getFullYear(),_cur.getMonth()-1,1);showCal();};
+$('calNext').onclick=()=>{_cur=new Date(_cur.getFullYear(),_cur.getMonth()+1,1);showCal();};
 
-/* ── Public ── */
 window.openCalendar=function(){
   _cur=new Date();
   $('calMod').classList.add('open');
   $('calDet').classList.remove('open');
-  const addr=getWalletAddr();
+  const addr=getAddr();
   if(!addr){
     $('calLoad').style.display='flex';
     $('calLoad').innerHTML='<span style="color:#8a8278;font-size:14px">⚠️ سجّل الدخول أولاً</span>';
-    $('calCont').style.display='none'; return;
+    $('calMain').style.display='none';
+    return;
   }
-  if(_loaded){ renderStats(); renderCal(); $('calLoad').style.display='none'; $('calCont').style.display='block'; }
+  if(_ready){showStats();showCal();showMain();}
   else load(addr);
 };
 
-function bindBtn(){ const b=document.getElementById('btnCalendar'); if(b) b.onclick=()=>window.openCalendar(); }
-bindBtn();
-document.addEventListener('DOMContentLoaded',bindBtn);
+function bind(){
+  const b=document.getElementById('btnCalendar');
+  if(b) b.onclick=()=>window.openCalendar();
+}
+bind();
+document.addEventListener('DOMContentLoaded',bind);
 })();
