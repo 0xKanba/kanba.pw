@@ -27,7 +27,6 @@
       margin: 1.5em 0 1em; 
       color: #0074d9; 
       text-align: center; 
-      position: relative;
     }
 
     p, ul, ol, pre { margin-bottom: 1em; }
@@ -45,25 +44,22 @@
       code { background: #333; } pre { background: #222; }
     }
 
-    /* تنسيق أيقونة الرابط بجانب h1 فقط */
+    /* ⬇️ تنسيق زر النسخ (دائماً ظاهر، صغير، ديناميكي) ⬇️ */
     .heading-link {
-      position: absolute;
-      right: -30px;
-      left: auto;
-      top: 50%;
-      transform: translateY(-50%);
-      opacity: 0;
-      transition: opacity 0.2s;
+      display: inline-block;
+      margin-right: 8px; /* مسافة بين الأيقونة والنص للعربي */
+      font-size: 0.6em;  /* حجم ديناميكي يتناسب مع حجم العنوان */
+      vertical-align: middle;
       text-decoration: none !important;
-      font-size: 0.6em;
-      color: #aaa !important;
+      color: #ccc !important;
+      transition: color 0.2s;
     }
     [dir="ltr"] .heading-link {
-      left: -30px;
-      right: auto;
+      margin-right: 0;
+      margin-left: 8px; /* مسافة للإنجليزي */
     }
-    h1:hover .heading-link {
-      opacity: 1; /* تظهر فقط عند تمرير الماوس على العنوان الرئيسي */
+    .heading-link:hover {
+      color: #0074d9 !important;
     }
   </style>
 </head>
@@ -107,11 +103,15 @@
         .then(text => {
           renderMarkdown(text, contentDiv, fileName);
           
+          // ⬇️ النزول التلقائي الديناميكي (باستخدام الـ ID المشفر) ⬇️
           if (subHeading) {
             setTimeout(() => {
-              const target = document.getElementById(subHeading);
-              if (target) target.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
+              const targetId = decodeURIComponent(subHeading); // فك التشفير للبحث في الصفحة
+              const target = document.getElementById(targetId);
+              if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 200); // تأخير بسيط لضمان تحميل الـ Markdown بالكامل
           }
         })
         .catch(e => {
@@ -128,24 +128,21 @@
 
       const renderer = new marked.Renderer();
       
-      // ⬇️ التعديل الدقيق هنا: فقط لـ h1 (مستوى 1) ⬇️
       renderer.heading = function(data) {
         const text = data.text;
-        const level = data.depth; // المستوى (1 = # ، 2 = ## ، إلخ)
+        const level = data.depth;
         
-        // إنشاء ID للعنوان (نحتاجه حتى لو لم نضع رابطاً لكي يعمل التمرير إذا تم مشاركة الرابط)
-        const id = text.toLowerCase()
-                       .replace(/[^\w\u0600-\u06FF\s-]/g, '')
-                       .replace(/\s+/g, '-');
+        // ⬇️ السحر هنا: تشفير النص ليصبح ID صحيح 100% للمتصفح ⬇️
+        const id = encodeURIComponent(text.trim());
 
-        // إذا كان العنوان رئيسياً (# فقط = level 1)، أضف له الرابط المخصص والأيقونة
+        // فقط للعناوين الرئيسية (#)
         if (level === 1) {
           const headingLink = `${fileName}/${id}`;
-          return `<h1 id="${id}">${text}<a class="heading-link" href="#${headingLink}" title="Copy link">🔗</a></h1>`;
+          // الأيقونة تظهر أولاً ثم النص (متناسقة وصغيرة)
+          return `<h1 id="${id}"><a class="heading-link" href="#${headingLink}" title="Copy link">🔗</a>${text}</h1>`;
         }
         
-        // أما إذا كان فرعياً (## أو ###)، اتركه عادياً جداً بدون أيقونة أو رابط مخصص
-        return `<h${level} id="${id}">${text}</h${level}>`;
+        return `<h${level}>${text}</h${level}>`;
       };
 
       element.innerHTML = marked.parse(text, { renderer });
