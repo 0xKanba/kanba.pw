@@ -16,6 +16,7 @@ https://shop.kanba.pw/
 
 
 
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -29,6 +30,8 @@ https://shop.kanba.pw/
 │   ├── script.js
 │   └── style.css
 ├── ccr.html
+├── chats
+│   └── index.html
 ├── css
 │   ├── ccr.css
 │   ├── kanba.css
@@ -40,8 +43,13 @@ https://shop.kanba.pw/
 │   ├── data
 │   │   ├── firms
 │   │   │   ├── blueguardian
-│   │   │   │   └── forex
-│   │   │   │       └── instant-starter.json
+│   │   │   │   ├── forex
+│   │   │   │   │   └── instant-starter.json
+│   │   │   │   └── futures
+│   │   │   │       ├── instant.json
+│   │   │   │       ├── pro.json
+│   │   │   │       ├── rapid.json
+│   │   │   │       └── standard.json
 │   │   │   ├── finotivefunding
 │   │   │   │   └── forex
 │   │   │   │       ├── 2step-challenge.json
@@ -109,11 +117,8 @@ https://shop.kanba.pw/
 │   ├── yaser.js
 │   └── younis.js
 ├── md
-│   ├── b.md
 │   ├── files.json
-│   ├── hl.md
-│   ├── us.md
-│   └── xz.md
+│   └── us.md
 ├── md.html
 ├── scc.html
 ├── tree.txt
@@ -121,6 +126,6 @@ https://shop.kanba.pw/
 ├── younis.html
 └── ysr.html
 
-21 directories, 78 files
+23 directories, 80 files
 ```
 <!-- TREE END -->
