@@ -665,17 +665,32 @@ async function execClose(){
   const p=State.positions[State.pendingClose];if(!p){closeModal('modalClose');return;}
   const pos=p.position,sziOz=parseFloat(pos.szi);
   const sym=shortCoinPos(pos.coin);
-  const isGram=ASSETS[sym]?.gram;
-  // ✅ API: دائماً ASSETS['GOLD'] لأن الـ idx/szDp الصحيح
-  const aApi=ASSETS['GOLD'];
-  const midGram=State.prices['XAU']?.mid||State.prices['GOLD']?.mid;
-  const midOz=isGram?(midGram*TROY):State.prices[sym]?.mid;
-  if(!aApi||!midOz){toast('بيانات ناقصة','err');closeModal('modalClose');return;}
-  setBtnLoading('closeExecute','⏳');showLoader(`إغلاق ${ASSETS[sym]?.icon||''} ${ASSETS[sym]?.name||''}...`);
+  const isGram=!!ASSETS[sym]?.gram;
+  // ✅ API: ASSETS['GOLD'] لـ XAU، ASSETS[sym] للباقي
+  const aApi=isGram?ASSETS['GOLD']:ASSETS[sym];
+  if(!aApi){toast('أصل غير معروف','err');closeModal('modalClose');return;}
+  // ✅ midOz: سعر الأونصة للـ API
+  // XAU: State.prices['XAU'].mid هو الغرام → ×TROY = أونصة
+  // fallback: State.prices['GOLD'].mid هو الأونصة مباشرة
+  const gramPx=State.prices['XAU']?.mid;
+  const midOz=isGram
+    ?(gramPx>0 ? gramPx*TROY : State.prices['GOLD']?.mid)
+    :State.prices[sym]?.mid;
+  if(!midOz||midOz<=0){toast('سعر غير متاح، انتظر لحظة','err');closeModal('modalClose');return;}
+  const aDisp=ASSETS[sym]||aApi;
+  setBtnLoading('closeExecute','⏳');showLoader(`إغلاق ${aDisp.icon||''} ${aDisp.name||''}...`);
   try{
     const isBuy=sziOz<0;
-    await hlExchange({type:'order',orders:[{a:aApi.idx,b:isBuy,p:wirePx(midOz*(isBuy?1.02:0.98),aApi.szDp),s:wire(Math.abs(sziOz),aApi.szDp),r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
-    closeModal('modalClose');toast(`✅ أُغلقت — ${ASSETS[sym]?.icon||''} ${ASSETS[sym]?.name||''}`,'ok',4000);
+    await hlExchange({
+      type:'order',
+      orders:[{a:aApi.idx,b:isBuy,
+        p:wirePx(midOz*(isBuy?1.02:0.98),aApi.szDp),
+        s:wire(Math.abs(sziOz),aApi.szDp),
+        r:true,t:{limit:{tif:'Ioc'}}}],
+      grouping:'na'
+    });
+    closeModal('modalClose');
+    toast(`✅ أُغلقت — ${aDisp.icon||''} ${aDisp.name||''}`,'ok',4000);
     State.pendingClose=null;setTimeout(pollAccount,2000);
   }catch(e){toast(tradeErr(e.message),'err',6000);}
   finally{resetBtn('closeExecute');hideLoader();}
@@ -699,13 +714,16 @@ async function execCloseAll(){
     for(const p of positions){
       const pos=p.position,sziOz=parseFloat(pos.szi);
       const sym=shortCoinPos(pos.coin);
-      const isGram=ASSETS[sym]?.gram;
+      const isGram=!!ASSETS[sym]?.gram;
       const aApi=isGram?ASSETS['GOLD']:ASSETS[sym];
-      const midGram=State.prices['XAU']?.mid;
-      const midOz=isGram?(midGram*TROY):State.prices[sym]?.mid;
+      const gramPx=State.prices['XAU']?.mid;
+      const midOz=isGram?(gramPx>0?gramPx*TROY:State.prices['GOLD']?.mid):State.prices[sym]?.mid;
       if(!aApi||!midOz){fail++;continue;}
-      try{const isBuy=sziOz<0;await hlExchange({type:'order',orders:[{a:aApi.idx,b:isBuy,p:wirePx(midOz*(isBuy?1.02:0.98),aApi.szDp),s:wire(Math.abs(sziOz),aApi.szDp),r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});ok++;}
-      catch(e){fail++;console.warn('[closeAll]',sym,e.message);}
+      try{
+        const isBuy=sziOz<0;
+        await hlExchange({type:'order',orders:[{a:aApi.idx,b:isBuy,p:wirePx(midOz*(isBuy?1.02:0.98),aApi.szDp),s:wire(Math.abs(sziOz),aApi.szDp),r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
+        ok++;
+      }catch(e){fail++;console.warn('[closeAll]',sym,e.message);}
     }
     closeModal('modalCloseAll');toast(`✅ أُغلق ${ok} مركز${fail?` · فشل ${fail}`:''}`,'ok',5000);
     setTimeout(pollAccount,2000);
@@ -723,10 +741,12 @@ function szToDisp(sym,ounceSz){return ASSETS[sym]?.gram?ounceSz*TROY:ounceSz;}
 
 window.openTP=async function(i){
   const p=State.positions[i];if(!p)return;
-  const pos=p.position,coin=shortCoin(pos.coin),a=ASSETS[coin]||{name:coin,pxDp:2,icon:'📊'};
+  const pos=p.position;
+  // ✅ استخدام shortCoinPos: xyz:GOLD → 'XAU' (غرام)
+  const coin=shortCoinPos(pos.coin);
+  const a=ASSETS[coin]||{name:coin,pxDp:2,icon:'📊'};
   const isGram=!!a.gram;
   const isLong=parseFloat(pos.szi)>0;
-  // ✅ سعر الدخول للعرض: ÷ TROY إذا كان غرام
   const entryDisp=ozToDisp(coin,parseFloat(pos.entryPx||0));
   setTxt('tpTitle',`🎯 جني الربح — ${a.icon} ${a.name}`);
   setTxt('tpSubtitle',`${isLong?'▲ شراء':'▼ بيع'} · دخول: $${fmt(entryDisp,a.pxDp)}`);
@@ -736,9 +756,8 @@ window.openTP=async function(i){
   hideLoader();
   function buildTpD(tpPxOz,ep,szi,a){
     if(!tpPxOz)return`<div class="confirm-row"><span class="confirm-key">الهدف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
-    // ✅ عرض سعر الغرام (÷ TROY)، الحساب بالأونصة
     const tpDisp=ozToDisp(coin,tpPxOz);
-    const sz=Math.abs(parseFloat(szi)); // أونصة
+    const sz=Math.abs(parseFloat(szi));
     const gross=(tpPxOz-parseFloat(ep))*parseFloat(szi);
     const fee=tpPxOz*sz*feeRate(coin),net=gross-fee;
     return`<div class="confirm-row"><span class="confirm-key">🎯 سعر التفعيل</span><span class="confirm-val tp">$${fmt(tpDisp,a.pxDp)}</span></div>
@@ -751,7 +770,6 @@ window.openTP=async function(i){
   $('tpCurrentDetails').innerHTML=buildTpD(ft.tp,pos.entryPx,pos.szi,a);
   $('tpDeleteRow').classList.toggle('hidden',!ft.tpOid);
   $('tpAmount').value='';setTxt('tpPreview','سعر التفعيل: —');
-  // نحفظ entryPx و szi بالأونصة (كما في API) للحساب الصحيح
   State.pendingTP={index:i,coin:pos.coin,szi:pos.szi,entryPx:pos.entryPx,sym:coin,tpsl:ft};
   openModal('modalTP');
 };
@@ -778,14 +796,15 @@ async function execTP(){
   const val=parseFloat($('tpAmount').value||0);
   if(!val||val<=0)return toast('أدخل مبلغ الربح المستهدف','err');
   const a=ASSETS[tp.sym];if(!a)return;
-  const tpPx=calcTpPrice(tp.entryPx,tp.szi,val);
+  const tpPxOz=calcTpPrice(tp.entryPx,tp.szi,val); // أونصة للـ API
+  const tpPxDisp=ozToDisp(tp.sym,tpPxOz); // غرام للعرض
   const isLong=parseFloat(tp.szi)>0;
-  if(isLong&&tpPx<=parseFloat(tp.entryPx))return toast('⚠️ TP يجب أن يكون فوق سعر الدخول','err');
-  if(!isLong&&tpPx>=parseFloat(tp.entryPx))return toast('⚠️ TP يجب أن يكون تحت سعر الدخول','err');
+  if(isLong&&tpPxOz<=parseFloat(tp.entryPx))return toast('⚠️ TP يجب أن يكون فوق سعر الدخول','err');
+  if(!isLong&&tpPxOz>=parseFloat(tp.entryPx))return toast('⚠️ TP يجب أن يكون تحت سعر الدخول','err');
   setBtnLoading('tpExecute','⏳');showLoader(`${a.icon} تعيين هدف الربح...`);
   try{
-    await placeNativeTpsl(tp.sym,tp.szi,'tp',tpPx);
-    closeModal('modalTP');toast(`✅ هدف الربح = $${fmt(tpPx,a.pxDp)}`,'ok',4000);
+    await placeNativeTpsl(tp.sym,tp.szi,'tp',tpPxOz);
+    closeModal('modalTP');toast(`✅ هدف الربح = $${fmt(tpPxDisp,a.pxDp)}`,'ok',4000);
     State.pendingTP=null;setTimeout(pollAccount,2000);
   }catch(e){toast(tradeErr(e.message),'err',5000);}
   finally{resetBtn('tpExecute');hideLoader();}
@@ -803,18 +822,23 @@ async function deleteTP(){
 
 window.openSL=async function(i){
   const p=State.positions[i];if(!p)return;
-  const pos=p.position,coin=shortCoin(pos.coin),a=ASSETS[coin]||{name:coin,pxDp:2,icon:'📊'};
+  const pos=p.position;
+  const coin=shortCoinPos(pos.coin); // ✅ xyz:GOLD → 'XAU'
+  const a=ASSETS[coin]||{name:coin,pxDp:2,icon:'📊'};
+  const isGram=!!a.gram;
   const isLong=parseFloat(pos.szi)>0;
+  const entryDisp=ozToDisp(coin,parseFloat(pos.entryPx||0));
   setTxt('slTitle',`🛡 وقف الخسارة — ${a.icon} ${a.name}`);
-  setTxt('slSubtitle',`${isLong?'▲ شراء':'▼ بيع'} · دخول: $${fmt(pos.entryPx||0,a.pxDp)}`);
+  setTxt('slSubtitle',`${isLong?'▲ شراء':'▼ بيع'} · دخول: $${fmt(entryDisp,a.pxDp)}`);
   showLoader('جلب الأوامر...');
   let ft={tp:null,sl:null,tpOid:null,slOid:null};
   try{const ords=await hlInfo({type:'frontendOpenOrders',user:State.wallet.address,dex:'xyz'});ft=parseTpslFromOrders(Array.isArray(ords)?ords:[],pos.coin);if(State.positions[i])State.positions[i].tpsl=ft;}catch{}
   hideLoader();
-  function buildSlD(slPx,ep,szi,a){
-    if(!slPx)return`<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
-    const sz=Math.abs(parseFloat(szi)),gross=(slPx-parseFloat(ep))*parseFloat(szi),fee=slPx*sz*feeRate(coin),net=gross-fee;
-    return`<div class="confirm-row"><span class="confirm-key">⛔ سعر الوقف</span><span class="confirm-val sl">$${fmt(slPx,a.pxDp)}</span></div>
+  function buildSlD(slPxOz,ep,szi,a){
+    if(!slPxOz)return`<div class="confirm-row"><span class="confirm-key">الوقف</span><span class="confirm-val muted">لم يُعيَّن بعد</span></div>`;
+    const slDisp=ozToDisp(coin,slPxOz);
+    const sz=Math.abs(parseFloat(szi)),gross=(slPxOz-parseFloat(ep))*parseFloat(szi),fee=slPxOz*sz*feeRate(coin),net=gross-fee;
+    return`<div class="confirm-row"><span class="confirm-key">⛔ سعر الوقف</span><span class="confirm-val sl">$${fmt(slDisp,a.pxDp)}</span></div>
       <div class="tpsl-breakdown">
         <div class="tb-row"><span>📉 خسارة متوقعة</span><span class="tb-mono neg">${gross>=0?'+':''}$${Math.abs(gross).toFixed(2)}</span></div>
         <div class="tb-row"><span>💸 رسوم</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
@@ -831,12 +855,16 @@ function recalcSlPreview(){
   const sl=State.pendingSL;if(!sl)return;
   const val=parseFloat($('slAmount')?.value||0),el=$('slPreview');if(!el)return;
   if(!val||val<=0){el.innerHTML='<span style="color:var(--text-secondary)">سعر الوقف: —</span>';return;}
-  const a=ASSETS[sl.sym]||{pxDp:2},px=calcSlPrice(sl.entryPx,sl.szi,val);
-  const sz=Math.abs(parseFloat(sl.szi)),fee=px*sz*feeRate(sl.sym),net=-(val+fee);
+  const a=ASSETS[sl.sym]||{pxDp:2};
+  // calcSlPrice يعمل بالأونصة → يُعطي سعر أونصة
+  const pxOz=calcSlPrice(sl.entryPx,sl.szi,val);
+  // ✅ عرض سعر الغرام للمستخدم
+  const pxDisp=ozToDisp(sl.sym,pxOz);
+  const sz=Math.abs(parseFloat(sl.szi)),fee=pxOz*sz*feeRate(sl.sym),net=-(val+fee);
   el.innerHTML=`<div class="tpsl-breakdown">
-    <div class="tb-row"><span>⛔ سعر الوقف</span><span class="tb-mono">$${fmt(px,a.pxDp)}</span></div>
+    <div class="tb-row"><span>⛔ سعر الوقف</span><span class="tb-mono">$${fmt(pxDisp,a.pxDp)}</span></div>
     <div class="tb-row"><span>📉 خسارة</span><span class="tb-mono neg">−$${val.toFixed(2)}</span></div>
-    <div class="tb-row"><span>💸 رسوم</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
+    <div class="tb-row"><span>💸 رسوم (${feeRatePct(sl.sym)})</span><span class="tb-mono warn">−$${fee.toFixed(4)}</span></div>
     <div class="tb-row tb-net"><span>🏁 صافي الخسارة</span><span class="tb-mono neg">${net.toFixed(2)}</span></div>
   </div>`;
 }
@@ -845,14 +873,15 @@ async function execSL(){
   const val=parseFloat($('slAmount').value||0);
   if(!val||val<=0)return toast('أدخل مبلغ الخسارة المسموح بها','err');
   const a=ASSETS[sl.sym];if(!a)return;
-  const slPx=calcSlPrice(sl.entryPx,sl.szi,val);
+  const slPxOz=calcSlPrice(sl.entryPx,sl.szi,val); // أونصة للـ API
+  const slPxDisp=ozToDisp(sl.sym,slPxOz); // غرام للعرض
   const isLong=parseFloat(sl.szi)>0;
-  if(isLong&&slPx>=parseFloat(sl.entryPx))return toast('⚠️ SL يجب أن يكون تحت سعر الدخول','err');
-  if(!isLong&&slPx<=parseFloat(sl.entryPx))return toast('⚠️ SL يجب أن يكون فوق سعر الدخول','err');
+  if(isLong&&slPxOz>=parseFloat(sl.entryPx))return toast('⚠️ SL يجب أن يكون تحت سعر الدخول','err');
+  if(!isLong&&slPxOz<=parseFloat(sl.entryPx))return toast('⚠️ SL يجب أن يكون فوق سعر الدخول','err');
   setBtnLoading('slExecute','⏳');showLoader(`${a.icon} تعيين وقف الخسارة...`);
   try{
-    await placeNativeTpsl(sl.sym,sl.szi,'sl',slPx);
-    closeModal('modalSL');toast(`✅ وقف الخسارة = $${fmt(slPx,a.pxDp)}`,'ok',4000);
+    await placeNativeTpsl(sl.sym,sl.szi,'sl',slPxOz);
+    closeModal('modalSL');toast(`✅ وقف الخسارة = $${fmt(slPxDisp,a.pxDp)}`,'ok',4000);
     State.pendingSL=null;setTimeout(pollAccount,2000);
   }catch(e){toast(tradeErr(e.message),'err',5000);}
   finally{resetBtn('slExecute');hideLoader();}
@@ -985,30 +1014,36 @@ async function _renderBalance(){
   if(!State.wallet)return;
   const el=$('balanceContent');if(!el)return;
   try{
-    // ✅ الرصيد من Hyperliquid الرئيسي (بدون dex)
-    const [main,spot,xyz]=await Promise.all([
+    // ✅ الرصيد من الحساب الرئيسي فقط (accountValue = SPOT + Perps + PnL كله مدمج)
+    const [main,xyz]=await Promise.all([
       hlInfo({type:'clearinghouseState',user:State.wallet.address}).catch(()=>({})),
-      hlInfo({type:'spotClearinghouseState',user:State.wallet.address}).catch(()=>({})),
       hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'}).catch(()=>({}))
     ]);
-    // SPOT USDC من الحساب الرئيسي
-    let spotUSDC=0;for(const b of spot?.balances||[])if(b.coin==='USDC'||b.coin==='USDC:0')spotUSDC+=parseFloat(b.total||0);
-    // قيمة الحساب الرئيسي
+    // accountValue = الرصيد الكلي الحقيقي (يشمل PnL)
     const mainVal=parseFloat(main?.marginSummary?.accountValue||0);
-    // xyz: هامش + PnL
-    const xyzVal=parseFloat(xyz?.marginSummary?.accountValue||0);
+    const xyzVal =parseFloat(xyz?.marginSummary?.accountValue||0);
+    // استخدم الأكبر أو مجموعهما إذا كانا مختلفين
+    const total=xyzVal>0?xyzVal:mainVal;
+    // ✅ الهامش المستخدم — منفصل لا يُجمع مع الرصيد
     const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0)||parseFloat(main?.marginSummary?.totalMarginUsed||0);
+    // ✅ PnL العائم — منفصل
     const floatPnl=(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0)||
                    (main?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
-    const total=mainVal+spotUSDC+(xyzVal&&xyzVal!==mainVal?xyzVal:0);
-    const display=total||mainVal||spotUSDC;
     const pCls=floatPnl>=0?'green':'red';
     el.innerHTML=`
       <div class="balance-grid">
-        <div class="balance-item"><span class="balance-label">💰 الرصيد الكلي</span><span class="balance-value blue">$${fmt(display,2)}</span></div>
-        <div class="balance-item"><span class="balance-label">💵 SPOT USDC</span><span class="balance-value blue">$${fmt(spotUSDC,2)}</span></div>
-        <div class="balance-item"><span class="balance-label">🔒 الهامش المستخدم</span><span class="balance-value warn">$${fmt(margin,2)}</span></div>
-        <div class="balance-item"><span class="balance-label">📊 الربح العائم</span><span class="balance-value ${pCls}">${floatPnl>=0?'+':''}$${fmt(floatPnl,2)}</span></div>
+        <div class="balance-item">
+          <span class="balance-label">💰 الرصيد الكلي</span>
+          <span class="balance-value blue">$${fmt(total,2)}</span>
+        </div>
+        <div class="balance-item">
+          <span class="balance-label">🔒 هامش مستخدم</span>
+          <span class="balance-value warn">$${fmt(margin,2)}</span>
+        </div>
+        <div class="balance-item">
+          <span class="balance-label">📊 ربح/خسارة عائمة</span>
+          <span class="balance-value ${pCls}">${floatPnl>=0?'+':''}$${fmt(floatPnl,2)}</span>
+        </div>
       </div>
       <div class="balance-auto-note">↻ تحديث تلقائي كل 2 ثانية</div>`;
   }catch(e){el.innerHTML=`<div class="balance-loading" style="color:var(--dn)">❌ ${e.message.slice(0,150)}</div>`;}
