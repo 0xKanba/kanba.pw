@@ -3,7 +3,7 @@ name: Auto Update Project Tree
 on:
   push:
     branches:
-      - master
+      - tst
 
 jobs:
   update-structure:
