@@ -991,12 +991,14 @@ async function showHistory(){
       const pxDisp=isGram?parseFloat(f.px)/TROY:parseFloat(f.px);
       const szDisp=isGram?parseFloat(f.sz)*TROY:parseFloat(f.sz);
       const assetImg=imgMap[sym]?`<img src="${imgMap[sym]}" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;" alt="${sym}">`:`<span>${a.icon}</span>`;
-      // رسوم التمويل فقط إذا وُجدت (بعد إغلاق صفقة)
-      const fundRow=fundUsd!==0?`
+      // ✅ رسوم التمويل — تظهر دائماً في التاريخ (بعد إغلاق صفقة)
+      const fundSign=fundUsd>=0?'+':'-';
+      const fundCls=fundUsd>=0?'pos':'neg';
+      const fundRow=`
         <div class="hist-cell"><span class="hist-lbl">رسوم التمويل</span>
-          <span class="hist-val ${fundUsd>=0?'pos':'neg'}">${fundUsd>=0?'+':'-'}$${Math.abs(fundUsd).toFixed(4)}</span></div>
-        <div class="hist-cell"><span class="hist-lbl">🏁 إجمالي مع التمويل</span>
-          <span class="hist-val ${tCls}">${totalPnl>=0?'+':''}$${fmt(totalPnl,2)}</span></div>`:'';
+          <span class="hist-val ${fundCls}">${fundSign}$${Math.abs(fundUsd).toFixed(4)}</span></div>
+        <div class="hist-cell"><span class="hist-lbl">🏁 الإجمالي (مع التمويل)</span>
+          <span class="hist-val ${tCls}">${totalPnl>=0?'+':''}$${fmt(totalPnl,2)}</span></div>`;
       return`<div class="history-item">
         <div class="hist-top">
           <div class="hist-asset">${assetImg} ${a.name}</div>
@@ -1032,39 +1034,20 @@ async function _renderBalance(){
   if(!State.wallet)return;
   const el=$('balanceContent');if(!el)return;
   try{
-    /* ✅ وثائق Hyperliquid:
-       - clearinghouseState (بدون dex) = الـ native perp accountValue (يشمل الـ USDC الـ perp)
-       - spotClearinghouseState = USDC في الـ Spot wallet
-       - clearinghouseState dex:'xyz' = صفقات xyz
-       الرصيد الكلي = native.accountValue + spotUSDC
-       (native.accountValue لا يشمل الـ spot USDC في الغالب — يشملهما معاً في الـ unified account)
-       الأبسط والأصح: نجمع native.accountValue + spot USDC ونتجنب التكرار */
-    const [native,spot,xyz]=await Promise.all([
+    const [native,xyz]=await Promise.all([
       hlInfo({type:'clearinghouseState',user:State.wallet.address}).catch(()=>({})),
-      hlInfo({type:'spotClearinghouseState',user:State.wallet.address}).catch(()=>({})),
       hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'}).catch(()=>({}))
     ]);
-    const nativeVal=parseFloat(native?.marginSummary?.accountValue||0);
-    const xyzVal   =parseFloat(xyz?.marginSummary?.accountValue||0);
-    let spotUSDC=0;
-    for(const b of spot?.balances||[])
-      if(b.coin==='USDC'||b.coin==='USDC:0')spotUSDC+=parseFloat(b.total||0);
-
-    // ✅ الرصيد الكلي الحقيقي = native (perp+balance) + spot USDC + xyz
-    // تجنب التكرار: إذا native=0 → المستخدم على xyz فقط
-    const total = nativeVal + (xyzVal>0&&xyzVal!==nativeVal?xyzVal:0) + spotUSDC;
-
-    // الهامش: من xyz (حيث الصفقات)
+    // ✅ accountValue = رصيد الحساب الكلي (يشمل PnL) — لا نجمع شيئاً
+    const total=parseFloat(native?.marginSummary?.accountValue||0)||
+                parseFloat(xyz?.marginSummary?.accountValue||0);
+    // ✅ الهامش المستخدم — منفصل تماماً
     const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0)||
                  parseFloat(native?.marginSummary?.totalMarginUsed||0);
-
-    // PnL: من xyz أو native
+    // ✅ PnL العائم — منفصل
     const calcPnl=pos=>pos.reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
     const floatPnl=calcPnl(xyz?.assetPositions||[])||calcPnl(native?.assetPositions||[]);
-
     const pCls=floatPnl>=0?'green':'red';
-    const avail=parseFloat(xyz?.withdrawable||native?.withdrawable||0)||Math.max(0,total-margin);
-
     el.innerHTML=`
       <div class="balance-grid">
         <div class="balance-item">
@@ -1072,15 +1055,11 @@ async function _renderBalance(){
           <span class="balance-value blue">$${fmt(total,2)}</span>
         </div>
         <div class="balance-item">
-          <span class="balance-label">✅ قابل للسحب</span>
-          <span class="balance-value green">$${fmt(avail,2)}</span>
-        </div>
-        <div class="balance-item">
-          <span class="balance-label">🔒 هامش مستخدم</span>
+          <span class="balance-label">🔒 الهامش المستخدم</span>
           <span class="balance-value warn">$${fmt(margin,2)}</span>
         </div>
         <div class="balance-item">
-          <span class="balance-label">📊 ربح/خسارة عائمة</span>
+          <span class="balance-label">📊 ربح / خسارة عائمة</span>
           <span class="balance-value ${pCls}">${floatPnl>=0?'+':''}$${fmt(floatPnl,2)}</span>
         </div>
       </div>
