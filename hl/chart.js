@@ -450,18 +450,26 @@ const ChartModule = (function () {
     if (typeof State==='undefined'||!State.wallet) return;
     const btn=document.getElementById('_cfX');
     if (btn) { btn.disabled=true; btn.innerHTML='<span class="cf-spin"></span>'; }
-    const a  = ai(_sym);
-    const mid= _lastClose||(typeof State!=='undefined'?State.prices[_sym]?.mid:0);
-    if (!mid) { hideCf(); return; }
+    const TROY_LOCAL = 31.1035;
+    const isGram = _sym === 'XAU';
+    // a: للـ API نستخدم GOLD (أونصة) لأن idx و szDp صحيحان
+    const a = isGram ? (typeof ASSETS!=='undefined'?ASSETS['GOLD']:ai(_sym)) : ai(_sym);
+    // mid: سعر الغرام (_lastClose) → نضرب × TROY للحصول على سعر الأونصة للـ API
+    const midGram = _lastClose||(typeof State!=='undefined'?State.prices['XAU']?.mid:0);
+    const midOz   = isGram ? midGram*TROY_LOCAL : (_lastClose||(typeof State!=='undefined'?State.prices[_sym]?.mid:0));
+    if (!midOz) { hideCf(); return; }
+    // qty: المستخدم يدخل غرامات → نحول لأونصات للـ API
+    const qtyOz = isGram ? qty/TROY_LOCAL : qty;
     try {
       try { await hlExchange({type:'updateLeverage',asset:a.idx,isCross:a.cross,leverage:a.lev}); } catch{}
       await hlExchange({
         type:'order',
-        orders:[{a:a.idx,b:isBuy,p:wire(mid*(isBuy?1.02:0.98),a.pxDp),s:wire(qty,a.szDp),r:false,t:{limit:{tif:'Ioc'}}}],
+        orders:[{a:a.idx,b:isBuy,p:wirePx(midOz*(isBuy?1.02:0.98),a.szDp),s:wireSz(qtyOz,a.szDp),r:false,t:{limit:{tif:'Ioc'}}}],
         grouping:'na'
       });
       hideCf();
-      if(typeof toast!=='undefined') toast(`✅ ${a.icon} ${isBuy?'شراء':'بيع'} ${fs(qty)} ${a.unit}`,'ok',4000);
+      const dispSz = isGram ? qty.toFixed(2)+' غرام' : fs(qty)+' '+(a.unit||'');
+      if(typeof toast!=='undefined') toast(`✅ ${a.icon} ${isBuy?'شراء':'بيع'} ${dispSz}`,'ok',4000);
       if(typeof pollAccount!=='undefined') setTimeout(pollAccount,2000);
     } catch(e) {
       if(typeof toast!=='undefined') toast((typeof tradeErr!=='undefined'?tradeErr(e.message):'❌ '+e.message.slice(0,100)),'err',5000);
@@ -658,6 +666,9 @@ const ChartModule = (function () {
 
   async function fetchCandles(sym, iv) {
     const now=Date.now(), start=now-(RANGES[iv]||RANGES['1h']);
+    // ✅ XAU (غرام ذهب): نقسم أسعار الشموع على TROY لعرض سعر الغرام
+    const TROY_LOCAL = 31.1035;
+    const isGram = sym === 'XAU';
     try {
       const r=await fetch(HL_API+'/info',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({type:'candleSnapshot',req:{coin:coin(sym),interval:iv,startTime:start,endTime:now}})});
@@ -665,7 +676,10 @@ const ChartModule = (function () {
       if(!Array.isArray(raw)||!raw.length) return [];
       return raw.map(c=>({
         time: Math.floor(c.t/1000),
-        open: +c.o, high: +c.h, low: +c.l, close: +c.c,
+        open: isGram ? +c.o/TROY_LOCAL : +c.o,
+        high: isGram ? +c.h/TROY_LOCAL : +c.h,
+        low:  isGram ? +c.l/TROY_LOCAL : +c.l,
+        close:isGram ? +c.c/TROY_LOCAL : +c.c,
       })).sort((a,b)=>a.time-b.time);
     } catch(e){console.warn('[Chart]',e.message);return [];}
   }
@@ -714,6 +728,7 @@ const ChartModule = (function () {
 
   function wsConnect(){
     wsClose(); clearTimeout(_wsTimer);
+    const TROY_LOCAL = 31.1035;
     try{
       _ws=new WebSocket(HL_WS);
       _ws.onopen=()=>{ _ws.send(JSON.stringify({method:'subscribe',subscription:{type:'candle',coin:coin(_sym),interval:_interval}})); setStatus('🟢'); };
@@ -722,15 +737,22 @@ const ChartModule = (function () {
           const msg=JSON.parse(e.data);
           if(msg.channel!=='candle'||!msg.data||!_series) return;
           const c=msg.data;
-          const bar={time:Math.floor(c.t/1000),open:+c.o,high:+c.h,low:+c.l,close:+c.c};
+          const isGram=_sym==='XAU';
+          // ✅ XAU: قسمة على TROY لعرض سعر الغرام في الرسم البياني
+          const bar={
+            time:Math.floor(c.t/1000),
+            open: isGram?+c.o/TROY_LOCAL:+c.o,
+            high: isGram?+c.h/TROY_LOCAL:+c.h,
+            low:  isGram?+c.l/TROY_LOCAL:+c.l,
+            close:isGram?+c.c/TROY_LOCAL:+c.c,
+          };
           _series.update(bar);
-          // تحديث آخر شمعة في الـ cache
           if (_candles.length && _candles[_candles.length-1].time === bar.time) {
             _candles[_candles.length-1] = bar;
           } else if (_candles.length && bar.time > _candles[_candles.length-1].time) {
             _candles.push(bar);
           }
-          setPrice(+c.c);
+          setPrice(bar.close); // سعر الغرام مباشرة
           drawLines();
           drawDayStats();
         }catch{}

@@ -79,6 +79,13 @@
   -webkit-tap-highlight-color:transparent;
   -webkit-touch-callout:none; user-select:none;
 }
+/* ✅ السماح بتحديد ونسخ النصوص المهمة */
+.pos-data-value, .price-value, .positions-pnl, .hist-val, .hist-pnl,
+.balance-value, .confirm-val, .cal-stat-v, .tab-price, .nav-address,
+.price-bid-ask, .priceDelta, .price-delta, .price-asset, .pos-pnl,
+.pos-funding-val, .pos-size, .pos-name, .hist-asset, .cal-tot,
+.cal-tp, .cal-tv { user-select:text; -webkit-user-select:text; cursor:text;
+}
 html,body {
   height:100%; background:var(--bg-app); color:var(--text-primary);
   font-family:var(--font-ui); overflow:hidden;
