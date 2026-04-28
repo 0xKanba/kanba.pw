@@ -1034,19 +1034,25 @@ async function _renderBalance(){
   if(!State.wallet)return;
   const el=$('balanceContent');if(!el)return;
   try{
-    const [native,xyz]=await Promise.all([
+    const [native,spot,xyz]=await Promise.all([
       hlInfo({type:'clearinghouseState',user:State.wallet.address}).catch(()=>({})),
+      hlInfo({type:'spotClearinghouseState',user:State.wallet.address}).catch(()=>({})),
       hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'}).catch(()=>({}))
     ]);
-    // ✅ accountValue = رصيد الحساب الكلي (يشمل PnL) — لا نجمع شيئاً
-    const total=parseFloat(native?.marginSummary?.accountValue||0)||
-                parseFloat(xyz?.marginSummary?.accountValue||0);
-    // ✅ الهامش المستخدم — منفصل تماماً
+    // 💰 الرصيد الكلي = perps + xyz + spot USDC
+    const nativeVal=parseFloat(native?.marginSummary?.accountValue||0);
+    const xyzVal=parseFloat(xyz?.marginSummary?.accountValue||0);
+    let spotUSDC=0;
+    for(const b of spot?.balances||[])
+      if(b.coin==='USDC'||b.coin==='USDC:0')spotUSDC+=parseFloat(b.total||0);
+    const total=nativeVal+(xyzVal>0&&xyzVal!==nativeVal?xyzVal:0)+spotUSDC;
+    // 🔒 الهامش المستخدم فقط
     const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0)||
                  parseFloat(native?.marginSummary?.totalMarginUsed||0);
-    // ✅ PnL العائم — منفصل
+    // 📊 PnL عائم = مجموع كل الصفقات المفتوحة
     const calcPnl=pos=>pos.reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
-    const floatPnl=calcPnl(xyz?.assetPositions||[])||calcPnl(native?.assetPositions||[]);
+    let floatPnl=calcPnl(xyz?.assetPositions||[]);
+    if(native?.assetPositions)floatPnl+=calcPnl(native.assetPositions.filter(p=>parseFloat(p.position?.szi||0)!==0));
     const pCls=floatPnl>=0?'green':'red';
     el.innerHTML=`
       <div class="balance-grid">
