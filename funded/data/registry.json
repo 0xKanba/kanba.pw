@@ -68,16 +68,6 @@
           "accounts": [
             { "id": "instant-starter", "name": "Instant Starter", "path": "data/firms/blueguardian/forex/instant-starter.json" }
           ]
-        },
-        {
-          "id": "futures",
-          "name": "Futures",
-          "accounts": [
-            { "id": "standard", "name": "Standard", "path": "data/firms/blueguardian/futures/standard.json" },
-            { "id": "pro",      "name": "Pro (Guardian)", "path": "data/firms/blueguardian/futures/pro.json" },
-            { "id": "rapid",    "name": "Rapid",    "path": "data/firms/blueguardian/futures/rapid.json" },
-            { "id": "instant",  "name": "Instant",  "path": "data/firms/blueguardian/futures/instant.json" }
-          ]
         }
       ]
     }
