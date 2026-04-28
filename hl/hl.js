@@ -191,7 +191,13 @@ async function hlExchange(action){
 }
 async function autoSetReferrer(){
   if(!State.wallet||State.referrerSet)return;
-  try{const ref=await hlInfo({type:'referral',user:State.wallet.address});if(ref.referredBy){State.referrerSet=true;return;}await hlExchange({type:'setReferrer',code:'KANBA'});State.referrerSet=true;}catch{}
+  try{
+    const ref=await hlInfo({type:'referral',user:State.wallet.address});
+    if(ref.referredBy){State.referrerSet=true;return;}
+    await hlExchange({type:'setReferrer',code:'KANBA'});
+    State.referrerSet=true;
+    console.log('✅ رابط الإحالة: https://app.hyperliquid.xyz/join/KANBA');
+  }catch{}
 }
 function tradeErr(msg){
   const m=msg.toLowerCase();
@@ -377,21 +383,32 @@ function updatePriceUI(){
   recalcTpPreview();recalcSlPreview();
 }
 
-/* ════ الحساب (xyz dex) ════ */
+/* ════ الحساب — native + xyz ════ */
 async function pollAccount(){
   if(!State.wallet)return;
   try{
-    const [xyz,spot,openOrders]=await Promise.all([
-      hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'}).catch(()=>({})),
+    const [native,spot,xyz,openOrders]=await Promise.all([
+      hlInfo({type:'clearinghouseState',user:State.wallet.address}).catch(()=>({})),
       hlInfo({type:'spotClearinghouseState',user:State.wallet.address}).catch(()=>({})),
+      hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'}).catch(()=>({})),
       hlInfo({type:'frontendOpenOrders',user:State.wallet.address,dex:'xyz'}).catch(()=>[])
     ]);
     State.openOrders=Array.isArray(openOrders)?openOrders:[];
-    const xyzVal=parseFloat(xyz?.marginSummary?.accountValue||0);
+
+    // ✅ الرصيد الكلي الصحيح
+    const nativeVal=parseFloat(native?.marginSummary?.accountValue||0);
+    const xyzVal   =parseFloat(xyz?.marginSummary?.accountValue||0);
     let spotUSDC=0;
-    for(const b of spot?.balances||[])if(b.coin==='USDC'||b.coin==='USDC:0')spotUSDC+=parseFloat(b.total||0);
-    State.balance={total:xyzVal+spotUSDC,margin:parseFloat(xyz?.marginSummary?.totalMarginUsed||0),floatPnl:(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0)};
+    for(const b of spot?.balances||[])
+      if(b.coin==='USDC'||b.coin==='USDC:0')spotUSDC+=parseFloat(b.total||0);
+    const total=nativeVal+(xyzVal>0&&xyzVal!==nativeVal?xyzVal:0)+spotUSDC;
+    const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0)||parseFloat(native?.marginSummary?.totalMarginUsed||0);
+
+    // ✅ الصفقات: من xyz (حيث يُتداول GOLD/SILVER/CL)
     const rawPos=(xyz?.assetPositions||[]).filter(p=>parseFloat(p.position?.szi||0)!==0);
+    const floatPnl=rawPos.reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
+    State.balance={total,margin,floatPnl};
+
     State.positions=rawPos.map(p=>{
       const existing=State.positions.find(e=>e.position.coin===p.position.coin);
       const tpsl=parseTpslFromOrders(State.openOrders,p.position.coin);
@@ -416,26 +433,27 @@ function parseTpslFromOrders(orders,coin){
 function calcTpPrice(ep,szi,pnl){const sz=parseFloat(szi),e=parseFloat(ep);return sz>0?e+pnl/sz:e-pnl/Math.abs(sz);}
 function calcSlPrice(ep,szi,sl){const sz=parseFloat(szi),e=parseFloat(ep);return sz>0?e-sl/sz:e+sl/Math.abs(sz);}
 
-/* ════ ✅ رسوم التمويل — إشارة صحيحة ════
-   sinceOpen من API:
-   موجب (+) = دفعت تمويلاً (ينقص من رصيدك) → نعرضه سالباً باللون الأحمر
-   سالب (-) = استلمت تمويلاً (يزيد رصيدك) → نعرضه موجباً باللون الأخضر
-   الحل: نعكس الإشارة بضرب -1
-══════════════════════════════════════════ */
+/* ════ رسوم التمويل ════
+   cumFunding.sinceOpen من API:
+   موجب = دفعت (ينقص رصيدك) → نعرضه بعلامة - وأحمر
+   سالب = استلمت (يزيد رصيدك) → نعرضه بعلامة + وأخضر
+   → نعكس بضرب -1 ════ */
 function updateFundingFromPositions(positions){
   const acc={};
   for(const p of positions||[]){
     const pos=p.position,coin=pos.coin||'';
     const raw=coin.includes(':')?coin.split(':')[1]:coin;
-    const sym=COIN_TO_SYM[raw]||raw;
-    // ✅ نعكس الإشارة: موجب API = دفعت = سالب للمستخدم
+    // ✅ GOLD → XAU (غرام) لعرض صحيح
+    const sym=raw==='GOLD'?'XAU':(COIN_TO_SYM[raw]||raw);
     acc[sym]=-parseFloat(pos.cumFunding?.sinceOpen||0);
   }
   State.fundingRates=acc;
+  // تحديث عناصر DOM
   Object.entries(acc).forEach(([sym,usd])=>{
     document.querySelectorAll(`[data-funding-sym="${sym}"]`).forEach(el=>{
-      const s=usd>=0?'+':'';
-      el.textContent=`${s}$${Math.abs(usd).toFixed(4)}`;
+      // ✅ علامة - أو + صريحة دائماً
+      const sign=usd>=0?'+':'-';
+      el.textContent=`${sign}$${Math.abs(usd).toFixed(4)}`;
       el.className=`pos-funding-val ${usd>=0?'pos':'neg'}`;
     });
   });
@@ -1001,7 +1019,7 @@ async function showHistory(){
   }
 }
 
-/* ════ الرصيد — SPOT من Hyperliquid الرئيسي + هامش من xyz ════ */
+/* ════ الرصيد ════ */
 async function showBalance(){
   openModal('modalBalance');await _renderBalance();
   clearInterval(State._balTimer);
@@ -1014,27 +1032,48 @@ async function _renderBalance(){
   if(!State.wallet)return;
   const el=$('balanceContent');if(!el)return;
   try{
-    // ✅ الرصيد من الحساب الرئيسي فقط (accountValue = SPOT + Perps + PnL كله مدمج)
-    const [main,xyz]=await Promise.all([
+    /* ✅ وثائق Hyperliquid:
+       - clearinghouseState (بدون dex) = الـ native perp accountValue (يشمل الـ USDC الـ perp)
+       - spotClearinghouseState = USDC في الـ Spot wallet
+       - clearinghouseState dex:'xyz' = صفقات xyz
+       الرصيد الكلي = native.accountValue + spotUSDC
+       (native.accountValue لا يشمل الـ spot USDC في الغالب — يشملهما معاً في الـ unified account)
+       الأبسط والأصح: نجمع native.accountValue + spot USDC ونتجنب التكرار */
+    const [native,spot,xyz]=await Promise.all([
       hlInfo({type:'clearinghouseState',user:State.wallet.address}).catch(()=>({})),
+      hlInfo({type:'spotClearinghouseState',user:State.wallet.address}).catch(()=>({})),
       hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'}).catch(()=>({}))
     ]);
-    // accountValue = الرصيد الكلي الحقيقي (يشمل PnL)
-    const mainVal=parseFloat(main?.marginSummary?.accountValue||0);
-    const xyzVal =parseFloat(xyz?.marginSummary?.accountValue||0);
-    // استخدم الأكبر أو مجموعهما إذا كانا مختلفين
-    const total=xyzVal>0?xyzVal:mainVal;
-    // ✅ الهامش المستخدم — منفصل لا يُجمع مع الرصيد
-    const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0)||parseFloat(main?.marginSummary?.totalMarginUsed||0);
-    // ✅ PnL العائم — منفصل
-    const floatPnl=(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0)||
-                   (main?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
+    const nativeVal=parseFloat(native?.marginSummary?.accountValue||0);
+    const xyzVal   =parseFloat(xyz?.marginSummary?.accountValue||0);
+    let spotUSDC=0;
+    for(const b of spot?.balances||[])
+      if(b.coin==='USDC'||b.coin==='USDC:0')spotUSDC+=parseFloat(b.total||0);
+
+    // ✅ الرصيد الكلي الحقيقي = native (perp+balance) + spot USDC + xyz
+    // تجنب التكرار: إذا native=0 → المستخدم على xyz فقط
+    const total = nativeVal + (xyzVal>0&&xyzVal!==nativeVal?xyzVal:0) + spotUSDC;
+
+    // الهامش: من xyz (حيث الصفقات)
+    const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0)||
+                 parseFloat(native?.marginSummary?.totalMarginUsed||0);
+
+    // PnL: من xyz أو native
+    const calcPnl=pos=>pos.reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
+    const floatPnl=calcPnl(xyz?.assetPositions||[])||calcPnl(native?.assetPositions||[]);
+
     const pCls=floatPnl>=0?'green':'red';
+    const avail=parseFloat(xyz?.withdrawable||native?.withdrawable||0)||Math.max(0,total-margin);
+
     el.innerHTML=`
       <div class="balance-grid">
         <div class="balance-item">
           <span class="balance-label">💰 الرصيد الكلي</span>
           <span class="balance-value blue">$${fmt(total,2)}</span>
+        </div>
+        <div class="balance-item">
+          <span class="balance-label">✅ قابل للسحب</span>
+          <span class="balance-value green">$${fmt(avail,2)}</span>
         </div>
         <div class="balance-item">
           <span class="balance-label">🔒 هامش مستخدم</span>
