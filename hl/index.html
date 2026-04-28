@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
@@ -71,8 +71,8 @@
   <nav class="nav">
     <div class="nav-left">
       <div class="nav-logo" id="navLogo" style="cursor:pointer">⚡ HL<em>Trade</em></div>
-      <a href="https://shop.kanba.pw/" target="_blank" class="nav-status" style="text-decoration:none; color:inherit;">
-        <span class="status-dot"></span>مباشر 
+      <a href="https://shop.kanba.pw" target="_blank" rel="noopener" class="nav-status" style="text-decoration:none; color:inherit;" title="ابدأ على Hyperliquid">
+        <span class="status-dot"></span>LIVE
       </a>
     </div>
     <div class="nav-right">
@@ -195,7 +195,7 @@
       <span class="footer-lbl">سحب</span>
     </button>
     <button class="footer-btn footer-logout" id="btnLogout">
-      <img class="footer-img" src="/hl/images/calendar.png" alt="" loading="eager">
+      <span style="font-size:clamp(18px,4vw,24px);line-height:1;display:block;margin-bottom:2px;">🚪</span>
       <span class="footer-lbl">خروج</span>
     </button>
   </footer>
@@ -518,7 +518,7 @@
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('/hl/sw.js')
         .then(reg => console.log('SW Registered'))
         .catch(err => console.log('SW Registration Failed', err));
     });
