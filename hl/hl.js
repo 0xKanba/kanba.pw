@@ -1237,7 +1237,7 @@ function startMainClock(){
 }
 
 /* ════ ربط الأحداث ════ */
-document.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('load',()=>{
   $('loginBtn').onclick=login;
   $('privateKey').onkeydown=e=>e.key==='Enter'&&login();
   $('toggleKey').onclick=()=>{const i=$('privateKey');i.type=i.type==='password'?'text':'password';$('toggleKey').textContent=i.type==='password'?'👁':'🙈';};
