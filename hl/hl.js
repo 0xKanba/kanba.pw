@@ -24,6 +24,7 @@ Object.entries(ASSETS).forEach(([sym,a]) => {
 });
 COIN_TO_SYM['XAU'] = 'XAU';
 
+
 const State = {
   wallet:null, asset:'CL', qty:0.1,
   prices:  {XAU:{bid:0,ask:0,mid:0},NQ:{bid:0,ask:0,mid:0},GOLD:{bid:0,ask:0,mid:0},SILVER:{bid:0,ask:0,mid:0},CL:{bid:0,ask:0,mid:0}},
