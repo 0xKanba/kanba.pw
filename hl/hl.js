@@ -1308,7 +1308,7 @@ window.addEventListener('load',()=>{
     }
   });
   const saved=localStorage.getItem(LS_KEY);
-  if(saved){$('privateKey').value=saved;login();}
+if(saved){$('privateKey').value=saved;(function w(){typeof ethers!=='undefined'?login():setTimeout(w,100);})();}
   if(localStorage.getItem(PIN_KEY)&&localStorage.getItem(LOCKED_KEY)==='true')
     setTimeout(()=>{if(State.wallet)lockApp();},500);
 });
