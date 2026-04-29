@@ -33,6 +33,7 @@ const ChartModule = (function () {
   let _slLine       = null;
   let _dayHiLine    = null;
   let _dayLoLine    = null;
+  let _liqLine      = null;  // ✅ خط التصفية
   let _candles      = [];   // cache للـ day stats
   let _ws           = null;
   let _wsTimer      = null;
@@ -697,8 +698,9 @@ const ChartModule = (function () {
 
   function clearLines(){
     _entryLines.forEach(l=>{try{_series.removePriceLine(l);}catch{}}); _entryLines=[];
-    if(_tpLine){try{_series.removePriceLine(_tpLine);}catch{} _tpLine=null;}
-    if(_slLine){try{_series.removePriceLine(_slLine);}catch{} _slLine=null;}
+    if(_tpLine) {try{_series.removePriceLine(_tpLine);}catch{} _tpLine=null;}
+    if(_slLine) {try{_series.removePriceLine(_slLine);}catch{} _slLine=null;}
+    if(_liqLine){try{_series.removePriceLine(_liqLine);}catch{} _liqLine=null;}
   }
   function drawLines(){
     if(!_series||typeof State==='undefined') return;
@@ -745,6 +747,24 @@ const ChartModule = (function () {
           price:slDisp, lineWidth:2, lineStyle:2, color:'#e8804a', axisLabelVisible:true,
           title:`🛡 SL (-$${slPnl.toFixed(2)})`
         });
+      }
+      // ✅ خط التصفية — بصيغة Hyperliquid الرسمية
+      if(typeof calcLiqPrice !== 'undefined' && typeof ASSETS !== 'undefined'){
+        const symForLiq = posSym; // 'XAU', 'CL', etc
+        const aLiq = ASSETS[symForLiq]||ASSETS['GOLD']||{lev:20,cross:false};
+        const bal  = (typeof State!=='undefined'&&State.balance?.total)||0;
+        const liqOz = calcLiqPrice(entryOz, sziOz, bal, aLiq.cross, aLiq.lev);
+        if(liqOz!==null && liqOz > 0){
+          const liqDisp = isGram ? liqOz/TROY_LOCAL : liqOz;
+          _liqLine = _series.createPriceLine({
+            price:       liqDisp,
+            lineWidth:   2,
+            lineStyle:   LightweightCharts.LineStyle.Dotted,
+            color:       '#ff6b35',
+            axisLabelVisible: true,
+            title:       `⚡ Liq ~$${liqDisp.toFixed(2)}`,
+          });
+        }
       }
       break;
     }
@@ -897,7 +917,7 @@ const ChartModule = (function () {
     document.getElementById('chartScreen')?.classList.add('hidden');
     const lg=document.getElementById('_cLegend'); if(lg) lg.innerHTML='';
     const ds=document.getElementById('_cDayStat'); if(ds) ds.innerHTML='';
-    _dayHiLine=null; _dayLoLine=null; _candles=[];
+    _dayHiLine=null; _dayLoLine=null; _liqLine=null; _candles=[];
   }
 
   function switchInterval(iv){
