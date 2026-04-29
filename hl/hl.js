@@ -1109,19 +1109,18 @@ async function _renderBalance(){
   if(!State.wallet)return;
   const el=$('balanceContent');if(!el)return;
   try{
-    const [native,xyz]=await Promise.all([
-      hlInfo({type:'clearinghouseState',user:State.wallet.address}).catch(()=>({})),
+    const [spot,xyz]=await Promise.all([
+      hlInfo({type:'spotClearinghouseState',user:State.wallet.address}).catch(()=>({})),
       hlInfo({type:'clearinghouseState',user:State.wallet.address,dex:'xyz'}).catch(()=>({}))
     ]);
-    // ✅ accountValue = رصيد الحساب الكلي (يشمل PnL) — لا نجمع شيئاً
-    const total=parseFloat(native?.marginSummary?.accountValue||0)||
-                parseFloat(xyz?.marginSummary?.accountValue||0);
-    // ✅ الهامش المستخدم — منفصل تماماً
-    const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0)||
-                 parseFloat(native?.marginSummary?.totalMarginUsed||0);
-    // ✅ PnL العائم — منفصل
-    const calcPnl=pos=>pos.reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
-    const floatPnl=calcPnl(xyz?.assetPositions||[])||calcPnl(native?.assetPositions||[]);
+    // ✅ الرصيد الكلي = USDC من Spot (حساب موحد Hyperliquid)
+    let total=0;
+    for(const b of spot?.balances||[])
+      if(b.coin==='USDC'||b.coin==='USDC:0')total+=parseFloat(b.total||0);
+    // ✅ الهامش المستخدم من xyz (حيث الصفقات)
+    const margin=parseFloat(xyz?.marginSummary?.totalMarginUsed||0);
+    // ✅ PnL العائم من xyz
+    const floatPnl=(xyz?.assetPositions||[]).reduce((s,p)=>s+parseFloat(p.position?.unrealizedPnl||0),0);
     const pCls=floatPnl>=0?'green':'red';
     el.innerHTML=`
       <div class="balance-grid">
