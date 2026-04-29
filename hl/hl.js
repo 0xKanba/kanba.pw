@@ -434,6 +434,55 @@ function parseTpslFromOrders(orders,coin){
   }
   return r;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   حساب سعر التصفية — صيغة Hyperliquid الرسمية
+   liq_price = entry - side × margin_available / size / (1 - l × side)
+   l = 1 / maintenance_leverage = mm_rate
+   mm_rate = 1 / (2 × max_leverage)
+
+   Cross:    margin_available = balance - notional × mm_rate
+   Isolated: margin_available = (notional / lev) - notional × mm_rate
+
+   إذا كان liq_price <= 0 للـ Long أو >= ∞ للـ Short → "آمن" (لا تصفية)
+════════════════════════════════════════════════════════════════ */
+function calcLiqPrice(entryPxOz, sziOz, balance, isCross, maxLev){
+  if(!entryPxOz||!sziOz||!maxLev)return null;
+  const mmRate  = 1/(2*maxLev);        // 2% عند 25x، 2.5% عند 20x
+  const mmLev   = 2*maxLev;
+  const l       = mmRate;              // = 1/mmLev
+  const side    = sziOz>0?1:-1;
+  const absSize = Math.abs(sziOz);
+  const notional= absSize*entryPxOz;
+  let marginAvail;
+  if(isCross){
+    // Cross: كل الرصيد يحمي الصفقة
+    marginAvail = (balance||0) - notional*mmRate;
+  } else {
+    // Isolated: فقط الهامش المخصص
+    const initMargin = notional/maxLev;
+    marginAvail = initMargin - notional*mmRate;
+  }
+  const denom = 1 - l*side;
+  if(Math.abs(denom)<0.0001)return null;
+  const liq = entryPxOz - side*marginAvail/absSize/denom;
+  // فحص صحة: Long→ liq<entry، Short→ liq>entry
+  if(side===1&&liq<=0)return 0;   // آمن جداً (يحتاج انهيار 100%)
+  if(side===-1&&liq>=entryPxOz*100)return null; // آمن جداً
+  return liq;
+}
+
+// نص عرض سعر التصفية للمستخدم (بوحدة العرض — غرام أو أونصة)
+function liqPriceDisplay(sym, entryPxOz, sziOz, balance){
+  const a=ASSETS[sym]||ASSETS['GOLD']||{lev:20,cross:false,pxDp:2,gram:false};
+  const isGram=!!a.gram;
+  const liqOz=calcLiqPrice(entryPxOz,sziOz,balance,a.cross,a.lev);
+  if(liqOz===null)return{text:'—',ounce:null};
+  if(liqOz===0)return{text:'آمن ✅',ounce:0};
+  const liqDisp=isGram?liqOz/TROY:liqOz;
+  return{text:`$${fmt(liqDisp,a.pxDp)}`,ounce:liqOz};
+}
+
 function calcTpPrice(ep,szi,pnl){const sz=parseFloat(szi),e=parseFloat(ep);return sz>0?e+pnl/sz:e-pnl/Math.abs(sz);}
 function calcSlPrice(ep,szi,sl){const sz=parseFloat(szi),e=parseFloat(ep);return sz>0?e-sl/sz:e+sl/Math.abs(sz);}
 
@@ -504,9 +553,21 @@ function renderPositions(){
     if(cpEl){
       const sym=shortCoinPos(p.position.coin);
       const a=ASSETS[sym]||{pxDp:2};
-      // ✅ السعر الحالي: من State.prices['XAU'] (غرام مباشرة)
       const cur=State.prices[sym]?.mid;
-      cpEl.textContent=cur?fmt(cur,a.pxDp):'—';
+      cpEl.textContent=cur?'$'+fmt(cur,a.pxDp):'—';
+    }
+    // ✅ سعر التصفية الحقيقي — يُحدَّث لحظياً مع كل سعر جديد
+    const liqEl=document.querySelector(`[data-liq-idx="${i}"]`);
+    if(liqEl){
+      const sym=shortCoinPos(p.position.coin);
+      const a=ASSETS[sym]||{};
+      const isGram=!!a.gram;
+      const entryOz=parseFloat(p.position.entryPx||0);
+      const sziOz=parseFloat(p.position.szi||0);
+      const bal=State.balance?.total||0;
+      const liqInfo=liqPriceDisplay(sym,entryOz,sziOz,bal);
+      liqEl.textContent=liqInfo.text;
+      liqEl.style.color=liqInfo.text==='آمن ✅'?'var(--up)':'var(--warn)';
     }
   });
   const tEl=$('totalPnl');
@@ -549,6 +610,10 @@ function renderPositions(){
         <div class="pos-data-item"><span class="pos-data-label">السعر الحالي</span><span class="pos-data-value" data-curpx-idx="${i}">${curPx?'$'+fmt(curPx,a.pxDp):'—'}</span></div>
         <div class="pos-data-item"><span class="pos-data-label">رسوم التمويل</span>
           <span class="pos-data-value pos-funding-val ${fundCls}" data-funding-sym="${sym}">${fundSign}$${Math.abs(fundUsd).toFixed(4)}</span></div>
+        <div class="pos-data-item" style="grid-column:1/-1;border-top:1px solid var(--border);padding-top:4px;margin-top:2px;">
+          <span class="pos-data-label">⚡ سعر التصفية</span>
+          <span class="pos-data-value" style="color:var(--warn)" data-liq-idx="${i}">—</span>
+        </div>
       </div>
       <div class="pos-tpsl-row">
         <button class="tpsl-btn ${tpDisp?'tp-set':'tp-unset'}" onclick="openTP(${i})">
@@ -612,6 +677,12 @@ function askTrade(isBuy){
   const feeOpen=(tradeMid*ozQty*fr).toFixed(4);
   const feeTot=(tradeMid*ozQty*fr*2).toFixed(4);
 
+  // ✅ سعر التصفية بصيغة Hyperliquid الرسمية
+  const sziForLiq = isBuy ? ozQty : -ozQty;
+  const balance   = State.balance?.total||0;
+  const liqInfo   = liqPriceDisplay(State.asset, tradeMid, sziForLiq, balance);
+  const liqCls    = liqInfo.text==='آمن ✅'?'up':'sell';
+
   setTxt('confirmTitle',`${a.icon} ${isBuy?'شراء ↑':'بيع ↓'} — ${a.name}`);
   setTxt('confirmSubtitle',`رافعة ${a.lev}x · تنفيذ فوري`);
   $('confirmDetails').innerHTML=`
@@ -619,7 +690,7 @@ function askTrade(isBuy){
     <div class="confirm-row"><span class="confirm-key">سعر ${isGram?'الغرام':'الوحدة'}</span><span class="confirm-val">${fmt(p.mid,a.pxDp)} $</span></div>
     <div class="confirm-row"><span class="confirm-key">القيمة الكلية</span><span class="confirm-val">≈ $${usd}</span></div>
     <div class="confirm-row"><span class="confirm-key">الهامش المطلوب</span><span class="confirm-val warn">≈ $${mgn}</span></div>
-    <div class="confirm-row"><span class="confirm-key">التصفية التقريبية</span><span class="confirm-val sell">≈ ${liq} $</span></div>
+    <div class="confirm-row"><span class="confirm-key">التصفية التقريبية</span><span class="confirm-val ${liqCls}">${liqInfo.text}</span></div>
     <div class="confirm-row"><span class="confirm-key">رسوم الفتح</span><span class="confirm-val fee">$${feeOpen} (${feeRatePct(State.asset)})</span></div>
     <div class="confirm-row"><span class="confirm-key">إجمالي الرسوم</span><span class="confirm-val fee">≈ $${feeTot}</span></div>`;
   const btn=$('confirmExecute');
