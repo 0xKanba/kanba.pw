@@ -33,6 +33,7 @@ const ChartModule = (function () {
   let _slLine       = null;
   let _dayHiLine    = null;
   let _dayLoLine    = null;
+  let _liqLine      = null;  // ✅ خط التصفية
   let _candles      = [];   // cache للـ day stats
   let _ws           = null;
   let _wsTimer      = null;
@@ -405,11 +406,22 @@ const ChartModule = (function () {
       return typeof toast!=='undefined'?toast('سجّل الدخول أولاً','err'):null;
     const qty = parseFloat(document.getElementById('_cQty')?.value||0);
     if (!qty||qty<=0) return typeof toast!=='undefined'?toast('أدخل الكمية','err'):null;
-    const a = ai(_sym);
-    const mid = _lastClose||(typeof State!=='undefined'?State.prices[_sym]?.mid:0);
-    if (!mid) return typeof toast!=='undefined'?toast('لا يوجد سعر','err'):null;
-    const usd=(mid*qty).toFixed(2), mgn=(mid*qty/a.lev).toFixed(2);
-    const liq=isBuy?fp(mid*(1-1/a.lev)):fp(mid*(1+1/a.lev));
+    const a   = ai(_sym);
+    const TROY_LOCAL = 31.1035;
+    const isGram = _sym === 'XAU';
+    // midDisp = سعر العرض (غرام أو أونصة)
+    const midDisp = _lastClose||(typeof State!=='undefined'?State.prices[_sym]?.mid:0);
+    if (!midDisp) return typeof toast!=='undefined'?toast('لا يوجد سعر','err'):null;
+    // midOz = سعر الأونصة للحسابات الصحيحة
+    const midOz = isGram ? midDisp * TROY_LOCAL : midDisp;
+    // qtyOz = كمية الأونصات للحسابات
+    const qtyOz = isGram ? qty / TROY_LOCAL : qty;
+    const usd = (midOz * qtyOz).toFixed(2);
+    const mgn = (midOz * qtyOz / a.lev).toFixed(2);
+    // سعر التصفية بوحدة العرض (غرام أو أونصة)
+    const liqOz = isBuy ? midOz*(1-1/a.lev) : midOz*(1+1/a.lev);
+    const liqDisp = isGram ? (liqOz/TROY_LOCAL).toFixed(a.pxDp) : liqOz.toFixed(a.pxDp);
+    const mid = midDisp; // للاستخدام في fp()
     hideCf();
     const wrap=document.getElementById('_cWrap');
     if (!wrap) return;
@@ -425,7 +437,7 @@ const ChartModule = (function () {
           <div class="cf-row"><span class="cf-key">السعر</span><span class="cf-val">${fp(mid)} $</span></div>
           <div class="cf-row"><span class="cf-key">القيمة</span><span class="cf-val">≈ $${usd}</span></div>
           <div class="cf-row"><span class="cf-key">الهامش</span><span class="cf-val w">≈ $${mgn}</span></div>
-          <div class="cf-row"><span class="cf-key">التصفية</span><span class="cf-val ${isBuy?'r':'g'}">≈ ${liq} $</span></div>
+          <div class="cf-row"><span class="cf-key">التصفية</span><span class="cf-val ${isBuy?'r':'g'}">≈ ${liqDisp} $</span></div>
         </div>
         <div class="cf-btns">
           <button class="cf-cancel" id="_cfC">إلغاء ✕</button>
@@ -686,41 +698,73 @@ const ChartModule = (function () {
 
   function clearLines(){
     _entryLines.forEach(l=>{try{_series.removePriceLine(l);}catch{}}); _entryLines=[];
-    if(_tpLine){try{_series.removePriceLine(_tpLine);}catch{} _tpLine=null;}
-    if(_slLine){try{_series.removePriceLine(_slLine);}catch{} _slLine=null;}
+    if(_tpLine) {try{_series.removePriceLine(_tpLine);}catch{} _tpLine=null;}
+    if(_slLine) {try{_series.removePriceLine(_slLine);}catch{} _slLine=null;}
+    if(_liqLine){try{_series.removePriceLine(_liqLine);}catch{} _liqLine=null;}
   }
   function drawLines(){
     if(!_series||typeof State==='undefined') return;
     clearLines();
-      for(const p of (State.positions||[])){
-      const c=p.position.coin.includes(':')?p.position.coin.split(':')[1]:p.position.coin;
-      if(c!==_sym) continue;
-      const pos=p.position, szi=+pos.szi, entry=+(pos.entryPx||0);
-      const curPx = _lastClose || (State.prices[c]?.mid || entry);
-      const pnl = (curPx - entry) * szi;
-      
-      if(entry>0){
-        const sign=pnl>=0?'+':'';
+    const TROY_LOCAL = 31.1035;
+    for(const p of (State.positions||[])){
+      const rawCoin = p.position.coin.includes(':') ? p.position.coin.split(':')[1] : p.position.coin;
+      // ✅ إصلاح: GOLD في الـ API = XAU في الـ UI — يجب مطابقتهما
+      const posSym = rawCoin === 'GOLD' ? 'XAU' : rawCoin;
+      if(posSym !== _sym) continue;
+
+      const pos = p.position;
+      const sziOz = +pos.szi;
+      const isGram = _sym === 'XAU';
+      // entryPx من API بالأونصة دائماً → للرسم نقسم على TROY إذا غرام
+      const entryOz = +(pos.entryPx||0);
+      const entryDisp = isGram ? entryOz/TROY_LOCAL : entryOz;
+      // curPx: _lastClose هو بالغرام (لأن chart يعرض غرام) — للحساب بالأونصة نضرب
+      const curDisp = _lastClose || (isGram ? (typeof State!=='undefined'?State.prices['XAU']?.mid:0) : (typeof State!=='undefined'?State.prices[_sym]?.mid:0)) || entryDisp;
+      const curOz = isGram ? curDisp * TROY_LOCAL : curDisp;
+      const pnl = (curOz - entryOz) * sziOz;
+
+      if(entryDisp > 0){
+        const sign = pnl >= 0 ? '+' : '';
         _entryLines.push(_series.createPriceLine({
-          price:entry,lineWidth:2,lineStyle:2,
-          color:pnl>=0?'#2da44e':'#e5534b',axisLabelVisible:true,
-          title:`${szi>0?'▲':'▼'} Entry  ${sign}$${Math.abs(pnl).toFixed(2)}`,
+          price: entryDisp, lineWidth:2, lineStyle:2,
+          color: pnl>=0 ? '#2da44e' : '#e5534b', axisLabelVisible:true,
+          title: `${sziOz>0?'▲':'▼'} Entry  ${sign}$${Math.abs(pnl).toFixed(2)}`,
         }));
       }
-      const ts=p.tpsl||{};
-      if(ts.tp) {
-        const tpPnl = Math.abs(szi) * Math.abs(ts.tp - entry);
-        _tpLine=_series.createPriceLine({
-          price:ts.tp,lineWidth:2,lineStyle:2,color:'#22c58b',axisLabelVisible:true,
+      const ts = p.tpsl||{};
+      if(ts.tp){
+        const tpDisp = isGram ? ts.tp/TROY_LOCAL : ts.tp;
+        const tpPnl  = Math.abs(sziOz) * Math.abs(ts.tp - entryOz);
+        _tpLine = _series.createPriceLine({
+          price:tpDisp, lineWidth:2, lineStyle:2, color:'#22c58b', axisLabelVisible:true,
           title:`🎯 TP (+$${tpPnl.toFixed(2)})`
         });
       }
-      if(ts.sl) {
-        const slPnl = Math.abs(szi) * Math.abs(ts.sl - entry);
-        _slLine=_series.createPriceLine({
-          price:ts.sl,lineWidth:2,lineStyle:2,color:'#e8804a',axisLabelVisible:true,
+      if(ts.sl){
+        const slDisp = isGram ? ts.sl/TROY_LOCAL : ts.sl;
+        const slPnl  = Math.abs(sziOz) * Math.abs(ts.sl - entryOz);
+        _slLine = _series.createPriceLine({
+          price:slDisp, lineWidth:2, lineStyle:2, color:'#e8804a', axisLabelVisible:true,
           title:`🛡 SL (-$${slPnl.toFixed(2)})`
         });
+      }
+      // ✅ خط التصفية — بصيغة Hyperliquid الرسمية
+      if(typeof calcLiqPrice !== 'undefined' && typeof ASSETS !== 'undefined'){
+        const symForLiq = posSym; // 'XAU', 'CL', etc
+        const aLiq = ASSETS[symForLiq]||ASSETS['GOLD']||{lev:20,cross:false};
+        const bal  = (typeof State!=='undefined'&&State.balance?.total)||0;
+        const liqOz = calcLiqPrice(entryOz, sziOz, bal, aLiq.cross, aLiq.lev);
+        if(liqOz!==null && liqOz > 0){
+          const liqDisp = isGram ? liqOz/TROY_LOCAL : liqOz;
+          _liqLine = _series.createPriceLine({
+            price:       liqDisp,
+            lineWidth:   2,
+            lineStyle:   LightweightCharts.LineStyle.Dotted,
+            color:       '#ff6b35',
+            axisLabelVisible: true,
+            title:       `⚡ Liq ~$${liqDisp.toFixed(2)}`,
+          });
+        }
       }
       break;
     }
@@ -873,7 +917,7 @@ const ChartModule = (function () {
     document.getElementById('chartScreen')?.classList.add('hidden');
     const lg=document.getElementById('_cLegend'); if(lg) lg.innerHTML='';
     const ds=document.getElementById('_cDayStat'); if(ds) ds.innerHTML='';
-    _dayHiLine=null; _dayLoLine=null; _candles=[];
+    _dayHiLine=null; _dayLoLine=null; _liqLine=null; _candles=[];
   }
 
   function switchInterval(iv){
