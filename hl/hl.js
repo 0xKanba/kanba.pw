@@ -1237,7 +1237,7 @@ function startMainClock(){
 }
 
 /* ════ ربط الأحداث ════ */
-window.addEventListener('load',()=>{
+document.addEventListener('DOMContentLoaded',()=>{
   $('loginBtn').onclick=login;
   $('privateKey').onkeydown=e=>e.key==='Enter'&&login();
   $('toggleKey').onclick=()=>{const i=$('privateKey');i.type=i.type==='password'?'text':'password';$('toggleKey').textContent=i.type==='password'?'👁':'🙈';};
@@ -1308,7 +1308,7 @@ window.addEventListener('load',()=>{
     }
   });
   const saved=localStorage.getItem(LS_KEY);
-if(saved){$('privateKey').value=saved;(function w(){typeof ethers!=='undefined'?login():setTimeout(w,100);})();}
+  if(saved){$('privateKey').value=saved;login();}
   if(localStorage.getItem(PIN_KEY)&&localStorage.getItem(LOCKED_KEY)==='true')
     setTimeout(()=>{if(State.wallet)lockApp();},500);
 });
