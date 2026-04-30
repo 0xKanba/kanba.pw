@@ -1,6 +1,9 @@
 const CACHE_NAME = 'hltrade-v99';
 const ASSETS = [
   '/','/index.html','/hl/hl.css','/hl/hl.js','/hl/chart.js','/hl/manifest.json',
+  '/hl/x1.png',
+  '/hl/x2.png',
+  '/hl/x3.png'
   '/hl/images/oil.svg','/hl/images/gold.svg','/hl/images/silver.svg','/hl/images/100.png',
   '/hl/images/balance.png','/hl/images/history.png','/hl/images/diposit.png',
   '/hl/images/withdraw.png','/hl/images/calendar.png',
