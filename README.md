@@ -33,6 +33,7 @@ https://shop.kanba.pw/
 
 
 
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -110,6 +111,8 @@ https://shop.kanba.pw/
 │   ├── paper.css
 │   ├── paper.js
 │   └── sw.js
+├── hp
+│   └── x3.png
 ├── images
 │   ├── 0xKanba.png
 │   ├── 0xbtc.png
@@ -137,10 +140,9 @@ https://shop.kanba.pw/
 ├── scc.html
 ├── tree.txt
 ├── videos.html
-├── x3.png
 ├── younis.html
 └── ysr.html
 
-21 directories, 81 files
+22 directories, 81 files
 ```
 <!-- TREE END -->
