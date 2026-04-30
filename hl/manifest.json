@@ -1,7 +1,7 @@
 {
-  "name": "HL Trade · Hyperliquid Terminal",
+  "name": "HL Trade · Hyperliquid Simple",
   "short_name": "HLtrade",
-  "description": "تداول مباشر على Hyperliquid trade.xyz",
+  "description": "تجربة تداول مؤسسية تجمع بين السيولة العميقة والسرعة الفائقة في بيئة لامركزية بالكامل.",
   "start_url": "/hl/",
   "scope": "/hl/",
   "display": "standalone",
@@ -24,7 +24,29 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "/hl/x1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "واجهة التداول المتقدمة"
+    },
+    {
+      "src": "/hl/x2.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "إدارة المحفظة والسيولة"
+    },
+    {
+      "src": "/hl/x3.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "تحليل الرسوم البيانية اللحظي"
+    }
+  ],
   "categories": ["finance"],
   "prefer_related_applications": false
 }
