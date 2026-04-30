@@ -29,7 +29,7 @@
       "src": "/hl/x1.png",
       "sizes": "750×1334",
       "type": "image/png",
-      "form_factor": "wide",
+      "form_factor": "narrow",
       "label": "Mobile"
     },
     {
