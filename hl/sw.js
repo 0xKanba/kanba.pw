@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hltrade-v99';
+const CACHE_NAME = 'hltrade-v109';
 const ASSETS = [
   '/','/index.html','/hl/hl.css','/hl/hl.js','/hl/chart.js','/hl/manifest.json',
   '/hl/x1.png',
