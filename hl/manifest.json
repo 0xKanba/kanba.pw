@@ -1,7 +1,7 @@
 {
-  "name": "HL Trade · Hyperliquid Simple",
+  "name": "HL Trade · Hyperliquid Terminal",
   "short_name": "HLtrade",
-  "description": "تجربة تداول مؤسسية تجمع بين السيولة العميقة والسرعة الفائقة في بيئة لامركزية بالكامل.",
+  "description": "منصة تداول مؤسسية فائقة السرعة، توفر سيولة عميقة وبيئة لامركزية بالكامل لتداول العقود الدائمة.",
   "start_url": "/hl/",
   "scope": "/hl/",
   "display": "standalone",
@@ -15,13 +15,13 @@
       "src": "/hl/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/hl/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
   "screenshots": [
@@ -30,21 +30,21 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "واجهة التداول المتقدمة"
+      "label": "HL Trade Desktop"
     },
     {
       "src": "/hl/x2.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "إدارة المحفظة والسيولة"
+      "label": "HL Trade Mobile"
     },
     {
       "src": "/hl/x3.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "تحليل الرسوم البيانية اللحظي"
+      "label": "Portfolio Analysis"
     }
   ],
   "categories": ["finance"],
