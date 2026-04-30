@@ -27,7 +27,7 @@
   "screenshots": [
     {
       "src": "/hl/x1.png",
-      "sizes": "750×1334",
+      "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Mobile"
