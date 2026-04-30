@@ -27,13 +27,20 @@
   "screenshots": [
     {
       "src": "/hl/x1.png",
-      "sizes": "1280x720",
+      "sizes": "750×1334",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Desktop"
+      "label": "Mobile"
     },
     {
       "src": "/hl/x2.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile"
+    },
+    {
+      "src": "/hl/x3.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
