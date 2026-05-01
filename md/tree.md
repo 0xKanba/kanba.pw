@@ -12,9 +12,8 @@ https://shop.kanba.pw/
 
 </div>
 
-<table width="100%" border="0">
-  <tr>
-    
+<table>
+      
   <td align="left">
   <a href="https://kanba.pw/" target="_blank">
     <img src="images/0xKanba.png">
@@ -25,7 +24,6 @@ https://shop.kanba.pw/
     <img src="images/Younis.png"> 
        </a>
   </td>
-  </tr>
 </table>
 
 
