@@ -12,7 +12,11 @@ https://shop.kanba.pw/
 
 </div>
 
+<div alegn="center" 
+<img src="0xKanba.png" width="50%"/>
+<img src="Younis.png" width="50$"/>
 
+</div>
 
 
 
