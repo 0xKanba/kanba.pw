@@ -21,7 +21,7 @@ https://shop.kanba.pw/
   </a>
   </td>
   <td align="right">
-  <a href="https://kanba.pw/younis" target="_blank"  
+  <a href="https://kanba.pw/younis" target="_blank">
     <img src="images/Younis.png" height="150"> 
        </a>
   </td>
