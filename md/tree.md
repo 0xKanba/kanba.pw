@@ -14,17 +14,8 @@ https://shop.kanba.pw/
 
 <table>
       
-  <td align="left">
-  <a href="https://kanba.pw/" target="_blank">
-    <img src="images/0xKanba.png">
-  </a>
-  </td>
-  <td align="right">
-  <a href="https://kanba.pw/younis" target="_blank">
-    <img src="images/Younis.png"> 
-       </a>
-  </td>
-</table>
+  | [![img](images/0xKanba.png)](https://kanba.pw/) | [![img](images/Younis.png)](https://kanba.pw/younis) |
+|---|---|
 
 
 
