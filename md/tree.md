@@ -15,8 +15,9 @@ https://shop.kanba.pw/
 <div align="left"> 
   <a href="https://kanba.pw/">
   <img src="images/0xKanba.png" loading="lazy" width="50%" height="50%"/>
-    
   </a>
+    </div>
+<div align="right">
   <a href="https://kanba.pw/younis">
  <img src="images/Younis.png" loading="lazy" width="50%"  height="50%"/>
  
