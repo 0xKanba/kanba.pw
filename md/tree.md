@@ -13,7 +13,7 @@ https://shop.kanba.pw/
 </div>
 
 
-<div align="center"> 
+<div align="left"> 
   
   <a href="https://kanba.pw/">
   <img src="images/0xKanba.png" loading="lazy" width="45%"/>
