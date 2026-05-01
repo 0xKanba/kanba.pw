@@ -13,18 +13,17 @@ https://shop.kanba.pw/
 </div>
 
 <table>
-  <tr>
+  <td>
   <a href="https://kanba.pw/" target="_blank">
     <img src="images/0xKanba.png" width="50%"/>
   </a>
-  </tr>
-  <tr>
+  </td>
+  <td>
    <a href="https://kanba.pw/younis" target="_blank">
     <img src="images/Younis.png"  width="50%"> 
        </a>
-  </tr>
-  
-</div>
+  </td>
+</table>
 
 
 
