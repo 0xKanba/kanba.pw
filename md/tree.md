@@ -16,11 +16,11 @@ https://shop.kanba.pw/
 <div align="left"> 
   
   <a href="https://kanba.pw/">
-  <img src="images/0xKanba.png" loading="lazy" width="45%"/>
+  <img src="images/0xKanba.png" loading="lazy" width="25%"/>
     
   </a>
   <a href="https://kanba.pw/younis">
- <img src="images/Younis.png" loading="lazy" width="45%"/>
+ <img src="images/Younis.png" loading="lazy" width="25%"/>
   </a>
 </div>
 
