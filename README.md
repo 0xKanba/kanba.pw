@@ -13,32 +13,6 @@ https://shop.kanba.pw/
 </div>
 
 
-<div align="left"> 
-  
-  <a href="https://kanba.pw/">
-  <img src="images/0xKanba.png" loading="lazy" width="20%"/>
-    
-  </a>
-  <a href="https://kanba.pw/younis">
- <img src="images/Younis.png" loading="lazy" width="20%"/>
-  </a>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
