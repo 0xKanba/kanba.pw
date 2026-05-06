@@ -14,7 +14,7 @@
           { "label": "Profit Target",          "value": "6%",           "detail": "Single phase. 6% of initial balance. No minimum trading days required." },
           { "label": "Consistency – Challenge","value": "≤ 40%",        "detail": "Biggest winning day ÷ total profit ≤ 40% to pass. Example: $11,250 best day / $25,000 total = 45% → need $3,125 more." },
           { "label": "Consistency – Funded",   "value": "≤ 35%",        "detail": "For payout eligibility, biggest day must be ≤ 35% of total profit." },
-          { "label": "Risk Per Trade Idea",    "value": "≤ 1% (Funded)", "detail": "Max 1% of initial balance per trade idea (funded only). Correlated assets = 1 idea. New trade within 10 min of close = same idea. SL required. Effective 7 Apr 2026." },
+          { "label": "Risk Per Trade Idea",    "value": "1% (DX) / 2% (Tradovate & Ninja)", "detail": "Effective 7 Apr 2026 17:00 EST. For DX Futures: max 1% of initial balance. For Tradovate & NinjaTrader: max 2% of initial balance. Applies to Hola Prime (Funded) accounts only. Splitting a trade into multiple positions counts as 1 idea. A new position within 10 mins of closing in the same direction = 1 idea. Stop loss must be placed within 3 minutes of opening a position or prior to closing, whichever occurs earlier." },
           { "label": "Inactivity Limit",       "value": "1 calendar week", "detail": "No activity (Sunday–Friday) = account closure. A traded day requires at least one fully completed round-trip trade." }
         ]
       },
@@ -30,14 +30,14 @@
       },
       {
         "id": "exposure_limits",
-        "title": "Max Position Size (Contracts)",
+        "title": "Maximum Exposure Limit (The highest total contracts permitted open at any moment across all instruments. e.g., Max 5 allows 3 ES long + 2 GC short simultaneously)",
         "table": {
-          "headers": ["Account Size", "Max Contracts (Micro/Mini)"],
+          "headers": ["Account Size", "Maximum Position Size"],
           "rows": [
-            ["$25,000",  "2 / 20"],
-            ["$50,000",  "4 / 40"],
-            ["$100,000", "8 / 80"],
-            ["$150,000", "12 / 120"]
+            ["$25K",  "1/10 Contracts"],
+            ["$50K",  "3/30 Contracts"],
+            ["$100K", "7/70 Contracts"],
+            ["$150K", "10/100 Contracts"]
           ]
         }
       },
