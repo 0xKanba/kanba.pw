@@ -64,6 +64,7 @@ https://shop.kanba.pw/
 
 
 
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -162,9 +163,9 @@ https://shop.kanba.pw/
 │   └── younis.js
 ├── md
 │   ├── b.md
+│   ├── deen.md
 │   ├── files.json
 │   ├── hl.md
-│   ├── summary_atheism_guide.md
 │   ├── tree.md
 │   ├── us.md
 │   └── xz.md
