@@ -19,6 +19,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 هيكل المشروع
@@ -90,10 +91,9 @@
 ├── scc.html
 ├── tree.txt
 ├── videos.html
-├── x.tsv
 ├── younis.html
 └── ysr.html
 
-18 directories, 51 files
+18 directories, 50 files
 ```
 <!-- TREE END -->
