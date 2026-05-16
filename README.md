@@ -2,6 +2,7 @@
 
 
 
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -51,12 +52,6 @@
 │   ├── index.html
 │   ├── script.js
 │   └── style.css
-├── hlpaper
-│   ├── chartpaper.js
-│   ├── index.html
-│   ├── paper.css
-│   ├── paper.js
-│   └── sw.js
 ├── images
 │   ├── 0xKanba.png
 │   ├── 0xbtc.png
@@ -85,6 +80,6 @@
 ├── younis.html
 └── ysr.html
 
-19 directories, 58 files
+18 directories, 53 files
 ```
 <!-- TREE END -->
