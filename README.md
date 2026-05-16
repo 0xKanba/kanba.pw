@@ -5,6 +5,7 @@
 
 
 
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -66,7 +67,6 @@
 │   ├── common.js
 │   ├── full.js
 │   ├── kanba.js
-│   ├── see.js
 │   ├── yaser.js
 │   └── younis.js
 ├── md
@@ -80,6 +80,6 @@
 ├── younis.html
 └── ysr.html
 
-18 directories, 51 files
+18 directories, 50 files
 ```
 <!-- TREE END -->
