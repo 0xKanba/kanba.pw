@@ -4,6 +4,7 @@
 
 
 
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -19,7 +20,6 @@
 ├── css
 │   ├── ccr.css
 │   ├── kanba.css
-│   ├── see.css
 │   ├── styles.css
 │   ├── yaser.css
 │   └── younis.css
@@ -80,6 +80,6 @@
 ├── younis.html
 └── ysr.html
 
-18 directories, 52 files
+18 directories, 51 files
 ```
 <!-- TREE END -->
