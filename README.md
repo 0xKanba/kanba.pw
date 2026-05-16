@@ -1,6 +1,7 @@
 
 
 
+
 <!-- TREE START -->
 
 ## 📂 هيكل المشروع
@@ -50,30 +51,6 @@
 │   ├── index.html
 │   ├── script.js
 │   └── style.css
-├── hl
-│   ├── a.js
-│   ├── c.js
-│   ├── chart.js
-│   ├── hl.css
-│   ├── hl.js
-│   ├── icon-192x192.png
-│   ├── icon-512x512.png
-│   ├── images
-│   │   ├── 100.png
-│   │   ├── balance.png
-│   │   ├── calendar.png
-│   │   ├── diposit.png
-│   │   ├── gold.svg
-│   │   ├── history.png
-│   │   ├── oil.svg
-│   │   ├── silver.svg
-│   │   └── withdraw.png
-│   ├── index.html
-│   ├── manifest.json
-│   ├── sw.js
-│   ├── x1.png
-│   ├── x2.png
-│   └── x3.png
 ├── hlpaper
 │   ├── chartpaper.js
 │   ├── index.html
@@ -108,6 +85,6 @@
 ├── younis.html
 └── ysr.html
 
-21 directories, 80 files
+19 directories, 58 files
 ```
 <!-- TREE END -->
