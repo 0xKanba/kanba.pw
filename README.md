@@ -39,6 +39,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 هيكل المشروع
@@ -99,7 +100,6 @@
 │   ├── common.js
 │   ├── full.js
 │   ├── kanba.js
-│   ├── yaser.js
 │   └── younis.js
 ├── md
 │   ├── deen.md
@@ -108,6 +108,7 @@
 ├── md.html
 ├── pvt
 │   ├── index.html
+│   ├── script.js
 │   ├── styles.css
 │   └── wallets.csv
 ├── scc.html
