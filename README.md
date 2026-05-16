@@ -38,6 +38,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 هيكل المشروع
@@ -54,7 +55,6 @@
 │   ├── ccr.css
 │   ├── kanba.css
 │   ├── styles.css
-│   ├── yaser.css
 │   └── younis.css
 ├── funded
 │   ├── data
@@ -108,6 +108,7 @@
 ├── md.html
 ├── pvt
 │   ├── index.html
+│   ├── styles.css
 │   └── wallets.csv
 ├── scc.html
 ├── tree.txt
