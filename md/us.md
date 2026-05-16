@@ -1,7 +1,6 @@
 <div align="center"> 
   
-## [Kanba](https://kanba.pw)
-## [Younis](https://kanba.pw/younis)
+# [Kanba](https://kanba.pw)  ×  [Younis](https://kanba.pw/younis)
 
 </div>
 
