@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [55.2708, 25.2048]
+      },
+      "properties": {
+        "name": "أحمد - الحوت 🐳",
+        "wallet": "0x71C...4731",
+        "description": "التقينا في مؤتمر دبي للكريبتو"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [46.6753, 24.7136]
+      },
+      "properties": {
+        "name": "سارة - متداولة 🏹",
+        "wallet": "0x281...cb16",
+        "description": "خبيرة إيردروپ في الرياض"
+      }
+    }
+  ]
+}
