@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Status Page</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #0f1115;
+        color: #ffffff;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .container {
+        text-align: center;
+    }
+
+    .icon {
+        font-size: 70px;
+        color: #00c853;
+        margin-bottom: 15px;
+    }
+
+    .title {
+        font-size: 30px;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #9aa0a6;
+        margin-top: 8px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="icon">✔</div>
+    <div class="title">Domain is working</div>
+    <div class="subtitle">All systems operational</div>
+</div>
+
+<script>
+    const icon = document.querySelector(".icon");
+    setInterval(() => {
+        icon.style.opacity = icon.style.opacity === "0.4" ? "1" : "0.4";
+    }, 900);
+</script>
+
+</body>
+</html>
