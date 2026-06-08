@@ -1,10 +1,9 @@
 document.addEventListener('DOMContentLoaded',function(){
   const link=document.createElement('link');
   link.rel='stylesheet';
-  link.href='/css/styles.css';
+  link.href='/css/style.css';
   document.head.appendChild(link);
   
-  const headerHTML=``;
   const footerHTML=`
     <footer class="footer">
       <div class="footer-content">
@@ -22,32 +21,24 @@ document.addEventListener('DOMContentLoaded',function(){
     </footer>
   `;
   
-  const headerElement=document.getElementById('header');
   const footerElement=document.getElementById('footer');
-  if(headerElement)headerElement.innerHTML=headerHTML;
   if(footerElement)footerElement.innerHTML=footerHTML;
-  
+
+  // Active tab logic
   setTimeout(()=>{
     const path=window.location.pathname.toLowerCase().trim();
-    // تقسيم المسار وإزالة العناصر الفارغة الناتجة عن الشرطات المائلة
     const segments = path.split('/').filter(p => p !== '');
-    let pageKey = 'index'; // القيمة الافتراضية للجذر الرئيسي
+    let pageKey = 'index'; 
 
     if (segments.length > 0) {
-      // الحصول على آخر جزء من الرابط وإزالة .html
       const lastSegment = segments[segments.length - 1].replace(/\.html$/, '');
-      
       if (lastSegment === 'index' || lastSegment === '') {
-        // إذا كان الملف index، نتحقق هل هو داخل مجلد فرعي أم لا
         if (segments.length > 1) {
-          // إذا كان هناك مجلد قبله (مثل funded)، نأخذ اسم المجلد
           pageKey = segments[segments.length - 2];
         } else {
-          // إذا كان في الجذر مباشرة
           pageKey = 'index';
         }
       } else {
-        // إذا كان الملف ليس index (مثل younis.html)
         pageKey = lastSegment;
       }
     }

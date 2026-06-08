@@ -55,7 +55,6 @@
 
 
 
-
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -71,7 +70,7 @@
 ├── css
 │   ├── ccr.css
 │   ├── kanba.css
-│   ├── styles.css
+│   ├── style.css
 │   └── younis.css
 ├── funded
 │   ├── data
@@ -126,14 +125,13 @@
 ├── pvt
 │   ├── index.html
 │   ├── script.js
-│   ├── styles.css
-│   └── wallets.csv
+│   └── styles.css
 ├── scc.html
 ├── tree.txt
 ├── videos.html
 ├── younis.html
 └── °.html
 
-19 directories, 53 files
+19 directories, 52 files
 ```
 <!-- TREE END -->
