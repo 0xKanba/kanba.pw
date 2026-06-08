@@ -1,106 +1,117 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Kanba Trader</title>
-<meta name="description" content="DM me, let's connect.">
-<meta property="og:title" content="Kanba Trader">
-<meta property="og:description" content="DM me, let's connect.">
-<meta property="og:image" content="/images/0xKanba.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="/images/0xKanba.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kanba Trader</title>
+  <meta name="description" content="DM me, let's connect.">
+  <meta property="og:title" content="Kanba Trader">
+  <meta property="og:description" content="DM me, let's connect.">
+  <meta property="og:image" content="/images/0xKanba.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="/images/0xKanba.png">
 
   <!-- Structured Data -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Kanba Trader",
-  "description": "DM me, let's connect.",
-  "image": "/images/0xKanba.png"
-}
-</script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Kanba Trader",
+    "description": "DM me, let's connect.",
+    "image": "/images/0xKanba.png"
+  }
+  </script>
 
-  <link rel="stylesheet" href="/css/styles.css">
   <link rel="icon" href="/images/0xKanba.png" type="image/png">
   <link rel="stylesheet" href="/css/kanba.css">
 </head>
 <body>
 
+<!-- Theme Toggle Button -->
+<button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+  <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+</button>
+
 <div class="container">
-  <header class="profile-center" data-entrance="top">
-    <a href="https://hl.kanba.pw/" target="_blank" rel="noopener noreferrer">
-      <img src="/images/0x.png" alt="Kanba Trader - Crypto Trading Signals" class="profile-img-clean">
-    </a>
-    <h1 class="profile-name">Kanba_Trader</h1>
-  </header>
-
   <main class="main-centered">
-    <section class="social-section" aria-label="social">
-      <div class="social-grid-clean" id="socialGrid">
-        
-        <a href="https://t.me/Kanba_trader" class="social-link" data-entrance="top-left" data-platform="telegram" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/telegram.svg" alt="TG">
-          <span>TG</span>
+    
+    <!-- Profile & Socials on the Right (reversed flex) -->
+    <section class="profile-and-social">
+      <header class="profile-center" data-entrance="top">
+        <a href="https://hl.kanba.pw/" target="_blank" rel="noopener noreferrer">
+          <img src="https://kanba.pw/images/0x.png" alt="Kanba Trader - Crypto Trading Signals" class="profile-img-clean">
         </a>
+        <h3 class="profile-name">Kanba_Trader</h3>
+      </header>
 
-        <a href="https://discord.gg/CGMfdcgRZE" class="social-link" data-entrance="right" data-platform="discord" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg" alt="DC">
-          <span>DC</span>
-        </a>
-       
-        <a href="mailto:dm@Kanba.pw" class="social-link" data-entrance="top-right" data-platform="email" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/proton.svg" alt="Mail">
-          <span>DM</span>
-        </a>
+      <div class="social-section" aria-label="social">
+        <div class="social-grid-clean" id="socialGrid">
+          
+          <a href="https://t.me/Kanba_trader" class="social-link" data-entrance="top-left" data-platform="telegram" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/telegram.svg" alt="TG">
+            <span>TG</span>
+          </a>
 
-        <a href="https://x.com/intent/user?screen_name=Kanba_trader" class="social-link" data-entrance="left" data-platform="x" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/x.svg" alt="X">
-          <span>X</span>
-        </a>
+          <a href="https://discord.gg/CGMfdcgRZE" class="social-link" data-entrance="right" data-platform="discord" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg" alt="DC">
+            <span>DC</span>
+          </a>
+         
+          <a href="mailto:dm@Kanba.pw" class="social-link" data-entrance="top-right" data-platform="email" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/proton.svg" alt="Mail">
+            <span>DM</span>
+          </a>
 
-        <a href="https://www.youtube.com/@Kanba_trader" class="social-link" data-entrance="right" data-platform="youtube" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" alt="YT">
-          <span>YT</span>
-        </a>
+          <a href="https://x.com/intent/user?screen_name=Kanba_trader" class="social-link" data-entrance="left" data-platform="x" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/x.svg" alt="X">
+            <span>X</span>
+          </a>
 
-        <a href="https://tiktok.com/@Kanba_trader" class="social-link" data-entrance="bottom-left" data-platform="tiktok" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg" alt="TT">
-          <span>TT</span>
-        </a>
+          <a href="https://www.youtube.com/@Kanba_trader" class="social-link" data-entrance="right" data-platform="youtube" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" alt="YT">
+            <span>YT</span>
+          </a>
 
-              <a href="https://github.com/0xKanba" class="social-link" data-entrance="center" data-platform="github" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="Git">
-          <span>Git</span>
-              </a>
-       
-        <a href="https://signal.me/#eu/oohNa8UaHj_Ojc8zDTb1us75o--ZtZPy2iTq6hoQDCfJN_YDcRFIEpRWhdzqjqDN" class="social-link" data-entrance="top" data-platform="signal" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/signal.svg" alt="Signal">
-          <span>Signal</span>
-        </a>
-               <a href="https://www.binance.com/en/square/profile/trader_kanba" class="social-link" data-entrance="bottom" data-platform="binance" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/binance.svg" alt="BN">
-          <span>BN</span>
-               </a>
+          <a href="https://tiktok.com/@Kanba_trader" class="social-link" data-entrance="bottom-left" data-platform="tiktok" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg" alt="TT">
+            <span>TT</span>
+          </a>
 
-        <a href="https://www.threads.com/@kanba_trader" class="social-link" data-entrance="left" data-platform="threads" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/threads.svg" alt="TH">
-          <span>TH</span>
-        </a>
+          <a href="https://github.com/0xKanba" class="social-link" data-entrance="center" data-platform="github" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="Git">
+            <span>Git</span>
+          </a>
+         
+          <a href="https://signal.me/#eu/oohNa8UaHj_Ojc8zDTb1us75o--ZtZPy2iTq6hoQDCfJN_YDcRFIEpRWhdzqjqDN" class="social-link" data-entrance="top" data-platform="signal" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/signal.svg" alt="Signal">
+            <span>Signal</span>
+          </a>
+          
+          <a href="https://www.binance.com/en/square/profile/trader_kanba" class="social-link" data-entrance="bottom" data-platform="binance" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/binance.svg" alt="BN">
+            <span>BN</span>
+          </a>
 
-        <a href="https://instagram.com/Kanba_trader" class="social-link" data-entrance="bottom-right" data-platform="instagram" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="IG">
-          <span>IG</span>
-        </a>
+          <a href="https://www.threads.com/@kanba_trader" class="social-link" data-entrance="left" data-platform="threads" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/threads.svg" alt="TH">
+            <span>TH</span>
+          </a>
 
-        <a href="https://web.facebook.com/people/Kanba-Trader/61568304382557/" class="social-link" data-entrance="bottom-left" data-platform="facebook" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="FB">
-          <span>FB</span>
-        </a>
+          <a href="https://instagram.com/Kanba_trader" class="social-link" data-entrance="bottom-right" data-platform="instagram" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="IG">
+            <span>IG</span>
+          </a>
+
+          <a href="https://web.facebook.com/people/Kanba-Trader/61568304382557/" class="social-link" data-entrance="bottom-left" data-platform="facebook" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="FB">
+            <span>FB</span>
+          </a>
+        </div>
       </div>
     </section>
 
+    <!-- Payment Frame on the Left -->
     <section class="payment-section" data-entrance="bottom">
       <div class="payment-frame">
         <iframe src="https://nowpayments.io/embeds/donation-widget?api_key=KTQZ64X-Q0141ZY-QB7PWXF-4RYN24Y" 
@@ -116,10 +127,11 @@
 
 <div id="footer"></div>
 
+
 <div class="bg-mesh"></div>
 
 <script src="/js/common.js"></script>
 <script src="/js/kanba.js"></script>
-  <script src="/js/full.js"></script>
+<script src="/js/full.js"></script>
 </body>
 </html>
