@@ -1,4 +1,4 @@
-/* ====== Ultra Clean K.Y.js - Adapted for Flat & Simple UX ====== */
+/* ====== Ultra Clean K.Y.js - Adapted for Flat & Simple UX ===== */
 
 document.addEventListener('DOMContentLoaded', function() {
   initEntranceAnimations();
