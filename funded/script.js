@@ -385,3 +385,13 @@ const App = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', App.init);
+
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
+window.addEventListener('load', () => {
+  if (!window.location.hash) {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }
+});
