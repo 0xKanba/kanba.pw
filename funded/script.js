@@ -51,7 +51,8 @@ const App = (() => {
     if (accountId) p.set('account', accountId);
 
     const base = window.location.pathname;           // e.g. /funded/
-    const next = `${base}?${p.toString()}`;
+    const hash = window.location.hash;               // keep existing hash
+    const next = `${base}?${p.toString()}${hash}`;
     if (window.location.href !== window.location.origin + next) {
       history.pushState({ firmId, marketId, accountId }, '', next);
     }
@@ -83,11 +84,12 @@ const App = (() => {
 
   function buildPills(container, items, activeId, onClickId) {
     container.innerHTML = '';
-    items.forEach(item => {
+    items.forEach((item) => {
       const btn = document.createElement('button');
       btn.className = 'pill' + (item.id === activeId ? ' active' : '');
       btn.textContent = item.name;
       btn.dataset.id  = item.id;
+      
       btn.setAttribute('aria-pressed', item.id === activeId ? 'true' : 'false');
       btn.addEventListener('click', () => onClickId(item.id));
       container.appendChild(btn);
@@ -165,6 +167,16 @@ const App = (() => {
       if (!res.ok) throw new Error(`HTTP ${res.status} — ${state.account.path}`);
       const data = await res.json();
       render(data.firm);
+      
+      // Wait for rendering then jump to hash
+      if (window.location.hash) {
+        setTimeout(() => {
+          const target = document.querySelector(window.location.hash);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 150);
+      }
     } catch (err) {
       console.error('[PropRules] Failed to load account JSON:', err);
       dom.leftCol.innerHTML = `
@@ -215,11 +227,6 @@ const App = (() => {
   /* ── Render dashboard ───────────────────────────────────────── */
 
   function render(d) {
-    /* animation */
-    dom.dashboard.classList.remove('anim');
-    void dom.dashboard.offsetWidth;
-    dom.dashboard.classList.add('anim');
-
     /* header */
     dom.firmLink.textContent    = d.name.toUpperCase();
     dom.firmLink.href           = state.firm.url || '#';
@@ -233,9 +240,15 @@ const App = (() => {
     const tableSecs = d.sections.filter(s => s.table);
 
     /* left — item cards */
-    dom.leftCol.innerHTML = itemSecs.map(sec => `
-      <div class="s-card">
-        <div class="s-head">${icon(sec.id)}<h2>${sec.title}</h2></div>
+    dom.leftCol.innerHTML = itemSecs.map((sec, i) => {
+      const sectionId = sec.title.replace(/\s+/g, '');
+      return `
+      <div class="s-card" id="${sectionId}">
+        <div class="s-head">
+          <a href="#${sectionId}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:10px;">
+            ${icon(sec.id)}<h2>${sec.title}</h2>
+          </a>
+        </div>
         <div class="items">
           ${sec.items.map(item => `
             <div class="item-row">
@@ -248,12 +261,18 @@ const App = (() => {
           `).join('')}
         </div>
       </div>
-    `).join('');
+    `}).join('');
 
     /* right — table sections + note */
-    dom.rightCol.innerHTML = tableSecs.map(sec => `
-      <div class="t-section">
-        <div class="t-head">${icon(sec.id)}<h2>${sec.title}</h2></div>
+    dom.rightCol.innerHTML = tableSecs.map((sec, i) => {
+      const sectionId = sec.title.replace(/\s+/g, '');
+      return `
+      <div class="t-section" id="${sectionId}">
+        <div class="t-head">
+          <a href="#${sectionId}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:10px;">
+            ${icon(sec.id)}<h2>${sec.title}</h2>
+          </a>
+        </div>
         <div class="tbl-wrap">
           <table>
             <thead><tr>${sec.table.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
@@ -263,7 +282,7 @@ const App = (() => {
           </table>
         </div>
       </div>
-    `).join('') + `
+    `}).join('') + `
       <div class="r-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -289,11 +308,39 @@ const App = (() => {
     loadAndRender();
   });
 
+  /* ── Theme Toggle ───────────────────────────────────────────── */
+  function initTheme() {
+    const toggleBtn = document.getElementById('themeToggle');
+    if (!toggleBtn) return;
+    
+    const currentTheme = localStorage.getItem('theme');
+    // We start dark by default (since we mapped kanba dark to root)
+    if (currentTheme === 'light') {
+      document.body.classList.add('light-theme');
+    } else if (currentTheme === 'dark') {
+      document.body.classList.remove('light-theme');
+    }
+    
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+      if (document.body.classList.contains('light-theme')) {
+        localStorage.setItem('theme', 'light');
+      } else {
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+  }
+
   /* ── Init ───────────────────────────────────────────────────── */
 
   async function init() {
+    initTheme();
     try {
-      const res = await fetch('data/registry.json');
+      const dataUrl = window.location.pathname.includes('/funded/') 
+        ? 'data/registry.json' 
+        : '/funded/data/registry.json';
+        
+      const res = await fetch(dataUrl);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       state.registry = await res.json();
 
@@ -328,7 +375,7 @@ const App = (() => {
       console.error('[PropRules] Init failed:', err);
       dom.loading.innerHTML =
         `<p style="font-family:monospace;font-size:12px;opacity:.6">
-          Error loading registry.json — check console.
+          Error loading registry.json — check console. Did you upload the /data folder?
         </p>`;
     }
   }
