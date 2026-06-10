@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="footer-content">
         <div class="footer-tabs">
           <a href="/index.html" class="footer-tab" data-page="index">Kanba</a>
-          <a href="https://younis.pw" class="footer-tab" data-page="younis">Younis</a>
+          <a href="https://younis.pw" class="footer-tab" target="_blank" data-page="younis">Younis</a>
           <a href="/ccr.html" class="footer-tab"  data-page="ccr">Compounding Calc.</a>
           <a href="/funded/index.html" class="footer-tab" data-page="funded">All funded rules</a>
           <a href="/videos.html" class="footer-tab" target="_blank" data-page="videos">my videos</a>
