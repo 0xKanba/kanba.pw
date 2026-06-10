@@ -1,207 +1,296 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Compound Calculator</title>
-<meta name="description" content="Compound calculator — calculate whatever you want.">
-<meta property="og:title" content="Compound Calculator">
-<meta property="og:description" content="Compound calculator — calculate whatever you want.">
-<meta property="og:image" content="/images/0xbtc.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="/images/0xbtc.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/styles.css">
-<link rel="stylesheet" href="/css/ccr.css">
-  <link rel="icon" href="/images/a.png" type="image/png">
-</head>
-<body>
-  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compound Calculator</title>
+    <meta
+      name="description"
+      content="Compound calculator — calculate whatever you want."
+    />
+    <meta property="og:title" content="Compound Calculator" />
+    <meta
+      property="og:description"
+      content="Compound calculator — calculate whatever you want."
+    />
+    <meta property="og:image" content="/images/0xbtc.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/images/0xbtc.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/ccr.css" />
+    <link rel="icon" href="/images/0x.png" type="image/png" />
+  </head>
+  <body>
+    <!-- Theme Toggle Button -->
+    <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+      <svg
+        class="sun-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg
+        class="moon-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
     <!-- SEO Content (Hidden) -->
     <h1 class="seo-only">Visualize Your Compound Growth</h1>
-    <p class="seo-only">Discover the power of compound interest with our intuitive calculator. Watch your investments grow over time with beautiful visualizations.</p>
+    <p class="seo-only">
+      Discover the power of compound interest with our intuitive calculator.
+      Watch your investments grow over time with beautiful visualizations.
+    </p>
 
     <!-- Main Calculator Content -->
     <main class="calc-main">
-        <div class="calc-container">
-            <!-- Calculator Form -->
-            <div class="calc-wrapper">
-                <form id="calcForm" class="calc-form-grid">
-                    <!-- Principal Amount -->
-                    <div class="calc-input-group">
-                        <label for="principalAmount" class="calc-label">
-                            <span class="calc-label-icon">💰</span>
-                            <span>Initial Investment</span>
-                        </label>
-                        <div class="calc-input-wrapper">
-                            <span class="calc-currency">$</span>
-                            <input 
-                                type="number" 
-                                id="principalAmount" 
-                                class="calc-input calc-numeric" 
-                                placeholder="10000"
-                                inputmode="decimal"
-                                pattern="[0-9]*\.?[0-9]*"
-                                min="0.1"
-                                step="0.01"
-                                required
-                            >
-                        </div>
-                        <span class="calc-error" id="principalError"></span>
-                    </div>
-
-                    <!-- Interest Rate -->
-                    <div class="calc-input-group">
-                        <label for="interestRate" class="calc-label">
-                            <span class="calc-label-icon">📈</span>
-                            <span>Interest Rate</span>
-                        </label>
-                        <div class="calc-input-wrapper">
-                            <input 
-                                type="number" 
-                                id="interestRate" 
-                                class="calc-input calc-numeric" 
-                                placeholder="7"
-                                inputmode="decimal"
-                                pattern="[0-9]*\.?[0-9]*"
-                                min="0.01"
-                                max="1000"
-                                step="0.01"
-                                required
-                            >
-                            <span class="calc-percent">%</span>
-                        </div>
-                        <span class="calc-error" id="rateError"></span>
-                    </div>
-
-                    <!-- Number of Times -->
-                    <div class="calc-input-group">
-                        <label for="numPeriods" class="calc-label">
-                            <span class="calc-label-icon">⏱️</span>
-                            <span>Number of Times</span>
-                        </label>
-                        <div class="calc-input-wrapper">
-                            <input 
-                                type="number" 
-                                id="numPeriods" 
-                                class="calc-input calc-numeric" 
-                                placeholder="10"
-                                inputmode="numeric"
-                                pattern="[0-9]*"
-                                min="1"
-                                max="1000"
-                                step="1"
-                                required
-                            >
-                            <span class="calc-years">times</span>
-                        </div>
-                        <span class="calc-error" id="periodError"></span>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="calc-submit-btn">
-                        <span>Calculate Growth</span>
-                        <svg class="calc-btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </button>
-                </form>
+      <div class="calc-container">
+        <!-- Calculator Form -->
+        <div class="calc-wrapper">
+          <form id="calcForm" class="calc-form-grid">
+            <!-- Principal Amount -->
+            <div class="calc-input-group">
+              <label for="principalAmount" class="calc-label">
+                <span class="calc-label-icon">💰</span>
+                <span>Initial Investment</span>
+              </label>
+              <div class="calc-input-wrapper">
+                <span class="calc-currency">$</span>
+                <input
+                  type="number"
+                  id="principalAmount"
+                  class="calc-input calc-numeric"
+                  placeholder="10000"
+                  inputmode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
+                  min="0.01"
+                  max="10000000000"
+                  step="any"
+                  required
+                />
+              </div>
+              <input
+                type="range"
+                id="principalRange"
+                class="calc-range"
+                min="0"
+                max="100000"
+                step="100"
+                value="10000"
+              />
+              <span class="calc-error" id="principalError"></span>
             </div>
 
-            <!-- Results Section -->
-            <div id="resultsArea" class="calc-results hidden">
-                <!-- Summary Cards -->
-                <div class="calc-summary-cards">
-                    <div class="calc-summary-card card-final">
-                        <div class="calc-card-icon">💎</div>
-                        <div class="calc-card-content">
-                            <h3>Final Amount</h3>
-                            <p class="calc-card-value" id="finalAmountDisplay">$0.00</p>
-                            <span class="calc-card-badge" id="totalGainPercent">+0%</span>
-                        </div>
-                    </div>
-
-                    <div class="calc-summary-card card-interest">
-                        <div class="calc-card-icon">📊</div>
-                        <div class="calc-card-content">
-                            <h3>Total Interest</h3>
-                            <p class="calc-card-value" id="totalInterestDisplay">$0.00</p>
-                        </div>
-                    </div>
-
-                    <div class="calc-summary-card card-growth">
-                        <div class="calc-card-icon">⚡</div>
-                        <div class="calc-card-content">
-                            <h3>Average Growth</h3>
-                            <p class="calc-card-value" id="avgGrowthDisplay">$0.00</p>
-                            <span class="calc-card-subtitle">per period</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chart Section -->
-                <div class="calc-chart-section">
-                    <div class="calc-chart-header">
-                        <h3>Growth Visualization</h3>
-                        <div class="calc-view-toggle">
-                            <button class="calc-toggle-btn active" data-view="chart">Chart</button>
-                            <button class="calc-toggle-btn" data-view="table">Table</button>
-                        </div>
-                    </div>
-
-                    <!-- Custom Tooltip (Fixed Position) -->
-                    <div id="chartTooltip" class="calc-custom-tooltip">
-                        <div class="tooltip-header">
-                            <span class="tooltip-period" id="tooltipPeriod">Period 1</span>
-                        </div>
-                        <div class="tooltip-body">
-                            <div class="tooltip-row">
-                                <span class="tooltip-dot balance-dot"></span>
-                                <span class="tooltip-label">Balance:</span>
-                                <span class="tooltip-value" id="tooltipBalance">$0.00</span>
-                            </div>
-                            <div class="tooltip-row">
-                                <span class="tooltip-dot interest-dot"></span>
-                                <span class="tooltip-label">Interest:</span>
-                                <span class="tooltip-value" id="tooltipInterest">$0.00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chart Container -->
-                    <div id="chartContainer" class="calc-chart-container">
-                        <canvas id="growthChart"></canvas>
-                    </div>
-
-                    <!-- Table Container -->
-                    <div id="tableContainer" class="calc-table-container calc-view-hidden">
-                        <table class="calc-data-table">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Starting Balance</th>
-                                    <th>Interest Earned</th>
-                                    <th>Ending Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dataTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- Interest Rate -->
+            <div class="calc-input-group">
+              <label for="interestRate" class="calc-label">
+                <span class="calc-label-icon">📈</span>
+                <span>Interest Rate</span>
+              </label>
+              <div class="calc-input-wrapper">
+                <input
+                  type="number"
+                  id="interestRate"
+                  class="calc-input calc-numeric"
+                  placeholder="7"
+                  inputmode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
+                  min="0.01"
+                  max="100"
+                  step="any"
+                  required
+                />
+                <span class="calc-percent">%</span>
+              </div>
+              <input
+                type="range"
+                id="interestRange"
+                class="calc-range"
+                min="0.1"
+                max="50"
+                step="0.1"
+                value="7"
+              />
+              <span class="calc-error" id="rateError"></span>
             </div>
+
+            <!-- Number of Times -->
+            <div class="calc-input-group">
+              <label for="numPeriods" class="calc-label">
+                <span class="calc-label-icon">⏱️</span>
+                <span>Number of Periods</span>
+              </label>
+              <div class="calc-input-wrapper">
+                <input
+                  type="number"
+                  id="numPeriods"
+                  class="calc-input calc-numeric"
+                  placeholder="10"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  min="1"
+                  max="10000"
+                  step="1"
+                  required
+                />
+                <span class="calc-years">times</span>
+              </div>
+              <input
+                type="range"
+                id="periodRange"
+                class="calc-range"
+                min="1"
+                max="50"
+                step="1"
+                value="10"
+              />
+              <span class="calc-error" id="periodError"></span>
+            </div>
+
+            <!-- Submit Button is now smaller and sleek -->
+            <button type="submit" class="calc-submit-btn">
+              <span>Calculate Growth</span>
+              <svg
+                class="calc-btn-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M5 12H19M19 12L12 5M19 12L12 19"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </button>
+          </form>
         </div>
+
+        <!-- Results Section -->
+        <div id="resultsArea" class="calc-results">
+          <!-- Summary Cards -->
+          <div class="calc-summary-cards">
+            <div class="calc-summary-card card-final">
+              <div class="calc-card-icon">💎</div>
+              <div class="calc-card-content">
+                <h3>Final Amount</h3>
+                <p class="calc-card-value" id="finalAmountDisplay">$0.00</p>
+                <span class="calc-card-badge" id="totalGainPercent">+0%</span>
+              </div>
+            </div>
+
+            <div class="calc-summary-card card-interest">
+              <div class="calc-card-icon">📊</div>
+              <div class="calc-card-content">
+                <h3>Total Interest</h3>
+                <p class="calc-card-value" id="totalInterestDisplay">$0.00</p>
+              </div>
+            </div>
+
+            <div class="calc-summary-card card-growth">
+              <div class="calc-card-icon">⚡</div>
+              <div class="calc-card-content">
+                <h3>Average Growth</h3>
+                <p class="calc-card-value" id="avgGrowthDisplay">$0.00</p>
+                <span class="calc-card-subtitle">per period</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart Section -->
+          <div class="calc-chart-section">
+            <div class="calc-chart-header">
+              <h3>Growth Visualization</h3>
+              <div class="calc-view-toggle">
+                <button class="calc-toggle-btn active" data-view="chart">
+                  Chart
+                </button>
+                <button class="calc-toggle-btn" data-view="table">Table</button>
+              </div>
+            </div>
+
+            <!-- Custom Tooltip (Fixed Position) -->
+            <div id="chartTooltip" class="calc-custom-tooltip">
+              <div class="tooltip-header">
+                <span class="tooltip-period" id="tooltipPeriod">Period 1</span>
+              </div>
+              <div class="tooltip-body">
+                <div class="tooltip-row">
+                  <span class="tooltip-dot balance-dot"></span>
+                  <span class="tooltip-label">Balance:</span>
+                  <span class="tooltip-value" id="tooltipBalance">$0.00</span>
+                </div>
+                <div class="tooltip-row">
+                  <span class="tooltip-dot interest-dot"></span>
+                  <span class="tooltip-label">Interest:</span>
+                  <span class="tooltip-value" id="tooltipInterest">$0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart Container -->
+            <div id="chartContainer" class="calc-chart-container">
+              <canvas id="growthChart"></canvas>
+            </div>
+
+            <!-- Table Container -->
+            <div
+              id="tableContainer"
+              class="calc-table-container calc-view-hidden"
+            >
+              <table class="calc-data-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Starting Balance</th>
+                    <th>Interest Earned</th>
+                    <th>Ending Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="dataTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <!-- Footer will be loaded here -->
     <div id="footer"></div>
+
+    <div class="bg-mesh"></div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/js/common.js"></script>
     <script src="/js/ccr.js"></script>
     <script src="/js/full.js"></script>
-
-</body>
+  </body>
 </html>
