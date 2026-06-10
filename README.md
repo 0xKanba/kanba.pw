@@ -60,6 +60,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -74,9 +75,7 @@
 ├── ccr.html
 ├── css
 │   ├── ccr.css
-│   ├── kanba.css
-│   ├── style.css
-│   └── younis.css
+│   └── kanba.css
 ├── funded
 │   ├── data
 │   │   ├── firms
@@ -119,9 +118,7 @@
 ├── js
 │   ├── ccr.js
 │   ├── common.js
-│   ├── full.js
-│   ├── kanba.js
-│   └── younis.js
+│   └── kanba.js
 ├── md
 │   ├── deen.md
 │   ├── files.json
@@ -134,9 +131,8 @@
 ├── scc.html
 ├── tree.txt
 ├── videos.html
-├── younis.html
 └── °.html
 
-19 directories, 52 files
+19 directories, 47 files
 ```
 <!-- TREE END -->
