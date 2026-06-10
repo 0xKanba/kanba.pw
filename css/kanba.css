@@ -355,7 +355,7 @@ body.light-theme .social-link:hover img {
 .theme-toggle-btn {
   position: absolute;
   top: 13px;
-  right: 13px;
+  left: 13px;
   width: 34px;
   height: 34px;
   border-radius: 50%;
