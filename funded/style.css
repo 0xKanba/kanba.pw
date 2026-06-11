@@ -141,7 +141,7 @@ body {
 .theme-toggle-btn {
   position: absolute;
   top: 16px;
-  left: 170px;
+  left: 16px;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -621,7 +621,8 @@ td {
   color: var(--c-text);
   border-bottom: 1px solid var(--c-line);
   vertical-align: top;
-  word-break: break-word;
+  word-break: normal;
+  white-space: nowrap;
 }
 tr:last-child td { border-bottom: none; }
 tbody tr { transition: background var(--ease); }
