@@ -595,6 +595,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   min-width: 0;
+  table-layout: fixed;
 }
 
 thead tr {
@@ -610,7 +611,7 @@ th {
   text-transform: uppercase;
   color: var(--c-text-3);
   text-align: left;
-  white-space: nowrap;
+  word-break: break-word;
 }
 td {
   padding: 12px 12px;
@@ -620,6 +621,7 @@ td {
   color: var(--c-text);
   border-bottom: 1px solid var(--c-line);
   vertical-align: top;
+  word-break: normal;
   white-space: nowrap;
 }
 tr:last-child td { border-bottom: none; }
