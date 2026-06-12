@@ -248,56 +248,6 @@ img { max-width: 100%; display: block }
 
 .nav-item.active .nav-icon svg { stroke: var(--yellow) }
 
-/* Sidebar Footer / Upload */
-.sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.upload-zone {
-  border: 2px dashed var(--border);
-  border-radius: 12px;
-  padding: 18px 12px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.upload-zone:hover,
-.upload-zone.drag-over {
-  border-color: var(--yellow);
-  background: var(--yellow-bg);
-}
-
-.upload-zone input[type="file"] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  font-size: 0;
-}
-
-.upload-zone svg {
-  width: 28px; height: 28px;
-  stroke: var(--text-muted);
-  margin: 0 auto 6px;
-  transition: stroke .3s;
-}
-
-.upload-zone:hover svg { stroke: var(--yellow) }
-
-.upload-zone-text {
-  font-size: .78rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.upload-zone-text strong { color: var(--yellow) }
-
 /* ── Sidebar Overlay (mobile) ──────────────────────────────── */
 .sidebar-overlay {
   display: none;
@@ -1019,7 +969,6 @@ tr:hover td { background: var(--bg-hover) }
   .topbar,
   .hamburger-btn,
   .sidebar-overlay,
-  .sidebar-footer,
   .page-footer { display: none !important }
   .main-content { margin-left: 0 !important }
   .tab-panel { display: block !important; page-break-inside: avoid }

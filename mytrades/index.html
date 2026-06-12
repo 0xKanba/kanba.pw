@@ -12,7 +12,7 @@
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0a0d10" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f3f4f8" media="(prefers-color-scheme: light)">
-  <link rel="canonical" href="https://yourusername.github.io/trading-dashboard/">
+  <link rel="canonical" href="https://yourusername.github.io/mytrades/">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -98,20 +98,6 @@
           Analytics
         </div>
       </nav>
-
-      <!-- Upload Section -->
-      <div class="sidebar-section-label">Data Source</div>
-      <div class="sidebar-footer">
-        <div class="upload-zone" id="uploadZone" role="button" aria-label="Upload CSV file">
-          <input type="file" accept=".csv" id="csvFileInput" aria-label="Choose CSV file">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          <div class="upload-zone-text"><strong>Upload CSV</strong><br>Drop or click</div>
-        </div>
-      </div>
     </aside>
 
     <!-- Sidebar Overlay (mobile) -->
@@ -144,7 +130,7 @@
         <div class="loading-state" id="loadingState">
           <div class="loading-spinner" aria-label="Loading"></div>
           <h2>Loading Trading Data</h2>
-          <p>Fetching your order history from <code>/csv/file.csv</code></p>
+          <p>Fetching your order history from <code>/mytrades/csv/file.csv</code></p>
         </div>
 
         <!-- Dashboard Panels (hidden until data loads) -->
@@ -300,7 +286,7 @@
 
       <!-- Footer -->
       <footer class="page-footer">
-        TradingPro Dashboard &middot; Data from <a href="/csv/file.csv">order history CSV</a> &middot; <span id="genDate"></span>
+        TradingPro Dashboard &middot; Data from <a href="/mytrades/csv/file.csv">order history CSV</a> &middot; <span id="genDate"></span>
       </footer>
 
     </main>

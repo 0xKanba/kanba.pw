@@ -23,7 +23,6 @@
     calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
     list: '<svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
     analytics: '<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
-    upload: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
     chevLeft: '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>',
     chevRight: '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>',
     trendUp: '<svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
@@ -809,37 +808,6 @@
     document.getElementById('genDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  function initUpload() {
-    var zone = document.getElementById('uploadZone');
-    var input = document.getElementById('csvFileInput');
-    if (!zone || !input) return;
-
-    input.addEventListener('change', function (e) {
-      if (e.target.files[0]) readFile(e.target.files[0]);
-    });
-
-    zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
-    zone.addEventListener('dragleave', function () { zone.classList.remove('drag-over'); });
-    zone.addEventListener('drop', function (e) {
-      e.preventDefault();
-      zone.classList.remove('drag-over');
-      if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
-    });
-  }
-
-  function readFile(file) {
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      alert('Please upload a .csv file');
-      return;
-    }
-    var reader = new FileReader();
-    reader.onload = function (e) {
-      try { processData(e.target.result); }
-      catch (err) { alert('Error parsing CSV: ' + err.message); }
-    };
-    reader.readAsText(file);
-  }
-
   function initFilters() {
     var typeF = document.getElementById('filterType');
     var statusF = document.getElementById('filterStatus');
@@ -853,7 +821,6 @@
   document.addEventListener('DOMContentLoaded', function () {
     initTheme();
     initSidebar();
-    initUpload();
     initFilters();
 
     // Theme toggle
@@ -864,21 +831,20 @@
       });
     }
 
-    // Try loading CSV from /csv/file.csv
-    fetch('/csv/file.csv')
+    // Try loading CSV from /mytrades/csv/file.csv
+    fetch('/mytrades/csv/file.csv')
       .then(function (r) {
         if (!r.ok) throw new Error('Not found');
         return r.text();
       })
       .then(function (csv) { processData(csv); })
       .catch(function () {
-        // Fallback: show upload prompt
         var loading = document.getElementById('loadingState');
         if (loading) {
           loading.innerHTML =
-            '<div style="margin-bottom:16px">' + ICONS.upload.replace('24 24', '48 48') + '</div>' +
-            '<h2>No Data Found</h2>' +
-            '<p>Upload your ThinkMarkets CSV file to get started.<br>Drag & drop into the sidebar zone or click to browse.</p>';
+            '<div class="loading-spinner"></div>' +
+            '<h2>Data Not Found</h2>' +
+            '<p>Place your CSV file at <code>mytrades/csv/file.csv</code> in the repository root and redeploy.</p>';
         }
       });
 
