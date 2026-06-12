@@ -63,6 +63,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -126,6 +127,14 @@
 │   ├── files.json
 │   └── us.md
 ├── md.html
+├── mytrades
+│   ├── css
+│   │   └── style.css
+│   ├── csv
+│   │   └── file.csv
+│   ├── index.html
+│   └── js
+│       └── app.js
 ├── pvt
 │   ├── index.html
 │   ├── script.js
@@ -135,6 +144,6 @@
 ├── videos.html
 └── °.html
 
-19 directories, 47 files
+23 directories, 51 files
 ```
 <!-- TREE END -->
