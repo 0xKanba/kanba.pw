@@ -703,52 +703,55 @@ a.chip {
 
 /* ── Table ──────────────────────────────────────── */
 .tbl-wrap {
-  border-radius: var(--r-md);
-  border: 1px solid var(--c-line-mid);
-  background: var(--c-card);
-  box-shadow: var(--sh-sm);
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+  background: transparent;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 0;
+  border-spacing: 0;
+  min-width: max-content;
 }
 
 thead tr {
   background: var(--c-surface);
-  border-bottom: 2px solid var(--c-line-mid);
 }
-th {
-  padding: clamp(8px, 1.5vw, 12px) clamp(6px, 1.5vw, 12px);
-  font-family: var(--f-mono);
-  font-size: clamp(9px, 2vw, 11px);
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--c-text-3);
+
+th, td {
+  padding: 8px 16px;
+  border: 1px solid var(--c-line-mid);
+  font-family: var(--f-ui);
   text-align: left;
+  word-break: normal;
   white-space: nowrap;
 }
+
+th {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--c-text-2);
+}
+
 td {
-  padding: clamp(8px, 1.5vw, 12px) clamp(6px, 1.5vw, 12px);
-  font-family: var(--f-mono);
-  font-size: clamp(11px, 2.5vw, 14px);
-  font-weight: 800;
+  font-weight: 600;
+  font-size: 13px;
   color: var(--c-text);
-  border-bottom: 1px solid var(--c-line);
-  vertical-align: middle;
-  white-space: nowrap;
 }
-tr:last-child td {
-  border-bottom: none;
-}
+
 tbody tr {
+  background: var(--c-card);
   transition: background var(--ease);
 }
+
+tbody tr:nth-child(2n) {
+  background: var(--c-surface);
+}
+
 tbody tr:hover {
   background: var(--c-hover);
 }
