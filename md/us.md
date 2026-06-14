@@ -7,7 +7,7 @@
 ---
 | Kanba | Younis |
 |-----|------|
-| ![https://kanba.pw](/images/0x.png) | ![https://younis.pw](/images/Younis.png) |
+| ![https://kanba.pw](/images/0x2000.png) | ![https://younis.pw](/images/Younis.png) |
 
 
 ---
