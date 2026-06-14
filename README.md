@@ -67,6 +67,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -116,7 +117,6 @@
 │   ├── 0xKanba.png
 │   ├── 0xbtc.png
 │   ├── Younis.png
-│   ├── a.png
 │   ├── bitcoin.svg
 │   ├── btc.png
 │   └── btc21.png
@@ -147,6 +147,6 @@
 ├── videos.html
 └── °.html
 
-23 directories, 51 files
+23 directories, 50 files
 ```
 <!-- TREE END -->
