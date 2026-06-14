@@ -5,7 +5,6 @@ const STATIC_CACHE = "kanba-static-v3";
 // ملفات أساسية (لا تضع كل المشروع هنا)
 const STATIC_ASSETS = [
   "/",
-  "/index.html",
   "/css/kanba.css",
   "/css/ccr.css",
   "/js/kanba.js",
