@@ -1,13 +1,13 @@
 <div align="center"> 
   
-# [Kanba](https://kanba.pw)  ×  [Younis](https://kanba.pw/younis)
+# [Kanba](https://kanba.pw)  ×  [Younis](https://younis.pw)
 
 </div>
 
 ---
 | Kanba | Younis |
 |-----|------|
-| ![https://kanba.pw](/images/0xKanba.png) | ![https://kanba.pw/youniz](/images/Younis.png) |
+| ![https://kanba.pw](/images/0x.png) | ![https://younis.pw](/images/Younis.png) |
 
 
 ---
