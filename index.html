@@ -130,6 +130,12 @@
 
 <div class="bg-mesh"></div>
 
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
+  </script>
+  
 <script src="/js/common.js"></script>
 <script src="/js/kanba.js"></script>
 </body>
