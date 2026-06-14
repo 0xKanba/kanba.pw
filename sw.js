@@ -1,8 +1,8 @@
-const CACHE_NAME = "kanba-v4";
-const IMAGE_CACHE = "kanba-images-v2";
-const STATIC_CACHE = "kanba-static-v2";
+const CACHE_VERSION = "kanba-v5";
+const IMAGE_CACHE = "kanba-images-v3";
+const STATIC_CACHE = "kanba-static-v3";
 
-// ملفات أساسية (خفيفة فقط)
+// ملفات أساسية (لا تضع كل المشروع هنا)
 const STATIC_ASSETS = [
   "/",
   "/index.html",
@@ -12,7 +12,7 @@ const STATIC_ASSETS = [
   "/js/ccr.js"
 ];
 
-// INSTALL: تخزين الملفات الأساسية فقط
+// INSTALL
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => cache.addAll(STATIC_ASSETS))
@@ -20,14 +20,14 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// ACTIVATE: تنظيف القديم
+// ACTIVATE
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
         keys.map((key) => {
-          if (![CACHE_NAME, IMAGE_CACHE, STATIC_CACHE].includes(key)) {
+          if (![CACHE_VERSION, IMAGE_CACHE, STATIC_CACHE].includes(key)) {
             return caches.delete(key);
           }
         })
@@ -37,7 +37,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// FETCH STRATEGY
+// FETCH
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
@@ -55,22 +55,30 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith(".js") ||
     url.pathname.endsWith(".html");
 
-  // 1. الصور: Cache First + auto save
+  // =========================
+  // 1. IMAGES (FULL OFFLINE SYSTEM)
+  // =========================
   if (isImage) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then(async (cache) => {
         const cached = await cache.match(req);
+
+        // لو موجود في الكاش → فورًا
         if (cached) return cached;
 
+        // تحميل + تخزين تلقائي
         const res = await fetch(req);
         cache.put(req, res.clone());
+
         return res;
       })
     );
     return;
   }
 
-  // 2. الملفات الثابتة: Cache First
+  // =========================
+  // 2. STATIC FILES
+  // =========================
   if (isStatic) {
     event.respondWith(
       caches.open(STATIC_CACHE).then(async (cache) => {
@@ -85,7 +93,9 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. باقي الطلبات: Network First
+  // =========================
+  // 3. OTHERS
+  // =========================
   event.respondWith(
     fetch(req).catch(() => caches.match(req))
   );
