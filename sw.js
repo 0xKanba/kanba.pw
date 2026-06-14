@@ -1,6 +1,6 @@
-const CACHE_NAME = "kanba-v3";
-const IMAGE_CACHE = "kanba-images-v1";
-const STATIC_CACHE = "kanba-static-v1";
+const CACHE_NAME = "kanba-v4";
+const IMAGE_CACHE = "kanba-images-v2";
+const STATIC_CACHE = "kanba-static-v2";
 
 // ملفات أساسية (خفيفة فقط)
 const STATIC_ASSETS = [
@@ -8,7 +8,6 @@ const STATIC_ASSETS = [
   "/index.html",
   "/css/kanba.css",
   "/css/ccr.css",
-  "/js/common.js",
   "/js/kanba.js",
   "/js/ccr.js"
 ];
