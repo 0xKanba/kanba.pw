@@ -1,0 +1,51 @@
+Time,Text
+2026-04-29 16:37:03,Order 3022215539 for symbol CAPITALCOM:US100 has been executed at price 27040.9 for 60 units
+2026-04-29 16:37:03,Order 3022216663 successfully cancelled
+2026-04-29 16:36:44,Order 3022215539 modification confirmed
+2026-04-29 16:36:44,Order 3022216663 modification confirmed
+2026-04-29 16:36:42,Modify position for symbol CAPITALCOM:US100 with SL 26995.8 and TP 27040.0
+2026-04-29 16:36:05,Order 3022215539 modification confirmed
+2026-04-29 16:36:05,Order 3022216663 successfully placed
+2026-04-29 16:36:05,Modify position for symbol CAPITALCOM:US100 with SL 26994.0 and TP 27040.0
+2026-04-29 16:36:00,Order 3022215539 modification confirmed
+2026-04-29 16:36:00,Modify position for symbol CAPITALCOM:US100 with TP 27040.0
+2026-04-29 16:35:58,Order 3022215539 successfully placed
+2026-04-29 16:35:58,Modify position for symbol CAPITALCOM:US100 with TP 27040.3
+2026-04-29 16:35:47,Order 3022213491 for symbol CAPITALCOM:US100 has been executed at price 26999.1 for 60 units
+2026-04-29 16:35:45,Order 3022213491 successfully placed
+2026-04-29 16:35:45,Call to place limit order to buy 60 units of symbol CAPITALCOM:US100 at price 27002.20 
+2026-04-29 16:35:11,Order 3022191838 for symbol CAPITALCOM:US100 has been executed at price 26994.3 for 60 units
+2026-04-29 16:35:11,Order 3022192728 successfully cancelled
+2026-04-29 16:34:16,Order 3022192728 modification confirmed
+2026-04-29 16:34:16,Order 3022191838 modification confirmed
+2026-04-29 16:34:16,Modify position for symbol CAPITALCOM:US100 with SL 26997.7 and TP 27036.1
+2026-04-29 16:33:49,Order 3022192728 modification confirmed
+2026-04-29 16:33:49,Order 3022191838 modification confirmed
+2026-04-29 16:33:49,Modify position for symbol CAPITALCOM:US100 with SL 26994.6 and TP 27036.1
+2026-04-29 16:33:43,Order 3022192728 modification confirmed
+2026-04-29 16:33:43,Order 3022191838 modification confirmed
+2026-04-29 16:33:43,Modify position for symbol CAPITALCOM:US100 with SL 26993.8 and TP 27036.1
+2026-04-29 16:33:29,Order 3022192728 successfully placed
+2026-04-29 16:33:29,Order 3022191838 modification confirmed
+2026-04-29 16:33:29,Modify position for symbol CAPITALCOM:US100 with SL 26993.8 and TP 27036.3
+2026-04-29 16:33:24,Order 3022191838 successfully placed
+2026-04-29 16:33:24,Modify position for symbol CAPITALCOM:US100 with SL 26993.8
+2026-04-29 16:33:18,Order 3022190972 for symbol CAPITALCOM:US100 has been executed at price 27002.8 for 60 units
+2026-04-29 16:33:18,Order 3022190972 successfully placed
+2026-04-29 16:33:18,Call to place market order to buy 60 units of symbol CAPITALCOM:US100 
+2026-04-28 13:58:25,Order 3017621241 for symbol TVC:GOLD has been executed at price 4604.775 for 400 units
+2026-04-28 13:58:25,Order 3017620904 successfully cancelled
+2026-04-28 13:57:53,Order 3017621241 modification confirmed
+2026-04-28 13:57:53,Order 3017620904 modification confirmed
+2026-04-28 13:57:53,Modify position for symbol TVC:GOLD with SL 4612.480 and TP 4604.958
+2026-04-28 13:57:44,Order 3017621241 modification confirmed
+2026-04-28 13:57:44,Order 3017620904 modification confirmed
+2026-04-28 13:57:44,Modify position for symbol TVC:GOLD with SL 4612.654 and TP 4604.958
+2026-04-28 13:56:05,Order 3017621241 modification confirmed
+2026-04-28 13:56:05,Order 3017620904 modification confirmed
+2026-04-28 13:56:05,Modify position for symbol TVC:GOLD with SL 4614.309 and TP 4604.958
+2026-04-28 13:50:22,Order 3017621241 modification confirmed
+2026-04-28 13:50:22,Order 3017620904 modification confirmed
+2026-04-28 13:50:22,Modify position for symbol TVC:GOLD with SL 4614.468 and TP 4604.958
+2026-04-28 13:50:06,Order 3017621241 successfully placed
+2026-04-28 13:50:06,Order 3017620904 modification confirmed
