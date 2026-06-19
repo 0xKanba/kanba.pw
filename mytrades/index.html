@@ -216,7 +216,8 @@
                         <th>Symbol</th>
                         <th class="num">Trades</th>
                         <th class="num">Win Rate</th>
-                        <th class="num">Avg RR</th>
+                        <th class="num">Avg R:R</th>
+                        <th class="num">Avg R-Mult</th>
                         <th class="num">Net P&amp;L</th>
                         <th class="num">Avg Win</th>
                         <th class="num">Avg Loss</th>
@@ -275,7 +276,7 @@
               <div class="card-head">
                 <div>
                   <h2 class="card-title">Trading Calendar</h2>
-                  <p class="card-sub">Daily P&amp;L heatmap</p>
+                  <p class="card-sub">Daily P&amp;L heatmap — click any day for detail</p>
                 </div>
                 <div class="cal-nav">
                   <button class="cal-btn" id="calPrev" type="button" aria-label="Previous month">
@@ -289,9 +290,9 @@
               </div>
               <div class="card-body">
                 <div class="cal-legend">
-                  <span class="cal-leg-item"><span class="swatch sw-loss"></span>Loss</span>
+                  <span class="cal-leg-item"><span class="swatch sw-loss"></span>Loss day</span>
                   <span class="cal-leg-item"><span class="swatch sw-neutral"></span>No trades</span>
-                  <span class="cal-leg-item"><span class="swatch sw-win"></span>Win</span>
+                  <span class="cal-leg-item"><span class="swatch sw-win"></span>Win day</span>
                 </div>
                 <div class="calendar" id="calendar" role="grid" aria-label="Trading calendar"></div>
               </div>
@@ -348,7 +349,10 @@
                         <th class="num">Qty</th>
                         <th class="num">Entry</th>
                         <th class="num">Exit</th>
+                        <th class="num">SL</th>
+                        <th class="num">TP</th>
                         <th class="num">R:R</th>
+                        <th class="num">R-Mult</th>
                         <th class="num">Net P&amp;L</th>
                         <th>Outcome</th>
                       </tr>
