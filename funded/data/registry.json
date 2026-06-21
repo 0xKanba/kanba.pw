@@ -35,6 +35,7 @@
           "id": "forex",
           "name": "Forex",
           "accounts": [
+            { "id": "common-rules",  "name": "Main Roles",  "path": "data/firms/finotivefunding/forex/common-rules.json" },
             { "id": "2step-challenge",  "name": "2-Step Challenge",  "path": "data/firms/finotivefunding/forex/2step-challenge.json" },
             { "id": "2step-pro",        "name": "2-Step Pro",        "path": "data/firms/finotivefunding/forex/2step-pro.json" },
             { "id": "instant-standard", "name": "Instant Standard",  "path": "data/firms/finotivefunding/forex/instant-standard.json" },
