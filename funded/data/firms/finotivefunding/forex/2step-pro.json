@@ -2,68 +2,76 @@
   "firm": {
     "name": "Finotive Funding",
     "type": "Forex",
-    "model": "2-Step Pro",
-    "last_updated": "2026-04-12",
+    "model": "Finotive Pro 2-Step Challenge",
+    "last_updated": "2026-06-21",
+    "phases": ["Phase 1 (Pro Challenge)", "Phase 2 (Pro Challenge)", "Funded Finotive Pro 2-Step"],
+    "trading_day": "17:00:00 to 16:59:59 New York Time (next day)",
     "sections": [
       {
-        "id": "risk_parameters",
-        "title": "Risk Parameters",
+        "id": "challenge_phase_risk_parameters",
+        "title": "Pro Challenge Phase — Risk Parameters",
         "items": [
-          { "label": "Daily Drawdown",      "value": "5%",          "detail": "Equity must not fall below 5% of previous day's closing balance at any point. Resets daily at 17:00 NY Time. Static. Hard breach = immediate closure without refund." },
-          { "label": "Max Overall Drawdown","value": "10%",         "detail": "Equity must not fall below 10% of initial balance. Static for account lifetime. Example: $100K account → equity must never drop below $90,000." },
-          { "label": "Profit Target P1",    "value": "7.5%",        "detail": "Phase 1 target of initial balance." },
-          { "label": "Profit Target P2",    "value": "5%",          "detail": "Verification phase target." },
-          { "label": "Min Profitable Days", "value": "2 days / phase", "detail": "2 profitable days per phase AND before each payout. Profitable day = balance at 23:00 CET ≥ 0.5% higher than previous day. Final day fast-tracked if target reached with all trades closed." }
+          { "label": "Daily Drawdown",      "value": "5.0%",     "detail": "Maximum loss allowed within one trading day. Trading day runs from 17:00:00 NY Time to 16:59:59 NY Time the following day. Open equity and floating losses are included. Static — does not trail upward. Hard Breach = immediate account termination." },
+          { "label": "Maximum Drawdown",    "value": "10.0%",    "detail": "Total loss allowed from the Initial Account Balance. Static — does not trail upward with profits and does not adjust based on the highest account balance reached. Open equity and floating losses are included. Hard Breach = immediate account termination." },
+          { "label": "Floating Drawdown",   "value": "2.0% — soft warning only", "detail": "Unrealised loss on open positions on the same symbol, measured as % of Initial Account Balance, on a combined basis per symbol. Threshold is 2.0%. Reaching the threshold results in a soft warning/notification only. Unlimited soft warnings may be issued during the Pro Challenge Phase." },
+          { "label": "Minimum Profitable Days", "value": "2 per phase", "detail": "Required to progress through each Pro Challenge stage. A profitable day = account balance at 17:00:00 NY Time exceeds previous trading day's closing balance by at least 0.5% of Initial Account Balance." }
+        ]
+      },
+      {
+        "id": "funded_phase_risk_parameters",
+        "title": "Funded Phase — Risk Parameters (Funded Finotive Pro 2-Step)",
+        "items": [
+          { "label": "Daily Drawdown",      "value": "5.0%",  "detail": "Same as Pro Challenge Phase. Hard Breach = immediate account termination." },
+          { "label": "Maximum Drawdown",    "value": "10.0%", "detail": "Same as Pro Challenge Phase. Hard Breach = immediate account termination." },
+          { "label": "Floating Drawdown",   "value": "2.0% — Strike + payout reduction to 10%", "detail": "Threshold is 2.0% per symbol on combined basis. An early soft reminder may be issued when Floating Drawdown reaches 1.5%. If Floating Drawdown reaches or exceeds 2.0%, it results in 1 Strike and payout reduction to 10% for the relevant payout cycle. Only one Strike per trade and instrument combination. Five cumulative Strikes = permanent account closure." },
+          { "label": "Minimum Profitable Days Between Payouts", "value": "2 between payouts", "detail": "Required before payout or scaling request. Profitable day = account balance at 17:00:00 NY Time exceeds previous trading day's closing balance by at least 0.5% of Initial Account Balance." }
+        ]
+      },
+      {
+        "id": "pro_ongoing_requirements",
+        "title": "Pro Ongoing Requirements (Post-Funding, from 31st Day)",
+        "items": [
+          { "label": "Trade Consistency Rule",  "value": "±25% of baseline (rolling 7-day)", "detail": "From the 31st day of Funded Status, and on a rolling seven-day basis, the trader's weekly trade count and instrument volumes must remain within plus or minus 25% of the averages recorded during: (a) the Challenge Phase, AND (b) the first 30 days of Funded Status. Example: avg 10 trades/week at 10 lots Forex → must trade 7–12 trades and 7.5–12.5 lots. Breach = automatic account downgrade." },
+          { "label": "Quarterly Profitability Rule", "value": "5% per rolling 90 days",   "detail": "Within each rolling 90-day period, the trader must generate combined realised and unrealised profit of at least 5% of the Initial Account Balance. Example: $100K account with $4,000 in payouts → account must have ≥ $1,000 balance at the 90-day mark. Breach = automatic account downgrade." },
+          { "label": "Breach Consequence",       "value": "Automatic Account Downgrade",  "detail": "Breach of either Pro rule results in: (1) Automatic Account Downgrade to the equivalent standard funded Challenge account, (2) Permanent removal of all Pro-specific benefits, (3) Permanent removal of the 100% profit split. The downgraded account continues as a standard funded Challenge account." }
         ]
       },
       {
         "id": "exposure_limits",
         "title": "Notional Volume Limits",
         "table": {
-          "headers": ["Account Size", "Notional Limit", "Max Exposure", "Leverage"],
+          "headers": ["Account Size", "Notional Volume Limit", "Maximum Exposure", "Leverage"],
           "rows": [
-            ["$50,000",  "2,000%", "$1,000,000", "100:1"],
-            ["$100,000", "1,250%", "$1,250,000", "100:1"],
-            ["$200,000", "1,000%", "$2,000,000", "100:1"]
+            ["$2,500",   "5,000%", "$125,000",    "100:1"],
+            ["$5,000",   "4,000%", "$200,000",    "100:1"],
+            ["$10,000",  "3,000%", "$300,000",    "100:1"],
+            ["$25,000",  "2,500%", "$625,000",    "100:1"],
+            ["$50,000",  "2,000%", "$1,000,000",  "100:1"],
+            ["$75,000",  "1,500%", "$1,125,000",  "100:1"],
+            ["$100,000", "1,250%", "$1,250,000",  "100:1"],
+            ["$200,000", "1,000%", "$2,000,000",  "100:1"]
           ]
         }
-      },
-      {
-        "id": "ongoing_requirements",
-        "title": "Pro Ongoing Requirements (Post-Funding)",
-        "items": [
-          { "label": "Weekly Trade Consistency", "value": "±25% of baseline",  "detail": "Every 7 days, weekly trade count AND instrument volumes must stay within ±25% of averages from Challenge + first 30 funded days. Example: avg 10 trades/week at 10 lots Forex → must trade 7–12 trades and 7.5–12.5 lots. Breach = immediate downgrade." },
-          { "label": "Quarterly Profit Target",  "value": "5% per 90 days",   "detail": "Every 90 days, total realized payouts + account balance must equal ≥ 5% of starting balance. Example: $100K account with $4,000 in payouts → account must have ≥ $1,000 balance at 90-day mark. Breach = immediate downgrade." },
-          { "label": "Breach Consequence",       "value": "Auto-downgrade",    "detail": "Breaching either consistency or quarterly target = automatic permanent downgrade to standard 2-Step funded account of same size. Salary and 100% profit split permanently revoked." }
-        ]
-      },
-      {
-        "id": "trading_rules",
-        "title": "Trading Rules",
-        "items": [
-          { "label": "News Trading",   "value": "Allowed (balanced)", "detail": "Trading permitted at all times. Unbalanced exploitation of high-impact news not permitted." },
-          { "label": "Weekend Hold",   "value": "Platform terms apply", "detail": "No specific weekend hold rule for 2-Step Pro. Subject to general platform terms." },
-          { "label": "Overnight Hold", "value": "Allowed",             "detail": "No restriction on overnight positions." }
-        ]
       },
       {
         "id": "breach_rules",
         "title": "Breach System",
         "items": [
-          { "label": "Hard Breach",              "value": "Immediate closure",    "detail": "Daily or max drawdown violation = account closed without refund. No recovery." },
-          { "label": "Soft Breach — Notional",   "value": "Strike issued",        "detail": "Each notional volume breach = 1 strike. Challenge: must return to positive balance before reset. 5 strikes = account closure. All strikes cleared upon reaching Funded Status." },
-          { "label": "Soft Breach — Funded",     "value": "−10% payout / cycle", "detail": "Each strike reduces next payout by 10%. 5 cumulative strikes = permanent account closure." },
-          { "label": "Consistency / Quarterly",  "value": "Permanent downgrade",  "detail": "Breach of either Pro rule = automatic downgrade to standard funded. Salary and 100% split permanently lost." }
+          { "label": "Hard Breach",              "value": "Immediate account termination",  "detail": "Triggered by: (1) Daily Drawdown breach, (2) Maximum Drawdown breach, or (3) Five cumulative Strikes." },
+          { "label": "Soft Breach — Notional (Pro Challenge)",  "value": "1 Strike + Account Reset",       "detail": "Soft Breach — Immediate Strike. If account balance is negative, the reset is placed on hold until trader returns the account to at least break-even. Five cumulative Strikes = permanent account closure." },
+          { "label": "Soft Breach — Notional (Funded Pro)",     "value": "1 Strike + payout reduction to 10%", "detail": "Payout reduction to 10% for the relevant payout cycle. Five cumulative Strikes = permanent account closure." },
+          { "label": "Pro Rule Breach",          "value": "Automatic Downgrade",            "detail": "Breach of Trade Consistency Rule or Quarterly Profitability Rule = automatic permanent downgrade to standard funded Challenge account. All Pro-specific benefits (incl. 100% profit split) permanently removed." }
         ]
       },
       {
         "id": "payouts",
         "title": "Payouts & Salary",
         "items": [
-          { "label": "Profit Split",  "value": "80% → 100%",       "detail": "Starts at 80%. Increases to 100% on the 30th funded day (if account is in profit)." },
-          { "label": "Salary",        "value": "Accrues from Day 1","detail": "Daily salary accrues from the first funded day regardless of trading profit. Revoked on downgrade." },
-          { "label": "Payout Cycle",  "value": "On-demand → Weekly","detail": "On-demand after 2 minimum profitable days. Subsequent payouts weekly." },
-          { "label": "Fee Refund",    "value": "30th funded day",   "detail": "100% challenge fee refunded on 30th funded day if account is in profit." }
+          { "label": "Profit Split",  "value": "80% → 100% (30th funded day)", "detail": "Starts at 80%. Increases to 100% on the 30th funded day if account is in profit. On-demand after completing 2 minimum profitable days between payouts." },
+          { "label": "Salary",         "value": "Accrues from Day 1",            "detail": "Daily salary accrues from the first funded day regardless of trading profit. Revoked permanently on downgrade." },
+          { "label": "Payout Cycle",   "value": "On-demand → Weekly",            "detail": "First payout on-demand after MPD met. Subsequent payouts available weekly." },
+          { "label": "Payout Reduction", "value": "To 10% per Strike",            "detail": "Each Strike in the Funded Pro Phase reduces the relevant payout cycle to 10%. If a Strike has been issued, trader must withdraw the full available amount — partial withdrawal is not permitted." },
+          { "label": "Fee Refund",     "value": "30th funded day",               "detail": "100% challenge fee refunded on the 30th funded day if account is in profit." }
         ]
       }
     ]
