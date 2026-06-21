@@ -3,39 +3,42 @@
     "name": "Finotive Funding",
     "type": "Forex",
     "model": "2-Step Challenge",
-    "last_updated": "2026-04-12",
+    "last_updated": "2026-06-21",
+    "phases": ["Phase 1 (Challenge)", "Phase 2 (Challenge)", "Funded 2-Step Challenge"],
+    "trading_day": "17:00:00 to 16:59:59 New York Time (next day)",
     "sections": [
       {
-        "id": "risk_parameters",
-        "title": "Risk Parameters",
+        "id": "challenge_phase_risk_parameters",
+        "title": "Challenge Phase — Risk Parameters",
         "items": [
-          { "label": "Daily Drawdown",      "value": "4.5%",     "detail": "Equity must not fall below 4.5% of previous day's closing balance at any point. Resets daily at 17:00 NY Time. Static — does not trail. Hard breach = immediate closure without refund." },
-          { "label": "Max Overall Drawdown","value": "9%",       "detail": "Equity must not fall below 9% of initial balance. Static for account lifetime. Example: $100K account → equity must never drop below $91,000." },
-          { "label": "Profit Target P1",    "value": "7.5%",     "detail": "Phase 1 target of initial balance." },
-          { "label": "Profit Target P2",    "value": "5%",       "detail": "Verification phase target." },
-          { "label": "Min Profitable Days", "value": "2 days / phase", "detail": "2 profitable days per phase AND before each payout. Profitable day = balance at 23:00 CET is ≥ 0.5% higher than previous day. Final day can be fast-tracked if target is reached and trades are closed." }
+          { "label": "Daily Drawdown",      "value": "4.5%",     "detail": "Maximum loss allowed within one trading day. Trading day runs from 17:00:00 NY Time to 16:59:59 NY Time the following day. Open equity and floating losses are included. Static — does not trail upward with profits. Hard Breach = immediate account termination. No warning, no strike applies." },
+          { "label": "Maximum Drawdown",    "value": "9.0%",     "detail": "Total loss allowed from the Initial Account Balance. Static — does not trail upward with profits and does not adjust based on the highest account balance reached. Open equity and floating losses are included. Hard Breach = immediate account termination. No warning, no strike applies." },
+          { "label": "Floating Drawdown",   "value": "2.0% — soft warning only", "detail": "Unrealised loss on open positions on the same symbol, measured as % of Initial Account Balance, on a combined basis per symbol. Threshold is 2.0%. Reaching the threshold results in a soft warning/notification only — no Strike, no Account Reset, no payout reduction, no account termination. Unlimited soft warnings may be issued during the Challenge Phase." },
+          { "label": "Minimum Profitable Days", "value": "2 per phase", "detail": "Required to progress through each Challenge stage. A profitable day = account balance at 17:00:00 NY Time exceeds previous trading day's closing balance by at least 0.5% of Initial Account Balance. No progression is allowed until the requirement is met." }
         ]
       },
       {
-        "id": "trading_rules",
-        "title": "Trading Rules",
+        "id": "funded_phase_risk_parameters",
+        "title": "Funded Phase — Risk Parameters (Funded 2-Step Challenge)",
         "items": [
-          { "label": "News Trading",   "value": "Allowed (balanced)", "detail": "Trading permitted at all times. Unbalanced exploitation of high-impact news events is not permitted." },
-          { "label": "Weekend Hold",   "value": "Platform terms apply", "detail": "No specific weekend hold rule stated for 2-Step accounts. Subject to general platform terms." },
-          { "label": "Overnight Hold", "value": "Allowed",             "detail": "No restriction on overnight positions." }
+          { "label": "Daily Drawdown",      "value": "4.5%", "detail": "Same as Challenge Phase. Hard Breach = immediate account termination." },
+          { "label": "Maximum Drawdown",    "value": "9.0%", "detail": "Same as Challenge Phase. Hard Breach = immediate account termination." },
+          { "label": "Floating Drawdown",   "value": "2.0% — Strike + payout reduction to 10%", "detail": "Threshold is 2.0% per symbol on combined basis. An early soft reminder may be issued when Floating Drawdown reaches 1.5%. If Floating Drawdown reaches or exceeds 2.0%, it results in 1 Strike and payout reduction to 10% for the relevant payout cycle. Only one Strike may be issued per trade and instrument combination — continued drawdown on the same open position does not generate additional Strikes. Five cumulative Strikes = permanent account closure." },
+          { "label": "Minimum Profitable Days Between Payouts", "value": "2 between payouts", "detail": "Required before payout or scaling request. Profitable day = account balance at 17:00:00 NY Time exceeds previous trading day's closing balance by at least 0.5% of Initial Account Balance. No payout or scaling request is permitted until the requirement is met." }
         ]
       },
       {
         "id": "exposure_limits",
         "title": "Notional Volume Limits",
         "table": {
-          "headers": ["Account Size", "Notional Limit", "Max Exposure", "Leverage"],
+          "headers": ["Account Size", "Notional Volume Limit", "Maximum Exposure", "Leverage"],
           "rows": [
             ["$2,500",   "5,000%", "$125,000",    "100:1"],
             ["$5,000",   "4,000%", "$200,000",    "100:1"],
             ["$10,000",  "3,000%", "$300,000",    "100:1"],
             ["$25,000",  "2,500%", "$625,000",    "100:1"],
             ["$50,000",  "2,000%", "$1,000,000",  "100:1"],
+            ["$75,000",  "1,500%", "$1,125,000",  "100:1"],
             ["$100,000", "1,250%", "$1,250,000",  "100:1"],
             ["$200,000", "1,000%", "$2,000,000",  "100:1"]
           ]
@@ -45,17 +48,21 @@
         "id": "breach_rules",
         "title": "Breach System",
         "items": [
-          { "label": "Hard Breach",              "value": "Immediate closure",    "detail": "Triggered by daily or max drawdown violation. Account closed without refund. No recovery." },
-          { "label": "Soft Breach — Notional",   "value": "Strike issued",        "detail": "Each breach of Notional Volume Limit = 1 strike. Challenge: must return to positive balance before reset allowed. 5 strikes = account closure. All strikes cleared upon reaching Funded Status." },
-          { "label": "Soft Breach — Funded",     "value": "−10% payout / cycle", "detail": "Each strike reduces next payout cycle by 10%. 5 cumulative strikes = permanent account closure." }
+          { "label": "Hard Breach",              "value": "Immediate account termination",  "detail": "Triggered by: (1) Daily Drawdown breach, (2) Maximum Drawdown breach, or (3) Five cumulative Strikes. No warning and no graduated consequence applies." },
+          { "label": "Soft Breach — Notional (Challenge)",  "value": "1 Strike + Account Reset",       "detail": "Soft Breach — Immediate Strike. If account balance is negative, the reset is placed on hold until trader returns the account to at least break-even. Five cumulative Strikes = permanent account closure." },
+          { "label": "Soft Breach — Notional (Funded)",     "value": "1 Strike + payout reduction to 10%", "detail": "Payout reduction to 10% for the relevant payout cycle. Five cumulative Strikes = permanent account closure." },
+          { "label": "Soft Breach — Floating DD (Funded)",  "value": "1 Strike + payout reduction to 10%", "detail": "Floating DD ≥ 2.0% in Funded Phase = Strike + payout reduction to 10%." },
+          { "label": "Soft Warning Only (Challenge)",       "value": "No Strike, no reset",            "detail": "Floating DD, Realised-Loss Recovery, Scalping, Concentration, Liquidity Abuse in Challenge Phase = soft warning only." },
+          { "label": "Conditional Strike (Funded)",         "value": "If active at payout: 1 Strike + payout to 10%", "detail": "Applies to Scalping, Excessive One-Sided Position Concentration, Liquidity Abuse in Funded Phase." }
         ]
       },
       {
         "id": "payouts",
         "title": "Payouts",
         "items": [
-          { "label": "Profit Split",  "value": "80%",              "detail": "Starting split on funded account. On-demand after completing 2 minimum profitable days." },
+          { "label": "Profit Split",  "value": "80%",              "detail": "Starting split on Funded 2-Step Challenge account. On-demand after completing 2 minimum profitable days between payouts." },
           { "label": "Payout Cycle",  "value": "On-demand → Weekly","detail": "First payout on-demand after MPD met. Subsequent payouts available weekly." },
+          { "label": "Payout Reduction", "value": "To 10% per Strike", "detail": "Each Strike in the Funded Phase reduces the relevant payout cycle to 10%. If a Strike has been issued, trader must withdraw the full available amount — partial withdrawal is not permitted." },
           { "label": "Fee Refund",    "value": "30th funded day",   "detail": "100% challenge fee refunded on the 30th funded day if account is in profit." }
         ]
       }
