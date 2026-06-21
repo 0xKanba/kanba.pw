@@ -1,0 +1,113 @@
+{
+  "firm": {
+    "name": "Finotive Funding",
+    "type": "Forex",
+    "model": "Common Rules (Applies to All Account Types)",
+    "last_updated": "2026-06-21",
+    "applies_to": [
+      "1-Step Challenge",
+      "2-Step Challenge",
+      "Finotive Pro 1-Step Challenge",
+      "Finotive Pro 2-Step Challenge",
+      "Funded 1-Step Challenge",
+      "Funded 2-Step Challenge",
+      "Funded Finotive Pro 1-Step",
+      "Funded Finotive Pro 2-Step",
+      "Instant Funding Standard",
+      "Instant Funding Lite"
+    ],
+    "trading_day": "17:00:00 to 16:59:59 New York Time (next day)",
+    "sections": [
+      {
+        "id": "general_rules",
+        "title": "General Rules Applicable to All Accounts",
+        "items": [
+          { "label": "Multiple Accounts, Allocation, Hedging, and Coordination", "value": "Conditional", "detail": "Traders may hold more than one Finotive account, provided the maximum allocation limit is not exceeded. Copying trades across the trader's own accounts is permitted. Prohibited: (a) Bypassing allocation limits using multiple profiles, false details, or third parties; (b) Coordinating or mirroring trades with other users; (c) Opening or maintaining hedged, offsetting, or materially correlated multi-account structures designed to manipulate drawdown, equity, or performance metrics. Consequence: Referred to Risk and Compliance team for review." },
+          { "label": "News Straddling", "value": "Prohibited Behaviour / Strategy", "detail": "Trading during high-impact news events is permitted only where the strategy reflects a genuine market view. Traders must not place straddled positions on the same or correlated instruments within 15 minutes before or after a Red or Amber event on the Forex Factory Calendar, earnings calendar, or geopolitical news events. Detected cases referred to Risk and Compliance team." },
+          { "label": "Third-Party Tools, Signal Services, Trade Copiers, and Expert Advisors", "value": "Owned/controlled only", "detail": "Trade copier tools may be used only to copy the trader's own trades. Prohibited: (a) Copying trades from third-party accounts; (b) Using signal providers, account managers, or challenge-passing services; (c) Allowing another person/group/service to control trading activity; (d) Using EAs not genuinely owned and controlled by the trader. Failure to cooperate may result in account closure and payout rejection." },
+          { "label": "Latency Arbitrage and Execution Abuse", "value": "Prohibited", "detail": "Trading activity that exploits delayed prices, stale quotes, out-of-sync prices, feed discrepancies, order-processing delays, or infrastructure inefficiencies is prohibited. Review triggers: 30%+ of trades affected by negative slippage, OR 30%+ of total realised profit (or at least 0.5% of Initial Account Balance) earned during quote absence or delayed-price conditions." },
+          { "label": "Swap-Free Account Misuse", "value": "Prohibited Behaviour / Strategy (swap-free accounts only)", "detail": "Applies only where the trader has purchased or uses a swap-free account. Swap-free accounts must be used for genuine directional trading. A breach may be identified where trades are opened before daily rollover and closed after rollover, and 50%+ of realised profit in the review period or payout cycle is generated from such rollover-crossing trades." },
+          { "label": "IP, Device, Login, and Location Monitoring", "value": "Monitored", "detail": "Finotive may monitor IP addresses, devices, login timestamps, and location data. Use of VPNs, proxies, remote desktops, or similar tools that obscure the trader's true location is not allowed. Failure to complete Enhanced KYC within 72 hours may result in account closure and payout rejection." },
+          { "label": "Inactivity", "value": "30 consecutive calendar days", "detail": "Inactivity means 30 consecutive calendar days without executing a trade on the relevant account. Consequence: The account will be permanently closed following notification. Any linked payout request will also be rejected." }
+        ]
+      },
+      {
+        "id": "strike_system_overview",
+        "title": "Strike System (Overview)",
+        "items": [
+          { "label": "5 Cumulative Strikes", "value": "Permanent account closure", "detail": "Strikes are issued for confirmed soft breaches. Five cumulative Strikes on any account type result in permanent account closure." },
+          { "label": "Immediate Strike", "value": "No warning stage", "detail": "Once the breach is confirmed, the Strike is recorded immediately. Examples: Notional Volume breach, Weekend Holding breach on Instant Funding accounts." },
+          { "label": "Warning-Based Strike", "value": "Begins with a warning", "detail": "A Strike is recorded only after a further confirmed breach. Examples: Floating Drawdown, Realised-loss recovery." },
+          { "label": "Conditional Strike", "value": "Triggered at payout request", "detail": "The trader may continue trading to reverse it before requesting payout. A Strike is only applied if the trader submits a payout request while the condition remains unresolved. Examples: Scalping, Excessive One-Sided Position Concentration, Liquidity Abuse, Disproportionate Single-Trade Profit Dependency." }
+        ]
+      },
+      {
+        "id": "strike_consequences_by_phase",
+        "title": "Strike Consequences by Account Phase",
+        "table": {
+          "headers": ["Strike Type", "Challenge Phase", "Challenge-Funded Phase", "Instant Funding"],
+          "rows": [
+            ["Immediate Strike",   "Account Reset",                "1 Strike + payout reduced to 10%", "1 Strike + payout reduced to 10%"],
+            ["Warning-Based Strike","Soft warning only",            "1 Strike + payout reduced to 10%", "1st breach = Formal Warning; 2nd breach onward = 1 Strike + payout reduced to 10%"],
+            ["Conditional Strike",  "Soft warning only",            "If not reversed before payout request: 1 Strike + payout reduced to 10%", "If not reversed before payout request: 1 Strike + payout reduced to 10%"]
+          ]
+        },
+        "items": [
+          { "label": "Strike History Reset", "value": "Cleared at Funded Status", "detail": "Strike history is cleared when a Challenge or Pro account reaches Funded Status, provided five Strikes have not already been accumulated." },
+          { "label": "Appeals", "value": "Within 48 hours", "detail": "Appeals must be submitted within 48 hours of enforcement and are accepted only where there is a clear data or pricing error." },
+          { "label": "Full Withdrawal Rule", "value": "Full available amount", "detail": "If a Strike has been issued in a payout cycle, the trader must withdraw the full available amount for that cycle. Partial withdrawal is not permitted." }
+        ]
+      },
+      {
+        "id": "hard_breaches",
+        "title": "Hard Breaches",
+        "items": [
+          { "label": "Daily Drawdown Breach", "value": "Hard Breach", "detail": "Daily Drawdown limit violated. Results in immediate account termination. No warning, no strike, no recovery." },
+          { "label": "Maximum Drawdown Breach", "value": "Hard Breach", "detail": "Maximum Drawdown limit violated. Results in immediate account termination. No warning, no strike, no recovery." },
+          { "label": "Five Cumulative Strikes", "value": "Hard Breach", "detail": "Accumulation of five soft-breach Strikes on any account type results in permanent account closure." },
+          { "label": "Hard Breach Consequence", "value": "Immediate or permanent account closure", "detail": "Hard Breaches result in immediate or permanent account closure, depending on the breach. No warning and no graduated consequence applies." }
+        ]
+      },
+      {
+        "id": "manual_review_rules",
+        "title": "All Manual Review Rules",
+        "items": [
+          { "label": "Note", "value": "Hitting any of the limits below closes all open trades and places the account on manual review", "detail": "The following rules trigger automatic trade closure and account manual review when breached." }
+        ],
+        "table": {
+          "headers": ["#", "Type", "Rule & Trigger"],
+          "rows": [
+            ["1", "AUTO-MONITORED", "News straddling around Red or Amber events — Trades opened inside a Red/Amber news window with straddle orders detected (order IDs logged); the account is placed under review."],
+            ["2", "AUTO-MONITORED", "IP / device / login / location anomalies requiring enhanced KYC — Linked accounts and sessions sharing the same IP, device or location."],
+            ["3", "MANUAL REVIEW",   "Bypass allocation using multiple profiles, false details, or third parties — Reviewed manually by the compliance team."],
+            ["4", "MANUAL REVIEW",   "Unauthorised third-party tools, signal services, copy services, or pass services — Reviewed manually by the compliance team."],
+            ["5", "MANUAL REVIEW",   "Latency arbitrage or execution abuse — Reviewed manually by the compliance team."],
+            ["6", "AUTO-MONITORED", "Coordinated / mirrored trading across different users — Account-similarity % and matched-account count compared across users."],
+            ["7", "AUTO-MONITORED", "Swap-free misuse (swap-free accounts only) — Swap-free advantage profit as a share of total realised profit."],
+            ["8", "AUTO-MONITORED", "Self-developed or self-owned EA without required approval / cooperation — EA approval status, EA-detected flag and EA trade-contribution %; compliance cooperation required if flagged."],
+            ["9", "AUTO-MONITORED", "Hedging / offsetting / materially correlated multi-account structures — Accounts under one user UUID holding opposite-direction positions, with instrument-level buy/sell exposure and hedge ratio."]
+          ]
+        }
+      },
+      {
+        "id": "common_definitions",
+        "title": "Common Definitions",
+        "items": [
+          { "label": "Profitable Day", "value": "≥ 0.5% of Initial Account Balance", "detail": "A profitable day is a trading day where the account balance at 17:00:00 New York Time exceeds the previous trading day's closing balance by at least 0.5% of the Initial Account Balance. This definition applies across all account types and phases." },
+          { "label": "Trading Day", "value": "17:00:00 to 16:59:59 NY Time", "detail": "The trading day runs from 17:00:00 New York Time to 16:59:59 New York Time the following day. This applies to all daily drawdown calculations, sequence resets for realised-loss recovery trading, and profitable day assessments across all account types." },
+          { "label": "Low-Liquidity Window — Global Instruments", "value": "22:00:00 to 01:59:59 UTC", "detail": "Low-liquidity window for global instruments. Used for Liquidity Abuse assessment." },
+          { "label": "Low-Liquidity Window — Asian Instruments", "value": "22:00:00 to 00:59:59 UTC", "detail": "Low-liquidity window for Asian instruments (Hang Seng Index, Nikkei). Used for Liquidity Abuse assessment." }
+        ]
+      },
+      {
+        "id": "final_confirmation",
+        "title": "Final Confirmation",
+        "items": [
+          { "label": "Acknowledgement", "value": "Required before trading", "detail": "By continuing, the trader confirms that they have read and understood the updated Finotive Trading Rules and the rules applicable to their account type and account phase." },
+          { "label": "Possible Consequences", "value": "Range from soft warning to permanent restriction", "detail": "Rule breaches may result in soft warnings, formal warnings, Strikes, payout reduction to 10%, account reset, account downgrade, payout rejection, account closure, or permanent restriction from Finotive, depending on the account type, account phase, rule category, and severity." },
+          { "label": "Source of Truth", "value": "Section 7 of Terms & Conditions", "detail": "This page summarises the key rules from Section 7 of the Terms & Conditions. If there is any inconsistency between this page, the FAQ, dashboard notification, or any other document, Section 7 of the Terms & Conditions will prevail." }
+        ]
+      }
+    ]
+  }
+}
