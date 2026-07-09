@@ -8,6 +8,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -15,10 +16,6 @@
 ```text
 .
 ├── README.md
-├── calendar
-│   ├── index.html
-│   ├── script.js
-│   └── style.css
 ├── ccr.html
 ├── css
 │   ├── ccr.css
@@ -33,6 +30,7 @@
 │   │   │   │   └── forex
 │   │   │   │       ├── 2step-challenge.json
 │   │   │   │       ├── 2step-pro.json
+│   │   │   │       ├── common-rules.json
 │   │   │   │       ├── instant-lite.json
 │   │   │   │       └── instant-standard.json
 │   │   │   ├── holaprime
@@ -74,13 +72,13 @@
 │   └── us.md
 ├── md.html
 ├── mytrades
-│   ├── css
-│   │   └── style.css
+│   ├── app.js
 │   ├── csv
-│   │   └── file.csv
+│   │   ├── b-h.csv
+│   │   ├── o-h.csv
+│   │   └── t-j.csv
 │   ├── index.html
-│   └── js
-│       └── app.js
+│   └── style.css
 ├── pvt
 │   ├── index.html
 │   ├── script.js
@@ -91,6 +89,6 @@
 ├── videos.html
 └── °.html
 
-23 directories, 54 files
+20 directories, 54 files
 ```
 <!-- TREE END -->
