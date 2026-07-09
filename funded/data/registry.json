@@ -44,24 +44,11 @@
         }
       ]
     },
-    {
-      "id": "thetradingpit",
-      "name": "TheTradingPit",
-      "url": "https://client-area.thetradingpit.com/quick-checkout?refpr=G9&vchr=REFZKXO",
-      "markets": [
-        {
-          "id": "futures",
-          "name": "Futures",
-          "accounts": [
-            { "id": "1step-futures", "name": "1-Step Prime", "path": "data/firms/thetradingpit/futures/1step-prime.json" }
-          ]
-        }
-      ]
-    },
+  
     {
       "id": "blueguardian",
       "name": "Blue Guardian",
-      "url": "https://blueguardian.com/#choose-evaluation",
+      "url": "https://checkout.blueguardian.com/instant-starter/?platform=MT5",
       "markets": [
         {
           "id": "forex",
