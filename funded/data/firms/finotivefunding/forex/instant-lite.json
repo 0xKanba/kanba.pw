@@ -11,21 +11,57 @@
         "id": "risk_parameters",
         "title": "Risk Parameters",
         "items": [
-          { "label": "Daily Drawdown",                "value": "3.0%", "detail": "Maximum loss allowed within one trading day. Trading day runs from 17:00:00 NY Time to 16:59:59 NY Time the following day. Open equity and floating losses are included. Static — does not trail upward. Hard Breach = immediate account termination." },
-          { "label": "Maximum Drawdown",              "value": "6.0%", "detail": "Total loss allowed from the Initial Account Balance. Static — does not trail upward with profits and does not adjust based on the highest account balance reached. Open equity and floating losses are included. Hard Breach = immediate account termination." },
-          { "label": "Floating DD — Early Reminder",  "value": "1.0%", "detail": "An early soft reminder is issued when the combined unrealised loss on any single symbol reaches 1.0% of the Initial Account Balance. No Strike applied at this stage. Example: $50K account → soft reminder at −$500 on any one symbol." },
-          { "label": "Floating DD — Breach",          "value": "1.5%", "detail": "Floating Drawdown is monitored on a combined basis per symbol and calculated against the Initial Account Balance. Threshold is 1.5%. First confirmed 1.5% breach = Formal Warning only — no Strike, no payout reduction. From the second confirmed breach onward: 1 Strike + payout reduction to 10% for the relevant payout cycle. Only one Strike may be issued per trade or instrument. Five cumulative Strikes = permanent account closure." },
-          { "label": "Profit Target",                  "value": "None", "detail": "Instant funding — no evaluation, no profit target required." },
-          { "label": "Minimum Profitable Days",       "value": "5 per 14-day cycle", "detail": "5 profitable days required per 14-day payout cycle before each payout. A profitable day is a trading day where the account balance at 17:00:00 NY Time exceeds the previous trading day's closing balance by at least 0.5% of the Initial Account Balance. No payout is permitted until the requirement is met." },
-          { "label": "Consistency Rule",              "value": "None", "detail": "No consistency requirement for this account type." }
+          {
+            "label": "Daily Drawdown",
+            "value": "3.0%",
+            "detail": "Maximum loss allowed within one trading day. Trading day runs from 17:00:00 NY Time to 16:59:59 NY Time the following day. At 17:00:00 NY Time, the Daily Drawdown threshold is recalculated by reference to the previous Trading Day's closing balance. Open equity and floating losses are included. Static — does not trail upward with profits. Hard Breach = immediate account termination. No warning, no Strike applies."
+          },
+          {
+            "label": "Maximum Drawdown",
+            "value": "6.0%",
+            "detail": "Total loss allowed from the Initial Account Balance. Static — does not trail upward with profits and does not adjust based on the highest account balance reached. Open equity and floating losses are included. Hard Breach = immediate and permanent account termination. No warning, no Strike applies."
+          },
+          {
+            "label": "Floating DD — Early Reminder",
+            "value": "1.0%",
+            "detail": "An early soft reminder is issued when the combined unrealised loss on any single symbol reaches 1.0% of the Initial Account Balance. No Strike applied at this stage. Example: $50K account → soft reminder at −$500 on any one symbol."
+          },
+          {
+            "label": "Floating DD — Breach",
+            "value": "1.5%",
+            "detail": "Floating Drawdown is monitored on a combined basis per symbol and calculated against the Initial Account Balance. Threshold is 1.5%. First confirmed 1.5% breach = Formal Warning only — no Strike, no payout reduction. From the second confirmed breach onward: 1 Strike + Reward Payment reduction to 10% for the relevant Payout Cycle. Only one Strike may be issued per trade or instrument event. Continued drawdown on the same open position does not create additional Strikes. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Profit Target",
+            "value": "None",
+            "detail": "Instant funding — no evaluation, no profit target required."
+          },
+          {
+            "label": "Minimum Profitable Days",
+            "value": "5 per 14-day cycle",
+            "detail": "5 profitable days required per 14-day Payout Cycle before each payout. A profitable day is a trading day where the account balance at 17:00:00 NY Time exceeds the previous trading day's closing balance by at least 0.5% of the Initial Account Balance. No payout is permitted until the requirement is met. Counter resets after every payout. Minimum Profitable Days do not shorten any Reward Payment cooldown or Payout Cycle."
+          },
+          {
+            "label": "Consistency Rule",
+            "value": "None",
+            "detail": "No consistency requirement for this account type."
+          }
         ]
       },
       {
         "id": "weekend_holding_rule",
         "title": "Weekend Holding Rule",
         "items": [
-          { "label": "Default Rule", "value": "Not permitted (Add-On required)", "detail": "Weekend holding is not permitted by default on Instant Funding Lite accounts. All non-crypto positions must be closed before Friday market close at 17:00:00 New York Time unless the Weekend Holding Add-On is active. Traders without the add-on will receive an automatic reminder one hour before market close and are advised to close positions at least 10 minutes before the cutoff." },
-          { "label": "Breach Consequence", "value": "1 Strike + payout reduction to 10%", "detail": "A Weekend Holding breach results in: 1 Strike, payout reduction to 10% for the relevant payout cycle. Five cumulative Strikes = permanent account closure." }
+          {
+            "label": "Default Rule",
+            "value": "Not permitted (Add-On required)",
+            "detail": "Weekend holding is not permitted by default on Instant Funding Lite accounts. All non-crypto positions must be closed before Friday market close at 17:00:00 New York Time unless the Weekend Holding Add-On is active. Finotive may send an automatic reminder one hour before market close, but the Trader remains solely responsible for closing positions in time. Finotive recommends closing non-crypto positions at least ten (10) minutes before the cutoff."
+          },
+          {
+            "label": "Breach Consequence",
+            "value": "1 Strike + payout reduction to 10%",
+            "detail": "A Weekend Holding breach is a Soft Breach — Immediate Strike. Each confirmed breach results in 1 Strike and Reward Payment reduction to 10% for the relevant Payout Cycle. Five cumulative Strikes = permanent account closure."
+          }
         ]
       },
       {
@@ -43,38 +79,137 @@
             ["$100,000", "1,250%", "$1,250,000",  "33:1"],
             ["$200,000", "1,000%", "$2,000,000",  "33:1"]
           ]
-        }
+        },
+        "items": [
+          {
+            "label": "Notional Volume Limit Note",
+            "value": "Separate from platform leverage",
+            "detail": "The Notional Volume Limit controls the maximum permitted open notional exposure for the Account. It is separate from platform leverage, margin usage, and buying power. A trade may be permitted by margin but still exceed the Notional Volume Limit. The Dashboard Notional Volume Calculator provides real-time guidance on maximum position size. The Trader is responsible for checking exposure before opening trades."
+          }
+        ]
       },
       {
         "id": "trading_behavior_rules",
         "title": "Trading Behavior Rules",
         "items": [
-          { "label": "Realised-Loss Recovery Trading",         "value": "Warning → Strike (1st warning, 2nd+ Strike)", "detail": "Two-trade basis on same symbol. Second trade cumulative volume must remain below twice the first trade's reference volume. First confirmed breach = Formal Warning only. Second breach onward = 1 Strike + payout reduction to 10%. Five cumulative Strikes = permanent account closure." },
-          { "label": "Scalping",                                "value": "Conditional Strike at payout", "detail": "40%+ of closed trades ≤ 120 sec, OR 20%+ of total positive realised profit from trades ≤ 120 sec. If active at payout: 1 Conditional Strike + payout to 10%." },
-          { "label": "Excessive One-Sided Position Concentration", "value": "Conditional Strike at payout", "detail": "≥ 10 closed trades AND 70%+ of trades OR 70%+ of exposure on same symbol & direction. If active at payout: 1 Conditional Strike + payout to 10%." },
-          { "label": "Liquidity Abuse",                          "value": "Conditional Strike at payout", "detail": "≥ 20% of total realised profit from trades opened & closed within low-liquidity window (Global 22:00–01:59 UTC; Asian 22:00–00:59 UTC). If active at payout: 1 Conditional Strike + payout to 10%." },
-          { "label": "Disproportionate Single-Trade Profit Dependency", "value": "Conditional Strike at payout", "detail": "Within a payout cycle, single most profitable closed trade contributes 60%+ of total positive realised profit. Assessed at payout time only. If active at payout: 1 Conditional Strike + payout to 10%." },
-          { "label": "High-Frequency Trading",                   "value": "Prohibited — referred to Risk & Compliance", "detail": "30%+ of closed trades < 60 sec (minimum 10 closed trades), OR 5+ trades opened within any 10-second interval. Referred to Risk and Compliance team for review." }
+          {
+            "label": "Scalping",
+            "value": "Conditional Strike at payout",
+            "detail": "Prohibited scalping is identified where either: (a) 40% or more of closed trades in a Payout Cycle have a holding time of 120 seconds or less; or (b) 20% or more of total positive realised profit in the Payout Cycle is generated from trades held for 120 seconds or less. The Dashboard may display a warning and a pop-up confirmation may appear at the Reward Payment Request stage if the condition remains active. The Trader may continue trading to reverse the condition before submitting a Reward Payment Request. If the Trader submits a Reward Payment Request while the condition remains active, one (1) Conditional Strike is recorded and the Reward Payment for that Payout Cycle is reduced to 10%. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Excessive One-Sided Position Concentration",
+            "value": "Conditional Strike at payout",
+            "detail": "Identified where the Trader has executed at least ten (10) closed trades during a Payout Cycle and either: (a) 70% or more of those closed trades are on the same symbol and in the same direction; or (b) 70% or more of total exposure is on the same symbol and in the same direction. The related Dashboard metric may be displayed as Most-Exposed Direction. This rule does not require a 50/50 buy/sell balance and does not prohibit trading one instrument. A pop-up confirmation may appear at the Reward Payment Request stage if the condition remains active. If active at payout: 1 Conditional Strike + Reward Payment to 10%. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Liquidity Abuse",
+            "value": "Conditional Strike at payout",
+            "detail": "Systematically targeting low-liquidity conditions, widened spreads, or execution inefficiencies. A condition is identified where at least 20% of total realised profit in a Payout Cycle is generated from trades opened and closed within the applicable low-liquidity window (Global 22:00–01:59 UTC; Asian 22:00–00:59 UTC). Each window is assessed independently based on the instrument traded. If active at payout: 1 Conditional Strike + Reward Payment to 10%. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Disproportionate Single-Trade Profit Dependency",
+            "value": "Conditional Strike at payout",
+            "detail": "Within a Payout Cycle, the single most profitable closed trade contributes 60% or more of total positive realised profit. The rule is assessed at Reward Payment Request stage, although a Dashboard indicator may appear earlier. A single large winning trade is not automatically prohibited; however, a Reward Payment cycle must not be materially dependent on one winning trade. If active at payout: 1 Conditional Strike + Reward Payment to 10%. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "High-Frequency Trading",
+            "value": "Prohibited — referred to Risk & Compliance",
+            "detail": "HFT is prohibited where either: (a) 30% or more of closed trades have a holding time of less than 60 seconds, with at least ten (10) closed trades required before assessment; or (b) five (5) or more trades are opened within any 10-second interval. HFT is Prohibited Behaviour / Strategy and may be referred to Risk and Compliance review. Finotive may provide Dashboard visibility, warnings, countdown timers, or other UI elements to help Traders understand the metric, but such UI does not limit Finotive's right to conduct review."
+          }
         ]
       },
       {
         "id": "breach_rules",
         "title": "Breach System",
         "items": [
-          { "label": "Hard Breach", "value": "Immediate account termination", "detail": "Triggered by: (1) Daily Drawdown breach, (2) Maximum Drawdown breach, or (3) Five cumulative Strikes." },
-          { "label": "Soft Breach — Immediate Strike", "value": "1 Strike + payout reduction to 10%", "detail": "Notional Volume breach + Weekend Holding breach = Immediate Strike + payout reduction to 10%." },
-          { "label": "Soft Breach — Warning-Based", "value": "1st Warning, 2nd+ Strike + payout to 10%", "detail": "Floating Drawdown (≥ 1.5%) + Realised-Loss Recovery = first breach Formal Warning, second breach onward Strike + payout to 10%." },
-          { "label": "Soft Breach — Conditional", "value": "If not reversed before payout: 1 Strike + payout to 10%", "detail": "Scalping, Concentration, Liquidity Abuse, Single-Trade Profit Dependency = Conditional Strike applied at payout if condition remains active." }
+          {
+            "label": "Hard Breach",
+            "value": "Immediate account termination",
+            "detail": "Triggered by: (1) Daily Drawdown breach, (2) Maximum Drawdown breach, or (3) Five cumulative Strikes. No warning and no graduated consequence applies. Results in immediate or permanent account closure."
+          },
+          {
+            "label": "Soft Breach — Immediate Strike",
+            "value": "1 Strike + payout reduction to 10%",
+            "detail": "Notional Volume breach + Weekend Holding breach = Immediate Strike + Reward Payment reduction to 10% for the relevant Payout Cycle. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Soft Breach — Warning-Based (Floating DD)",
+            "value": "1st Formal Warning, 2nd+ Strike + payout to 10%",
+            "detail": "Floating Drawdown ≥ 1.5%: first confirmed breach = Formal Warning only (no Strike, no payout reduction). From the second confirmed breach onward: 1 Strike + Reward Payment reduction to 10% for the relevant Payout Cycle. Only one Strike may be issued per trade or instrument event. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Soft Breach — Conditional",
+            "value": "If not reversed before payout: 1 Strike + payout to 10%",
+            "detail": "Scalping, Excessive One-Sided Position Concentration, Liquidity Abuse, Disproportionate Single-Trade Profit Dependency = Conditional Strike. The Trader may continue trading to reverse the condition. A Strike is only applied if the Trader submits a Reward Payment Request while the condition remains active. If active at payout: 1 Conditional Strike + Reward Payment to 10%. Five cumulative Strikes = permanent account closure."
+          }
         ]
       },
       {
         "id": "payouts",
         "title": "Payouts",
         "items": [
-          { "label": "Profit Split", "value": "70%", "detail": "Starting split for all Instant Funding Lite accounts." },
-          { "label": "Payout Cycle", "value": "On-demand → Bi-weekly", "detail": "First payout on-demand after 5 minimum profitable days met. Subsequent payouts every 14 days." },
-          { "label": "Min Profitable Days", "value": "5 days / 14-day cycle", "detail": "Must complete 5 profitable days (≥ 0.5% each) per 14-day cycle before each payout. Counter resets after every payout." },
-          { "label": "Payout Reduction", "value": "To 10% per Strike", "detail": "Each Strike reduces the relevant payout cycle to 10%. If a Strike has been issued, trader must withdraw the full available amount — partial withdrawal is not permitted." }
+          {
+            "label": "Profit Split",
+            "value": "70%",
+            "detail": "Starting Reward Split for all Instant Funding Lite accounts. May scale up through scaling: 70% → 75% → 80% → 85%, subject to eligibility, account status, promotions, and the Terms."
+          },
+          {
+            "label": "Maximum Reward Split",
+            "value": "85% through scaling",
+            "detail": "Instant Funding Lite may scale from 70% to 75% to 80% to 85%. Reward Split changes are subject to scaling eligibility, account status, promotions, and the Terms."
+          },
+          {
+            "label": "Payout Cycle",
+            "value": "On-demand → 14 calendar day cooldown",
+            "detail": "First Reward Payment Request is available on demand once the Instant Funding Lite Account has generated eligible simulated profits, completed 5 Minimum Profitable Days, and all Reward Payment conditions are met. After the first approved Reward Payment, a fourteen (14) calendar day cooldown applies between subsequent Reward Payment Requests unless the Dashboard specifies otherwise."
+          },
+          {
+            "label": "Minimum Reward Payment Request",
+            "value": "1% of Initial Account Balance",
+            "detail": "Minimum Reward Payment Request is 1% of the Initial Account Balance. No USD cap applies."
+          },
+          {
+            "label": "Min Profitable Days",
+            "value": "5 days / 14-day cycle",
+            "detail": "Must complete 5 profitable days (≥ 0.5% each) per 14-day Payout Cycle before each payout. Counter resets after every payout. Minimum Profitable Days do not shorten any Reward Payment cooldown or Payout Cycle."
+          },
+          {
+            "label": "Payout Reduction",
+            "value": "To 10% per Strike",
+            "detail": "Each Strike reduces the relevant Payout Cycle Reward Payment to 10%. Where any Strike would become the fifth cumulative Strike, the five-Strike Hard Breach outcome applies instead of a 10% reduced Reward Payment. If a Strike has been issued, trader must withdraw the full available amount — partial withdrawal is not permitted."
+          }
+        ]
+      },
+      {
+        "id": "scaling",
+        "title": "Scaling",
+        "items": [
+          {
+            "label": "Scaling Cycle",
+            "value": "Rolling 90 days",
+            "detail": "Instant Funding Lite Accounts may be eligible for scaling on a rolling ninety (90) day Scaling Cycle."
+          },
+          {
+            "label": "Scaling Requirements",
+            "value": "Multiple conditions",
+            "detail": "Requirements include: at least fifty (50) trades, no more than 5% of net profit from a single trade, achievement of the 15% 90-day scaling target, all three months of the Scaling Cycle being profitable, no Hard Breach, and full compliance with Section 7."
+          },
+          {
+            "label": "90-Day Scaling Target",
+            "value": "15%",
+            "detail": "The 90-day scaling target for Instant Funding Lite is 15% of the Initial Account Balance."
+          },
+          {
+            "label": "Balance Increase",
+            "value": "30% per successful cycle",
+            "detail": "Balance progression increases by 30% per successful Scaling Cycle, subject to the published Dashboard schedule."
+          },
+          {
+            "label": "Maximum Scaled Balance",
+            "value": "USD 340,000",
+            "detail": "Maximum per-account scaled balance of USD 340,000 unless amended by Finotive."
+          }
         ]
       }
     ]

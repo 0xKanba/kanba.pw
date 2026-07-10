@@ -22,23 +22,107 @@
         "id": "general_rules",
         "title": "General Rules Applicable to All Accounts",
         "items": [
-          { "label": "Multiple Accounts, Allocation, Hedging, and Coordination", "value": "Conditional", "detail": "Traders may hold more than one Finotive account, provided the maximum allocation limit is not exceeded. Copying trades across the trader's own accounts is permitted. Prohibited: (a) Bypassing allocation limits using multiple profiles, false details, or third parties; (b) Coordinating or mirroring trades with other users; (c) Opening or maintaining hedged, offsetting, or materially correlated multi-account structures designed to manipulate drawdown, equity, or performance metrics. Consequence: Referred to Risk and Compliance team for review." },
-          { "label": "News Straddling", "value": "Prohibited Behaviour / Strategy", "detail": "Trading during high-impact news events is permitted only where the strategy reflects a genuine market view. Traders must not place straddled positions on the same or correlated instruments within 15 minutes before or after a Red or Amber event on the Forex Factory Calendar, earnings calendar, or geopolitical news events. Detected cases referred to Risk and Compliance team." },
-          { "label": "Third-Party Tools, Signal Services, Trade Copiers, and Expert Advisors", "value": "Owned/controlled only", "detail": "Trade copier tools may be used only to copy the trader's own trades. Prohibited: (a) Copying trades from third-party accounts; (b) Using signal providers, account managers, or challenge-passing services; (c) Allowing another person/group/service to control trading activity; (d) Using EAs not genuinely owned and controlled by the trader. Failure to cooperate may result in account closure and payout rejection." },
-          { "label": "Latency Arbitrage and Execution Abuse", "value": "Prohibited", "detail": "Trading activity that exploits delayed prices, stale quotes, out-of-sync prices, feed discrepancies, order-processing delays, or infrastructure inefficiencies is prohibited. Review triggers: 30%+ of trades affected by negative slippage, OR 30%+ of total realised profit (or at least 0.5% of Initial Account Balance) earned during quote absence or delayed-price conditions." },
-          { "label": "Swap-Free Account Misuse", "value": "Prohibited Behaviour / Strategy (swap-free accounts only)", "detail": "Applies only where the trader has purchased or uses a swap-free account. Swap-free accounts must be used for genuine directional trading. A breach may be identified where trades are opened before daily rollover and closed after rollover, and 50%+ of realised profit in the review period or payout cycle is generated from such rollover-crossing trades." },
-          { "label": "IP, Device, Login, and Location Monitoring", "value": "Monitored", "detail": "Finotive may monitor IP addresses, devices, login timestamps, and location data. Use of VPNs, proxies, remote desktops, or similar tools that obscure the trader's true location is not allowed. Failure to complete Enhanced KYC within 72 hours may result in account closure and payout rejection." },
-          { "label": "Inactivity", "value": "30 consecutive calendar days", "detail": "Inactivity means 30 consecutive calendar days without executing a trade on the relevant account. Consequence: The account will be permanently closed following notification. Any linked payout request will also be rejected." }
+          {
+            "label": "Multiple Accounts, Allocation, Hedging, and Coordination",
+            "value": "Conditional",
+            "detail": "Traders may hold more than one Finotive account, provided the maximum allocation limit is not exceeded. Copying trades across the trader's own accounts is permitted. Prohibited: (a) Bypassing allocation limits using multiple profiles, false details, or third parties; (b) Coordinating or mirroring trades with other users; (c) Opening or maintaining hedged, offsetting, or materially correlated multi-account structures designed to manipulate drawdown, equity, or performance metrics. Consequence: Referred to Risk and Compliance team for review. Attempts to bypass account limits through multiple profiles, false details, third parties, corporate structures, shared accounts, or related persons are prohibited and may result in Risk or Compliance review with possible Hard Breach outcome."
+          },
+          {
+            "label": "News Straddling",
+            "value": "Prohibited Behaviour / Strategy",
+            "detail": "Trading during high-impact news is permitted if the trade reflects a genuine directional market view and is not designed solely to exploit volatility, short-term price spikes, execution delay, or market inefficiency. The Trader must not place straddled, offsetting, or equivalent hedged exposure on the same or correlated instruments within fifteen (15) minutes before or after Red or Amber events on the Forex Factory Calendar, earnings events, or geopolitical news events where the purpose is to capture volatility rather than express a genuine directional view. Detected cases referred to Risk and Compliance team."
+          },
+          {
+            "label": "Third-Party Tools, Signal Services, Trade Copiers, and Expert Advisors",
+            "value": "Owned/controlled only",
+            "detail": "The Trader may use commercial trade copier tools to copy the Trader's own trades between accounts, including from an external broker or prop firm account into a Finotive Funding account, provided the master account, trading strategy, and trading decisions are genuinely owned and controlled by the Trader. Prohibited: (a) Copying trades from third-party accounts or shared master accounts; (b) Using signal providers, account managers, challenge-passing services, or third-party trading groups; (c) Allowing any external person or service to direct trading; (d) Using Expert Advisors or automated strategies not genuinely developed, owned, and controlled by the Trader; (e) Using trade-copying arrangements where ownership and control cannot be proven. Finotive may request verification, Enhanced KYC, a compliance interview, a live demonstration, or evidence of ownership and control at any time. Failure to cooperate may result in account closure and Reward Payment rejection."
+          },
+          {
+            "label": "Latency Arbitrage and Execution Abuse",
+            "value": "Prohibited",
+            "detail": "Trading activity that exploits delayed prices, stale quotes, out-of-sync prices, price-feed discrepancies, order-processing delays, execution latency, system timing, quote absence, or infrastructure inefficiencies is prohibited. Assessment may include execution timestamps, prevailing market quotes, price deviation, slippage asymmetry, frequency, and profitability during quote absence or delayed-price conditions. Review triggers: 30%+ of trades affected by negative slippage, OR 30%+ of total realised profit (or at least 0.5% of Initial Account Balance) earned during quote absence or delayed-price conditions. Referred to Risk and Compliance team."
+          },
+          {
+            "label": "Swap-Free Account Misuse",
+            "value": "Prohibited Behaviour / Strategy (swap-free accounts only)",
+            "detail": "Applies only where the trader has purchased or uses a swap-free account. Swap-Free accounts must be used for genuine trading purposes. They must not be used primarily to benefit from the absence of overnight financing costs, avoid negative swaps, or run a strategy that materially depends on swap-free conditions rather than genuine market direction. A breach may be identified where trades are opened before the daily rollover period, closed after the rollover period, and 50%+ of realised profit in the review period or Payout Cycle is generated from such rollover-crossing trades. Referred to Risk and Compliance review and may result in a Hard Breach outcome, account closure, Reward Payment rejection, forfeiture of unpaid simulated profits, or removal of Swap-Free status depending on the findings."
+          },
+          {
+            "label": "IP, Device, Login, and Location Monitoring",
+            "value": "Monitored",
+            "detail": "Finotive may monitor IP addresses, device identifiers, login timestamps, location data, payment data, browser/device fingerprints, platform access, and account activity to detect account sharing, identity issues, coordinated trading, cross-account abuse, payment concerns, fraud, and suspicious access. Use of VPNs, proxies, remote desktops, or similar tools that obscure the trader's true location is not allowed. Where account access patterns raise reasonable concerns, Finotive may request Enhanced KYC, restrict access, pause Reward Payments, or place the account under Manual Review. Failure to complete Enhanced KYC within 72 hours or failure to complete required checks may result in account closure and Reward Payment rejection."
+          },
+          {
+            "label": "Inactivity",
+            "value": "30 consecutive calendar days",
+            "detail": "Inactivity means thirty (30) consecutive calendar days without executing any trade on the relevant Account. Inactivity is Prohibited Behaviour / Strategy. When the inactivity threshold is reached, Finotive may notify the Trader and permanently close the Account. Any linked Reward Payment Request may be rejected."
+          },
+          {
+            "label": "Scalping",
+            "value": "Conditional Strike at payout (Funded & Instant)",
+            "detail": "Prohibited scalping is identified where either: (a) 40% or more of closed trades in a Payout Cycle have a holding time of 120 seconds or less; or (b) 20% or more of total positive realised profit in the Payout Cycle is generated from trades held for 120 seconds or less. During Challenge and Pro Challenge phases, no real-time alert or Conditional Strike indicator is issued — relevant findings may be included in the Challenge Phase Progression Report. During Funded Challenge, Funded Pro, and Instant Funding Payout Cycles, if the Trader submits a Reward Payment Request while the condition remains active, one (1) Conditional Strike is recorded and the Reward Payment for that Payout Cycle is reduced to 10%. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Disproportionate Single-Trade Profit Dependency",
+            "value": "Conditional Strike at payout (Instant Funding only)",
+            "detail": "This rule applies to Instant Funding Standard and Instant Funding Lite only. A condition is identified where, within a Payout Cycle, the single most profitable closed trade contributes 60% or more of the Trader's total positive realised profit. The rule is assessed at Reward Payment Request stage, although a Dashboard indicator may appear earlier. A single large winning trade is not automatically prohibited; however, a Reward Payment cycle must not be materially dependent on one winning trade. If the Trader submits a Reward Payment Request while the condition remains active, one (1) Conditional Strike is recorded and the Reward Payment for that Payout Cycle is reduced to 10%. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Excessive One-Sided Position Concentration",
+            "value": "Conditional Strike at payout (Funded & Instant)",
+            "detail": "Identified where the Trader has executed at least ten (10) closed trades during a Payout Cycle and either: (a) 70% or more of those closed trades are on the same symbol and in the same direction; or (b) 70% or more of total exposure is on the same symbol and in the same direction. The related Dashboard metric may be displayed as Most-Exposed Direction. This rule does not require a 50/50 buy/sell balance and does not prohibit trading one instrument. During Challenge and Pro Challenge phases, no real-time alert or Conditional Strike indicator is issued — relevant findings may be included in the Challenge Phase Progression Report. During Funded Challenge, Funded Pro, and Instant Funding Payout Cycles, if the Trader submits a Reward Payment Request while the condition remains active, one (1) Conditional Strike is recorded and the Reward Payment for that Payout Cycle is reduced to 10%. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "Liquidity Abuse",
+            "value": "Conditional Strike at payout (Funded & Instant)",
+            "detail": "Systematically targeting low-liquidity conditions, widened spreads, or execution inefficiencies. A condition may be identified where at least 20% of total realised profit in a review period or Payout Cycle is generated from trades opened and closed within the applicable low-liquidity window for the instrument traded. Global instruments are monitored for the 22:00:00 – 01:59:59 UTC window. Asian instruments (including Hang Seng Index and Nikkei where applicable) are monitored for the 22:00:00 – 00:59:59 UTC window. Each window is assessed independently based on the instrument traded. During Challenge and Pro Challenge phases, no real-time alert or Conditional Strike indicator is issued — relevant findings may be included in the Challenge Phase Progression Report. During Funded Challenge, Funded Pro, and Instant Funding Payout Cycles, if the Trader submits a Reward Payment Request while the condition remains active, one (1) Conditional Strike is recorded and the Reward Payment for that Payout Cycle is reduced to 10%. Five cumulative Strikes = permanent account closure."
+          },
+          {
+            "label": "High-Frequency Trading",
+            "value": "Prohibited — Instant Funding only",
+            "detail": "The specific HFT rule applies to Instant Funding Standard and Instant Funding Lite only. HFT is prohibited where either: (a) 30% or more of closed trades have a holding time of less than 60 seconds, with at least ten (10) closed trades required before assessment; or (b) five (5) or more trades are opened within any 10-second interval. HFT is Prohibited Behaviour / Strategy and may be referred to Risk and Compliance review. Finotive may provide Dashboard visibility, warnings, countdown timers, or other UI elements to help Traders understand the metric, but such UI does not limit Finotive's right to conduct review."
+          },
+          {
+            "label": "Realised-Loss Recovery Over-Sizing",
+            "value": "Internal Risk Review (all account types)",
+            "detail": "After a position or group of positions on an instrument closes with a cumulative realised loss, opening a new position or group of positions on the same instrument and in the same direction with cumulative volume of at least twice the confirmed losing reference volume may place the account under internal Risk Review. Positions on the same instrument and in the same direction that form part of the same trading sequence are assessed cumulatively. This rule does not automatically prohibit normal fixed-risk trading, structured position sizing, or a genuine new trading setup. A potential case does not result in an automatic Strike, Conditional Strike, Formal Warning, or automatic Reward Payment reduction. Possible outcomes from Risk review may include trading-style guidance, account pause, Risk call, Reward Payment delay, Reward Payment rejection, permanent account closure, or another decision based on the findings. The sequence resets at 17:00 New York Time each Trading Day and at the end of each Payout Cycle."
+          }
         ]
       },
       {
         "id": "strike_system_overview",
         "title": "Strike System (Overview)",
         "items": [
-          { "label": "5 Cumulative Strikes", "value": "Permanent account closure", "detail": "Strikes are issued for confirmed soft breaches. Five cumulative Strikes on any account type result in permanent account closure." },
-          { "label": "Immediate Strike", "value": "No warning stage", "detail": "Once the breach is confirmed, the Strike is recorded immediately. Examples: Notional Volume breach, Weekend Holding breach on Instant Funding accounts." },
-          { "label": "Warning-Based Strike", "value": "Begins with a warning", "detail": "A Strike is recorded only after a further confirmed breach. Examples: Floating Drawdown, Realised-loss recovery." },
-          { "label": "Conditional Strike", "value": "Triggered at payout request", "detail": "The trader may continue trading to reverse it before requesting payout. A Strike is only applied if the trader submits a payout request while the condition remains unresolved. Examples: Scalping, Excessive One-Sided Position Concentration, Liquidity Abuse, Disproportionate Single-Trade Profit Dependency." }
+          {
+            "label": "5 Cumulative Strikes",
+            "value": "Permanent account closure",
+            "detail": "Strikes are issued for confirmed soft breaches. Five cumulative Strikes on any account type result in permanent account closure and no Reward Payment, reduced Reward Payment, pending withdrawal, or Reward Split for that cycle. Where any Strike would become the fifth cumulative Strike, the five-Strike Hard Breach outcome applies instead of a 10% reduced Reward Payment."
+          },
+          {
+            "label": "Immediate Strike",
+            "value": "No warning stage",
+            "detail": "Once the breach is confirmed, the Strike is recorded immediately with no prior warning. Examples: Notional Volume breach, Weekend Holding breach on Instant Funding accounts."
+          },
+          {
+            "label": "Warning-Based Strike",
+            "value": "Begins with a warning",
+            "detail": "A Strike is recorded only after a further confirmed breach. Examples: Floating Drawdown (on Instant Funding — first breach = Formal Warning, second onward = Strike), Realised-Loss Recovery is a Risk Review trigger (not a Strike rule)."
+          },
+          {
+            "label": "Conditional Strike",
+            "value": "Triggered at payout request",
+            "detail": "The Trader may continue trading to reverse it before requesting payout. A Strike is only applied if the trader submits a Reward Payment Request while the condition remains unresolved. Examples: Scalping, Excessive One-Sided Position Concentration, Liquidity Abuse, Disproportionate Single-Trade Profit Dependency (Instant Funding only)."
+          },
+          {
+            "label": "Challenge Phase Reporting",
+            "value": "No real-time alerts for Warning/Conditional Strikes",
+            "detail": "During Challenge and Pro Challenge phases, Finotive will not issue real-time dashboard alerts, email alerts, platform notifications, Early Soft Warnings, Formal Warnings, or Conditional Strike indicators for Warning-Based Strike or Conditional Strike rules unless the applicable rule expressly provides otherwise. Relevant findings may instead be included in a Challenge Phase Progression Report when the Trader successfully completes the applicable stage and progresses to the next stage. This restriction does not apply to Daily Drawdown, Maximum Drawdown, Notional Volume, profit targets, Minimum Profitable Days, Hard Breaches, Risk or Compliance reviews, Enhanced KYC, or any provision that expressly requires immediate review, notification, restriction, or enforcement."
+          },
+          {
+            "label": "Strike History Reset",
+            "value": "Cleared at Funded Status",
+            "detail": "Strike history is cleared when a Challenge or Pro account reaches Simulated Funded Status, provided five Strikes have not already been accumulated."
+          }
         ]
       },
       {
@@ -47,32 +131,59 @@
         "table": {
           "headers": ["Strike Type", "Challenge Phase", "Challenge-Funded Phase", "Instant Funding"],
           "rows": [
-            ["Immediate Strike",   "Account Reset",                "1 Strike + payout reduced to 10%", "1 Strike + payout reduced to 10%"],
-            ["Warning-Based Strike","Soft warning only",            "1 Strike + payout reduced to 10%", "1st breach = Formal Warning; 2nd breach onward = 1 Strike + payout reduced to 10%"],
-            ["Conditional Strike",  "Soft warning only",            "If not reversed before payout request: 1 Strike + payout reduced to 10%", "If not reversed before payout request: 1 Strike + payout reduced to 10%"]
+            ["Immediate Strike",   "Account Reset",                "1 Strike + Reward Payment reduced to 10%", "1 Strike + Reward Payment reduced to 10%"],
+            ["Warning-Based Strike","No real-time alert; findings may appear in Challenge Phase Progression Report",   "1 Strike + Reward Payment reduced to 10% from first funded breach", "1st breach = Formal Warning; 2nd breach onward = 1 Strike + Reward Payment reduced to 10%"],
+            ["Conditional Strike",  "No real-time alert; findings may appear in Challenge Phase Progression Report",   "If unresolved at Reward Payment Request: 1 Strike + Reward Payment reduced to 10%", "If unresolved at Reward Payment Request: 1 Strike + Reward Payment reduced to 10%"]
           ]
         },
         "items": [
-          { "label": "Strike History Reset", "value": "Cleared at Funded Status", "detail": "Strike history is cleared when a Challenge or Pro account reaches Funded Status, provided five Strikes have not already been accumulated." },
-          { "label": "Appeals", "value": "Within 48 hours", "detail": "Appeals must be submitted within 48 hours of enforcement and are accepted only where there is a clear data or pricing error." },
-          { "label": "Full Withdrawal Rule", "value": "Full available amount", "detail": "If a Strike has been issued in a payout cycle, the trader must withdraw the full available amount for that cycle. Partial withdrawal is not permitted." }
+          {
+            "label": "Appeals",
+            "value": "Within 48 hours",
+            "detail": "Appeals against trading-rule enforcement must be submitted within forty-eight (48) hours of the enforcement action unless Finotive expressly allows a longer period. Appeals are accepted only where there is a clear and demonstrable data, calculation, pricing, or platform-error issue. Disagreement with the rule itself, the commercial model, or the existence of a rule is not a valid appeal ground."
+          },
+          {
+            "label": "Full Withdrawal Rule",
+            "value": "Full available amount",
+            "detail": "If a Strike has been issued in a Payout Cycle, the Trader must withdraw the full available amount for that cycle. Partial withdrawal is not permitted."
+          }
         ]
       },
       {
         "id": "hard_breaches",
         "title": "Hard Breaches",
         "items": [
-          { "label": "Daily Drawdown Breach", "value": "Hard Breach", "detail": "Daily Drawdown limit violated. Results in immediate account termination. No warning, no strike, no recovery." },
-          { "label": "Maximum Drawdown Breach", "value": "Hard Breach", "detail": "Maximum Drawdown limit violated. Results in immediate account termination. No warning, no strike, no recovery." },
-          { "label": "Five Cumulative Strikes", "value": "Hard Breach", "detail": "Accumulation of five soft-breach Strikes on any account type results in permanent account closure." },
-          { "label": "Hard Breach Consequence", "value": "Immediate or permanent account closure", "detail": "Hard Breaches result in immediate or permanent account closure, depending on the breach. No warning and no graduated consequence applies." }
+          {
+            "label": "Daily Drawdown Breach",
+            "value": "Hard Breach",
+            "detail": "Daily Drawdown limit violated. Results in immediate account closure. No warning, no Strike, no recovery."
+          },
+          {
+            "label": "Maximum Drawdown Breach",
+            "value": "Hard Breach",
+            "detail": "Maximum Drawdown limit violated. Results in immediate and permanent account closure. No warning, no Strike, no recovery."
+          },
+          {
+            "label": "Five Cumulative Strikes",
+            "value": "Hard Breach",
+            "detail": "Accumulation of five soft-breach Strikes on any account type results in permanent account closure and no Reward Payment, reduced Reward Payment, pending withdrawal, or Reward Split for that cycle."
+          },
+          {
+            "label": "Hard Breach Consequence",
+            "value": "Immediate or permanent account closure",
+            "detail": "Hard Breaches result in immediate or permanent account closure, depending on the breach. No warning and no graduated consequence applies. Upon termination for breach, fraud, Hard Breach, or prohibited conduct, the Trader is not entitled to any refund or unpaid Reward Payment unless Finotive determines otherwise or mandatory law requires otherwise."
+          }
         ]
       },
       {
         "id": "manual_review_rules",
         "title": "All Manual Review Rules",
         "items": [
-          { "label": "Note", "value": "Hitting any of the limits below closes all open trades and places the account on manual review", "detail": "The following rules trigger automatic trade closure and account manual review when breached." }
+          {
+            "label": "Note",
+            "value": "Hitting any of the limits below closes all open trades and places the account on manual review",
+            "detail": "The following rules trigger automatic trade closure and account manual review when breached. During Manual Review, the Trader may close and manage existing open positions but may not open new positions unless Finotive confirms otherwise."
+          }
         ],
         "table": {
           "headers": ["#", "Type", "Rule & Trigger"],
@@ -85,27 +196,87 @@
             ["6", "AUTO-MONITORED", "Coordinated / mirrored trading across different users — Account-similarity % and matched-account count compared across users."],
             ["7", "AUTO-MONITORED", "Swap-free misuse (swap-free accounts only) — Swap-free advantage profit as a share of total realised profit."],
             ["8", "AUTO-MONITORED", "Self-developed or self-owned EA without required approval / cooperation — EA approval status, EA-detected flag and EA trade-contribution %; compliance cooperation required if flagged."],
-            ["9", "AUTO-MONITORED", "Hedging / offsetting / materially correlated multi-account structures — Accounts under one user UUID holding opposite-direction positions, with instrument-level buy/sell exposure and hedge ratio."]
+            ["9", "AUTO-MONITORED", "Hedging / offsetting / materially correlated multi-account structures — Accounts under one user UUID holding opposite-direction positions, with instrument-level buy/sell exposure and hedge ratio."],
+            ["10", "MANUAL REVIEW", "Realised-loss recovery over-sizing — After a position or group of positions on an instrument closes with a cumulative realised loss, opening a new position or group of positions on the same instrument and in the same direction with cumulative volume of at least twice the confirmed losing reference volume may place the account under internal Risk review. Positions on the same instrument and in the same direction that form part of the same trading sequence are assessed cumulatively. The sequence resets at 17:00 New York Time each trading day. A losing position from the previous trading day will not be used as the reference for a new sequence after the daily reset, unless a relevant combined position remains open at the reset time."]
           ]
         }
+      },
+      {
+        "id": "enforcement_and_review",
+        "title": "Enforcement, Retrospective Review, and Manual Review Outcomes",
+        "items": [
+          {
+            "label": "Retrospective Enforcement",
+            "value": "May be enforced after the event",
+            "detail": "Breaches, prohibited conduct, review triggers, or risk concerns may be enforced retrospectively if discovered after the relevant event, including after a Reward Payment has been processed. Finotive may reverse a Reward Payment, reclaim scaling benefits, adjust Reward Splits, or take other action if the benefit arose from breached or non-compliant activity."
+          },
+          {
+            "label": "Manual Review Period",
+            "value": "Close-only mode",
+            "detail": "During Manual Review, Finotive may restrict account access, pause Reward Payment processing, request additional information, or require a Risk or Compliance Verification Call. During the Manual Review period, the Trader may close and manage existing open positions but may not open new positions unless Finotive confirms otherwise."
+          },
+          {
+            "label": "Possible Review Outcomes",
+            "value": "Range from cleared to permanent exclusion",
+            "detail": "Possible outcomes from Risk or Compliance review include: the account being cleared, the account remaining active subject to conditions, Reward Payment approval, Reward Payment delay, Reward Payment rejection, permanent account closure, forfeiture of unpaid simulated profits, permanent exclusion, or another decision reasonably determined by Finotive based on the findings."
+          }
+        ]
       },
       {
         "id": "common_definitions",
         "title": "Common Definitions",
         "items": [
-          { "label": "Profitable Day", "value": "≥ 0.5% of Initial Account Balance", "detail": "A profitable day is a trading day where the account balance at 17:00:00 New York Time exceeds the previous trading day's closing balance by at least 0.5% of the Initial Account Balance. This definition applies across all account types and phases." },
-          { "label": "Trading Day", "value": "17:00:00 to 16:59:59 NY Time", "detail": "The trading day runs from 17:00:00 New York Time to 16:59:59 New York Time the following day. This applies to all daily drawdown calculations, sequence resets for realised-loss recovery trading, and profitable day assessments across all account types." },
-          { "label": "Low-Liquidity Window — Global Instruments", "value": "22:00:00 to 01:59:59 UTC", "detail": "Low-liquidity window for global instruments. Used for Liquidity Abuse assessment." },
-          { "label": "Low-Liquidity Window — Asian Instruments", "value": "22:00:00 to 00:59:59 UTC", "detail": "Low-liquidity window for Asian instruments (Hang Seng Index, Nikkei). Used for Liquidity Abuse assessment." }
+          {
+            "label": "Profitable Day",
+            "value": "≥ 0.5% of Initial Account Balance",
+            "detail": "A profitable day is a trading day where the account balance at 17:00:00 New York Time exceeds the previous trading day's closing balance by at least 0.5% of the Initial Account Balance. This definition applies across all account types and phases."
+          },
+          {
+            "label": "Trading Day",
+            "value": "17:00:00 to 16:59:59 NY Time",
+            "detail": "The trading day runs from 17:00:00 New York Time to 16:59:59 New York Time the following day. This applies to all daily drawdown calculations, sequence resets for realised-loss recovery trading, and profitable day assessments across all account types."
+          },
+          {
+            "label": "Low-Liquidity Window — Global Instruments",
+            "value": "22:00:00 to 01:59:59 UTC",
+            "detail": "Low-liquidity window for global instruments. Used for Liquidity Abuse assessment."
+          },
+          {
+            "label": "Low-Liquidity Window — Asian Instruments",
+            "value": "22:00:00 to 00:59:59 UTC",
+            "detail": "Low-liquidity window for Asian instruments (Hang Seng Index, Nikkei where applicable). Used for Liquidity Abuse assessment."
+          },
+          {
+            "label": "Account Refresh",
+            "value": "Paid restart option (funded accounts)",
+            "detail": "An Account Refresh is a paid option that may allow an eligible funded Challenge or funded Pro Account to restart under fresh conditions where the Account is active and within the relevant drawdown conditions. Subject to Dashboard availability, payment of the applicable fee, and Finotive approval. Finotive may refuse, delay, or suspend a Refresh where repeated activity indicates abusive, highly speculative, non-replicable, or manipulative behaviour."
+          },
+          {
+            "label": "Account Reset",
+            "value": "Return to Initial Account Balance (Challenge/Pro Phase)",
+            "detail": "An Account Reset returns the Account to its Initial Account Balance and resets relevant performance metrics. A Reset is primarily used where the Notional Volume Limit is breached during Challenge or Pro Challenge phases. If the Account Balance is below break-even at the time a Reset would otherwise apply, the Reset is placed on hold until the Trader recovers to at least break-even."
+          }
         ]
       },
       {
         "id": "final_confirmation",
         "title": "Final Confirmation",
         "items": [
-          { "label": "Acknowledgement", "value": "Required before trading", "detail": "By continuing, the trader confirms that they have read and understood the updated Finotive Trading Rules and the rules applicable to their account type and account phase." },
-          { "label": "Possible Consequences", "value": "Range from soft warning to permanent restriction", "detail": "Rule breaches may result in soft warnings, formal warnings, Strikes, payout reduction to 10%, account reset, account downgrade, payout rejection, account closure, or permanent restriction from Finotive, depending on the account type, account phase, rule category, and severity." },
-          { "label": "Source of Truth", "value": "Section 7 of Terms & Conditions", "detail": "This page summarises the key rules from Section 7 of the Terms & Conditions. If there is any inconsistency between this page, the FAQ, dashboard notification, or any other document, Section 7 of the Terms & Conditions will prevail." }
+          {
+            "label": "Acknowledgement",
+            "value": "Required before trading",
+            "detail": "By continuing, the Trader confirms that they have read and understood the updated Finotive Trading Rules and the rules applicable to their account type and account phase."
+          },
+          {
+            "label": "Possible Consequences",
+            "value": "Range from soft warning to permanent restriction",
+            "detail": "Rule breaches may result in soft warnings, Formal Warnings, findings in a Challenge Phase Progression Report, Strikes, Reward Payment reduction to 10%, Account Reset, Account Downgrade, Manual Review, Risk Review, Compliance Review, Reward Payment delay, Reward Payment rejection, account closure, forfeiture of unpaid simulated profits, permanent exclusion, or another outcome under the Terms, depending on the account type, account phase, rule category, and severity."
+          },
+          {
+            "label": "Source of Truth",
+            "value": "Section 7 of Terms & Conditions",
+            "detail": "This page summarises the key rules from Section 7 of the Terms and Conditions. If there is any inconsistency between this page, the FAQ, Dashboard tooltip, chatbot response, support message, marketing page, platform notification, or any other trader-facing explanation, Section 7 of the Terms and Conditions will prevail."
+          }
         ]
       }
     ]
