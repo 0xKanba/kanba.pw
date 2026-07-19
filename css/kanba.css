@@ -107,8 +107,8 @@ body {
 
 /* Circular Profile Image */
 .profile-img-clean {
-  width: 140px;
-  height: 140px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
   margin: 0 auto 21px; /* visually spaced */
