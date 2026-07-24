@@ -4,4 +4,4 @@
 
 [![Week 2 Demo](https://github.com/user-attachments/assets/03ea74c5-bf9e-404a-af13-6abb1054b466)](https://www.myfxbook.com/members/Kanba_trader/week-2--demo-for/12113689)
 
-[![Week 3 Demo](https://github.com/user-attachments/assets/03ea74c5-bf9e-404a-af13-6abb1054b466)](https://www.myfxbook.com/members/Kanba_trader/week-3/12122419)
+[![Week 3 Demo](https://github.com/user-attachments/assets/3b66b15f-7152-476c-a2e7-d46dce596c27)](https://www.myfxbook.com/members/Kanba_trader/week-3/12122419)
