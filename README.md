@@ -44,6 +44,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -111,14 +112,6 @@
 │   ├── lw.md
 │   └── us.md
 ├── md.html
-├── mytrades
-│   ├── app.js
-│   ├── csv
-│   │   ├── b-h.csv
-│   │   ├── o-h.csv
-│   │   └── t-j.csv
-│   ├── index.html
-│   └── style.css
 ├── pvt
 │   ├── index.html
 │   ├── script.js
@@ -128,6 +121,6 @@
 ├── videos.html
 └── °.html
 
-20 directories, 58 files
+18 directories, 52 files
 ```
 <!-- TREE END -->
