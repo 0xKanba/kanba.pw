@@ -1,6 +1,6 @@
-const CACHE_VERSION = "kanba-v12";
-const IMAGE_CACHE = "kanba-images-v12";
-const STATIC_CACHE = "kanba-static-v12";
+const CACHE_VERSION = "kanba-v13";
+const IMAGE_CACHE = "kanba-images-v13";
+const STATIC_CACHE = "kanba-static-v13";
 
 // ملفات أساسية (لا تضع كل المشروع هنا)
 const STATIC_ASSETS = [
@@ -8,7 +8,8 @@ const STATIC_ASSETS = [
   "/css/kanba.css",
   "/css/ccr.css",
   "/js/kanba.js",
-  "/js/ccr.js"
+  "/js/ccr.js",
+  "/funded/index.html"
 ];
 
 // INSTALL
