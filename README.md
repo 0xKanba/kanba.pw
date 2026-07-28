@@ -43,6 +43,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -122,12 +123,11 @@
 │   ├── index.html
 │   ├── script.js
 │   └── styles.css
-├── scc.html
 ├── sw.js
 ├── tree.txt
 ├── videos.html
 └── °.html
 
-20 directories, 59 files
+20 directories, 58 files
 ```
 <!-- TREE END -->
