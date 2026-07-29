@@ -9,7 +9,8 @@ const STATIC_ASSETS = [
   "/css/ccr.css",
   "/js/kanba.js",
   "/js/ccr.js",
-  "/funded/index.html"
+  "/funded/index.html",
+  "/md.html"
 ];
 
 // INSTALL
