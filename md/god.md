@@ -7,3 +7,5 @@
 [![Week 3 Demo](https://cdn.jsdelivr.net/gh/0xKanba/assets@master/i/w3.png)](https://www.myfxbook.com/members/Kanba_trader/week-3/12122419)
 
 [![Week 4 Demo](https://cdn.jsdelivr.net/gh/0xKanba/assets@master/i/w4.png)](https://www.myfxbook.com/members/Kanba_trader/week-4/12129795)
+
+[![Week 5 Demo](https://cdn.jsdelivr.net/gh/0xKanba/assets@master/i/w5.png)](https://www.myfxbook.com/members/Kanba_trader/week-5/12133020)
