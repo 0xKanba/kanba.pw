@@ -13,7 +13,7 @@
 ---
 
 ## tree
-
+- [GodMode](/md#god)
 - [deen](/md#deen)
 - [local plan](/md#lw)
 
