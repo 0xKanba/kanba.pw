@@ -139,6 +139,16 @@ body {
   letter-spacing: -0.03em;
   margin-top: 13px;
 }
+.profile-name-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+}
+
+.profile-name-link:hover .profile-name {
+  opacity: 0.85;
+  cursor: pointer;
+}
 
 /* Layout Centering - Golden Ratio Concept */
 .main-centered {
