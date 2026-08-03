@@ -1,6 +1,6 @@
-const CACHE_VERSION = "kanba-v16";
-const IMAGE_CACHE = "kanba-images-v16";
-const STATIC_CACHE = "kanba-static-v16";
+const CACHE_VERSION = "kanba-v17";
+const IMAGE_CACHE = "kanba-images-v17";
+const STATIC_CACHE = "kanba-static-v17";
 
 // ملفات أساسية (لا تضع كل المشروع هنا)
 const STATIC_ASSETS = [
@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
   "/css/ccr.css",
   "/js/kanba.js",
   "/js/ccr.js",
-  "/funded/index.html",
+  "/funded",
   "/md.html",
   "/site.webmanifest"
 ];
