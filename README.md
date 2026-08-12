@@ -70,6 +70,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -145,11 +146,10 @@
 ├── site.webmanifest
 ├── sw.js
 ├── tree.txt
-├── v.html
 ├── vid.html
 ├── videos.html
 └── °.html
 
-18 directories, 56 files
+18 directories, 55 files
 ```
 <!-- TREE END -->
