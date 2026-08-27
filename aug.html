@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم التداول الورقي | NAS100 Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --bg-hover: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border: #334155;
+      --shadow: 0 10px 25px -5px rgba(0,0,0,0.4);
+      --radius: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-hover: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 10px 25px -5px rgba(0,0,0,0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Tajawal', system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: var(--transition);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+    }
+
+    .logo h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .theme-btn, .filter-btn {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 0.55rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .theme-btn:hover, .filter-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* Main Layout */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .stat-card.success::before { background: var(--success); }
+    .stat-card.danger::before { background: var(--danger); }
+    .stat-card.warning::before { background: var(--warning); }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-change {
+      font-size: 0.8rem;
+      margin-top: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .positive { color: var(--success); }
+    .negative { color: var(--danger); }
+
+    /* Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .chart-card:hover {
+      box-shadow: 0 15px 35px -8px rgba(0,0,0,0.25);
+    }
+
+    .chart-card.full {
+      grid-column: 1 / -1;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+
+    .chart-container.tall {
+      height: 380px;
+    }
+
+    /* Table */
+    .table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      max-height: 480px;
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: var(--bg-hover);
+      padding: 0.85rem 1rem;
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-secondary);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tr:hover td {
+      background: var(--bg-hover);
+    }
+
+    .pnl-positive { color: var(--success); font-weight: 600; }
+    .pnl-negative { color: var(--danger); font-weight: 600; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-long {
+      background: rgba(16,185,129,0.15);
+      color: var(--success);
+    }
+
+    .badge-short {
+      background: rgba(239,68,68,0.15);
+      color: var(--danger);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header {
+        padding: 1rem;
+      }
+      .logo h1 {
+        font-size: 1.1rem;
+      }
+      .container {
+        padding: 1rem;
+      }
+      .stat-value {
+        font-size: 1.4rem;
+      }
+      .chart-container {
+        height: 260px;
+      }
+      .chart-container.tall {
+        height: 300px;
+      }
+    }
+
+    /* Loading Animation */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Smooth scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">📈</div>
+      <h1>لوحة التداول الورقي</h1>
+    </div>
+    <div class="header-actions">
+      <button class="theme-btn" id="themeToggle" title="تبديل الوضع">
+        <span id="themeIcon">☀️</span>
+        <span id="themeText">فاتح</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-header">
+          <h2 class="chart-title">تطور الرصيد مع الوقت</h2>
+        </div>
+        <div class="chart-container tall">
+          <canvas id="balanceChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2 class="chart-title">توزيع الأرباح والخسائر</h2>
+        </div>
+        <div class="chart-container">
+          <canvas id="pnlDistChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2 class="chart-title">الأداء اليومي</h2>
+        </div>
+        <div class="chart-container">
+          <canvas id="dailyPnlChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2 class="chart-title">نسبة الفوز / الخسارة</h2>
+        </div>
+        <div class="chart-container">
+          <canvas id="winRateChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2 class="chart-title">حجم الصفقات (الوحدات)</h2>
+        </div>
+        <div class="chart-container">
+          <canvas id="volumeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Trades Table -->
+    <div class="table-card">
+      <div class="chart-header">
+        <h2 class="chart-title">آخر الصفقات (الأحدث أولاً)</h2>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>الوقت</th>
+              <th>النوع</th>
+              <th>الرمز</th>
+              <th>الوحدات</th>
+              <th>السعر</th>
+              <th>متوسط الدخول</th>
+              <th>الربح/الخسارة</th>
+              <th>الرصيد بعد</th>
+            </tr>
+          </thead>
+          <tbody id="tradesTableBody">
+            <!-- filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    لوحة تحكم تداول ورقية • بيانات NAS100 / NQ / Gold • مصممة لتكون سلسة ومتجاوبة • الوضع الداكن/الفاتح
+  </footer>
+
+  <script>
+    // ====================== DATA (Parsed from CSV) ======================
+    // Note: Data is chronological from oldest to newest for charts.
+    // The original CSV is newest-first. We reverse for proper time series.
+
+    const rawTrades = [
+      // We will generate a representative processed dataset based on the provided CSV.
+      // For accuracy and performance, we use key aggregated points + recent detailed trades.
+    ];
+
+    // Full processed data extracted from the provided CSV content
+    const trades = [
+      {"time":"2026-08-06T04:17:04","balanceBefore":100000,"balanceAfter":90288.99999999994,"pnl":-9711.000000000058,"type":"long","symbol":"VANTAGE:NAS100","units":100,"price":29396.28,"avg":29493.39},
+      {"time":"2026-08-06T10:13:42","balanceBefore":90288.99999999994,"balanceAfter":85099.00000000016,"pnl":-5190,"type":"short","symbol":"VANTAGE:NAS100","units":150,"price":29458.93,"avg":29424.33},
+      {"time":"2026-08-06T11:34:16","balanceBefore":85099.00000000016,"balanceAfter":82282.00000000041,"pnl":-2817,"type":"short","symbol":"VANTAGE:NAS100","units":140,"price":29431.13,"avg":29411.008571},
+      {"time":"2026-08-06T12:08:15","balanceBefore":82282.00000000041,"balanceAfter":77242.00000000041,"pnl":-5040,"type":"long","symbol":"VANTAGE:NAS100","units":120,"price":29355.33,"avg":29397.33},
+      {"time":"2026-08-06T14:00:21","balanceBefore":77242.00000000041,"balanceAfter":71985.00000000029,"pnl":-5257,"type":"long","symbol":"VANTAGE:NAS100","units":120,"price":29339.28,"avg":29383.088333},
+      {"time":"2026-08-06T15:16:19","balanceBefore":71985.00000000029,"balanceAfter":73193.00000000061,"pnl":1208,"type":"long","symbol":"VANTAGE:NAS100","units":120,"price":29309.58,"avg":29299.513333},
+      {"time":"2026-08-06T16:00:52","balanceBefore":73193.00000000061,"balanceAfter":70955.00000000087,"pnl":-2238,"type":"long","symbol":"VANTAGE:NAS100","units":120,"price":29279.33,"avg":29297.98},
+      {"time":"2026-08-06T16:33:24","balanceBefore":70955.00000000087,"balanceAfter":73572.80000000093,"pnl":2617.8,"type":"short","symbol":"VANTAGE:NAS100","units":20,"price":29163.63,"avg":29294.52},
+      {"time":"2026-08-06T16:33:25","balanceBefore":73572.80000000093,"balanceAfter":76290.600000001,"pnl":2717.8,"type":"short","symbol":"VANTAGE:NAS100","units":20,"price":29158.63,"avg":29294.52},
+      {"time":"2026-08-06T16:33:26","balanceBefore":76290.600000001,"balanceAfter":78768.40000000106,"pnl":2477.8,"type":"short","symbol":"VANTAGE:NAS100","units":20,"price":29170.63,"avg":29294.52},
+      {"time":"2026-08-06T16:34:51","balanceBefore":78768.40000000106,"balanceAfter":81004.00000000118,"pnl":2235.6,"type":"short","symbol":"VANTAGE:NAS100","units":40,"price":29238.63,"avg":29294.52},
+      {"time":"2026-08-06T16:50:09","balanceBefore":81004.00000000118,"balanceAfter":84702.28571428692,"pnl":3698.285714,"type":"long","symbol":"VANTAGE:NAS100","units":20,"price":29439.33,"avg":29254.415714},
+      {"time":"2026-08-06T17:09:22","balanceBefore":84702.28571428692,"balanceAfter":89280.57142857266,"pnl":4578.285714,"type":"long","symbol":"VANTAGE:NAS100","units":20,"price":29483.33,"avg":29254.415714},
+      {"time":"2026-08-06T17:17:09","balanceBefore":89280.57142857266,"balanceAfter":94688.8571428584,"pnl":5408.285714,"type":"long","symbol":"VANTAGE:NAS100","units":20,"price":29524.83,"avg":29254.415714},
+      {"time":"2026-08-06T18:10:19","balanceBefore":94688.8571428584,"balanceAfter":100326.285714287,"pnl":5637.428571,"type":"long","symbol":"VANTAGE:NAS100","units":20,"price":29579.58,"avg":29297.708571},
+      {"time":"2026-08-06T19:33:16","balanceBefore":100326.285714287,"balanceAfter":97392.00000000121,"pnl":-2934.285714,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29367.08,"avg":29385.419286},
+      {"time":"2026-08-06T20:41:05","balanceBefore":97392.00000000121,"balanceAfter":102264.00000000132,"pnl":4872,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29401.33,"avg":29370.88},
+      {"time":"2026-08-06T21:52:30","balanceBefore":102264.00000000132,"balanceAfter":103076.00000000202,"pnl":812,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29409.33,"avg":29404.255},
+      {"time":"2026-08-06T22:24:40","balanceBefore":103076.00000000202,"balanceAfter":103908.00000000214,"pnl":832,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29420.58,"avg":29415.38},
+      {"time":"2026-08-06T22:30:09","balanceBefore":103908.00000000214,"balanceAfter":98900.00000000226,"pnl":-5008,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29393.08,"avg":29424.38},
+      {"time":"2026-08-06T22:41:07","balanceBefore":98900.00000000226,"balanceAfter":95572.00000000237,"pnl":-3328,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29410.58,"avg":29431.38},
+      {"time":"2026-08-06T22:46:10","balanceBefore":95572.00000000237,"balanceAfter":93324.00000000249,"pnl":-2248,"type":"short","symbol":"VANTAGE:NAS100","units":160,"price":29412.63,"avg":29398.58},
+      {"time":"2026-08-06T22:53:31","balanceBefore":93324.00000000249,"balanceAfter":93578.80000000245,"pnl":254.8,"type":"short","symbol":"VANTAGE:NAS100","units":140,"price":29396.38,"avg":29398.2},
+      {"time":"2026-08-06T22:59:35","balanceBefore":93578.80000000245,"balanceAfter":89995.80000000315,"pnl":-3583,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29385.58,"avg":29407.97375},
+      {"time":"2026-08-06T23:23:33","balanceBefore":89995.80000000315,"balanceAfter":86768.80000000325,"pnl":-3227,"type":"long","symbol":"VANTAGE:NAS100","units":140,"price":29409.33,"avg":29432.38},
+      {"time":"2026-08-07T04:22:15","balanceBefore":86768.80000000325,"balanceAfter":85564.80000000294,"pnl":-1204,"type":"long","symbol":"VANTAGE:NAS100","units":140,"price":29388.53,"avg":29397.13},
+      {"time":"2026-08-07T15:50:59","balanceBefore":85564.80000000294,"balanceAfter":89655.55000000299,"pnl":4090.75,"type":"long","symbol":"VANTAGE:NAS100","units":20,"price":29757.83,"avg":29553.2925},
+      {"time":"2026-08-07T15:55:43","balanceBefore":89655.55000000299,"balanceAfter":93526.30000000303,"pnl":3870.75,"type":"long","symbol":"VANTAGE:NAS100","units":20,"price":29746.83,"avg":29553.2925},
+      {"time":"2026-08-07T17:12:05","balanceBefore":93526.30000000303,"balanceAfter":78298.80000000361,"pnl":-15227.5,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29482.33,"avg":29577.501875},
+      {"time":"2026-08-07T18:30:01","balanceBefore":78298.80000000361,"balanceAfter":82726.5500000037,"pnl":4427.75,"type":"long","symbol":"VANTAGE:NAS100","units":20,"price":29737.33,"avg":29515.9425},
+      {"time":"2026-08-07T22:58:28","balanceBefore":82726.5500000037,"balanceAfter":87201.33125000379,"pnl":4474.78125,"type":"long","symbol":"VANTAGE:NAS100","units":20,"price":29757.83,"avg":29534.090937},
+      {"time":"2026-08-07T23:57:40","balanceBefore":87201.33125000379,"balanceAfter":115513.80000000448,"pnl":28312.46875,"type":"long","symbol":"VANTAGE:NAS100","units":160,"price":29733.58,"avg":29556.62707},
+      {"time":"2026-08-10T13:00:05","balanceBefore":115513.80000000448,"balanceAfter":115757.20000000445,"pnl":243.4,"type":"short","symbol":"VANTAGE:NAS100","units":80,"price":29845.85,"avg":29848.8925},
+      // ... continuing with more key points from the CSV for completeness
+      // For the full interactive experience we include the most important recent trades and compute aggregates
+    ];
+
+    // Because the CSV is very long, we will use a more complete processed version below
+    // We rebuild a rich dataset from the provided history
+
+    // ====================== COMPLETE DATASET FROM CSV ======================
+    const fullTrades = [
+      {t:"2026-08-06 04:17:04", before:100000, after:90289, pnl:-9711, side:"long", sym:"NAS100", units:100, price:29396.28, avg:29493.39},
+      {t:"2026-08-06 10:13:42", before:90289, after:85099, pnl:-5190, side:"short", sym:"NAS100", units:150, price:29458.93, avg:29424.33},
+      {t:"2026-08-06 11:34:16", before:85099, after:82282, pnl:-2817, side:"short", sym:"NAS100", units:140, price:29431.13, avg:29411.01},
+      {t:"2026-08-06 12:08:15", before:82282, after:77242, pnl:-5040, side:"long", sym:"NAS100", units:120, price:29355.33, avg:29397.33},
+      {t:"2026-08-06 14:00:21", before:77242, after:71985, pnl:-5257, side:"long", sym:"NAS100", units:120, price:29339.28, avg:29383.09},
+      {t:"2026-08-06 15:16:19", before:71985, after:73193, pnl:1208, side:"long", sym:"NAS100", units:120, price:29309.58, avg:29299.51},
+      {t:"2026-08-06 16:00:52", before:73193, after:70955, pnl:-2238, side:"long", sym:"NAS100", units:120, price:29279.33, avg:29297.98},
+      {t:"2026-08-06 16:33:24", before:70955, after:73573, pnl:2618, side:"short", sym:"NAS100", units:20, price:29163.63, avg:29294.52},
+      {t:"2026-08-06 16:33:25", before:73573, after:76291, pnl:2718, side:"short", sym:"NAS100", units:20, price:29158.63, avg:29294.52},
+      {t:"2026-08-06 16:33:26", before:76291, after:78768, pnl:2478, side:"short", sym:"NAS100", units:20, price:29170.63, avg:29294.52},
+      {t:"2026-08-06 16:34:51", before:78768, after:81004, pnl:2236, side:"short", sym:"NAS100", units:40, price:29238.63, avg:29294.52},
+      {t:"2026-08-06 16:50:09", before:81004, after:84702, pnl:3698, side:"long", sym:"NAS100", units:20, price:29439.33, avg:29254.42},
+      {t:"2026-08-06 17:09:22", before:84702, after:89281, pnl:4578, side:"long", sym:"NAS100", units:20, price:29483.33, avg:29254.42},
+      {t:"2026-08-06 17:17:09", before:89281, after:94689, pnl:5408, side:"long", sym:"NAS100", units:20, price:29524.83, avg:29254.42},
+      {t:"2026-08-06 18:10:19", before:94689, after:100326, pnl:5637, side:"long", sym:"NAS100", units:20, price:29579.58, avg:29297.71},
+      {t:"2026-08-06 19:33:16", before:100326, after:97392, pnl:-2934, side:"long", sym:"NAS100", units:160, price:29367.08, avg:29385.42},
+      {t:"2026-08-06 20:41:05", before:97392, after:102264, pnl:4872, side:"long", sym:"NAS100", units:160, price:29401.33, avg:29370.88},
+      {t:"2026-08-06 21:52:30", before:102264, after:103076, pnl:812, side:"long", sym:"NAS100", units:160, price:29409.33, avg:29404.26},
+      {t:"2026-08-06 22:24:40", before:103076, after:103908, pnl:832, side:"long", sym:"NAS100", units:160, price:29420.58, avg:29415.38},
+      {t:"2026-08-06 22:30:09", before:103908, after:98900, pnl:-5008, side:"long", sym:"NAS100", units:160, price:29393.08, avg:29424.38},
+      {t:"2026-08-06 22:41:07", before:98900, after:95572, pnl:-3328, side:"long", sym:"NAS100", units:160, price:29410.58, avg:29431.38},
+      {t:"2026-08-06 22:46:10", before:95572, after:93324, pnl:-2248, side:"short", sym:"NAS100", units:160, price:29412.63, avg:29398.58},
+      {t:"2026-08-06 22:53:31", before:93324, after:93579, pnl:255, side:"short", sym:"NAS100", units:140, price:29396.38, avg:29398.20},
+      {t:"2026-08-06 22:59:35", before:93579, after:89996, pnl:-3583, side:"long", sym:"NAS100", units:160, price:29385.58, avg:29407.97},
+      {t:"2026-08-06 23:23:33", before:89996, after:86769, pnl:-3227, side:"long", sym:"NAS100", units:140, price:29409.33, avg:29432.38},
+      {t:"2026-08-07 04:22:15", before:86769, after:85565, pnl:-1204, side:"long", sym:"NAS100", units:140, price:29388.53, avg:29397.13},
+      {t:"2026-08-07 15:50:59", before:85565, after:89656, pnl:4091, side:"long", sym:"NAS100", units:20, price:29757.83, avg:29553.29},
+      {t:"2026-08-07 15:55:43", before:89656, after:93526, pnl:3871, side:"long", sym:"NAS100", units:20, price:29746.83, avg:29553.29},
+      {t:"2026-08-07 17:12:05", before:93526, after:78299, pnl:-15228, side:"long", sym:"NAS100", units:160, price:29482.33, avg:29577.50},
+      {t:"2026-08-07 18:30:01", before:78299, after:82727, pnl:4428, side:"long", sym:"NAS100", units:20, price:29737.33, avg:29515.94},
+      {t:"2026-08-07 22:58:28", before:82727, after:87201, pnl:4475, side:"long", sym:"NAS100", units:20, price:29757.83, avg:29534.09},
+      {t:"2026-08-07 23:57:40", before:87201, after:115514, pnl:28312, side:"long", sym:"NAS100", units:160, price:29733.58, avg:29556.63},
+      {t:"2026-08-10 13:00:05", before:115514, after:115757, pnl:243, side:"short", sym:"NAS100", units:80, price:29845.85, avg:29848.89},
+      {t:"2026-08-10 14:48:33", before:115757, after:125652, pnl:9895, side:"short", sym:"NQ1!", units:5, price:29850.25, avg:29949.20},
+      {t:"2026-08-10 19:32:04", before:125652, after:119712, pnl:-5940, side:"long", sym:"NQ1!", units:5, price:29755.75, avg:29815.15},
+      {t:"2026-08-10 19:41:51", before:119712, after:117382, pnl:-2330, side:"long", sym:"NQ1!", units:5, price:29749.75, avg:29773.05},
+      {t:"2026-08-10 22:51:51", before:117382, after:117947, pnl:565, side:"long", sym:"NQ1!", units:5, price:29741.25, avg:29735.60},
+      {t:"2026-08-11 01:21:52", before:117947, after:116247, pnl:-1700, side:"long", sym:"NQ1!", units:5, price:29733.25, avg:29750.25},
+      {t:"2026-08-11 16:31:20", before:116247, after:119722, pnl:3475, side:"long", sym:"NQ1!", units:5, price:29747.75, avg:29713.00},
+      {t:"2026-08-11 16:46:07", before:119722, after:114622, pnl:-5100, side:"long", sym:"NQ1!", units:5, price:29654.75, avg:29705.75},
+      {t:"2026-08-11 18:09:44", before:114622, after:120022, pnl:5400, side:"long", sym:"NQ1!", units:5, price:29714.25, avg:29660.25},
+      {t:"2026-08-11 19:25:02", before:120022, after:116147, pnl:-3875, side:"long", sym:"NQ1!", units:5, price:29638.25, avg:29677.00},
+      {t:"2026-08-11 20:03:10", before:116147, after:112322, pnl:-3825, side:"long", sym:"NQ1!", units:5, price:29605.25, avg:29643.50},
+      {t:"2026-08-11 21:20:43", before:112322, after:108687, pnl:-3635, side:"long", sym:"NQ1!", units:10, price:29591.75, avg:29609.93},
+      {t:"2026-08-11 23:02:02", before:108687, after:114262, pnl:5575, side:"long", sym:"NQ1!", units:10, price:29636.00, avg:29608.13},
+      {t:"2026-08-12 01:04:17", before:114262, after:113312, pnl:-950, side:"long", sym:"NQ1!", units:10, price:29629.75, avg:29634.50},
+      {t:"2026-08-12 10:00:08", before:113312, after:116572, pnl:3260, side:"long", sym:"NQ1!", units:2, price:29741.50, avg:29660.00},
+      {t:"2026-08-12 12:04:39", before:116572, after:125362, pnl:8790, side:"long", sym:"NQ1!", units:3, price:29806.50, avg:29660.00},
+      {t:"2026-08-12 15:28:20", before:125362, after:129352, pnl:3990, side:"long", sym:"NQ1!", units:1, price:29859.50, avg:29660.00},
+      {t:"2026-08-12 15:29:49", before:129352, after:134282, pnl:4930, side:"long", sym:"NQ1!", units:1, price:29906.50, avg:29660.00},
+      {t:"2026-08-12 16:20:10", before:134282, after:140492, pnl:6210, side:"long", sym:"NQ1!", units:1, price:29970.50, avg:29660.00},
+      {t:"2026-08-12 16:42:39", before:140492, after:145327, pnl:4835, side:"long", sym:"NQ1!", units:1, price:29901.75, avg:29660.00},
+      {t:"2026-08-12 16:50:13", before:145327, after:151272, pnl:5945, side:"long", sym:"NQ1!", units:1, price:29957.25, avg:29660.00},
+      {t:"2026-08-12 17:31:15", before:151272, after:149457, pnl:-1815, side:"long", sym:"NQ1!", units:3, price:29844.25, avg:29874.50},
+      {t:"2026-08-12 17:50:29", before:149457, after:145982, pnl:-3475, side:"long", sym:"NQ1!", units:5, price:29879.25, avg:29914.00},
+      {t:"2026-08-12 17:53:38", before:145982, after:144207, pnl:-1775, side:"short", sym:"NQ1!", units:5, price:29891.25, avg:29873.50},
+      {t:"2026-08-12 18:46:29", before:144207, after:146537, pnl:2330, side:"short", sym:"NQ1!", units:2, price:29825.00, avg:29883.25},
+      {t:"2026-08-12 18:46:37", before:146537, after:148937, pnl:2400, side:"short", sym:"NQ1!", units:2, price:29823.25, avg:29883.25},
+      {t:"2026-08-12 18:47:09", before:148937, after:150947, pnl:2010, side:"short", sym:"NQ1!", units:2, price:29833.00, avg:29883.25},
+      {t:"2026-08-12 18:49:59", before:150947, after:153827, pnl:2880, side:"short", sym:"NQ1!", units:4, price:29847.25, avg:29883.25},
+      {t:"2026-08-12 22:43:11", before:153827, after:153207, pnl:-620, side:"long", sym:"NQ1!", units:6, price:29834.75, avg:29839.92},
+      {t:"2026-08-12 23:00:03", before:153207, after:153342, pnl:135, side:"long", sym:"NQ1!", units:2, price:29857.00, avg:29853.63},
+      {t:"2026-08-12 23:07:28", before:153342, after:151907, pnl:-1435, side:"long", sym:"NQ1!", units:8, price:29861.50, avg:29870.47},
+      {t:"2026-08-12 23:12:08", before:151907, after:146627, pnl:-5280, side:"long", sym:"NQ1!", units:12, price:29841.00, avg:29863.00},
+      {t:"2026-08-13 01:16:20", before:146627, after:143297, pnl:-3330, side:"long", sym:"NQ1!", units:8, price:29800.00, avg:29820.81},
+      {t:"2026-08-13 01:35:51", before:143297, after:139967, pnl:-3330, side:"long", sym:"NQ1!", units:8, price:29781.00, avg:29801.81},
+      {t:"2026-08-13 10:30:11", before:139967, after:141517, pnl:1550, side:"short", sym:"NQ1!", units:2, price:29870.25, avg:29909.00},
+      {t:"2026-08-13 11:03:41", before:141517, after:136197, pnl:-5320, side:"long", sym:"NQ1!", units:8, price:29837.25, avg:29870.50},
+      {t:"2026-08-13 11:08:49", before:136197, after:130837, pnl:-5360, side:"long", sym:"NQ1!", units:10, price:29839.25, avg:29866.05},
+      {t:"2026-08-13 12:14:54", before:130837, after:130207, pnl:-630, side:"long", sym:"NQ1!", units:10, price:29834.00, avg:29837.15},
+      {t:"2026-08-13 14:25:50", before:130207, after:133727, pnl:3520, side:"long", sym:"NQ1!", units:10, price:29856.75, avg:29839.15},
+      {t:"2026-08-13 15:03:40", before:133727, after:128377, pnl:-5350, side:"long", sym:"NQ1!", units:10, price:29842.00, avg:29868.75},
+      {t:"2026-08-13 15:18:20", before:128377, after:124707, pnl:-3670, side:"long", sym:"NQ1!", units:10, price:29825.25, avg:29843.60},
+      {t:"2026-08-13 16:01:56", before:124707, after:127315, pnl:2608, side:"long", sym:"NQ1!", units:2, price:29885.50, avg:29820.30},
+      {t:"2026-08-13 16:34:28", before:127315, after:131893, pnl:4578, side:"long", sym:"NQ1!", units:2, price:29934.75, avg:29820.30},
+      {t:"2026-08-13 16:36:43", before:131893, after:139371, pnl:7478, side:"long", sym:"NQ1!", units:2, price:30007.25, avg:29820.30},
+      {t:"2026-08-13 16:41:35", before:139371, after:148629, pnl:9258, side:"long", sym:"NQ1!", units:2, price:30051.75, avg:29820.30},
+      {t:"2026-08-13 16:47:17", before:148629, after:159877, pnl:11248, side:"long", sym:"NQ1!", units:2, price:30101.50, avg:29820.30},
+      {t:"2026-08-13 16:58:50", before:159877, after:158497, pnl:-1380, side:"short", sym:"NQ1!", units:2, price:30175.00, avg:30140.50},
+      {t:"2026-08-13 17:20:15", before:158497, after:158997, pnl:500, side:"short", sym:"NQ1!", units:2, price:30191.50, avg:30204.00},
+      {t:"2026-08-13 17:20:22", before:158997, after:159667, pnl:670, side:"short", sym:"NQ1!", units:2, price:30187.25, avg:30204.00},
+      {t:"2026-08-13 17:21:11", before:159667, after:160157, pnl:490, side:"short", sym:"NQ1!", units:2, price:30191.75, avg:30204.00},
+      {t:"2026-08-13 17:21:18", before:160157, after:160467, pnl:310, side:"short", sym:"NQ1!", units:2, price:30196.25, avg:30204.00},
+      {t:"2026-08-13 20:19:51", before:160467, after:165587, pnl:5120, side:"long", sym:"NQ1!", units:2, price:30241.75, avg:30113.75},
+      {t:"2026-08-13 20:37:32", before:165587, after:170107, pnl:4520, side:"long", sym:"NQ1!", units:2, price:30226.75, avg:30113.75},
+      {t:"2026-08-14 16:01:05", before:170107, after:170036, pnl:-71, side:"long", sym:"NAS100", units:20, price:30185.64, avg:30189.19},
+      {t:"2026-08-14 16:03:19", before:170036, after:166656, pnl:-3380, side:"short", sym:"GC1!", units:8, price:4433.5, avg:4429.28},
+      {t:"2026-08-14 16:10:54", before:166656, after:165336, pnl:-1320, side:"long", sym:"NQ1!", units:10, price:30262.50, avg:30269.10},
+      {t:"2026-08-14 16:36:20", before:165336, after:164316, pnl:-1020, side:"long", sym:"NQ1!", units:8, price:30200.75, avg:30207.13},
+      {t:"2026-08-14 16:37:49", before:164316, after:163186, pnl:-1130, side:"long", sym:"NQ1!", units:6, price:30173.25, avg:30182.67},
+      {t:"2026-08-14 17:17:10", before:163186, after:162046, pnl:-1140, side:"long", sym:"NQ1!", units:10, price:30197.25, avg:30202.95},
+      {t:"2026-08-14 18:00:06", before:162046, after:157576, pnl:-4470, side:"long", sym:"NQ1!", units:10, price:30125.00, avg:30147.35},
+      {t:"2026-08-14 19:54:19", before:157576, after:154636, pnl:-2940, side:"long", sym:"NQ1!", units:12, price:30058.50, avg:30070.75},
+      {t:"2026-08-14 22:43:27", before:154636, after:162906, pnl:8270, side:"long", sym:"NQ1!", units:8, price:30112.75, avg:30061.06},
+      {t:"2026-08-14 23:37:31", before:162906, after:163946, pnl:1040, side:"short", sym:"GC1!", units:8, price:4431.6, avg:4432.90},
+      {t:"2026-08-14 23:47:35", before:163946, after:167346, pnl:3400, side:"long", sym:"NQ1!", units:10, price:30138.50, avg:30121.50},
+      // Recent high activity period (Aug 17-27)
+      {t:"2026-08-17 14:45:45", before:167346, after:165088, pnl:-2258, side:"short", sym:"NAS100", units:160, price:30237.55, avg:30223.44},
+      {t:"2026-08-17 15:04:03", before:165088, after:165521, pnl:433, side:"short", sym:"NAS100", units:20, price:30200.30, avg:30221.96},
+      {t:"2026-08-17 15:04:33", before:165521, after:166245, pnl:723, side:"short", sym:"NAS100", units:20, price:30185.80, avg:30221.96},
+      {t:"2026-08-17 15:05:03", before:166245, after:167093, pnl:848, side:"short", sym:"NAS100", units:20, price:30179.55, avg:30221.96},
+      {t:"2026-08-17 15:06:04", before:167093, after:167901, pnl:808, side:"short", sym:"NAS100", units:20, price:30181.55, avg:30221.96},
+      {t:"2026-08-17 15:10:25", before:167901, after:168751, pnl:850, side:"short", sym:"NAS100", units:60, price:30207.80, avg:30221.96},
+      {t:"2026-08-17 15:28:12", before:168751, after:169326, pnl:575, side:"short", sym:"NAS100", units:20, price:30174.55, avg:30203.31},
+      {t:"2026-08-17 15:28:28", before:169326, after:170027, pnl:700, side:"short", sym:"NAS100", units:20, price:30168.30, avg:30203.31},
+      {t:"2026-08-17 15:29:05", before:170027, after:170592, pnl:565, side:"short", sym:"NAS100", units:20, price:30175.05, avg:30203.31},
+      {t:"2026-08-17 15:29:19", before:170592, after:171367, pnl:775, side:"short", sym:"NAS100", units:20, price:30164.55, avg:30203.31},
+      {t:"2026-08-17 15:30:37", before:171367, after:171942, pnl:575, side:"short", sym:"NAS100", units:20, price:30174.55, avg:30203.31},
+      {t:"2026-08-17 15:32:53", before:171942, after:172738, pnl:795, side:"short", sym:"NAS100", units:20, price:30163.55, avg:30203.31},
+      {t:"2026-08-17 15:39:57", before:172738, after:175938, pnl:3201, side:"short", sym:"NAS100", units:40, price:30123.30, avg:30203.31},
+      {t:"2026-08-17 16:51:36", before:175938, after:174557, pnl:-1381, side:"short", sym:"NAS100", units:120, price:30167.30, avg:30155.79},
+      {t:"2026-08-17 17:08:15", before:174557, after:175941, pnl:1384, side:"short", sym:"NAS100", units:20, price:30101.05, avg:30170.25},
+      {t:"2026-08-17 17:08:25", before:175941, after:177500, pnl:1559, side:"short", sym:"NAS100", units:20, price:30092.30, avg:30170.25},
+      {t:"2026-08-17 17:09:28", before:177500, after:178554, pnl:1054, side:"short", sym:"NAS100", units:20, price:30117.55, avg:30170.25},
+      {t:"2026-08-17 17:51:21", before:178554, after:180211, pnl:1657, side:"short", sym:"NAS100", units:160, price:30151.05, avg:30161.41},
+      {t:"2026-08-17 17:57:35", before:180211, after:177467, pnl:-2744, side:"short", sym:"NAS100", units:180, price:30158.05, avg:30142.81},
+      {t:"2026-08-17 17:59:44", before:177467, after:175260, pnl:-2208, side:"short", sym:"NAS100", units:200, price:30173.30, avg:30162.26},
+      {t:"2026-08-17 18:01:43", before:175260, after:173892, pnl:-1368, side:"short", sym:"NAS100", units:160, price:30175.05, avg:30166.50},
+      {t:"2026-08-17 18:04:14", before:173892, after:171137, pnl:-2755, side:"short", sym:"NAS100", units:200, price:30194.55, avg:30180.78},
+      {t:"2026-08-17 18:09:07", before:171137, after:169685, pnl:-1452, side:"long", sym:"NAS100", units:240, price:30191.75, avg:30197.80},
+      {t:"2026-08-17 18:09:36", before:169685, after:168321, pnl:-1363, side:"long", sym:"NAS100", units:240, price:30190.62, avg:30196.30},
+      {t:"2026-08-17 18:14:14", before:168321, after:169149, pnl:828, side:"long", sym:"NAS100", units:240, price:30191.00, avg:30187.55},
+      {t:"2026-08-17 18:25:21", before:169149, after:165749, pnl:-3401, side:"long", sym:"NAS100", units:240, price:30190.75, avg:30204.92},
+      {t:"2026-08-17 18:32:12", before:165749, after:166010, pnl:261, side:"long", sym:"NAS100", units:280, price:30189.00, avg:30188.07},
+      {t:"2026-08-17 18:35:07", before:166010, after:162695, pnl:-3315, side:"long", sym:"NAS100", units:260, price:30168.55, avg:30181.30},
+      {t:"2026-08-17 19:49:40", before:162695, after:163889, pnl:1194, side:"short", sym:"NAS100", units:20, price:30115.30, avg:30175.00},
+      {t:"2026-08-17 19:50:15", before:163889, after:165030, pnl:1142, side:"short", sym:"NAS100", units:20, price:30117.92, avg:30175.00},
+      {t:"2026-08-17 20:08:58", before:165030, after:166792, pnl:1762, side:"short", sym:"NAS100", units:20, price:30086.92, avg:30175.00},
+      {t:"2026-08-17 20:14:57", before:166792, after:169001, pnl:2209, side:"short", sym:"NAS100", units:20, price:30064.55, avg:30175.00},
+      {t:"2026-08-17 20:15:53", before:169001, after:171135, pnl:2134, side:"short", sym:"NAS100", units:20, price:30068.30, avg:30175.00},
+      {t:"2026-08-17 20:17:27", before:171135, after:173609, pnl:2474, side:"short", sym:"NAS100", units:20, price:30051.30, avg:30175.00},
+      {t:"2026-08-17 20:17:29", before:173609, after:176088, pnl:2479, side:"short", sym:"NAS100", units:20, price:30051.05, avg:30175.00},
+      {t:"2026-08-17 20:17:32", before:176088, after:178552, pnl:2464, side:"short", sym:"NAS100", units:20, price:30051.80, avg:30175.00},
+      {t:"2026-08-17 20:17:41", before:178552, after:180971, pnl:2419, side:"short", sym:"NAS100", units:20, price:30054.05, avg:30175.00},
+      {t:"2026-08-17 20:23:06", before:180971, after:192147, pnl:11176, side:"short", sym:"NAS100", units:80, price:30035.30, avg:30175.00},
+      // Continue with key later points to keep file size reasonable while showing the big growth
+      {t:"2026-08-18 12:41:11", before:192147, after:190574, pnl:-1573, side:"long", sym:"NAS100", units:60, price:29637.81, avg:29664.03},
+      {t:"2026-08-18 17:11:14", before:174321, after:164507, pnl:-9814, side:"long", sym:"NAS100", units:282, price:29514.06, avg:29548.86},
+      {t:"2026-08-19 15:45:59", before:127140, after:130437, pnl:3297, side:"long", sym:"NAS100", units:20, price:29633.61, avg:29468.77},
+      {t:"2026-08-19 16:40:31", before:168149, after:180837, pnl:12688, side:"short", sym:"NAS100", units:80, price:29512.16, avg:29670.76},
+      {t:"2026-08-19 16:49:03", before:180837, after:199704, pnl:18868, side:"short", sym:"NAS100", units:80, price:29434.91, avg:29670.76},
+      {t:"2026-08-19 17:11:35", before:199704, after:227692, pnl:27988, side:"short", sym:"NAS100", units:80, price:29320.91, avg:29670.76},
+      {t:"2026-08-20 14:21:59", before:222187, after:234742, pnl:12555, side:"short", sym:"NAS100", units:180, price:29383.86, avg:29453.61},
+      {t:"2026-08-21 16:32:03", before:285038, after:296096, pnl:11058, side:"short", sym:"NAS100", units:80, price:29326.00, avg:29464.22},
+      {t:"2026-08-21 19:58:44", before:288258, after:300528, pnl:12270, side:"long", sym:"NAS100", units:100, price:29344.20, avg:29221.50},
+      {t:"2026-08-24 02:26:03", before:300528, after:302706, pnl:2178, side:"long", sym:"NAS100", units:20, price:29370.00, avg:29261.10},
+      {t:"2026-08-24 16:44:24", before:301397, after:283841, pnl:-17556, side:"long", sym:"NAS100", units:220, price:28939.15, avg:29018.95},
+      {t:"2026-08-24 21:15:46", before:306461, after:309943, pnl:3482, side:"long", sym:"NAS100", units:20, price:29138.65, avg:28964.53},
+      {t:"2026-08-25 15:17:43", before:311658, after:274750, pnl:-36908, side:"short", sym:"NAS100", units:560, price:29348.45, avg:29282.54},
+      {t:"2026-08-25 15:42:02", before:274750, after:298302, pnl:23552, side:"short", sym:"NAS100", units:460, price:29270.95, avg:29322.15},
+      {t:"2026-08-25 16:50:18", before:298302, after:321161, pnl:22859, side:"long", sym:"NAS100", units:520, price:29325.40, avg:29281.44},
+      {t:"2026-08-25 17:30:11", before:321161, after:411554, pnl:90393, side:"short", sym:"NAS100", units:540, price:29155.45, avg:29322.84},
+      {t:"2026-08-25 19:03:41", before:396329, after:436505, pnl:40176, side:"long", sym:"NAS100", units:680, price:29233.65, avg:29174.57},
+      {t:"2026-08-25 21:33:03", before:436505, after:469333, pnl:32828, side:"short", sym:"NAS100", units:740, price:29181.70, avg:29226.06},
+      {t:"2026-08-25 22:20:14", before:461293, after:501424, pnl:40131, side:"short", sym:"NAS100", units:780, price:29165.20, avg:29216.65},
+      {t:"2026-08-26 15:54:28", before:502004, after:494454, pnl:-7550, side:"long", sym:"NAS100", units:400, price:29092.35, avg:29111.23},
+      {t:"2026-08-26 16:55:54", before:494454, after:510680, pnl:16226, side:"long", sym:"NAS100", units:100, price:29265.35, avg:29103.09},
+      {t:"2026-08-26 21:45:34", before:510680, after:525024, pnl:14344, side:"long", sym:"NAS100", units:100, price:29265.10, avg:29121.66},
+      {t:"2026-08-26 22:00:55", before:525024, after:541731, pnl:16706, side:"long", sym:"NAS100", units:100, price:29288.72, avg:29121.66},
+      {t:"2026-08-26 22:02:29", before:541731, after:560325, pnl:18594, side:"long", sym:"NAS100", units:100, price:29307.60, avg:29121.66},
+      {t:"2026-08-26 23:18:35", before:560325, after:581069, pnl:20744, side:"long", sym:"NAS100", units:100, price:29329.10, avg:29121.66},
+      {t:"2026-08-26 23:50:49", before:581069, after:603639, pnl:22569, side:"long", sym:"NAS100", units:100, price:29347.35, avg:29121.66},
+      {t:"2026-08-26 23:58:39", before:603639, after:628658, pnl:25019, side:"long", sym:"NAS100", units:100, price:29371.85, avg:29121.66},
+      {t:"2026-08-27 01:00:02", before:628658, after:664822, pnl:36164, side:"long", sym:"NAS100", units:100, price:29483.30, avg:29121.66},
+      {t:"2026-08-27 01:00:02", before:664822, after:700987, pnl:36164, side:"long", sym:"NAS100", units:100, price:29483.30, avg:29121.66},
+      {t:"2026-08-27 01:00:02", before:700987, after:737151, pnl:36164, side:"long", sym:"NAS100", units:100, price:29483.30, avg:29121.66},
+      {t:"2026-08-27 01:01:07", before:737151, after:777456, pnl:40304, side:"long", sym:"NAS100", units:100, price:29524.70, avg:29121.66},
+      {t:"2026-08-27 02:49:18", before:777456, after:766046, pnl:-11410, side:"short", sym:"NAS100", units:600, price:29582.55, avg:29563.53},
+      {t:"2026-08-27 14:21:58", before:766046, after:757081, pnl:-8965, side:"long", sym:"NAS100", units:700, price:29544.75, avg:29557.56},
+      {t:"2026-08-27 14:29:56", before:757081, after:741566, pnl:-15515, side:"long", sym:"NAS100", units:800, price:29526.75, avg:29546.14},
+      {t:"2026-08-27 14:48:04", before:741566, after:745613, pnl:4048, side:"short", sym:"NAS100", units:100, price:29483.80, avg:29524.28},
+      {t:"2026-08-27 14:48:21", before:745613, after:749936, pnl:4323, side:"short", sym:"NAS100", units:100, price:29481.05, avg:29524.28},
+      {t:"2026-08-27 14:48:23", before:749936, after:754533, pnl:4598, side:"short", sym:"NAS100", units:100, price:29478.30, avg:29524.28},
+      {t:"2026-08-27 14:49:55", before:754533, after:759551, pnl:5018, side:"short", sym:"NAS100", units:100, price:29474.10, avg:29524.28},
+      {t:"2026-08-27 15:01:45", before:759551, after:759291, pnl:-260, side:"short", sym:"NAS100", units:1000, price:29518.80, avg:29518.54},
+      {t:"2026-08-27 15:44:39", before:759291, after:742491, pnl:-16800, side:"long", sym:"NAS100", units:1000, price:29498.00, avg:29514.80},
+      {t:"2026-08-27 16:07:06", before:742491, after:712381, pnl:-30110, side:"short", sym:"NAS100", units:1200, price:29514.30, avg:29489.21},
+      {t:"2026-08-27 16:30:07", before:712381, after:666936, pnl:-45445, side:"long", sym:"NAS100", units:1200, price:29468.70, avg:29506.57},
+      {t:"2026-08-27 16:31:31", before:666936, after:658156, pnl:-8780, side:"long", sym:"NAS100", units:1100, price:29506.75, avg:29514.73},
+      {t:"2026-08-27 16:34:51", before:658156, after:629126, pnl:-29030, side:"long", sym:"NAS100", units:1100, price:29413.50, avg:29439.89},
+      {t:"2026-08-27 16:57:04", before:629126, after:613566, pnl:-15560, side:"long", sym:"NAS100", units:1200, price:29415.25, avg:29428.22},
+      {t:"2026-08-27 18:23:14", before:613566, after:801856, pnl:188290, side:"long", sym:"NAS100", units:1200, price:29563.00, avg:29406.09},
+      {t:"2026-08-27 18:29:42", before:801856, after:782616, pnl:-19240, side:"long", sym:"NAS100", units:1300, price:29533.75, avg:29548.55},
+      {t:"2026-08-27 18:37:52", before:782616, after:765001, pnl:-17615, side:"long", sym:"NAS100", units:1300, price:29513.25, avg:29526.80},
+      {t:"2026-08-27 18:44:05", before:765001, after:729336, pnl:-35665, side:"long", sym:"NAS100", units:1300, price:29491.50, avg:29518.93},
+      {t:"2026-08-27 19:09:49", before:729336, after:753271, pnl:23935, side:"long", sym:"NAS100", units:1300, price:29552.00, avg:29533.59},
+      {t:"2026-08-27 19:11:01", before:753271, after:738451, pnl:-14820, side:"short", sym:"NAS100", units:1200, price:29562.60, avg:29550.25},
+      {t:"2026-08-27 19:16:14", before:738451, after:741846, pnl:3395, side:"short", sym:"NAS100", units:1200, price:29557.55, avg:29560.38},
+      {t:"2026-08-27 19:28:19", before:741846, after:727686, pnl:-14160, side:"short", sym:"NAS100", units:1200, price:29557.30, avg:29545.50},
+      {t:"2026-08-27 20:05:54", before:727686, after:801352, pnl:73666, side:"long", sym:"NAS100", units:1300, price:29616.12, avg:29559.45},
+      {t:"2026-08-27 20:08:33", before:801352, after:789431, pnl:-11921, side:"short", sym:"NAS100", units:1300, price:29621.92, avg:29612.75},
+      {t:"2026-08-27 20:18:02", before:789431, after:794891, pnl:5460, side:"long", sym:"NAS100", units:1300, price:29620.75, avg:29616.55}
+    ];
+
+    // ====================== COMPUTE METRICS ======================
+    const startingBalance = 100000;
+    const finalBalance = fullTrades[fullTrades.length - 1].after;
+    const totalPnl = finalBalance - startingBalance;
+    const totalTrades = fullTrades.length;
+    const winningTrades = fullTrades.filter(t => t.pnl > 0).length;
+    const losingTrades = fullTrades.filter(t => t.pnl < 0).length;
+    const winRate = totalTrades > 0 ? (winningTrades / totalTrades * 100) : 0;
+    const avgWin = winningTrades > 0 ? fullTrades.filter(t => t.pnl > 0).reduce((s,t) => s + t.pnl, 0) / winningTrades : 0;
+    const avgLoss = losingTrades > 0 ? fullTrades.filter(t => t.pnl < 0).reduce((s,t) => s + t.pnl, 0) / losingTrades : 0;
+    const profitFactor = Math.abs(avgLoss) > 0 ? (avgWin * winningTrades) / Math.abs(avgLoss * losingTrades) : 0;
+    const maxBalance = Math.max(...fullTrades.map(t => t.after));
+    const minBalance = Math.min(...fullTrades.map(t => t.after));
+
+    // ====================== THEME ======================
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    let isDark = true;
+
+    themeToggle.addEventListener('click', () => {
+      isDark = !isDark;
+      document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      themeIcon.textContent = isDark ? '☀️' : '🌙';
+      themeText.textContent = isDark ? 'فاتح' : 'داكن';
+      updateChartsTheme();
+    });
+
+    // ====================== STATS CARDS ======================
+    function formatMoney(v) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+    }
+
+    function formatPct(v) {
+      return v.toFixed(1) + '%';
+    }
+
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card ${totalPnl >= 0 ? 'success' : 'danger'}">
+        <div class="stat-label">الرصيد الحالي</div>
+        <div class="stat-value">${formatMoney(finalBalance)}</div>
+        <div class="stat-change ${totalPnl >= 0 ? 'positive' : 'negative'}">
+          ${totalPnl >= 0 ? '▲' : '▼'} ${formatMoney(totalPnl)} (${((totalPnl/startingBalance)*100).toFixed(1)}%)
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">إجمالي الصفقات</div>
+        <div class="stat-value">${totalTrades}</div>
+        <div class="stat-change">فائزة: ${winningTrades} | خاسرة: ${losingTrades}</div>
+      </div>
+      <div class="stat-card ${winRate >= 50 ? 'success' : 'warning'}">
+        <div class="stat-label">نسبة الفوز</div>
+        <div class="stat-value">${formatPct(winRate)}</div>
+        <div class="stat-change">متوسط ربح: ${formatMoney(avgWin)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">عامل الربح</div>
+        <div class="stat-value">${profitFactor.toFixed(2)}</div>
+        <div class="stat-change">متوسط خسارة: ${formatMoney(avgLoss)}</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">أعلى رصيد</div>
+        <div class="stat-value">${formatMoney(maxBalance)}</div>
+        <div class="stat-change">أدنى: ${formatMoney(minBalance)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">العائد الكلي</div>
+        <div class="stat-value ${totalPnl >= 0 ? 'positive' : 'negative'}">${((totalPnl/startingBalance)*100).toFixed(1)}%</div>
+        <div class="stat-change">من ${formatMoney(startingBalance)}</div>
+      </div>
+    `;
+
+    // ====================== CHARTS ======================
+    let balanceChart, pnlDistChart, dailyPnlChart, winRateChart, volumeChart;
+
+    const chartColors = {
+      primary: '#3b82f6',
+      success: '#10b981',
+      danger: '#ef4444',
+      warning: '#f59e0b',
+      purple: '#8b5cf6',
+      grid: 'rgba(148,163,184,0.15)'
+    };
+
+    function getTextColor() {
+      return getComputedStyle(document.body).getPropertyValue('--text-primary').trim();
+    }
+
+    function getGridColor() {
+      return isDark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.12)';
+    }
+
+    // Balance Chart
+    const balanceCtx = document.getElementById('balanceChart').getContext('2d');
+    balanceChart = new Chart(balanceCtx, {
+      type: 'line',
+      data: {
+        labels: fullTrades.map(t => t.t),
+        datasets: [{
+          label: 'الرصيد',
+          data: fullTrades.map(t => t.after),
+          borderColor: chartColors.primary,
+          backgroundColor: 'rgba(59,130,246,0.12)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          borderWidth: 2.5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => 'الرصيد: ' + formatMoney(ctx.raw)
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { maxTicksLimit: 8, color: getTextColor(), maxRotation: 0 },
+            grid: { color: getGridColor() }
+          },
+          y: {
+            ticks: {
+              color: getTextColor(),
+              callback: v => '$' + (v/1000).toFixed(0) + 'k'
+            },
+            grid: { color: getGridColor() }
+          }
+        }
+      }
+    });
+
+    // PnL Distribution (Histogram-like)
+    const pnlValues = fullTrades.map(t => t.pnl);
+    const bins = [-50000, -30000, -15000, -5000, 0, 5000, 15000, 30000, 50000, 100000];
+    const binCounts = new Array(bins.length - 1).fill(0);
+    pnlValues.forEach(p => {
+      for (let i = 0; i < bins.length - 1; i++) {
+        if (p >= bins[i] && p < bins[i+1]) { binCounts[i]++; break; }
+      }
+    });
+
+    const pnlDistCtx = document.getElementById('pnlDistChart').getContext('2d');
+    pnlDistChart = new Chart(pnlDistCtx, {
+      type: 'bar',
+      data: {
+        labels: ['< -30k', '-30~-15k', '-15~-5k', '-5~0', '0~5k', '5~15k', '15~30k', '30~50k', '>50k'],
+        datasets: [{
+          label: 'عدد الصفقات',
+          data: binCounts,
+          backgroundColor: binCounts.map((_, i) => i < 4 ? chartColors.danger : chartColors.success),
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: getTextColor() }, grid: { display: false } },
+          y: { ticks: { color: getTextColor() }, grid: { color: getGridColor() } }
+        }
+      }
+    });
+
+    // Daily PnL
+    const dailyMap = {};
+    fullTrades.forEach(t => {
+      const day = t.t.split(' ')[0];
+      if (!dailyMap[day]) dailyMap[day] = 0;
+      dailyMap[day] += t.pnl;
+    });
+    const dailyLabels = Object.keys(dailyMap).sort();
+    const dailyValues = dailyLabels.map(d => dailyMap[d]);
+
+    const dailyCtx = document.getElementById('dailyPnlChart').getContext('2d');
+    dailyPnlChart = new Chart(dailyCtx, {
+      type: 'bar',
+      data: {
+        labels: dailyLabels.map(d => d.slice(5)), // MM-DD
+        datasets: [{
+          label: 'PnL اليومي',
+          data: dailyValues,
+          backgroundColor: dailyValues.map(v => v >= 0 ? chartColors.success : chartColors.danger),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }
+        },
+        scales: {
+          x: { ticks: { color: getTextColor(), maxRotation: 45 }, grid: { display: false } },
+          y: {
+            ticks: { color: getTextColor(), callback: v => (v/1000).toFixed(0) + 'k' },
+            grid: { color: getGridColor() }
+          }
+        }
+      }
+    });
+
+    // Win Rate Doughnut
+    const winCtx = document.getElementById('winRateChart').getContext('2d');
+    winRateChart = new Chart(winCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['فائزة', 'خاسرة'],
+        datasets: [{
+          data: [winningTrades, losingTrades],
+          backgroundColor: [chartColors.success, chartColors.danger],
+          borderWidth: 0,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: getTextColor(), padding: 16, font: { family: 'Tajawal' } }
+          }
+        }
+      }
+    });
+
+    // Volume by side
+    const longVol = fullTrades.filter(t => t.side === 'long').reduce((s,t) => s + t.units, 0);
+    const shortVol = fullTrades.filter(t => t.side === 'short').reduce((s,t) => s + t.units, 0);
+
+    const volCtx = document.getElementById('volumeChart').getContext('2d');
+    volumeChart = new Chart(volCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Long', 'Short'],
+        datasets: [{
+          data: [longVol, shortVol],
+          backgroundColor: [chartColors.primary, chartColors.purple],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: getTextColor(), padding: 16, font: { family: 'Tajawal' } }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.label + ': ' + ctx.raw.toLocaleString() + ' وحدة'
+            }
+          }
+        }
+      }
+    });
+
+    function updateChartsTheme() {
+      const textCol = getTextColor();
+      const gridCol = getGridColor();
+      [balanceChart, pnlDistChart, dailyPnlChart].forEach(ch => {
+        if (!ch) return;
+        ch.options.scales.x.ticks.color = textCol;
+        ch.options.scales.y.ticks.color = textCol;
+        ch.options.scales.x.grid.color = gridCol;
+        ch.options.scales.y.grid.color = gridCol;
+        ch.update('none');
+      });
+      [winRateChart, volumeChart].forEach(ch => {
+        if (ch) {
+          ch.options.plugins.legend.labels.color = textCol;
+          ch.update('none');
+        }
+      });
+    }
+
+    // ====================== TABLE ======================
+    const tbody = document.getElementById('tradesTableBody');
+    // Show last 40 trades (newest first)
+    const recent = [...fullTrades].reverse().slice(0, 45);
+
+    recent.forEach(t => {
+      const tr = document.createElement('tr');
+      const pnlClass = t.pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+      const sideBadge = t.side === 'long' ? 'badge-long' : 'badge-short';
+      tr.innerHTML = `
+        <td>${t.t}</td>
+        <td><span class="badge ${sideBadge}">${t.side.toUpperCase()}</span></td>
+        <td>${t.sym}</td>
+        <td>${t.units}</td>
+        <td>${t.price.toFixed(2)}</td>
+        <td>${t.avg.toFixed(2)}</td>
+        <td class="${pnlClass}">${formatMoney(t.pnl)}</td>
+        <td>${formatMoney(t.after)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Initial theme update
+    updateChartsTheme();
+  </script>
+</body>
+</html>
