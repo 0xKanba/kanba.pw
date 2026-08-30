@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم التداول الورقي | NAS100 — أغسطس 2026</title>
+<meta name="description" content="لوحة تحليلية شاملة لأداء استراتيجية NAS100 خلال أغسطس 2026: الرصيد، الأرباح، الصفقات والتسلسل الزمني.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">📈</div>
+    <div>
+      <h1>لوحة التداول الورقي</h1>
+      <div class="logo-sub"><span class="sym">VANTAGE:NAS100</span> · <span id="rangeLabel">—</span></div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="ghost-btn" id="exportBtn" title="تصدير الصفقات المعروضة">⬇ تصدير CSV</button>
+    <button class="ghost-btn" id="themeToggle" title="تبديل الوضع"><span id="themeIcon">☀️</span><span id="themeText">فاتح</span></button>
+  </div>
+</header>
+
+<div id="loader" class="state">جارٍ تحميل البيانات…</div>
+<div id="errorBox" class="state error" hidden></div>
+
+<main class="container" id="app" hidden>
+
+  <section class="filters" aria-label="فلاتر">
+    <div class="filter-group" id="rangeFilter" data-key="range">
+      <button class="chip" data-val="all">الكل</button>
+      <button class="chip" data-val="30">30 يوم</button>
+      <button class="chip" data-val="7">7 أيام</button>
+      <button class="chip" data-val="1">آخر يوم</button>
+    </div>
+    <div class="filter-group" id="sideFilter" data-key="side">
+      <button class="chip" data-val="all">الاتجاهان</button>
+      <button class="chip" data-val="long">شراء</button>
+      <button class="chip" data-val="short">بيع</button>
+    </div>
+    <div class="filter-group" id="resultFilter" data-key="result">
+      <button class="chip" data-val="all">كل النتائج</button>
+      <button class="chip" data-val="win">رابحة</button>
+      <button class="chip" data-val="loss">خاسرة</button>
+    </div>
+    <input type="search" id="searchInput" class="search" placeholder="بحث برقم الصفقة أو السعر…">
+  </section>
+
+  <section class="stats-grid" id="statsGrid"></section>
+
+  <section class="charts-grid">
+    <div class="chart-card full">
+      <div class="chart-header"><h2 class="chart-title">تطور الرصيد والتراجع (Drawdown)</h2><span class="chart-note">من b-h.csv</span></div>
+      <div class="chart-container tall"><canvas id="balanceChart"></canvas></div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-header"><h2 class="chart-title">الربح التراكمي للصفقات</h2><span class="chart-note">من t-h.csv</span></div>
+      <div class="chart-container"><canvas id="cumPnlChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header"><h2 class="chart-title">ربح/خسارة كل صفقة</h2></div>
+      <div class="chart-container"><canvas id="perTradeChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header"><h2 class="chart-title">الأداء اليومي</h2></div>
+      <div class="chart-container"><canvas id="dailyPnlChart"></canvas></div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-header"><h2 class="chart-title">التسلسل السعري: الدخول والخروج</h2><span class="chart-note">أخضر = شراء · أحمر = بيع</span></div>
+      <div class="chart-container tall"><canvas id="priceChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header"><h2 class="chart-title">توزيع أحجام الربح/الخسارة</h2></div>
+      <div class="chart-container"><canvas id="histChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header"><h2 class="chart-title">نسبة الفوز / الخسارة</h2></div>
+      <div class="chart-container"><canvas id="winRateChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header"><h2 class="chart-title">شراء مقابل بيع</h2></div>
+      <div class="chart-container"><canvas id="sideChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header"><h2 class="chart-title">الأداء حسب ساعة اليوم</h2></div>
+      <div class="chart-container"><canvas id="hourChart"></canvas></div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-header"><h2 class="chart-title">حجم الصفقات (وحدات)</h2></div>
+      <div class="chart-container"><canvas id="volumeChart"></canvas></div>
+    </div>
+  </section>
+
+  <section class="split">
+    <div class="table-card">
+      <div class="chart-header"><h2 class="chart-title">التسلسل الزمني للأحداث</h2><span class="chart-note" id="timelineCount"></span></div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <div class="table-card">
+      <div class="chart-header"><h2 class="chart-title">حركات الرصيد</h2><span class="chart-note">b-h.csv</span></div>
+      <div class="table-wrapper short">
+        <table>
+          <thead><tr><th>الوقت</th><th>قبل</th><th>بعد</th><th>الربح المحقق</th><th>العملية</th></tr></thead>
+          <tbody id="balanceTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-card">
+    <div class="chart-header">
+      <h2 class="chart-title">جدول الصفقات</h2>
+      <span class="chart-note" id="tradesCount"></span>
+    </div>
+    <div class="table-wrapper">
+      <table id="tradesTable">
+        <thead>
+          <tr>
+            <th data-sort="num">#</th>
+            <th data-sort="side">الاتجاه</th>
+            <th data-sort="entryTime">الدخول</th>
+            <th data-sort="exitTime">الخروج</th>
+            <th data-sort="duration">المدة</th>
+            <th data-sort="entryPrice">سعر الدخول</th>
+            <th data-sort="exitPrice">سعر الخروج</th>
+            <th data-sort="qty">الكمية</th>
+            <th data-sort="value">القيمة</th>
+            <th data-sort="pnl">الربح/الخسارة</th>
+            <th data-sort="retPct">العائد %</th>
+            <th data-sort="cum">تراكمي</th>
+          </tr>
+        </thead>
+        <tbody id="tradesTableBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </section>
+
+  <footer class="footer">بيانات تداول ورقي — VANTAGE:NAS100 · أغسطس 2026</footer>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
