@@ -13,26 +13,19 @@ document.addEventListener('DOMContentLoaded', function() {
 function initThemeToggle() {
   const toggleBtn = document.getElementById('themeToggle');
   if (!toggleBtn) return;
-  
-  // Check local storage or system preference
-  const currentTheme = localStorage.getItem('theme');
-  if (currentTheme === 'light') {
+
+  const savedTheme = localStorage.getItem('theme');
+
+  if (savedTheme === 'light') {
     document.body.classList.add('light-theme');
-  } else if (currentTheme === 'dark') {
+  } else if (savedTheme === 'dark') {
     document.body.classList.remove('light-theme');
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.body.classList.add('light-theme');
   }
-  
+
   toggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('light-theme');
-    
-    // Save preference
-    if (document.body.classList.contains('light-theme')) {
-      localStorage.setItem('theme', 'light');
-    } else {
-      localStorage.setItem('theme', 'dark');
-    }
+    const isLightTheme = document.body.classList.toggle('light-theme');
+
+    localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
   });
 }
 
@@ -173,3 +166,4 @@ window.addEventListener('load', () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }
 });
+

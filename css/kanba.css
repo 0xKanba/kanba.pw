@@ -3,22 +3,11 @@
   --primary: #ff8800;
   --secondary: #222222;
   --bg-dark: #111111;
+  --bg-panel: rgba(255, 255, 255, 0.04);
   --text: #ffffff;
   --text-dim: #b5b5b5;
+  --border-light: rgba(255, 255, 255, 0.18);
   --glow: rgba(0, 204, 255, 0.3);
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --primary: #0080ff;
-    --secondary: #e8e9ef;
-    --bg-dark: #f0f0f6;
-    --bg-panel: #e8e9ef;
-    --text: #000000;
-    --text-dim: #252525;
-    --border-light: #555555;
-    --glow: rgba(0, 128, 255, 0.2);
-  }
 }
 
 body.light-theme {
@@ -238,12 +227,6 @@ body.light-theme .social-link img {
   filter: brightness(0);
 }
 
-@media (prefers-color-scheme: light) {
-  body:not(.dark-theme) .social-link img {
-    filter: brightness(0);
-  }
-}
-
 .social-link span {
   display: none;
 }
@@ -259,12 +242,6 @@ body.light-theme .social-link img {
 
 body.light-theme .social-link:hover img {
   filter: brightness(0) drop-shadow(0 5px 13px var(--primary)); 
-}
-
-@media (prefers-color-scheme: light) {
-  body:not(.dark-theme) .social-link:hover img {
-    filter: brightness(0) drop-shadow(0 5px 13px var(--primary)); 
-  }
 }
 
 /* Specific glows */
@@ -405,4 +382,5 @@ body:not(.light-theme) .theme-toggle-btn .sun-icon {
 body:not(.light-theme) .theme-toggle-btn .moon-icon {
   display: none;
 }
+
 
