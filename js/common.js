@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .footer-content { max-width: 800px; margin: 0 auto; padding: 0 16px; }
     .footer-tabs { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
     .footer-tab { font-weight: 700; font-size: 0.75rem; padding: 4px 8px; white-space: nowrap; color: inherit; text-decoration: none; position: relative; transition: color 0.3s; }
-    .footer-tab::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: -2px; width: 0; height: 1.5px; background-color: var(--primary, #ff8800); transition: width 0.3s; border-radius: 99px; }
+    .footer-tab::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: -2px; width: 0; height: 1.5px; background-color: var(--primary, #ff8800); transition: width 0.3s; }
     .footer-tab.active::after, .footer-tab:hover::after { width: 100%; }
     .footer-tab.active, .footer-tab:hover { color: var(--primary, #ff8800); }
     .footer-tab.active { font-weight: 800; text-shadow: 0 0 6px var(--glow, rgba(255, 136, 0, 0.3)); }
@@ -85,4 +85,16 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }, 150);
+
+  // Theme Toggle for common.js
+  function initCommonTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-theme');
+    } else if (savedTheme === 'dark') {
+      document.body.classList.remove('light-theme');
+    }
+  }
+  
+  initCommonTheme();
 });
