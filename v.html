@@ -10,7 +10,6 @@
   html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
   #player-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
   
-  /* زر التشغيل المخصص لكسر حماية المتصفحات لملء الشاشة */
   #custom-play-btn {
     position: absolute;
     top: 50%;
@@ -37,11 +36,10 @@
     <button id="custom-play-btn">▶ تشغيل الفيديو</button>
   </div>
 
-  <!-- تحميل مكتبة يوتيوب البرمجية -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     let player;
-    // دالة يوتيوب الافتراضية التي تعمل عند جاهزية المكتبة
+
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('youtube-player', {
         height: '100%',
@@ -52,36 +50,52 @@
           'rel': 0, 
           'modestbranding': 1,
           'loop': 1, 
-          'playlist': 'GEAELbO8rx0', /* مطلوب لتفعيل التكرار */
-          'vq': 'hd1080', /* طلب جودة 1080p */
+          'playlist': 'GEAELbO8rx0',
           'controls': 1
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
         }
       });
+    }
+
+    // تعيين الجودة إلى 1080p عند الجاهزية
+    function onPlayerReady(event) {
+      if (typeof player.setPlaybackQuality === 'function') {
+        player.setPlaybackQuality('hd1080');
+      }
+    }
+
+    // تأكيد تعيين الجودة عند بدء التشغيل الفعلي
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        if (typeof player.setPlaybackQuality === 'function') {
+          player.setPlaybackQuality('hd1080');
+        }
+      }
     }
 
     // تفعيل ملء الشاشة والتشغيل عند النقر
     document.getElementById('custom-play-btn').addEventListener('click', function() {
       const container = document.getElementById('player-container');
       
-      // طلب ملء الشاشة بمختلف المتصفحات
       if (container.requestFullscreen) {
         container.requestFullscreen();
-      } else if (container.webkitRequestFullscreen) { /* Safari */
+      } else if (container.webkitRequestFullscreen) {
         container.webkitRequestFullscreen();
-      } else if (container.msRequestFullscreen) { /* IE11 */
+      } else if (container.msRequestFullscreen) {
         container.msRequestFullscreen();
       }
 
-      // تشغيل الفيديو وإخفاء الزر
       player.playVideo();
       this.style.display = 'none';
     });
 
-    // إعادة إظهار الزر وإيقاف الفيديو إذا خرج المستخدم من ملء الشاشة
     document.addEventListener('fullscreenchange', () => {
       if (!document.fullscreenElement) {
-          player.pauseVideo();
-          document.getElementById('custom-play-btn').style.display = 'block';
+        player.pauseVideo();
+        document.getElementById('custom-play-btn').style.display = 'block';
       }
     });
   </script>
