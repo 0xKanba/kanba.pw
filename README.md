@@ -90,6 +90,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -146,6 +147,7 @@
 │   ├── 0xmini2000.png
 │   ├── K—.png
 │   ├── K—mini.png
+│   ├── Screenshot_2026-10-06_22-33-33.png
 │   ├── Younis.png
 │   ├── bitcoin.svg
 │   ├── btc.png
@@ -181,6 +183,6 @@
 ├── videos.html
 └── °.html
 
-19 directories, 66 files
+19 directories, 67 files
 ```
 <!-- TREE END -->
