@@ -95,6 +95,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -182,6 +183,7 @@
 │   ├── index.html
 │   ├── script.js
 │   └── styles.css
+├── qr-generator.html
 ├── r.html
 ├── site.webmanifest
 ├── sw.js
@@ -190,6 +192,6 @@
 ├── videos.html
 └── °.html
 
-19 directories, 70 files
+19 directories, 71 files
 ```
 <!-- TREE END -->
