@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>أسعار USDT/IQD مباشرة — Binance P2P | kanba</title>
+  <meta name="description" content="أفضل أسعار شراء وبيع USDT مقابل الدينار العراقي من Binance P2P، تتحدث تلقائياً.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>USDT / <span id="fiatLabel">IQD</span></h1>
+      <p class="sub">أفضل أسعار Binance P2P — تحديث تلقائي</p>
+    </div>
+    <div class="controls">
+      <span id="status" class="status">…</span>
+      <button id="refreshBtn" class="btn" type="button">⟳ تحديث</button>
+    </div>
+  </header>
+
+  <section class="summary">
+    <div class="stat buy"><small>أفضل سعر شراء</small><b id="bestBuy">—</b></div>
+    <div class="stat sell"><small>أفضل سعر بيع</small><b id="bestSell">—</b></div>
+    <div class="stat"><small>الفرق</small><b id="spread">—</b></div>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-side="BUY" role="tab">🟢 شراء USDT</button>
+    <button class="tab" data-side="SELL" role="tab">🔴 بيع USDT</button>
+    <label class="chk"><input type="checkbox" id="merchantOnly"> تجار موثّقون فقط</label>
+  </nav>
+
+  <main id="list" class="list" aria-live="polite"></main>
+
+  <footer class="foot">
+    المصدر: Binance P2P العامة · آخر تحديث: <span id="updated">—</span> · قراءة فقط، لا تنفيذ صفقات
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
