@@ -1,150 +1,23 @@
-/*
- * app.js — منطق صفحة أسعار P2P
- * =================================
- * كيف يعمل:
- *  1) fetchSide(side)  يطلب الإعلانات من الوسيط (worker.js) الذي يمررها إلى Binance.
- *       side="BUY"  = أنت تشتري USDT  → الأفضل = الأرخص.
- *       side="SELL" = أنت تبيع USDT   → الأفضل = الأغلى.
- *  2) parseAd(raw)     يحوّل الإعلان الخام إلى كائن بسيط.
- *       monthFinishRate و positiveRate تأتي ككسر (1 = 100%) فنضربها ×100.
- *       الحد الأعلى الحقيقي = dynamicMaxSingleTransAmount.
- *  3) refresh()        يجلب الشراء والبيع معاً كل REFRESH_SECONDS ثانية،
- *       ويرسم البطاقات من جديد فقط إذا تغيّرت البيانات (بصمة signature)،
- *       ويومض البطاقة التي تغيّر سعرها.
- *  ملاحظة: Binance P2P لا توفر WebSocket للإعلانات، لذلك نستخدم تحديثاً
- *  دورياً + زر تحديث + تحديث فوري عند العودة إلى التبويب.
- */
-(() => {
-  const C = window.P2P_CONFIG;
-  const $ = (id) => document.getElementById(id);
-
-  const state = { side: "BUY", merchantOnly: false, data: { BUY: [], SELL: [] }, sig: "", prev: {} };
-
-  // ---------- 1) الجلب ----------
-  async function fetchSide(side) {
-    const res = await fetch(C.PROXY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fiat: C.FIAT, asset: C.ASSET, tradeType: side,
-        page: 1, rows: 20, payTypes: [], countries: [],
-        publisherType: state.merchantOnly ? "merchant" : null,
-      }),
-    });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const json = await res.json();
-    if (json.code && json.code !== "000000") throw new Error(json.message || "Binance error");
-    const ads = (json.data || [])
-      .filter((x) => x.adv && x.adv.isTradable !== false)
-      .map(parseAd)
-      .filter((a) => a.price > 0 && a.available > 0);
-    ads.sort((a, b) => (side === "BUY" ? a.price - b.price : b.price - a.price));
-    return ads.slice(0, C.TOP_N);
-  }
-
-  // ---------- 2) التحويل ----------
-  const num = (v) => (isFinite(+v) ? +v : 0);
-  function parseAd({ adv, advertiser: u = {} }) {
-    return {
-      id: adv.advNo,
-      price: num(adv.price),
-      min: num(adv.minSingleTransAmount),
-      max: num(adv.dynamicMaxSingleTransAmount || adv.maxSingleTransAmount),
-      available: num(adv.tradableQuantity || adv.surplusAmount),
-      payMin: num(adv.payTimeLimit),
-      methods: (adv.tradeMethods || []).map((m) => m.tradeMethodName || m.identifier),
-      nick: u.nickName || "—",
-      merchant: u.userType === "merchant",
-      orders: num(u.monthOrderCount),
-      finish: num(u.monthFinishRate) * 100,
-      positive: num(u.positiveRate) * 100,
-      active: u.activeTimeInSecond ?? null,
-    };
-  }
-
-  // ---------- 3) الرسم ----------
-  const fmt = (n, d = 0) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
-  const money = (n) => (n >= 100 ? fmt(n) : fmt(n, 2));
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-
-  function seen(sec) {
-    if (sec == null || sec < 0) return "غير معروف";
-    if (sec < 300) return "🟢 متصل الآن";
-    if (sec < 3600) return `🟡 قبل ${Math.floor(sec / 60)} د`;
-    if (sec < 86400) return `🟠 قبل ${Math.floor(sec / 3600)} س`;
-    return `⚪ قبل ${Math.floor(sec / 86400)} يوم`;
-  }
-
-  function card(a, i, side) {
-    const changed = state.prev[a.id] !== undefined && state.prev[a.id] !== a.price;
-    return `
-    <article class="card side-${side}${changed ? " flash" : ""}">
-      <div class="rank">#${i + 1}</div>
-      <div class="price">${fmt(a.price, 2)} <small>${C.FIAT}</small></div>
-      <div><span class="nick">${esc(a.nick)}</span>
-        <span class="badge ${a.merchant ? "merchant" : ""}">${a.merchant ? "✓ تاجر موثّق" : "مستخدم"}</span></div>
-      <div class="meta">
-        <span>المتاح: <b>${money(a.available)} ${C.ASSET}</b></span>
-        <span>الحد: <b dir="ltr">${money(a.min)} – ${money(a.max)}</b> ${C.FIAT}</span>
-        <span>صفقات 30 يوم: <b>${a.orders}</b></span>
-        <span>إتمام: <b>${a.finish.toFixed(1)}%</b></span>
-        <span>تقييم: <b>${a.positive.toFixed(1)}%</b></span>
-        <span>${seen(a.active)}</span>
-        <span>مهلة الدفع: <b>${a.payMin}</b> د</span>
-      </div>
-      <div class="pays">${a.methods.slice(0, 5).map((m) => `<span class="pay">${esc(m)}</span>`).join("")}</div>
-    </article>`;
-  }
-
-  function render() {
-    const { BUY, SELL } = state.data;
-    $("bestBuy").textContent = BUY[0] ? fmt(BUY[0].price, 2) : "—";
-    $("bestSell").textContent = SELL[0] ? fmt(SELL[0].price, 2) : "—";
-    $("spread").textContent = BUY[0] && SELL[0] ? fmt(BUY[0].price - SELL[0].price, 2) : "—";
-    const list = state.data[state.side];
-    $("list").innerHTML = list.length
-      ? list.map((a, i) => card(a, i, state.side)).join("")
-      : `<div class="empty">لا توجد إعلانات حالياً</div>`;
-    // نحفظ الأسعار لنعرف لاحقاً أي بطاقة تغيّرت
-    state.prev = Object.fromEntries([...BUY, ...SELL].map((a) => [a.id, a.price]));
-  }
-
-  // ---------- 4) التحديث ----------
-  let busy = false;
-  async function refresh(force = false) {
-    if (busy) return;
-    busy = true;
-    $("refreshBtn").disabled = true;
-    try {
-      const [BUY, SELL] = await Promise.all([fetchSide("BUY"), fetchSide("SELL")]);
-      const sig = JSON.stringify([BUY, SELL].map((l) => l.map((a) => [a.id, a.price, a.available, a.max])));
-      state.data = { BUY, SELL };
-      if (force || sig !== state.sig) { render(); state.sig = sig; }
-      $("updated").textContent = new Date().toLocaleTimeString("ar-IQ");
-      setStatus("مباشر", "live");
-    } catch (e) {
-      console.error(e);
-      setStatus("تعذّر الاتصال: " + e.message, "err");
-    } finally {
-      busy = false;
-      $("refreshBtn").disabled = false;
-    }
-  }
-  function setStatus(t, cls) { const s = $("status"); s.textContent = t; s.className = "status " + cls; }
-
-  // ---------- 5) الأحداث ----------
-  document.querySelectorAll(".tab").forEach((b) =>
-    b.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x === b));
-      state.side = b.dataset.side;
-      render();
-    })
-  );
-  $("merchantOnly").addEventListener("change", (e) => { state.merchantOnly = e.target.checked; refresh(true); });
-  $("refreshBtn").addEventListener("click", () => refresh(true));
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
-
-  $("fiatLabel").textContent = C.FIAT;
-  refresh(true);
-  setInterval(() => { if (!document.hidden) refresh(); }, Math.max(10, C.REFRESH_SECONDS) * 1000);
-})();
+/* كل نص من السوق غير موثوق: escape قبل HTML، raw عبر textContent.
+   فرز وفلاتر محلية ضمن المسترجع. لا صفقات أو تاريخ وهمي أو localStorage. */
+import {parse,usable,num,fits,sort,top5,simulate} from './core.js';
+const C=window.P2P_CONFIG,$=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),fmt=(n,d=2)=>n==null?'غير متوفر':n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const S={side:'BUY',data:{BUY:[],SELL:[]},snapshot:null,busy:false,key:'price',dir:'asc',visible:[],prev:new Map(),history:{BUY:[],SELL:[]},detail:null,next:Date.now(),error:false};
+const interval=()=>Math.max(10,num(S.snapshot?.interval)??num(C.REFRESH_SECONDS)??30)*1000;
+function stale(side){const s=S.snapshot?.sides?.[side];return S.error||!s||s.stale||!s.fetchedAt||Date.now()-new Date(s.fetchedAt).getTime()>Math.max(45000,interval()*3);}
+function activity(n){if(n===null||n<0)return 'غير متوفر';if(n<60)return 'قبل أقل من دقيقة';if(n<3600)return `قبل ${Math.floor(n/60)} د`;if(n<86400)return `قبل ${Math.floor(n/3600)} س`;return `قبل ${Math.floor(n/86400)} يوم`;}
+function filtered(side){const q=$('search').value.trim().toLowerCase(),p=$('payment').value,n=num($('filterAmount').value),f=Number($('finish').value);return S.data[side].filter(a=>(!q||a.nick.toLowerCase().includes(q)||a.id.includes(q))&&(!p||a.methods.includes(p))&&(!$('merchant').checked||a.merchant)&&(!(n>0)||fits(a,n))&&(!f||(a.finish!==null&&a.finish>=f)));}
+function payments(){const old=$('payment').value,methods=[...new Set(S.data[S.side].flatMap(a=>a.methods))].sort();$('payment').innerHTML='<option value="">جميع الطرق</option>'+methods.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');if(methods.includes(old))$('payment').value=old;}
+function row(a,i){const old=S.prev.get(a.side+':'+a.id),changed=old!==undefined&&old!==a.price;return `<tr class="${changed?'changed':''}"><td class="num">${i+1}</td><td><div class="nick">${esc(a.nick)}</div><small class="${a.merchant?'merchant':''}">${a.merchant?'✓ تاجر':'مستخدم'}</small></td><td class="num price ${a.side==='BUY'?'buy':'sell'}">${fmt(a.price)}${changed?'<small>تغير السعر</small>':''}</td><td class="num">${fmt(a.available,4)}</td><td class="num">${fmt(a.min,0)}<small class="num">إلى ${fmt(a.max,0)}</small></td><td class="num">${fmt(a.orders,0)}<small>صفقة</small></td><td class="num">${a.finish===null?'—':fmt(a.finish,1)+'%'}</td><td class="num">${a.positive===null?'—':fmt(a.positive,1)+'%'}</td><td>${activity(a.activeSeconds)}</td><td class="methods">${a.methods.map(esc).join(' · ')||'غير متوفر'}<small>مهلة ${fmt(a.payMinutes,0)} د</small></td><td><button class="button row-action" data-detail="${esc(a.id)}" title="تفاصيل الإعلان" aria-label="تفاصيل ${esc(a.nick)}">↗</button></td></tr>`;}
+function summary(){const b=top5(filtered('BUY'),'BUY')[0],s=top5(filtered('SELL'),'SELL')[0];$('bestBuy').textContent=b?fmt(b.price):'—';$('bestSell').textContent=s?fmt(s.price):'—';$('buyNick').textContent=b?.nick??'لا توجد نتائج';$('sellNick').textContent=s?.nick??'لا توجد نتائج';const spread=b&&s?b.price-s.price:null;$('spread').textContent=spread===null?'—':fmt(spread);$('spreadPercent').textContent=spread===null?'—':`${fmt(spread/b.price*100)}% · ليس ربحاً مضموناً`;const info=S.snapshot?.sides?.[S.side];$('coverage').textContent=String(info?.data?.length??0);$('coverageNote').textContent=info?`${info.pages} صفحة · إجمالي المصدر ${info.reportedTotal??'غير متوفر'}${info.exhausted?'':' · نتائج محدودة'}`:'بانتظار المصدر';}
+function render(){summary();const list=sort(filtered(S.side),S.key,S.dir),limit=$('limit').value,selected=limit==='5'?top5(list,S.side):limit==='all'?list:list.slice(0,20);S.visible=sort(selected,S.key,S.dir);$('results').textContent=`${S.visible.length} معروض / ${list.length} مطابق · ${S.side==='BUY'?'أنت تشتري':'أنت تبيع'}`;$('rows').innerHTML=S.visible.length?S.visible.map(row).join(''):`<tr><td colspan="11" class="empty">${S.data[S.side].length?'لا توجد إعلانات تطابق الفلاتر':'بانتظار بيانات خادم الأسعار'}</td></tr>`;document.querySelectorAll('th').forEach(th=>th.removeAttribute('aria-sort'));document.querySelector(`[data-sort="${S.key}"]`)?.parentElement?.setAttribute('aria-sort',S.dir==='asc'?'ascending':'descending');simAds(list);insights(list);if(S.detail&&$('details').open)details(S.detail,false);}
+function simAds(list){const old=$('simAd').value;$('simAd').innerHTML=list.length?sort(list,'price',S.side==='BUY'?'asc':'desc').map(a=>`<option value="${esc(a.id)}">${esc(a.nick)} · ${fmt(a.price)} IQD</option>`).join(''):'<option value="">لا توجد إعلانات</option>';if(list.some(a=>a.id===old))$('simAd').value=old;sim();}
+function sim(){const a=S.data[S.side].find(a=>a.id===$('simAd').value);if(!a){$('simResult').textContent='لا توجد إعلانات للمحاكاة';return;}const r=simulate(a,num($('simAmount').value),$('simUnit').value),old=stale(S.side);$('simResult').innerHTML=`<p class="${r.ok&&!old?'buy':'sell'}">${old?'لقطة قديمة؛ أعد التحقق من الإعلان':r.ok?'المبلغ ضمن الحدود المتاحة':esc(r.reason)}</p>${r.asset!==undefined?`<strong>${fmt(r.asset,4)} USDT</strong><span>${S.side==='BUY'?'تدفع':'تستلم'} ${fmt(r.fiat)} IQD</span>`:''}`;}
+function insights(list){$('insightSide').textContent=S.side==='BUY'?'الشراء':'البيع';const prices=list.map(a=>a.price).sort((a,b)=>a-b),n=prices.length,median=n?(n%2?prices[Math.floor(n/2)]:(prices[n/2-1]+prices[n/2])/2):null,fields=[['نطاق السعر',n?`${fmt(prices[0])} – ${fmt(prices[n-1])} IQD`:'—'],['السعر الوسيط',median===null?'—':`${fmt(median)} IQD`],['الكمية ضمن الفلاتر',`${fmt(list.reduce((sum,a)=>sum+(a.available??0),0))} USDT`],['تجار ضمن الفلاتر',`${list.filter(a=>a.merchant).length} / ${list.length}`]];$('insights').innerHTML=fields.map(([k,v])=>`<div><dt>${k}</dt><dd dir="ltr">${esc(v)}</dd></div>`).join('');const points=S.history[S.side];if(points.length<2){$('sparkline').replaceChildren();$('historyNote').textContent='بانتظار لقطتين ناجحتين لرسم السعر خلال الجلسة';return;}const vals=points.map(p=>p.price),lo=Math.min(...vals),range=Math.max(...vals)-lo||1,path=vals.map((v,i)=>`${i*600/(vals.length-1)},${48-(v-lo)/range*36}`).join(' ');$('sparkline').innerHTML=`<svg viewBox="0 0 600 60" preserveAspectRatio="none" role="img" aria-label="أفضل سعر مسترجع خلال الجلسة"><polyline fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" points="${path}"/></svg>`;$('historyNote').textContent=`${points.length} لقطة خلال الجلسة · دون فلاتر · ${new Date(points[0].time).toLocaleTimeString('ar-IQ')} — ${new Date(points.at(-1).time).toLocaleTimeString('ar-IQ')}`;}
+function details(id,open=true){const a=S.data[S.side].find(a=>a.id===id);if(!a){$('detailContent').textContent='الإعلان لم يعد ضمن اللقطة الحالية';return;}S.detail=id;$('detailTitle').textContent=a.nick;const info=S.snapshot?.sides?.[S.side],fields=[['رقم الإعلان',a.id],['نوع الحساب من المصدر',a.userType],['السعر',fmt(a.price)+' IQD'],['المتاح',fmt(a.available,4)+' USDT'],['الحد الأدنى',fmt(a.min,0)+' IQD'],['الحد التنفيذي المحسوب',fmt(a.max,0)+' IQD'],['الحد الأعلى المعلن',fmt(a.advertisedMax,0)+' IQD'],['الحد الديناميكي من المصدر',fmt(a.dynamicMax,0)+' IQD'],['إتمام / 30 يوماً',a.finish===null?'غير متوفر':fmt(a.finish,1)+'%'],['التقييم الإيجابي',a.positive===null?'غير متوفر':fmt(a.positive,1)+'%'],['آخر نشاط',activity(a.activeSeconds)],['اللقطة',info?.fetchedAt?new Date(info.fetchedAt).toLocaleString('ar-IQ'):'غير متوفر']];$('detailContent').innerHTML=`<div class="detail-grid">${fields.map(([k,v])=>`<div><small>${esc(k)}</small><span>${esc(v)}</span></div>`).join('')}</div><h3>طرق الدفع</h3><p>${a.methods.map(esc).join(' · ')||'غير متوفر'}</p><h3>شروط الإعلان</h3><p class="remarks">${esc(a.remarks||'المصدر العام لم يرسل شروطاً لهذا الإعلان.')}</p><details><summary>جميع حقول الإعلان الخام</summary><pre id="raw"></pre></details><p class="detail-note">الحد التنفيذي = الأصغر بين الحد المعلن والديناميكي وقيمة الكمية المتاحة. الحقول الفارغة غير متاحة من المصدر، وليست صفراً. لا تتوفر بيانات الحساب البنكي أو سجل التاجر الخاص.</p><div class="detail-buttons"><button class="button" id="useSim">محاكاة هذا الإعلان</button><button class="button" id="downloadRaw">↓ JSON</button></div>`;$('raw').textContent=JSON.stringify(a.raw,null,2);$('useSim').onclick=()=>{$('simAd').value=a.id;sim();$('details').close();$('simAmount').focus();};$('downloadRaw').onclick=()=>download(JSON.stringify(a.raw,null,2),`ad-${a.id}.json`,'application/json');if(open&&!$('details').open)$('details').showModal();}
+function download(text,name,type){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function status(){const info=S.snapshot?.sides?.[S.side],old=stale(S.side);$('status').textContent=S.error?'تعذر الاتصال':old?'بيانات غير حديثة':'تم التحديث';$('status').className=old?'stale':'fresh';$('updated').textContent=info?.fetchedAt?`آخر لقطة ${new Date(info.fetchedAt).toLocaleTimeString('ar-IQ')}`:'لا توجد لقطة بعد';if(old&&info&&!S.error){$('notice').hidden=false;$('notice').textContent='اللقطة الحالية قديمة. لا تعتمد عليها لتنفيذ صفقة حتى يعود الاتصال.';}}
+async function refresh(){if(S.busy)return;S.busy=true;$('refresh').disabled=true;try{const res=await fetch(C.API_URL,{signal:AbortSignal.timeout(20000),cache:'no-store',credentials:'omit'});if(!res.ok)throw new Error('HTTP');const json=await res.json();if(!json.sides||json.asset!=='USDT'||json.fiat!=='IQD')throw new Error('invalid');S.prev=new Map([...S.data.BUY,...S.data.SELL].map(a=>[a.side+':'+a.id,a.price]));const previous=S.snapshot;S.snapshot=json;S.error=false;for(const side of ['BUY','SELL']){const info=json.sides[side];if(info&&Array.isArray(info.data)){S.data[side]=info.data.map(r=>parse(r,side)).filter(usable);if(!stale(side)&&info.fetchedAt!==previous?.sides?.[side]?.fetchedAt){const best=top5(S.data[side],side)[0];if(best){S.history[side].push({time:info.fetchedAt,price:best.price});S.history[side]=S.history[side].slice(-120);}}}else S.data[side]=[];}const errors=Object.values(json.errors??{});$('notice').hidden=!errors.length;$('notice').textContent=errors.join(' ');payments();render();status();}catch(e){S.error=true;$('notice').hidden=false;$('notice').textContent=`تعذر الاتصال بخادم الأسعار. تأكد أنه يعمل وأن API_URL صحيح؛ موقع HTTPS يحتاج عنوان HTTPS عاماً. ${S.snapshot?'آخر لقطة محفوظة مع وقتها؛ ليست أسعاراً حديثة.':''}`;status();sim();}finally{S.busy=false;$('refresh').disabled=false;S.next=Date.now()+interval();}}
+document.querySelectorAll('[data-side]').forEach(b=>b.onclick=()=>{S.side=b.dataset.side;S.key='price';S.dir=S.side==='BUY'?'asc':'desc';$('sort').value='best';document.querySelectorAll('[data-side]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-selected',String(x===b));});payments();render();status();});
+['search','filterAmount'].forEach(id=>$(id).addEventListener('input',render));['payment','finish','merchant','limit'].forEach(id=>$(id).addEventListener('change',render));$('sort').onchange=()=>{[S.key,S.dir]=$('sort').value==='best'?['price',S.side==='BUY'?'asc':'desc']:$('sort').value.split(':');render();};document.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{const key=b.dataset.sort;S.dir=S.key===key&&S.dir==='asc'?'desc':'asc';S.key=key;const value=`${key}:${S.dir}`;$('sort').value=[...$('sort').options].some(o=>o.value===value)?value:'';render();});$('rows').onclick=e=>{const b=e.target.closest('[data-detail]');if(b)details(b.dataset.detail);};$('closeDetails').onclick=()=>$('details').close();['simAmount','simUnit','simAd'].forEach(id=>$(id).addEventListener('input',sim));$('refresh').onclick=refresh;$('auto').onchange=()=>{S.next=Date.now()+interval();if($('auto').checked)refresh();};document.addEventListener('visibilitychange',()=>{if(!document.hidden&&$('auto').checked)refresh();});
+$('export').onclick=()=>{const keys=['side','id','nick','price','available','min','max','orders','finish','positive','activeSeconds','payMinutes','methods'];const cell=v=>{let s=String(v??'');if(/^[=+@-]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';};download('\ufeff'+[keys.join(','),...S.visible.map(a=>keys.map(k=>cell(k==='methods'?a.methods.join(' | '):a[k])).join(','))].join('\r\n'),`kanba-${S.side}-${Date.now()}.csv`,'text/csv;charset=utf-8');};setInterval(()=>{if(document.hidden)return;const left=Math.max(0,Math.ceil((S.next-Date.now())/1000));$('countdown').textContent=$('auto').checked?`تحديث دوري · ${left} ث`:'التحديث التلقائي متوقف';if(!left&&$('auto').checked)refresh();status();sim();},1000);refresh();
