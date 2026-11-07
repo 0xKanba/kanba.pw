@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // === CSS ===
   const style = document.createElement("style");
   style.textContent = `
     .footer {
@@ -36,65 +37,83 @@ document.addEventListener("DOMContentLoaded", function () {
   `;
   document.head.appendChild(style);
 
-  const footerHTML = `
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-tabs">
-          <a href="/index.html" class="footer-tab" data-page="index">Kanba</a>
-          <a href="https://younis.pw" class="footer-tab" target="_blank" data-page="younis">Younis</a>
-          <a href="/ccr.html" class="footer-tab"  data-page="ccr">Compounding Calc.</a>
-          <a href="/funded/index.html" class="footer-tab" data-page="funded">All funded rules</a>
-          <a href="/videos.html" class="footer-tab" target="_blank" data-page="videos">my videos</a>
-        </div>
-        <div class="copyright">
-          © 2025-2026 Kanba_trader | All Rights Reserved
-        </div>
-        <div class="footer-welcome">
-          ✨ WELCOME ✨
-        </div>
-      </div>
-    </footer>
-  `;
+  // === تحميل التذييل من JSON ===
+  async function loadFooter() {
+    try {
+      // المسار النسبي حسب موقع الصفحة
+      // إذا كانت الصفحة في مجلد فرعي (مثل /funded/) نستخدم ../js/footer.json
+      // وإلا نستخدم /js/footer.json أو js/footer.json
+      const isSubfolder = window.location.pathname.split("/").filter(Boolean).length > 1;
+      const jsonPath = isSubfolder ? "../js/footer.json" : "js/footer.json";
 
-  const footerElement = document.getElementById("footer");
-  if (footerElement) footerElement.innerHTML = footerHTML;
+      const res = await fetch(jsonPath);
+      if (!res.ok) throw new Error("Failed to load footer.json");
+      const data = await res.json();
 
-  // Active tab logic
-  setTimeout(() => {
-    const path = window.location.pathname.toLowerCase().trim();
-    const segments = path.split("/").filter((p) => p !== "");
-    let pageKey = "index";
+      const tabsHtml = data.tabs
+        .map((tab) => {
+          const target = tab.external ? ' target="_blank"' : "";
+          return `<a href="${tab.url}" class="footer-tab" data-page="${tab.page}"${target}>${tab.label}</a>`;
+        })
+        .join("");
 
-    if (segments.length > 0) {
-      const lastSegment = segments[segments.length - 1].replace(/\.html$/, "");
-      if (lastSegment === "index" || lastSegment === "") {
-        if (segments.length > 1) {
-          pageKey = segments[segments.length - 2];
-        } else {
-          pageKey = "index";
+      const footerHTML = `
+        <footer class="footer">
+          <div class="footer-content">
+            <div class="footer-tabs">
+              ${tabsHtml}
+            </div>
+            <div class="copyright">
+              ${data.copyright}
+            </div>
+            <div class="footer-welcome">
+              ${data.welcome}
+            </div>
+          </div>
+        </footer>
+      `;
+
+      const footerElement = document.getElementById("footer");
+      if (footerElement) {
+        footerElement.innerHTML = footerHTML;
+      }
+
+      // Active tab logic
+      setTimeout(() => {
+        const path = window.location.pathname.toLowerCase().trim();
+        const segments = path.split("/").filter((p) => p !== "");
+        let pageKey = "index";
+
+        if (segments.length > 0) {
+          const lastSegment = segments[segments.length - 1].replace(/\.html$/, "");
+          if (lastSegment === "index" || lastSegment === "") {
+            pageKey = segments.length > 1 ? segments[segments.length - 2] : "index";
+          } else {
+            pageKey = lastSegment;
+          }
         }
-      } else {
-        pageKey = lastSegment;
-      }
-    }
 
-    document.querySelectorAll(".footer-tab").forEach((tab) => {
-      const tabPage = tab.getAttribute("data-page");
-      if (tabPage === pageKey) {
-        tab.classList.add("active");
-      }
-    });
-  }, 150);
-
-  // Theme Toggle for common.js
-  function initCommonTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      document.body.classList.add('light-theme');
-    } else if (savedTheme === 'dark') {
-      document.body.classList.remove('light-theme');
+        document.querySelectorAll(".footer-tab").forEach((tab) => {
+          if (tab.getAttribute("data-page") === pageKey) {
+            tab.classList.add("active");
+          }
+        });
+      }, 150);
+    } catch (err) {
+      console.error("فشل تحميل التذييل:", err);
     }
   }
-  
+
+  loadFooter();
+
+  // Theme
+  function initCommonTheme() {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      document.body.classList.add("light-theme");
+    } else if (savedTheme === "dark") {
+      document.body.classList.remove("light-theme");
+    }
+  }
   initCommonTheme();
 });

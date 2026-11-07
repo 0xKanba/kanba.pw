@@ -1,0 +1,33 @@
+{
+  "tabs": [
+    {
+      "label": "Kanba",
+      "url": "/index.html",
+      "page": "index"
+    },
+    {
+      "label": "Younis",
+      "url": "https://younis.pw",
+      "page": "younis",
+      "external": true
+    },
+    {
+      "label": "Compounding Calc.",
+      "url": "/ccr.html",
+      "page": "ccr"
+    },
+    {
+      "label": "All funded rules",
+      "url": "/funded/index.html",
+      "page": "funded"
+    },
+    {
+      "label": "my videos",
+      "url": "/videos.html",
+      "page": "videos",
+      "external": true
+    }
+  ],
+  "copyright": "© 2025-2026 Kanba_trader | All Rights Reserved",
+  "welcome": "✨ WELCOME ✨"
+}
