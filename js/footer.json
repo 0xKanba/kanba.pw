@@ -28,9 +28,25 @@
       "external": true
     },
     {
+      "label": "news trade video",
+      "url": "/v.html",
+      "page": "v",
+      "external": true
+    },
+    {
+      "label": "QR generate free",
+      "url": "qr-generator.html",
+      "page": "qr-generator"
+    },
+    {
       "label": "Finotive Funding 100$",
       "url": "/ff.html",
       "page": "videos"
+    },
+    {
+      "label": "JustMarkets broker",
+      "url": "/jm.html",
+      "page": "jm"
     }
   ],
   "copyright": "© 2025-2026 Kanba_trader | All Rights Reserved",
