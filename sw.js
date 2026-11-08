@@ -1,6 +1,6 @@
-const CACHE_VERSION = "kanba-v21";
-const IMAGE_CACHE = "kanba-images-v21";
-const STATIC_CACHE = "kanba-static-v21";
+const CACHE_VERSION = "kanba-v22";
+const IMAGE_CACHE = "kanba-images-v22";
+const STATIC_CACHE = "kanba-static-v22";
 
 // ملفات أساسية (لا تضع كل المشروع هنا)
 const STATIC_ASSETS = [
