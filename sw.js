@@ -11,7 +11,6 @@ const STATIC_ASSETS = [
   "/js/ccr.js",
   "/funded",
   "/md.html",
-  "/site.webmanifest"
 ];
 
 // INSTALL
