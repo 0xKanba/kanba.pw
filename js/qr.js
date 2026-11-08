@@ -1,115 +1,93 @@
 (function () {
-  const input = document.getElementById("qrInput");
-  const sizeEl = document.getElementById("qrSize");
-  const levelEl = document.getElementById("qrLevel");
-  const darkEl = document.getElementById("qrDark");
-  const lightEl = document.getElementById("qrLight");
-  const card = document.querySelector(".card");
-  const empty = document.getElementById("qrEmpty");
-  const count = document.getElementById("qrCount");
-  const status = document.getElementById("qrStatus");
-  const downloadBtn = document.getElementById("qrDownload");
-  const copyBtn = document.getElementById("qrCopy");
-  const clearBtn = document.getElementById("qrClear");
-  const pasteBtn = document.getElementById("qrPaste");
+  var input = document.getElementById("qrInput");
+  var file = document.getElementById("qrFile");
+  var go = document.getElementById("go");
+  var err = document.getElementById("err");
+  var inLayer = document.getElementById("inLayer");
+  var outLayer = document.getElementById("outLayer");
+  var box = document.getElementById("qrcode");
+  var decoded = document.getElementById("decoded");
+  var copyOut = document.getElementById("copyOut");
+  var back = document.getElementById("back");
+  var lastText = "";
 
-  let timer = 0;
-
-  function setStatus(text) {
-    status.textContent = text || "";
+  function fail(msg) {
+    err.hidden = !msg;
+    err.textContent = msg || "";
   }
 
-  function render() {
-    const text = input.value.trim();
-    count.textContent = input.value.length + " chars";
-    box.innerHTML = "";
+  function showOut(mode) {
+    var narrow = window.matchMedia("(max-width: 859px)").matches;
+    if (narrow) inLayer.hidden = true;
+    outLayer.hidden = false;
+    box.hidden = mode !== "qr";
+    decoded.hidden = mode !== "text";
+    copyOut.hidden = mode !== "text";
+  }
 
-    if (!text) {
-      empty.hidden = false;
-      card.hidden = true;
-      downloadBtn.disabled = true;
-      copyBtn.disabled = true;
-      setStatus("");
+  function make() {
+    fail("");
+    var text = input.value.trim();
+    var imgFile = file.files && file.files[0];
+
+    if (imgFile) {
+      readImage(imgFile);
       return;
     }
-
-    empty.hidden = true;
-    card.hidden = false;
-    const size = Number(sizeEl.value) || 280;
-
+    if (!text) {
+      fail("Type text or choose a QR image.");
+      return;
+    }
+    box.innerHTML = "";
     new QRCode(box, {
       text: text,
-      width: size,
-      height: size,
-      colorDark: darkEl.value,
-      colorLight: lightEl.value,
-      correctLevel: QRCode.CorrectLevel[levelEl.value] || QRCode.CorrectLevel.M
+      width: 320,
+      height: 320,
+      colorDark: "#111111",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
     });
-
-    downloadBtn.disabled = false;
-    copyBtn.disabled = false;
-    setStatus("Updated");
+    showOut("qr");
   }
 
-  function schedule() {
-    clearTimeout(timer);
-    timer = setTimeout(render, 120);
+  function readImage(imgFile) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        var ctx = canvas.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var code = window.jsQR(pixels.data, canvas.width, canvas.height);
+        if (!code) {
+          fail("No QR found in that image.");
+          return;
+        }
+        lastText = code.data;
+        decoded.textContent = lastText;
+        showOut("text");
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(imgFile);
   }
 
-  function canvas() {
-    return box.querySelector("canvas");
-  }
+  go.addEventListener("click", make);
 
-  downloadBtn.addEventListener("click", function () {
-    const c = canvas();
-    if (!c) return;
-    const a = document.createElement("a");
-    a.href = c.toDataURL("image/png");
-    a.download = "qr.png";
-    a.click();
+  copyOut.addEventListener("click", function () {
+    if (!lastText) return;
+    navigator.clipboard.writeText(lastText).then(function () {
+      copyOut.textContent = "Copied";
+      setTimeout(function () { copyOut.textContent = "Copy"; }, 1200);
+    });
   });
 
-  copyBtn.addEventListener("click", async function () {
-    const c = canvas();
-    if (!c) return;
-    try {
-      const blob = await new Promise(function (resolve) {
-        c.toBlob(resolve, "image/png");
-      });
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      setStatus("Copied image");
-    } catch (err) {
-      try {
-        await navigator.clipboard.writeText(input.value.trim());
-        setStatus("Copied text");
-      } catch (e) {
-        setStatus("Copy blocked by the browser");
-      }
-    }
+  back.addEventListener("click", function () {
+    inLayer.hidden = false;
+    outLayer.hidden = true;
+    fail("");
   });
-
-  clearBtn.addEventListener("click", function () {
-    input.value = "";
-    render();
-    input.focus();
-  });
-
-  pasteBtn.addEventListener("click", async function () {
-    try {
-      input.value = await navigator.clipboard.readText();
-      render();
-    } catch (err) {
-      setStatus("Paste permission denied");
-    }
-  });
-
-  input.addEventListener("input", schedule);
-  sizeEl.addEventListener("input", schedule);
-  levelEl.addEventListener("change", schedule);
-  darkEl.addEventListener("input", schedule);
-  lightEl.addEventListener("input", schedule);
-
-  const params = new URLSearchParams(location.search);
-  if (params.get("text")) input.value = params.get("text");
-  render();
 })();

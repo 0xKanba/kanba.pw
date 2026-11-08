@@ -4,72 +4,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>QR · Kanba</title>
+  <meta name="description" content="Make a QR from text, or read a QR image. Runs in the browser.">
+  <meta property="og:title" content="QR · Kanba">
+  <meta property="og:description" content="Make a QR from text, or read a QR image. Runs in the browser.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kanba.pw/qr-generator.html">
+  <meta property="og:image" content="https://cdn.jsdelivr.net/gh/0xKanba/assets@master/kanba.pw/favicon/x-bg.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="QR · Kanba">
+  <meta name="twitter:description" content="Make a QR from text, or read a QR image. Runs in the browser.">
+  <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/0xKanba/assets@master/kanba.pw/favicon/x-bg.png">
+  <link rel="icon" href="https://cdn.jsdelivr.net/gh/0xKanba/assets@master/kanba.pw/favicon/favicon.ico">
   <link rel="stylesheet" href="/css/qr.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" defer></script>
 </head>
 <body>
   <div class="qr-bg" aria-hidden="true"><span></span><span></span></div>
 
-  <main class="qr-shell">
-    <header class="qr-head">
+  <main class="qr-shell" id="app">
+    <section class="layer in-layer" id="inLayer">
       <h1>QR</h1>
-      <p>Type, paste, or pass <code>?text=</code>. The code updates as you edit.</p>
-    </header>
+      <p class="lead">Text becomes a code. A code image becomes text.</p>
+      <label>
+        Text
+        <textarea id="qrInput" placeholder="Link, wallet, or any text" spellcheck="false"></textarea>
+      </label>
+      <label class="file">
+        Or a QR image
+        <input id="qrFile" type="file" accept="image/*">
+      </label>
+      <button type="button" id="go">Create</button>
+      <p id="err" class="err" hidden></p>
+    </section>
 
-    <div class="qr-layout">
-      <section class="panel controls">
-        <label>
-          Content
-          <textarea id="qrInput" placeholder="https://kanba.pw or a wallet address" autocomplete="off" spellcheck="false"></textarea>
-        </label>
-        <div class="meta">
-          <span id="qrCount">0 chars</span>
-          <span id="qrStatus" class="status"></span>
-        </div>
-
-        <div class="row">
-          <label>
-            Size
-            <select id="qrSize">
-              <option value="220">Small</option>
-              <option value="320" selected>Medium</option>
-              <option value="480">Large</option>
-              <option value="720">Print</option>
-            </select>
-          </label>
-          <label>
-            Error correction
-            <select id="qrLevel">
-              <option value="L">Low</option>
-              <option value="M" selected>Medium</option>
-              <option value="Q">Quartile</option>
-              <option value="H">High</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="colors">
-          <label class="color-field">Dark
-            <input id="qrDark" type="color" value="#111111">
-          </label>
-          <label class="color-field">Light
-            <input id="qrLight" type="color" value="#ffffff">
-          </label>
-        </div>
-
-        <div class="actions">
-          <button type="button" id="qrPaste" class="ghost">Paste</button>
-          <button type="button" id="qrCopy" class="ghost" disabled>Copy</button>
-          <button type="button" id="qrDownload" disabled>Download PNG</button>
-          <button type="button" id="qrClear" class="ghost">Clear</button>
-        </div>
-      </section>
-
-      <section class="panel stage" aria-live="polite">
-        <p id="qrEmpty" class="empty">The code appears here as soon as there is text.</p>
-        <div class="card" id="qrcode" hidden></div>
-      </section>
-    </div>
+    <section class="layer out-layer" id="outLayer" hidden>
+      <div id="qrcode" class="card" hidden></div>
+      <pre id="decoded" class="decoded" hidden></pre>
+      <div class="out-actions">
+        <button type="button" id="copyOut" hidden>Copy</button>
+        <button type="button" id="back" class="ghost">Back</button>
+      </div>
+    </section>
   </main>
 
   <div id="footer"></div>
