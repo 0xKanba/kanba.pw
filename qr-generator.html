@@ -30,16 +30,16 @@
         Text
         <textarea id="qrInput" placeholder="Link, wallet, or any text" spellcheck="false"></textarea>
       </label>
-      <label class="file">
-        Or a QR image
-        <input id="qrFile" type="file" accept="image/*">
+      <label class="file-btn">
+        <input id="qrFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+        <span id="fileLabel">Choose a QR image</span>
       </label>
       <button type="button" id="go">Create</button>
       <p id="err" class="err" hidden></p>
     </section>
 
     <section class="layer out-layer" id="outLayer" hidden>
-      <div id="qrcode" class="card" hidden></div>
+      <button type="button" id="qrcode" class="card" hidden aria-label="Open QR full screen"></button>
       <pre id="decoded" class="decoded" hidden></pre>
       <div class="out-actions">
         <button type="button" id="copyOut" hidden>Copy</button>
@@ -49,6 +49,12 @@
   </main>
 
   <div id="footer"></div>
+
+  <div id="zoom" class="zoom" hidden>
+    <button type="button" id="zoomClose" class="zoom-close" aria-label="Close">Close</button>
+    <img id="zoomImg" alt="QR code">
+  </div>
+
   <script src="/js/common.js" defer></script>
   <script src="/js/qr.js" defer></script>
 </body>
