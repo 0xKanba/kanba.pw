@@ -103,13 +103,13 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
 
 ```text
 .
-├── 80.html
 ├── README.md
 ├── aug
 │   ├── app.js
@@ -120,7 +120,8 @@
 ├── ccr.html
 ├── css
 │   ├── ccr.css
-│   └── kanba.css
+│   ├── kanba.css
+│   └── qr.css
 ├── ff.html
 ├── funded
 │   ├── data
@@ -128,41 +129,22 @@
 │   │   │   ├── blueguardian
 │   │   │   │   └── forex
 │   │   │   │       └── instant-starter.json
-│   │   │   ├── finotivefunding
-│   │   │   │   └── forex
-│   │   │   │       ├── 2step-challenge.json
-│   │   │   │       ├── 2step-pro.json
-│   │   │   │       ├── common-rules.json
-│   │   │   │       ├── instant-lite.json
-│   │   │   │       └── instant-standard.json
-│   │   │   ├── holaprime
-│   │   │   │   ├── forex
-│   │   │   │   │   ├── 1step-prime.json
-│   │   │   │   │   ├── 2step-prime.json
-│   │   │   │   │   ├── 2step.pro.json
-│   │   │   │   │   ├── direct.json
-│   │   │   │   │   └── one-challenge.json
-│   │   │   │   └── futures
-│   │   │   │       ├── 1step-prime.json
-│   │   │   │       └── direct.json
-│   │   │   └── thetradingpit
-│   │   │       └── futures
-│   │   │           └── 1step-prime.json
+│   │   │   └── finotivefunding
+│   │   │       └── forex
+│   │   │           ├── 2step-challenge.json
+│   │   │           ├── 2step-pro.json
+│   │   │           ├── common-rules.json
+│   │   │           ├── instant-lite.json
+│   │   │           └── instant-standard.json
 │   │   └── registry.json
 │   ├── index.html
 │   ├── script.js
 │   └── style.css
 ├── images
-│   ├── 0x.png
-│   ├── 0x2000.png
 │   ├── 0xKanba.png
 │   ├── 0xbtc.png
-│   ├── 0xmini2000.png
 │   ├── K—.png
 │   ├── K—mini.png
-│   ├── Screenshot_2026-10-06_22-33-33.png
-│   ├── Screenshot_20261006-225234.png
-│   ├── Screenshot_20261006-225241.png
 │   ├── Younis.png
 │   ├── bitcoin.svg
 │   ├── btc.png
@@ -174,7 +156,9 @@
 ├── js
 │   ├── ccr.js
 │   ├── common.js
-│   └── kanba.js
+│   ├── footer.json
+│   ├── kanba.js
+│   └── qr.js
 ├── md
 │   ├── bonus.md
 │   ├── deen.md
@@ -192,13 +176,11 @@
 │   └── styles.css
 ├── qr-generator.html
 ├── r.html
-├── site.webmanifest
 ├── sw.js
 ├── tree.txt
 ├── v.html
-├── videos.html
-└── °.html
+└── videos.html
 
-19 directories, 71 files
+14 directories, 57 files
 ```
 <!-- TREE END -->
