@@ -104,6 +104,7 @@
 
 
 
+
 <!-- TREE START -->
 
 # 📂 repo tree
@@ -158,7 +159,10 @@
 │   ├── common.js
 │   ├── footer.json
 │   ├── kanba.js
-│   └── qr.js
+│   ├── nav.js
+│   ├── qr.js
+│   ├── scan.js
+│   └── write.js
 ├── md
 │   ├── bonus.md
 │   ├── deen.md
@@ -175,12 +179,13 @@
 │   ├── script.js
 │   └── styles.css
 ├── qr-generator.html
+├── qr.html
 ├── r.html
 ├── sw.js
 ├── tree.txt
 ├── v.html
 └── videos.html
 
-14 directories, 57 files
+14 directories, 61 files
 ```
 <!-- TREE END -->
