@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR</title>
+  <link rel="stylesheet" href="/css/qr.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" defer></script>
+</head>
+<body>
+  <button type="button" id="theme" class="theme" aria-label="Toggle theme">◐</button>
+  <main class="shell">
+    <nav class="tabs">
+      <button type="button" id="tab-write" class="on">Write</button>
+      <button type="button" id="tab-scan">Scan</button>
+    </nav>
+
+    <div id="view-write" class="view">
+      <section class="composer">
+        <button type="button" id="w-clear" class="x" aria-label="Clear">X</button>
+        <textarea id="w-text" placeholder="Write something" spellcheck="false" maxlength="2000"></textarea>
+        <div class="dock">
+          <span id="w-count" class="count"></span>
+          <span id="w-err" class="err"></span>
+          <button type="button" id="w-go" class="go">Create</button>
+        </div>
+      </section>
+      <section class="stage" id="w-stage">
+        <button type="button" id="w-close" class="x" aria-label="Close">X</button>
+        <div id="w-qr" class="card" role="button" tabindex="0" aria-label="Open QR"></div>
+        <div class="dock">
+          <button type="button" id="w-png" class="chip on">PNG</button>
+          <button type="button" id="w-svg" class="chip">SVG</button>
+          <a id="w-save" class="go" href="" download="qr.png">Download</a>
+        </div>
+      </section>
+    </div>
+
+    <div id="view-scan" class="view" hidden>
+      <section class="composer">
+        <button type="button" id="s-clear" class="x" aria-label="Clear">X</button>
+        <label class="file"><input id="s-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><span id="s-label">Choose a QR image</span></label>
+        <div class="dock">
+          <span id="s-err" class="err"></span>
+          <button type="button" id="s-go" class="go">Read</button>
+        </div>
+      </section>
+      <section class="stage" id="s-stage">
+        <button type="button" id="s-close" class="x" aria-label="Close">X</button>
+        <textarea id="s-out" class="out-text" readonly></textarea>
+        <div class="dock">
+          <button type="button" id="s-copy" class="ghost">Copy</button>
+          <a id="s-save" class="go" href="" download="qr.txt">Download .txt</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="zoom" class="zoom" hidden>
+    <button type="button" id="zoomX" class="close" aria-label="Close">X</button>
+    <img id="zoomImg" alt="">
+  </div>
+
+  <script src="/js/write.js" defer></script>
+  <script src="/js/scan.js" defer></script>
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>
