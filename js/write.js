@@ -92,7 +92,6 @@
     var img = box.querySelector("img"); if (img) img.remove();
     var canvas = box.querySelector("canvas");
     grid = canvas ? measure(canvas) : null;
-    if (canvas && grid) eyes(canvas, grid);
     if (canvas) pngUrl = canvas.toDataURL("image/png");
     say("");
     stage.classList.add("show");
@@ -101,15 +100,10 @@
   function svg() {
     if (!grid) return "";
     var n = grid.n, pad = 4, size = n + 8;
-    function eye(c, r) { return (c < 7 && r < 7) || (c >= n - 7 && r < 7) || (c < 7 && r >= n - 7); }
-    var rects = grid.cells.filter(function (p) { return !eye(p[0], p[1]); }).map(function (p) {
+    var rects = grid.cells.map(function (p) {
       return '<rect x="' + (p[0] + pad) + '" y="' + (p[1] + pad) + '" width="1" height="1"/>';
     }).join("");
-    function ring(col, row) {
-      var cx = col + pad + 3.5, cy = row + pad + 3.5;
-      return '<circle cx="' + cx + '" cy="' + cy + '" r="3.4"/><circle cx="' + cx + '" cy="' + cy + '" r="2.45" fill="#fff"/><circle cx="' + cx + '" cy="' + cy + '" r="1.4"/>';
-    }
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '"><rect width="100%" height="100%" fill="#fff"/><g fill="#111">' + rects + ring(0, 0) + ring(n - 7, 0) + ring(0, n - 7) + "</g></svg>";
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '"><rect width="100%" height="100%" fill="#fff"/><g fill="#111">' + rects + "</g></svg>";
   }
   input.value = localStorage.getItem(KEY) || "";
   count.textContent = input.value.length ? input.value.length + " / 2000" : "";
