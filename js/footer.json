@@ -35,8 +35,8 @@
     },
     {
       "label": "QR generate free",
-      "url": "qr-generator.html",
-      "page": "qr-generator"
+      "url": "qr.html",
+      "page": "qr"
     },
     {
       "label": "Finotive Funding 100$",
